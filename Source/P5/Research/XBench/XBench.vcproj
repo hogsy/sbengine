@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="7.10"
+	Name="Exe_XBench_PCStatic"
+	SccProjectName="Perforce Project"
+	SccAuxPath=""
+	SccLocalPath="..\.."
+	SccProvider="MSSCCI:Perforce SCM">
+	<Platforms>
+		<Platform
+			Name="Win32"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="PS3 Debug|Win32"
+			OutputDirectory=".\Output\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory=".\Intermediate\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-g -Wall -fno-exceptions $(MAdditionalPS3Compile)"
+				Optimization="0"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include\network&quot;;&quot;$(ProjectDir)PCH&quot;;&quot;$(ProjectDir)..\..\Shared\mcc&quot;;&quot;$(ProjectDir)..\..\SDK\Include&quot;"
+				PreprocessorDefinitions="TARGET_PS3;SN_TARGET_PS3;_DEBUG;__GCC__"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="FALSE"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="PCH.h"
+				PrecompiledHeaderFile="$(IntDir)\$(ProjectName).pch"
+				ProgramDataBaseFileName="$(OutDir)/$(TargetName).pdb "
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"
+				ForcedIncludeFiles=""/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="&quot;$(SN_PS3_PATH)\ppu\lib\sn\libsn.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpthread.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libfs.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libpsgl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libpsglu.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot;"
+				OutputFile="$(OutDir)/$(ConfigurationName).elf"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames="libc"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; &quot;.\&quot; /y"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1053"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="PS3 Release|Win32"
+			OutputDirectory=".\Output\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory=".\Intermediate\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-g -Wall -fno-exceptions -O2 $(MAdditionalPS3Compile)"
+				Optimization="0"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include\network&quot;;&quot;$(ProjectDir)\..\..\Shared\MCC&quot;;&quot;$(ProjectDir)\PCH&quot;;&quot;$(ProjectDir)\..\..\SDK\Include&quot;"
+				PreprocessorDefinitions="TARGET_PS3;SN_TARGET_PS3;__GCC__"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="FALSE"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="PCH.h"
+				PrecompiledHeaderFile="$(IntDir)\$(ProjectName).pch"
+				ProgramDataBaseFileName="$(OutDir)/$(TargetName).pdb "
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="&quot;$(SN_PS3_PATH)\ppu\lib\sn\libsn.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpthread.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libfs.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsgl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsglu.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot;"
+				OutputFile="$(OutDir)/$(ConfigurationName).elf"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames="libc"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; &quot;.\&quot; /y"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1053"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="PS3 RTM|Win32"
+			OutputDirectory=".\Output\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory=".\Intermediate\$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Wall -fno-exceptions -O3 $(MAdditionalPS3Compile)"
+				Optimization="0"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include\network&quot;;&quot;$(ProjectDir)\..\..\Shared\MCC&quot;;&quot;$(ProjectDir)\PCH&quot;;&quot;$(ProjectDir)\..\..\SDK\Include&quot;"
+				PreprocessorDefinitions="TARGET_PS3;SN_TARGET_PS3;__GCC__;M_RTM"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="FALSE"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="PCH.h"
+				PrecompiledHeaderFile="$(IntDir)\$(ProjectName).pch"
+				ProgramDataBaseFileName="$(OutDir)/$(TargetName).pdb "
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="&quot;$(SN_PS3_PATH)\ppu\lib\sn\libsn.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpthread.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libfs.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsgl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsglu.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot;"
+				OutputFile="$(OutDir)/$(ConfigurationName).elf"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames="libc"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; &quot;.\&quot; /y"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1053"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="PS3 RTMD|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Wall -fno-exceptions -O3 $(MAdditionalPS3Compile)"
+				Optimization="0"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include&quot;;&quot;$(SCE_PS3_ROOT)\target-ceb\ppu\include\network&quot;;&quot;$(ProjectDir)\..\..\Shared\MCC&quot;;&quot;$(ProjectDir)\PCH&quot;;&quot;$(ProjectDir)\..\..\SDK\Include&quot;"
+				PreprocessorDefinitions="TARGET_PS3;SN_TARGET_PS3;__GCC__;M_RTM;M_Profile"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="FALSE"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="PCH.h"
+				PrecompiledHeaderFile="$(IntDir)\$(ProjectName).pch"
+				ProgramDataBaseFileName="$(OutDir)/$(TargetName).pdb "
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"
+				ForcedIncludeFiles=""/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				AdditionalDependencies="&quot;$(SN_PS3_PATH)\ppu\lib\sn\libsn.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpthread.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libfs.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsgl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsglu.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot;"
+				OutputFile="$(OutDir)/$(ConfigurationName).elf"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames="libc"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; &quot;.\&quot; /y"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1053"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source"
+			Filter="">
+			<File
+				RelativePath="..\..\Shared\Mos\MMain.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mcc\Mrtc.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBench.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\Xr\XRSurf.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\Xr\XRSurfaceContext.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\Xr\XRVBContext.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\Xr\XRVBManager.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\Xr\XRVBManager.h">
+			</File>
+			<Filter
+				Name="Classes">
+				<File
+					RelativePath="..\..\Shared\Mos\Classes\Render\MRenderUtil.cpp">
+					<FileConfiguration
+						Name="PS3 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 RTM|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 RTMD|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="Windows">
+				<File
+					RelativePath="..\..\Shared\Mos\Classes\Win\MWinGrph.cpp">
+					<FileConfiguration
+						Name="PS3 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 RTM|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="PS3 RTMD|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Libraries">
+			<File
+				RelativePath="..\..\Shared\Mcc\MCC_Dyn.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\RenderContexts\Ps3\MRenderPS3_Dyn.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\Shared\Mos\MSystem\MSystem_Dyn.cpp">
+				<FileConfiguration
+					Name="PS3 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTM|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 RTMD|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
