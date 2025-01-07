@@ -526,7 +526,7 @@ void CRenderContextPS3::FP_Bind( CRC_ExtAttributes_FragmentProgram20* _pExtAttr 
 		cgGLBindProgram(pProg->m_Program);
 		GLErr("FP_Bind");
 
-		cgGLEnableProfile(CG_PROFILE_SCE_FP_TYPEC);
+		cgGLEnableProfile(CG_PROFILE_SCE_FP_RSX);
 		GLErr("FP_Bind");
 
 		m_pCurrentFPProgram = pProg;
@@ -552,10 +552,10 @@ void CRenderContextPS3::FP_Bind( CRC_ExtAttributes_FragmentProgram20* _pExtAttr 
 
 void CRenderContextPS3::FP_Disable()
 {
-	cgGLDisableProfile(CG_PROFILE_SCE_FP_TYPEC);
+	cgGLDisableProfile(CG_PROFILE_SCE_FP_RSX);
 	GLErr("FP_Disable");
 
-	cgGLUnbindProgram(CG_PROFILE_SCE_FP_TYPEC);
+	cgGLUnbindProgram(CG_PROFILE_SCE_FP_RSX);
 	GLErr("FP_Disable");
 
 	m_pCurrentFPProgram = NULL;
@@ -570,9 +570,9 @@ void CRenderContextPS3::FP_Load( const char* _pProgram, uint32 _Hash )
 {
 //	TArray<uint8> lData;
 //	lData = CDiskUtil::ReadFileToArray(_pProgram, CFILE_READ);
-//	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)lData.GetBasePtr(), CG_PROFILE_SCE_FP_TYPEC, NULL, NULL);
+//	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)lData.GetBasePtr(), CG_PROFILE_SCE_FP_RSX, NULL, NULL);
 //	GLErr("FP_Load (cgCreateProgram)");
-	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_SOURCE, _pProgram, CG_PROFILE_SCE_FP_TYPEC, NULL, NULL);
+	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_SOURCE, _pProgram, CG_PROFILE_SCE_FP_RSX, NULL, NULL);
 	GLErr("FP_Load (cgCreateProgram)");
 	CGparameter constants = cgGetNamedParameter(cgprog, "c");
 	GLErr("FP_Load (cgGetNamedParameter)");
@@ -646,7 +646,7 @@ void CRenderContextPS3::FP_LoadCache()
 
 void CRenderContextPS3::FP_LoadBinary(const uint8* _pProgram, uint32 _Hash)
 {
-	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)_pProgram, CG_PROFILE_SCE_FP_TYPEC, NULL, NULL);
+	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)_pProgram, CG_PROFILE_SCE_FP_RSX, NULL, NULL);
 	GLErr("FP_LoadBinary (cgCreateProgram)");
 	CGparameter constants = cgGetNamedParameter(cgprog, "c");
 	GLErr("FP_LoadBinary (cgGetNamedParameter)");

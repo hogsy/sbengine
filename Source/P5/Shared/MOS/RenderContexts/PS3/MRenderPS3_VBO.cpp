@@ -111,6 +111,17 @@ void CRenderContextPS3::VBO_CreateVB(int _VBID, CRC_BuildVertexBuffer& _VBB)
 			MemError("VAO_CreateVB");
 		m_lspVB[_VBID]->Create(_VBID);
 	}
+	else
+	{
+		GLuint liDelete[2];
+		liDelete[0] = VBO_VBID(_VBID);
+		liDelete[1] = VBO_IBID(_VBID);
+		int nCount = 1;
+		if(m_lspVB[_VBID]->m_nTri)
+			nCount = 2;
+
+		glDeleteBuffers(nCount, liDelete);
+	}
 
 	// Lets create a temporary buffer
 	CRC_VertexBuffer _VB;
@@ -147,11 +158,11 @@ void CRenderContextPS3::VBO_CreateVB(int _VBID, CRC_BuildVertexBuffer& _VBB)
 	VBI.m_Stride = Stride;
 	int Size = Stride*nV;
 
-	GLuint liDelete[2];
-	liDelete[0]= VBO_VBID(_VBID);
-	liDelete[1]= VBO_IBID(_VBID);
-	glDeleteBuffers(2, liDelete);
-	GLErr("VBO_CreateVB (glDeleteBuffers)");
+//	GLuint liDelete[2];
+//	liDelete[0]= VBO_VBID(_VBID);
+//	liDelete[1]= VBO_IBID(_VBID);
+//	glDeleteBuffers(2, liDelete);
+//	GLErr("VBO_CreateVB (glDeleteBuffers)");
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_VBID(_VBID));
 	GLErr("VBO_CreateVB (glBindBuffer, 0)");

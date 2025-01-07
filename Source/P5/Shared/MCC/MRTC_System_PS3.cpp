@@ -838,7 +838,7 @@ int32 MRTC_SystemInfo::Atomic_Increase(volatile int32 *_pDest)
 		"addi %1, %0, 1\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_inc_loop%=\n"
-		: "=&r"(result), "=&r"(temp)
+		: "=&b"(result), "=&b"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -854,7 +854,7 @@ int32 MRTC_SystemInfo::Atomic_Decrease(volatile int32 *_pDest)
 		"subi %1, %0, 1\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_dec_loop%=\n"
-		: "=&r"(result), "=&r"(temp)
+		: "=&b"(result), "=&b"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -870,7 +870,7 @@ int32 MRTC_SystemInfo::Atomic_Add(volatile int32 *_pDest, int32 _Add)
 		"add %1, %0, %2\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_add_loop%=\n"
-		: "=&r"(result), "=&r"(temp)
+		: "=&b"(result), "=&b"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -888,8 +888,8 @@ int32 MRTC_SystemInfo::Atomic_IfEqualExchange(volatile int32 *_pDest, int32 _Com
 		"stwcx. %3, 0, %1\n"
 		"bne- .Latomic_iex_loop%=\n"
 	".Latomic_iex_done%=:\n"
-		: "=&r"(result)
-		: "r"(_pDest), "r"(_CompareTo), "r"(_SetTo)
+		: "=&b"(result)
+		: "r"(_pDest), "r"(_CompareTo), "b"(_SetTo)
 		: "memory"
 		);
 	
@@ -904,8 +904,8 @@ int32 MRTC_SystemInfo::Atomic_Exchange(volatile int32 *_pDest, int32 _SetTo)
 		"lwarx %0, 0, %1\n"
 		"stwcx. %2, 0, %1\n"
 		"bne-	.Latomic_xch_loop%=\n"
-		: "=&r"(result)
-		: "r"(_pDest), "r"(_SetTo)
+		: "=&b"(result)
+		: "r"(_pDest), "b"(_SetTo)
 		: "memory"
 		);
 	return result;

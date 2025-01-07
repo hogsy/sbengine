@@ -225,9 +225,9 @@ void CRenderContextPS3::VP_Load(const char* _pProgram, const CRC_VPFormat::CProg
 {
 //	TArray<uint8> lData;
 //	lData = CDiskUtil::ReadFileToArray(_pProgram, CFILE_READ);
-//	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)lData.GetBasePtr(), CG_PROFILE_SCE_VP_TYPEC, NULL, NULL);
+//	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)lData.GetBasePtr(), CG_PROFILE_SCE_VP_RSX, NULL, NULL);
 //	GLErr("VP_Load (cgCreateProgram)");
-	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_SOURCE, _pProgram, CG_PROFILE_SCE_VP_TYPEC, NULL, NULL);
+	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_SOURCE, _pProgram, CG_PROFILE_SCE_VP_RSX, NULL, NULL);
 	GLErr("VP_Load (cgCreateProgram)");
 	CGparameter constants = cgGetNamedParameter(cgprog, "c");
 	GLErr("VP_Load (cgGetNamedParameter)");
@@ -319,7 +319,7 @@ void CRenderContextPS3::VP_Bind(const CRC_VPFormat& _Format)
 	cgGLBindProgram(pProg->m_Program);
 	GLErr("VP_Bind");
 
-	cgGLEnableProfile(CG_PROFILE_SCE_VP_TYPEC);
+	cgGLEnableProfile(CG_PROFILE_SCE_VP_RSX);
 	GLErr("VP_Bind");
 
 	m_pCurrentVPProgram = pProg;
@@ -328,10 +328,10 @@ void CRenderContextPS3::VP_Bind(const CRC_VPFormat& _Format)
 
 void CRenderContextPS3::VP_Disable()
 {
-	cgGLDisableProfile(CG_PROFILE_SCE_VP_TYPEC);
+	cgGLDisableProfile(CG_PROFILE_SCE_VP_RSX);
 	GLErr("VP_Disable");
 
-	cgGLUnbindProgram(CG_PROFILE_SCE_VP_TYPEC);
+	cgGLUnbindProgram(CG_PROFILE_SCE_VP_RSX);
 	GLErr("VP_Disable");
 
 	m_pCurrentVPProgram = NULL;
@@ -416,7 +416,7 @@ void CRenderContextPS3::VP_LoadCache()
 
 void CRenderContextPS3::VP_LoadBinary(const uint8* _pProgram, const CRC_VPFormat::CProgramFormat& _Format)
 {
-	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)_pProgram, CG_PROFILE_SCE_VP_TYPEC, NULL, NULL);
+	CGprogram cgprog = cgCreateProgram(m_CGContext, CG_BINARY, (const char*)_pProgram, CG_PROFILE_SCE_VP_RSX, NULL, NULL);
 	GLErr("VP_LoadBinary (cgCreateProgram)");
 	CGparameter constants = cgGetNamedParameter(cgprog, "c");
 	GLErr("VP_LoadBinary (cgGetNamedParameter)");
