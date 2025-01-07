@@ -252,17 +252,18 @@
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
 				CompileAs="0"
-				ForcedIncludeFiles=""/>
+				ForcedIncludeFiles=""
+				ForcedUsingFiles=""/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=""
-				AdditionalDependencies="&quot;$(SN_PS3_PATH)\ppu\lib\sn\libsn.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpthread.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libfs.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsgl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt\libpsglu.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot;"
+				AdditionalDependencies="-lsn -lm -lio -lpthread -lkb -lpad -lnet -lfs -lcgc -lpsgl -lpsglu -lpsglcgc -lgcm -lsysutil"
 				OutputFile="$(OutDir)/$(ConfigurationName).elf"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(SN_PS3_PATH)\ppu\lib\sn;$(SCE_PS3_ROOT)\target\ppu\lib;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\opt"
 				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"/>

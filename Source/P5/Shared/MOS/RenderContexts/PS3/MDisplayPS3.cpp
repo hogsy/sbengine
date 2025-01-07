@@ -304,21 +304,25 @@ void CDisplayContextPS3::ResetMode()
 		CDisplayContextPS3::ms_This.m_pDevice = NULL;
 	}
 
-	CDCGL_VideoMode* pMode = (CDCGL_VideoMode*)((CDC_VideoMode*)CDisplayContextPS3::ms_This.m_lspModes[CDisplayContextPS3::ms_This.m_DisplayModeNr]);
+//	CDCGL_VideoMode* pMode = (CDCGL_VideoMode*)((CDC_VideoMode*)CDisplayContextPS3::ms_This.m_lspModes[CDisplayContextPS3::ms_This.m_DisplayModeNr]);
 
-	PSGLbufferParameters DeviceParams;
-	DeviceParams.width = pMode->m_Width;
-	DeviceParams.height = pMode->m_Height;
-	DeviceParams.colorBits = GetColorBits(pMode->m_FrontBufferMode);
-	DeviceParams.alphaBits = GetAlphaBits(pMode->m_FrontBufferMode);
-	DeviceParams.depthBits = GetDepthBits(pMode->m_ZBufferMode);
-	DeviceParams.stencilBits = GetStencilBits(pMode->m_ZBufferMode);
-	DeviceParams.deviceType = PSGL_DEVICE_TYPE_AUTO;
-	DeviceParams.TVStandard = PSGL_TV_STANDARD_NONE;
-	DeviceParams.TVFormat = PSGL_TV_FORMAT_AUTO;
-	DeviceParams.bufferingMode = PSGL_BUFFERING_MODE_DOUBLE;
-	DeviceParams.antiAliasing = m_bAntialias?GL_TRUE:GL_FALSE;
-	CDisplayContextPS3::ms_This.m_pDevice = psglCreateDevice(&DeviceParams);
+//	PSGLbufferParameters DeviceParams;
+//	DeviceParams.width = pMode->m_Width;
+//	DeviceParams.height = pMode->m_Height;
+//	DeviceParams.colorBits = GetColorBits(pMode->m_FrontBufferMode);
+//	DeviceParams.alphaBits = GetAlphaBits(pMode->m_FrontBufferMode);
+//	DeviceParams.depthBits = GetDepthBits(pMode->m_ZBufferMode);
+//	DeviceParams.stencilBits = GetStencilBits(pMode->m_ZBufferMode);
+//	DeviceParams.deviceType = PSGL_DEVICE_TYPE_AUTO;
+//	DeviceParams.TVStandard = PSGL_TV_STANDARD_NONE;
+//	DeviceParams.TVFormat = PSGL_TV_FORMAT_AUTO;
+//	DeviceParams.bufferingMode = PSGL_BUFFERING_MODE_DOUBLE;
+//	DeviceParams.antiAliasing = m_bAntialias?GL_TRUE:GL_FALSE;
+//	CDisplayContextPS3::ms_This.m_pDevice = psglCreateDevice(&DeviceParams);
+	CDisplayContextPS3::ms_This.m_pDevice = psglCreateDeviceAuto(GL_ARGB_SCE, GL_DEPTH_COMPONENT24, GL_MULTISAMPLING_NONE_SCE);
+
+	GLuint Width, Height;
+	psglGetDeviceDimensions(CDisplayContextPS3::ms_This.m_pDevice, &Width, &Height);
 
 //	GLErr("ResetMode(1)");
 #ifdef PLATFORM_PS3
@@ -334,16 +338,16 @@ void CDisplayContextPS3::ResetMode()
 
 //	psglLoadShaderLibrary("/app_home/System/GL/PS3_Cache/shaders.bin");
 
-	SetRenderTarget(pMode->m_Width, pMode->m_Height, pMode->m_BackBufferMode, false);
+	SetRenderTarget(Width, Height, IMAGE_FORMAT_BGRX8, false);
 	CBackbufferContext TempContext;
-	TempContext.m_Setup.m_Width = pMode->m_Width;
-	TempContext.m_Setup.m_Height = pMode->m_Height;
+	TempContext.m_Setup.m_Width = Width;
+	TempContext.m_Setup.m_Height = Height;
 	TempContext.m_Setup.m_BackBufferFormat = IMAGE_FORMAT_BGRA8;
 	TempContext.m_Setup.m_bZBuffer = true;
 	TempContext.m_Setup.m_ZStartMem = 0x7fffffff;
 	m_CurrentBackbufferContext = TempContext;
 	CDisplayContextPS3::ms_This.m_DefaultBackbufferContext = m_CurrentBackbufferContext;
-	CDisplayContextPS3::ms_This.m_BackbufferImage.CreateVirtual(pMode->m_Width, pMode->m_Height, IMAGE_FORMAT_BGRA8, IMAGE_MEM_VIRTUAL);
+	CDisplayContextPS3::ms_This.m_BackbufferImage.CreateVirtual(Width, Height, IMAGE_FORMAT_BGRA8, IMAGE_MEM_VIRTUAL);
 
 	CRenderContextPS3::ms_This.m_CGContext = cgCreateContext();
 	GLErr("ResetMode(3)");
