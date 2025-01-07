@@ -6,13 +6,10 @@ M_INLINE fint CCFile::Pos()
 	{
 	case ECCFile_Stream_XDF:
 		return ((CStream_XDF *)m_pStream)->INL_Pos();
-		break;
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.Pos();
-		break;
 	default:
 		return m_pStream->Pos();
-		break;
 	}
 };
 
@@ -23,13 +20,10 @@ M_INLINE fint CCFile::Length()
 	{
 	case ECCFile_Stream_XDF:
 		return ((CStream_XDF *)m_pStream)->INL_Length();
-		break;
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.Len();
-		break;
 	default:
 		return m_pStream->Length();
-		break;
 	}
 };
 
@@ -91,13 +85,10 @@ M_INLINE bool CCFile::EndOfFile()
 	{
 	case ECCFile_Stream_XDF:
 		return ((CStream_XDF *)m_pStream)->INL_EndOfFile();
-		break;
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.EndOfFile();
-		break;
 	default:
 		return m_pStream->EndOfFile();
-		break;
 	}
 };
 

@@ -171,6 +171,8 @@ void CHuffmanTree::Build(void *_pSource, uint32 _Len, uint8 _InputSize)
 		// Create the leafs of the Huffman tree
 		// and put them in the priority queue.
 		CHMBuildElem he;
+		he.m_Character = 0;
+		he.m_Frequency = 0;
 		m_NrCharacters = 0;
 		int32 i;
 		for (i=0; i<(int32)m_NrLeafs; i++)

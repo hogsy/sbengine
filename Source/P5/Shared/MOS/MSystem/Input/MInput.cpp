@@ -265,8 +265,9 @@ bool CInputContextCore::RemoveShiftKey(int8 scancode)
 	{
 	}
 	if (cnt == m_nUserSK) return FALSE;
-	for (i = cnt; i < m_nUserSK-1; m_UserSK[i] = m_UserSK[(i++) + 1])
+	for (i = cnt; i < m_nUserSK-1; i++)
 	{
+		m_UserSK[i] = m_UserSK[i + 1];
 	}
 	m_nUserSK--;
 	return TRUE;

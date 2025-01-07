@@ -198,7 +198,7 @@ size_t MRTC_MemSize(void* _pMem)
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-void* M_CDECL ::operator new(mint _nSize)
+void* M_CDECL operator new(mint _nSize)
 {
 #if defined(MRTC_MEMORYDEBUG) && !defined(PLATFORM_PS3)
 	if (!MRTC_GetObjectManager()->ForgiveDebugNew())
@@ -207,39 +207,39 @@ void* M_CDECL ::operator new(mint _nSize)
 
 	return M_ALLOC(_nSize);
 }
-void M_CDECL ::operator delete(void* p)
+void M_CDECL operator delete(void* p)
 {
 	return MRTC_GetMemoryManager()->Free(p);
 }
 
 
 #ifdef PLATFORM_PS3
-void* M_CDECL ::operator new(mint _nSize, const std::nothrow_t&)
+void* M_CDECL operator new(mint _nSize, const std::nothrow_t&)
 {
 	return M_ALLOC(_nSize);
 }
 
-void* M_CDECL ::operator new[](mint _nSize, const std::nothrow_t&)
+void* M_CDECL operator new[](mint _nSize, const std::nothrow_t&)
 {
 	return M_ALLOC(_nSize);
 }
 
-void* M_CDECL ::operator new[](mint _nSize)
+void* M_CDECL operator new[](mint _nSize)
 {
 	return M_ALLOC(_nSize);
 }
 
-void M_CDECL ::operator delete[](void* p)
+void M_CDECL operator delete[](void* p)
 {
 	return MRTC_GetMemoryManager()->Free(p);
 }
 
-void M_CDECL ::operator delete(void* p, const std::nothrow_t&)
+void M_CDECL operator delete(void* p, const std::nothrow_t&)
 {
 	return MRTC_GetMemoryManager()->Free(p);
 }
 
-void M_CDECL ::operator delete[](void* p, const std::nothrow_t&)
+void M_CDECL operator delete[](void* p, const std::nothrow_t&)
 {
 	return MRTC_GetMemoryManager()->Free(p);
 }

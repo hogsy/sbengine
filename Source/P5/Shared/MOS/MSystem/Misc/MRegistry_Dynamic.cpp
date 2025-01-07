@@ -4235,9 +4235,9 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 	fp4 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
 	fp4 Time = 0;
 	int nLoops = 0;
-	fp4 LoopStart;
+	fp4 LoopStart = 0;
 	fp4 LoopEnd = 0;
-	fp4 LoopLength;
+	fp4 LoopLength = 0;
 	fp4 LoopTime = -1;
 	if (_Flags & REGISTRY_ANIMFLAGS_LOOP)
 	{

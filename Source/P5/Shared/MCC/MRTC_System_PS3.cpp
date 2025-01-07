@@ -9,7 +9,7 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <netex/netset.h>
+//#include <netex/netset.h>
 #include <netex/net.h>
 #include <netex/errno.h>
 #include <arpa/inet.h>
@@ -101,9 +101,9 @@ public:
 	{
 	public:
 		bint m_bInitFailed;
-		sys_netset_id_t m_sid;
+//		sys_netset_id_t m_sid;
 
-		CTCPContext() : m_bInitFailed(false), m_sid(0)
+		CTCPContext() : m_bInitFailed(false)//, m_sid(0)
 		{
 			Init();
 		}
@@ -111,6 +111,7 @@ public:
 		~CTCPContext()
 		{
 			m_SocketTree.f_DeleteAll();
+/*
 			if(!m_bInitFailed)
 			{
 				int ret = sys_netset_if_down(m_sid, -1, 0);
@@ -121,10 +122,11 @@ public:
 					MRTC_SystemInfo::OS_Assert(CFStrF("sys_netset_if_close failed(%d, %d)\n", ret, sys_net_errno).Str());
 				sys_net_finalize_network();
 			}
-		}
+*/		}
  
 		void Init()
 		{
+/*
 			m_bInitFailed = true;
 			if(sys_net_initialize_network() != 0)
 				return;
@@ -158,6 +160,7 @@ public:
 				sys_net_finalize_network();
 				return;
 			}
+*/
 		}
 
 		class CTCPSocket : public MRTC_Thread
@@ -697,7 +700,7 @@ void MRTC_SystemInfo::CPU_MeasureFrequency()
 	m_CPUFrequencyu = sys_time_get_timebase_frequency();
 	m_CPUFrequencyfp = m_CPUFrequencyu;
 	m_CPUFrequencyRecp = 1.0f / m_CPUFrequencyfp;
-	printf("PS3 CPU Frequency: %lu\n", m_CPUFrequencyu);
+	printf("PS3 CPU Frequency: %u\n", (uint32)m_CPUFrequencyu);
 }
 
 int64 MRTC_SystemInfo::CPU_Clock()

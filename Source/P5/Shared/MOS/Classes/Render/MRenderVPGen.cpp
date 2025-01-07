@@ -284,7 +284,7 @@ int CRC_VPGenerator::SubstituteConstants(char* _pVPDst, int _MaxDstSize, const c
 //	int Len = CStr::StrLen(_pVPSrc);
 
 	const char* pFind = 0;
-	while(pFind = strstr(_pVPSrc, "$"))
+	while((pFind = strstr(_pVPSrc, "$")))
 	{
 		int nCopy = pFind - _pVPSrc;
 		memcpy(_pVPDst, _pVPSrc, nCopy);

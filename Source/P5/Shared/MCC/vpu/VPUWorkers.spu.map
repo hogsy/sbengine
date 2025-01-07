@@ -1,28 +1,28 @@
 Archive member included because of file (symbol)
 
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
                               VPUWorkers.spu.o (cellDmaLargeCmd)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
                               VPUWorkers.spu.o (sys_spu_thread_send_event)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o (sys_spu_thread_exit)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o (exit)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o (sys_spu_thread_exit)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o (exit)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
                               VPUWorkers.spu.o (operator delete[](void*))
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o) (operator delete(void*))
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o) (free)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o) (_Aldata)
-D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
-                              D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o) (sbrk)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o) (operator delete(void*))
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o) (free)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o) (_Aldata)
+d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
+                              d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o) (sbrk)
 
 Allocating common symbols
 Common symbol       size              file
 
-_Atfuns             0x140             D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+_Atfuns             0x140             d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
 
 Memory Configuration
 
@@ -31,18 +31,18 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
 LOAD VPUWorkers.spu.o
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a
 START GROUP
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1\libgcc.a
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1\libsupc++.a
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2\libgcc.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2\libsupc++.a
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a
 END GROUP
-LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1.o
+LOAD d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crtend1.o
                 0x0000000000000080                PROVIDE (__executable_start, 0x80)
                 0x0000000000000080                . = 0x80
 
@@ -67,70 +67,31 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
 .gnu.version_r
  *(.gnu.version_r)
 
-.rel.init
+.rel.dyn
  *(.rel.init)
-
-.rela.init
- *(.rela.init)
-
-.rel.text
  *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
-
-.rela.text
- *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
-
-.rel.fini
  *(.rel.fini)
-
-.rela.fini
- *(.rela.fini)
-
-.rel.rodata
  *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
-
-.rela.rodata
- *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
-
-.rel.data
+ *(.rel.data.rel.ro*)
  *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
-
-.rela.data
- *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
-
-.rel.tdata
  *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
-
-.rela.tdata
- *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
-
-.rel.tbss
  *(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
-
-.rela.tbss
- *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
-
-.rel.ctors
  *(.rel.ctors)
-
-.rela.ctors
- *(.rela.ctors)
-
-.rel.dtors
  *(.rel.dtors)
-
-.rela.dtors
- *(.rela.dtors)
-
-.rel.got
  *(.rel.got)
-
-.rela.got
- *(.rela.got)
-
-.rel.bss
  *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
 
-.rela.bss
+.rela.dyn
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
  *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
 
 .rel.plt
@@ -145,171 +106,156 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
 .plt
  *(.plt)
 
-.text           0x0000000000000080     0x55a0
+.text           0x0000000000000080     0x5458
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x0000000000000080       0xd8 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
-                0x0000000000000100                _Exit
+ .text          0x0000000000000080       0xe0 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
+                0x0000000000000108                _Exit
                 0x0000000000000080                _start
-                0x0000000000000100                _exit
- .text          0x0000000000000158     0x3a08 VPUWorkers.spu.o
-                0x00000000000002d8                CVPU_JobInfo::~CVPU_JobInfo()
-                0x00000000000009a8                CVPU_CacheBuffer::~CVPU_CacheBuffer()
-                0x0000000000000d50                CVPU_CacheBuffer::GetPntElement(unsigned int)
-                0x00000000000002f8                VPU_Main()
-                0x0000000000000390                MRTC_System_VPU::OS_Assert(char const*, char const*, int)
-                0x0000000000000678                CVPU_CacheBuffer::CVPU_CacheBuffer(CVPU_CacheBufferInfo&, unsigned int)
-                0x0000000000000438                MRTC_System_VPU::OS_HeapFree(void*)
-                0x0000000000002b40                CVPU_WorkQueue::GetJob(unsigned int&, unsigned int&, CVPU_SystemAddr&)
-                0x00000000000015e0                CVPU_StreamBuffer::CVPU_StreamBuffer(CVPU_StreamBufferInfo&, unsigned int)
-                0x0000000000001b80                CVPU_StreamBuffer::~CVPU_StreamBuffer()
-                0x0000000000000458                MRTC_System_VPU::OS_HeapFreeAll()
-                0x0000000000001040                CVPU_StreamBuffer::CVPU_StreamBuffer(CVPU_StreamBufferInfo&, unsigned int)
-                0x0000000000000208                CVPU_JobInfo::CVPU_JobInfo(CVPU_JobDefData*)
-                0x0000000000000810                CVPU_CacheBuffer::CVPU_CacheBuffer(CVPU_CacheBufferInfo&, unsigned int)
-                0x00000000000003d8                MRTC_System_VPU::OS_HeapAlloc(unsigned int)
-                0x0000000000003a58                main
-                0x0000000000002380                CVPU_StreamBuffer::GetBuffer(unsigned int&)
-                0x0000000000000a58                CVPU_CacheBuffer::GetVecElement(unsigned int)
-                0x0000000000002be8                VPUWorker_TestStream(CVPU_JobInfo&)
-                0x0000000000000158                CVPU_JobInfo::CVPU_JobInfo(CVPU_JobDefData*)
-                0x0000000000001be0                CVPU_StreamBuffer::GetNextBuffer(unsigned int&)
-                0x0000000000000468                MRTC_System_VPU::OS_DMATransferFromSys(CVPU_SystemAddr, void*, unsigned int)
-                0x0000000000000a00                CVPU_CacheBuffer::~CVPU_CacheBuffer()
-                0x00000000000002b8                CVPU_JobInfo::~CVPU_JobInfo()
-                0x0000000000000618                MRTC_System_VPU::OS_DMABlockUntilIdle()
-                0x0000000000001bb0                CVPU_StreamBuffer::~CVPU_StreamBuffer()
-                0x0000000000002fd0                VPUWorker_Shadow(CVPU_JobInfo&)
-                0x0000000000002bb0                CVPU_WorkQueue::SignalJobComplete(unsigned int)
-                0x00000000000024c8                CVPU_StreamBuffer::SetPosition(unsigned int)
-                0x0000000000002dc0                VPUWorker_TestCache(CVPU_JobInfo&)
-                0x0000000000002850                CVPU_StreamBuffer::Flush()
-                0x0000000000003a80                VPU_Worker(unsigned int, CVPU_JobInfo&)
- .gnu.linkonce.t._ZN15CVPU_SystemAddrC1Ev
-                0x0000000000003b60       0x38 VPUWorkers.spu.o
-                0x0000000000003b60                CVPU_SystemAddr::CVPU_SystemAddr()
- .gnu.linkonce.t._ZNK15CVPU_SystemAddrcvjEv
-                0x0000000000003b98       0x30 VPUWorkers.spu.o
-                0x0000000000003b98                CVPU_SystemAddr::operator unsigned int() const
- .gnu.linkonce.t._ZN15CVPU_SystemAddrC1Ej
-                0x0000000000003bc8       0x48 VPUWorkers.spu.o
-                0x0000000000003bc8                CVPU_SystemAddr::CVPU_SystemAddr(unsigned int)
- .gnu.linkonce.t._ZN15CVPU_SystemAddr7SetAddrEj
-                0x0000000000003c10       0x48 VPUWorkers.spu.o
-                0x0000000000003c10                CVPU_SystemAddr::SetAddr(unsigned int)
- .gnu.linkonce.t._ZNK17CVPU_StreamBuffer14GetBufferCountEv
-                0x0000000000003c58       0xd8 VPUWorkers.spu.o
-                0x0000000000003c58                CVPU_StreamBuffer::GetBufferCount() const
- .gnu.linkonce.t._ZN12CVPU_JobInfo15GetStreamBufferEj
-                0x0000000000003d30       0x58 VPUWorkers.spu.o
-                0x0000000000003d30                CVPU_JobInfo::GetStreamBuffer(unsigned int)
- .gnu.linkonce.t._ZN12CVPU_JobInfo14GetCacheBufferEj
-                0x0000000000003d88      0x130 VPUWorkers.spu.o
-                0x0000000000003d88                CVPU_JobInfo::GetCacheBuffer(unsigned int)
- .gnu.linkonce.t._Z12M_VGetX_SlowU8__vectorf
-                0x0000000000003eb8       0x60 VPUWorkers.spu.o
-                0x0000000000003eb8                M_VGetX_Slow(float __vector)
- .gnu.linkonce.t._Z6M_VDp3U8__vectorfS_
-                0x0000000000003f18      0x1c8 VPUWorkers.spu.o
-                0x0000000000003f18                M_VDp3(float __vector, float __vector)
- .gnu.linkonce.t._Z6M_VXpdU8__vectorfS_
-                0x00000000000040e0      0x150 VPUWorkers.spu.o
-                0x00000000000040e0                M_VXpd(float __vector, float __vector)
- .gnu.linkonce.t._Z6M_VSubU8__vectorfS_
-                0x0000000000004230       0x40 VPUWorkers.spu.o
-                0x0000000000004230                M_VSub(float __vector, float __vector)
- .gnu.linkonce.t._ZNK11CVec3Bundle4getVEj
-                0x0000000000004270       0xe0 VPUWorkers.spu.o
-                0x0000000000004270                CVec3Bundle::getV(unsigned int) const
+                0x0000000000000108                _exit
+ .text          0x0000000000000160     0x3980 VPUWorkers.spu.o
+                0x0000000000000330                CVPU_JobInfo::~CVPU_JobInfo()
+                0x0000000000000708                CVPU_CacheBuffer::~CVPU_CacheBuffer()
+                0x0000000000001c18                CVPU_CacheBuffer::GetPntElement(unsigned int)
+                0x00000000000039f0                VPU_Main()
+                0x0000000000000360                MRTC_System_VPU::OS_Assert(char const*, char const*, int)
+                0x00000000000003c8                CVPU_CacheBuffer::CVPU_CacheBuffer(CVPU_CacheBufferInfo&, unsigned int)
+                0x00000000000003a8                MRTC_System_VPU::OS_HeapFree(void*)
+                0x00000000000007c8                CVPU_WorkQueue::GetJob(unsigned int&, unsigned int&, CVPU_SystemAddr&)
+                0x0000000000001338                CVPU_StreamBuffer::CVPU_StreamBuffer(CVPU_StreamBufferInfo&, unsigned int)
+                0x0000000000003ab0                CVPU_StreamBuffer::~CVPU_StreamBuffer()
+                0x0000000000000350                MRTC_System_VPU::OS_HeapFreeAll()
+                0x0000000000000d68                CVPU_StreamBuffer::CVPU_StreamBuffer(CVPU_StreamBufferInfo&, unsigned int)
+                0x0000000000000268                CVPU_JobInfo::CVPU_JobInfo(CVPU_JobDefData*)
+                0x0000000000000568                CVPU_CacheBuffer::CVPU_CacheBuffer(CVPU_CacheBufferInfo&, unsigned int)
+                0x0000000000000160                MRTC_System_VPU::OS_HeapAlloc(unsigned int)
+                0x0000000000003a88                main
+                0x0000000000002620                CVPU_StreamBuffer::GetBuffer(unsigned int&)
+                0x0000000000001958                CVPU_CacheBuffer::GetVecElement(unsigned int)
+                0x0000000000003728                VPUWorker_TestStream(CVPU_JobInfo&)
+                0x00000000000001c0                CVPU_JobInfo::CVPU_JobInfo(CVPU_JobDefData*)
+                0x0000000000001ed8                CVPU_StreamBuffer::GetNextBuffer(unsigned int&)
+                0x0000000000000bd0                MRTC_System_VPU::OS_DMATransferFromSys(CVPU_SystemAddr, void*, unsigned int)
+                0x0000000000000768                CVPU_CacheBuffer::~CVPU_CacheBuffer()
+                0x0000000000000310                CVPU_JobInfo::~CVPU_JobInfo()
+                0x0000000000001908                MRTC_System_VPU::OS_DMABlockUntilIdle()
+                0x0000000000002a18                CVPU_StreamBuffer::~CVPU_StreamBuffer()
+                0x0000000000002a48                VPUWorker_Shadow(CVPU_JobInfo&)
+                0x0000000000000838                CVPU_WorkQueue::SignalJobComplete(unsigned int)
+                0x0000000000000870                CVPU_StreamBuffer::SetPosition(unsigned int)
+                0x0000000000003528                VPUWorker_TestCache(CVPU_JobInfo&)
+                0x0000000000002758                CVPU_StreamBuffer::Flush()
+                0x0000000000003920                VPU_Worker(unsigned int, CVPU_JobInfo&)
  .gnu.linkonce.t._Z5M_VLdffff
-                0x0000000000004350       0x88 VPUWorkers.spu.o
-                0x0000000000004350                M_VLd(float, float, float, float)
+                0x0000000000003ae0       0x88 VPUWorkers.spu.o
+                0x0000000000003ae0                M_VLd(float, float, float, float)
+ .gnu.linkonce.t._Z6M_VSubU8__vectorfS_
+                0x0000000000003b68       0x38 VPUWorkers.spu.o
+                0x0000000000003b68                M_VSub(float __vector, float __vector)
+ .gnu.linkonce.t._ZN15CVPU_SystemAddrC1Ev
+                0x0000000000003ba0       0x38 VPUWorkers.spu.o
+                0x0000000000003ba0                CVPU_SystemAddr::CVPU_SystemAddr()
+ .gnu.linkonce.t._ZN15CVPU_SystemAddrC1Ej
+                0x0000000000003bd8       0x48 VPUWorkers.spu.o
+                0x0000000000003bd8                CVPU_SystemAddr::CVPU_SystemAddr(unsigned int)
+ .gnu.linkonce.t._ZN15CVPU_SystemAddr7SetAddrEj
+                0x0000000000003c20       0x48 VPUWorkers.spu.o
+                0x0000000000003c20                CVPU_SystemAddr::SetAddr(unsigned int)
+ .gnu.linkonce.t._ZNK15CVPU_SystemAddrcvjEv
+                0x0000000000003c68       0x30 VPUWorkers.spu.o
+                0x0000000000003c68                CVPU_SystemAddr::operator unsigned int() const
+ .gnu.linkonce.t._ZNK17CVPU_StreamBuffer14GetBufferCountEv
+                0x0000000000003c98       0xd8 VPUWorkers.spu.o
+                0x0000000000003c98                CVPU_StreamBuffer::GetBufferCount() const
+ .gnu.linkonce.t._ZN12CVPU_JobInfo15GetStreamBufferEj
+                0x0000000000003d70       0x58 VPUWorkers.spu.o
+                0x0000000000003d70                CVPU_JobInfo::GetStreamBuffer(unsigned int)
+ .gnu.linkonce.t._ZN12CVPU_JobInfo14GetCacheBufferEj
+                0x0000000000003dc8      0x130 VPUWorkers.spu.o
+                0x0000000000003dc8                CVPU_JobInfo::GetCacheBuffer(unsigned int)
  .gnu.linkonce.t._ZN12CVPU_JobInfo9GetVParamEj
-                0x00000000000043d8       0x58 VPUWorkers.spu.o
-                0x00000000000043d8                CVPU_JobInfo::GetVParam(unsigned int)
+                0x0000000000003ef8       0x58 VPUWorkers.spu.o
+                0x0000000000003ef8                CVPU_JobInfo::GetVParam(unsigned int)
  .gnu.linkonce.t._Z3MinIjET_S0_S0_
-                0x0000000000004430       0x58 VPUWorkers.spu.o
-                0x0000000000004430                unsigned int Min<unsigned int>(unsigned int, unsigned int)
+                0x0000000000003f50       0x60 VPUWorkers.spu.o
+                0x0000000000003f50                unsigned int Min<unsigned int>(unsigned int, unsigned int)
  .gnu.linkonce.t._Z4SwapIjEvRT_S1_
-                0x0000000000004488       0x88 VPUWorkers.spu.o
-                0x0000000000004488                void Swap<unsigned int>(unsigned int&, unsigned int&)
+                0x0000000000003fb0       0x88 VPUWorkers.spu.o
+                0x0000000000003fb0                void Swap<unsigned int>(unsigned int&, unsigned int&)
  .gnu.linkonce.t._Z4SwapIPvEvRT_S2_
-                0x0000000000004510       0x88 VPUWorkers.spu.o
-                0x0000000000004510                void Swap<void*>(void*&, void*&)
- .text          0x0000000000004598      0x130 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
-                0x0000000000004598                cellDmaLargeCmd
- .text          0x00000000000046c8      0x1c8 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
-                0x00000000000047f8                sys_spu_thread_tryreceive_event
-                0x0000000000004718                sys_spu_thread_throw_event
-                0x00000000000046c8                sys_spu_thread_send_event
-                0x0000000000004760                sys_spu_thread_receive_event
- .text          0x0000000000004890       0x28 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
-                0x00000000000048a8                sys_spu_thread_exit
-                0x00000000000048a0                sys_spu_thread_group_yield
-                0x0000000000004890                sys_spu_thread_group_exit
- .text          0x00000000000048b8       0xa8 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
-                0x00000000000048b8                atexit
-                0x00000000000048f8                exit
- .text          0x0000000000004960       0x20 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
-                0x0000000000004960                operator delete[](void*)
- .text          0x0000000000004980       0x28 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
-                0x0000000000004980                operator delete(void*)
- .text          0x00000000000049a8      0x218 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
-                0x00000000000049a8                free
- .text          0x0000000000004bc0      0x9d8 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
-                0x0000000000004bc0                malloc
-                0x0000000000004ea8                memalign
- .text          0x0000000000005598       0x88 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
-                0x0000000000005598                sbrk
+                0x0000000000004038       0x88 VPUWorkers.spu.o
+                0x0000000000004038                void Swap<void*>(void*&, void*&)
+ .gnu.linkonce.t._ZNK11CVec3Bundle4getVEj
+                0x00000000000040c0       0xc8 VPUWorkers.spu.o
+                0x00000000000040c0                CVec3Bundle::getV(unsigned int) const
+ .gnu.linkonce.t._Z6M_VXpdU8__vectorfS_
+                0x0000000000004188      0x140 VPUWorkers.spu.o
+                0x0000000000004188                M_VXpd(float __vector, float __vector)
+ .gnu.linkonce.t._Z6M_VDp3U8__vectorfS_
+                0x00000000000042c8      0x178 VPUWorkers.spu.o
+                0x00000000000042c8                M_VDp3(float __vector, float __vector)
+ .gnu.linkonce.t._Z12M_VGetX_SlowU8__vectorf
+                0x0000000000004440       0x48 VPUWorkers.spu.o
+                0x0000000000004440                M_VGetX_Slow(float __vector)
+ .text          0x0000000000004488      0x120 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+                0x0000000000004488                cellDmaLargeCmd
+ .text          0x00000000000045a8      0x1e8 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
+                0x0000000000004708                sys_spu_thread_tryreceive_event
+                0x0000000000004620                sys_spu_thread_throw_event
+                0x00000000000045a8                sys_spu_thread_send_event
+                0x0000000000004680                sys_spu_thread_receive_event
+ .text          0x0000000000004790       0x28 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
+                0x00000000000047a8                sys_spu_thread_exit
+                0x00000000000047a0                sys_spu_thread_group_yield
+                0x0000000000004790                sys_spu_thread_group_exit
+ .text          0x00000000000047b8       0xb0 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+                0x00000000000047b8                atexit
+                0x00000000000047f8                exit
+ .text          0x0000000000004868        0x8 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
+                0x0000000000004868                operator delete[](void*)
+ .text          0x0000000000004870       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
+                0x0000000000004870                operator delete(void*)
+ .text          0x0000000000004880      0x1b8 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
+                0x0000000000004880                free
+ .text          0x0000000000004a38      0xa10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+                0x0000000000005158                malloc
+                0x0000000000004a38                memalign
+ .text          0x0000000000005448       0x90 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
+                0x0000000000005448                sbrk
+ *(.text.*personality*)
+ *(.spu.elf)
  *(.gnu.warning)
 
 .fini
  *(.fini)
-                0x0000000000005620                PROVIDE (__etext, .)
-                0x0000000000005620                PROVIDE (_etext, .)
-                0x0000000000005620                PROVIDE (etext, .)
+                0x00000000000054d8                PROVIDE (__etext, .)
+                0x00000000000054d8                PROVIDE (_etext, .)
+                0x00000000000054d8                PROVIDE (etext, .)
 
-.rodata         0x0000000000005620       0x30
+.rodata         0x00000000000054e0       0x30
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x0000000000005620       0x20 VPUWorkers.spu.o
- .rodata.cst16  0x0000000000005640       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .rodata        0x00000000000054e0       0x20 VPUWorkers.spu.o
+ .rodata.cst16  0x0000000000005500       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
 .rodata1
  *(.rodata1)
 
 .eh_frame_hdr
  *(.eh_frame_hdr)
-                0x0000000000005680                . = ALIGN (0x80)
-                0x0000000000005680                . = ALIGN (0x10)
-                0x0000000000005680                PROVIDE (__preinit_array_start, .)
 
-.preinit_array
- *(.preinit_array)
-                0x0000000000005680                PROVIDE (__preinit_array_end, .)
-                0x0000000000005680                PROVIDE (__init_array_start, .)
+.eh_frame
+ *(.eh_frame)
 
-.init_array
- *(.init_array)
-                0x0000000000005680                PROVIDE (__init_array_end, .)
-                0x0000000000005680                PROVIDE (__fini_array_start, .)
+.gcc_except_table
+ *(.gcc_except_table)
+ *(.gcc_except_table.*)
+                0x0000000000005580                . = ALIGN (0x80)
 
-.fini_array
- *(.fini_array)
-                0x0000000000005680                PROVIDE (__fini_array_end, .)
+.eh_frame
+ *(.eh_frame)
 
-.data           0x0000000000005680       0x30
- *(.data .data.* .gnu.linkonce.d.*)
- .data          0x0000000000005680       0x10 VPUWorkers.spu.o
-                0x0000000000005680                pMem
- .data          0x0000000000005690       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
-                0x0000000000005690                _Atcount
- .data          0x00000000000056a0       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
-                0x00000000000056a0                _Size_block
-
-.data1
- *(.data1)
-
-.toe
- *(.toe)
+.gcc_except_table
+ *(.gcc_except_table)
+ *(.gcc_except_table.*)
 
 .tdata
  *(.tdata .tdata.* .gnu.linkonce.td.*)
@@ -317,59 +263,88 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
 .tbss
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
+                0x0000000000005580                . = ALIGN (0x10)
+                0x0000000000005580                PROVIDE (__preinit_array_start, .)
 
-.eh_frame
- *(.eh_frame)
+.preinit_array
+ *(.preinit_array)
+                0x0000000000005580                PROVIDE (__preinit_array_end, .)
+                0x0000000000005580                PROVIDE (__init_array_start, .)
 
-.gcc_except_table
- *(.gcc_except_table)
+.init_array
+ *(.init_array)
+                0x0000000000005580                PROVIDE (__init_array_end, .)
+                0x0000000000005580                PROVIDE (__fini_array_start, .)
 
-.dynamic
- *(.dynamic)
+.fini_array
+ *(.fini_array)
+                0x0000000000005580                PROVIDE (__fini_array_end, .)
 
-.ctors          0x00000000000056b0        0x8
+.ctors          0x0000000000005580        0x8
  *crtbegin*.o(.ctors)
  *(EXCLUDE_FILE(*crtend*.o) .ctors)
- .ctors         0x00000000000056b0        0x4 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
-                0x00000000000056b0                __CTOR_LIST__
+ .ctors         0x0000000000005580        0x4 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
+                0x0000000000005580                __CTOR_LIST__
  *(SORT(.ctors.*))
  *(.ctors)
- .ctors         0x00000000000056b4        0x4 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1.o
-                0x00000000000056b4                __CTOR_END__
+ .ctors         0x0000000000005584        0x4 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crtend1.o
+                0x0000000000005584                __CTOR_END__
 
-.dtors          0x00000000000056b8        0x8
+.dtors          0x0000000000005588        0x8
  *crtbegin*.o(.dtors)
  *(EXCLUDE_FILE(*crtend*.o) .dtors)
- .dtors         0x00000000000056b8        0x4 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
+ .dtors         0x0000000000005588        0x4 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
  *(SORT(.dtors.*))
  *(.dtors)
- .dtors         0x00000000000056bc        0x4 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1.o
-                0x00000000000056bc                __DTOR_END__
+ .dtors         0x000000000000558c        0x4 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crtend1.o
+                0x000000000000558c                __DTOR_END__
 
 .jcr
  *(.jcr)
 
+.data.rel.ro
+ *(.data.rel.ro.local)
+ *(.data.rel.ro*)
+
+.dynamic
+ *(.dynamic)
+
 .got
  *(.got.plt)
  *(.got)
-                0x00000000000056c0                _edata = .
-                0x00000000000056c0                PROVIDE (edata, .)
-                0x00000000000056c0                __bss_start = .
 
-.bss            0x00000000000056c0      0x160
+.data           0x0000000000005590       0x30
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000000005590       0x10 VPUWorkers.spu.o
+                0x0000000000005590                pMem
+ .data          0x00000000000055a0       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+                0x00000000000055a0                _Atcount
+ .data          0x00000000000055b0       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+                0x00000000000055b0                _Size_block
+ *(.gnu.linkonce.d.*personality*)
+
+.data1
+ *(.data1)
+
+.toe
+ *(.toe)
+                0x00000000000055c0                _edata = .
+                0x00000000000055c0                PROVIDE (edata, .)
+                0x00000000000055c0                __bss_start = .
+
+.bss            0x00000000000055c0      0x160
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00000000000056c0       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
- .bss           0x00000000000056d0       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
-                0x00000000000056d0                _Aldata
+ .bss           0x00000000000055c0       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
+ .bss           0x00000000000055d0       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+                0x00000000000055d0                _Aldata
  *(COMMON)
- COMMON         0x00000000000056e0      0x140 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
-                                          0x0 (size before relaxing)
-                0x00000000000056e0                _Atfuns
-                0x0000000000005820                . = ALIGN (0x10)
-                0x0000000000005820                . = ALIGN (0x10)
-                0x0000000000005820                _end = .
-                0x0000000000005820                PROVIDE (end, .)
+ COMMON         0x00000000000055e0      0x140 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+                0x00000000000055e0                _Atfuns
+                0x0000000000005720                . = ALIGN (0x10)
+                0x0000000000005720                . = ALIGN (0x10)
+                0x0000000000005720                _end = .
+                0x0000000000005720                PROVIDE (end, .)
 
 .stab
  *(.stab)
@@ -389,20 +364,20 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
 .stab.indexstr
  *(.stab.indexstr)
 
-.comment        0x0000000000000000      0x210
+.comment        0x0000000000000000      0x21c
  *(.comment)
- .comment       0x0000000000000000       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crt1.o
- .comment       0x000000000000002c       0x2c VPUWorkers.spu.o
- .comment       0x0000000000000058       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
- .comment       0x0000000000000084       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
- .comment       0x00000000000000b0       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
- .comment       0x00000000000000dc       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
- .comment       0x0000000000000108       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
- .comment       0x0000000000000134       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
- .comment       0x0000000000000160       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
- .comment       0x000000000000018c       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
- .comment       0x00000000000001b8       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
- .comment       0x00000000000001e4       0x2c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1.o
+ .comment       0x0000000000000000       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crt1.o
+ .comment       0x000000000000002d       0x2d VPUWorkers.spu.o
+ .comment       0x000000000000005a       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .comment       0x0000000000000087       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
+ .comment       0x00000000000000b4       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
+ .comment       0x00000000000000e1       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+ .comment       0x000000000000010e       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
+ .comment       0x000000000000013b       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
+ .comment       0x0000000000000168       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
+ .comment       0x0000000000000195       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+ .comment       0x00000000000001c2       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
+ .comment       0x00000000000001ef       0x2d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../lib/gcc/spu-lv2/4.0.2/crtend1.o
 
 .debug
  *(.debug)
@@ -421,7 +396,7 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
  .debug_aranges
                 0x0000000000000000       0xa8 VPUWorkers.spu.o
  .debug_aranges
-                0x00000000000000a8       0x20 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+                0x00000000000000a8       0x20 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
 .debug_pubnames
                 0x0000000000000000      0x5f0
@@ -429,36 +404,37 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
  .debug_pubnames
                 0x0000000000000000      0x5ca VPUWorkers.spu.o
  .debug_pubnames
-                0x00000000000005ca       0x26 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+                0x00000000000005ca       0x26 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
-.debug_info     0x0000000000000000     0x33af
+.debug_info     0x0000000000000000     0x2f01
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x0000000000000000     0x320a VPUWorkers.spu.o
- .debug_info    0x000000000000320a      0x1a5 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .debug_info    0x0000000000000000     0x2d56 VPUWorkers.spu.o
+ .debug_info    0x0000000000002d56      0x1ab d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
-.debug_abbrev   0x0000000000000000      0x4ac
+.debug_abbrev   0x0000000000000000      0x4be
  *(.debug_abbrev)
- .debug_abbrev  0x0000000000000000      0x3c5 VPUWorkers.spu.o
- .debug_abbrev  0x00000000000003c5       0xe7 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .debug_abbrev  0x0000000000000000      0x3e2 VPUWorkers.spu.o
+ .debug_abbrev  0x00000000000003e2       0xdc d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
-.debug_line     0x0000000000000000      0x96b
+.debug_line     0x0000000000000000      0x9c9
  *(.debug_line)
- .debug_line    0x0000000000000000      0x787 VPUWorkers.spu.o
- .debug_line    0x0000000000000787      0x1e4 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .debug_line    0x0000000000000000      0x7ff VPUWorkers.spu.o
+ .debug_line    0x00000000000007ff      0x1ca d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
-.debug_frame    0x0000000000000000      0x554
+.debug_frame    0x0000000000000000      0x550
  *(.debug_frame)
- .debug_frame   0x0000000000000000      0x52c VPUWorkers.spu.o
- .debug_frame   0x000000000000052c       0x28 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .debug_frame   0x0000000000000000      0x528 VPUWorkers.spu.o
+ .debug_frame   0x0000000000000528       0x28 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
-.debug_str      0x0000000000000000      0x312
+.debug_str      0x0000000000000000      0x269
  *(.debug_str)
- .debug_str     0x0000000000000000      0x1d6 VPUWorkers.spu.o
- .debug_str     0x00000000000001d6      0x13c D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
-                                        0x175 (size before relaxing)
+ .debug_str     0x0000000000000000      0x12c VPUWorkers.spu.o
+ .debug_str     0x000000000000012c      0x13d d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+                                        0x176 (size before relaxing)
 
-.debug_loc
+.debug_loc      0x0000000000000000      0x122
  *(.debug_loc)
+ .debug_loc     0x0000000000000000      0x122 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -481,12 +457,12 @@ LOAD D:/usr/local/cell/0_8_1/host-win32/spu/bin/../lib/gcc/spu-lv2/3.4.1/crtend1
 OUTPUT(VPUWorkers.elf elf32-spu)
 
 .sceversion     0x0000000000000000       0x7f
- .sceversion    0x0000000000000000        0xd D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
- .sceversion    0x000000000000000d       0x13 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
- .sceversion    0x0000000000000020       0x13 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
- .sceversion    0x0000000000000033        0xb D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
- .sceversion    0x000000000000003e       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
- .sceversion    0x000000000000004e       0x10 D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
- .sceversion    0x000000000000005e        0xb D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
- .sceversion    0x0000000000000069        0xb D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
- .sceversion    0x0000000000000074        0xb D:/usr/local/cell/0_8_1/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
+ .sceversion    0x0000000000000000        0xd d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libdma.a(cellDmaLargeCmd.o)
+ .sceversion    0x000000000000000d       0x13 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_event.spu.o)
+ .sceversion    0x0000000000000020       0x13 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libsputhread.a(spu_thread.spu.o)
+ .sceversion    0x0000000000000033        0xb d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(exit.o)
+ .sceversion    0x000000000000003e       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delaop.o)
+ .sceversion    0x000000000000004e       0x10 d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libstdc++.a(delop.o)
+ .sceversion    0x000000000000005e        0xb d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(free.o)
+ .sceversion    0x0000000000000069        0xb d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(malloc.o)
+ .sceversion    0x0000000000000074        0xb d:/usr/local/cell/0_8_2/host-win32/spu/bin/../../../target/spu/lib\libc.a(sbrk.o)
