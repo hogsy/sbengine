@@ -20,6 +20,600 @@
 
 //class IFile;
 
+namespace NStr
+{
+
+	/************************************************************************************************\
+	||¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯||
+	|| Character funcs
+	||______________________________________________________________________________________________||
+	\************************************************************************************************/
+
+	template<class t_CData>
+		mint StrLen(const t_CData *_pStr)
+	{
+		const t_CData *pStr = _pStr;
+		while (*pStr)
+			++pStr;
+		return pStr - _pStr;;
+	}
+
+	template<typename t_CData1, typename t_CData2>
+		DIdsPInlineM t_CData1 *StrCopy(t_CData1 *_pTo, const t_CData2 *_pFrom)
+	{
+		while (*_pFrom)
+			*_pTo++ = *_pFrom++;
+		*_pTo = 0;
+
+		return _pTo;
+	}
+
+	template<class t_CData>
+		DIdsPInlineM t_CData CharUpperCase(t_CData _Character)
+	{
+		if (_Character >= 'a' && _Character <= 'z')
+			_Character -= 'a' - 'A';
+
+		return _Character;
+	}
+
+	template<class t_CData>
+		DIdsPInlineM t_CData CharLowerCase(t_CData _Character)
+	{
+		if (_Character >= 'A' && _Character <= 'A')
+			_Character += 'a' - 'A';
+
+		return _Character;
+	}
+
+	template<class t_CData>
+		DIdsPInlineM bint CharIsWhiteSpace(const t_CData _Character)
+	{
+		switch (_Character)
+		{
+		case 32 : return true;
+		case 8 : return true;
+		case 9 : return true;
+		case 10 : return true;
+		case 13 : return true;
+		}
+		return false;			
+	}
+
+	template<class t_CData>
+		DIdsPInlineL bint CharIsAlphabetical(const t_CData _Character)
+	{
+		if (_Character >= 'A' && _Character <= 'Z')
+			return true;
+		if (_Character >= 'a' && _Character <= 'z')
+			return true;
+
+//		if (_Character >= 0x7f || _Character < 0)
+//			return true;
+		if (_Character & ~0x7f)
+			return true;
+
+		return false;
+
+	}
+
+	template<class t_CData>
+		DIdsPInlineL bint CharIsAnsiAlphabetical(const t_CData _Character)
+	{
+		if (_Character >= 'A' && _Character <= 'Z')
+			return true;
+		if (_Character >= 'a' && _Character <= 'z')
+			return true;
+
+		return false;
+
+	}
+
+	template<class t_CData>
+		DIdsPInlineM bint CharIsNumber(const t_CData _Character)
+	{
+		if (_Character >= '0' && _Character <= '9')
+			return true;
+
+		return false;
+	}
+
+	template<class t_CData, class t_CReturn, class t_CTerminator>
+		t_CReturn StrToFloatParse(const t_CData *&_pStr, t_CReturn _FailValue, t_CTerminator *_pStrTerminators = (const ch8 *)DNP)
+	{
+		t_CReturn DestNumber = 0.0;
+		t_CReturn DestDecimals = 0.0;
+		t_CReturn DestExponent = 0.0;
+		t_CReturn DecimalPlace = 1.0;
+		const t_CData *&pParseStr = _pStr;
+
+		aint SearchMode = 0;
+		t_CReturn Sign = 1.0;
+		t_CReturn ExponentSign = 1.0;
+		aint bFoundNum = false;
+
+		// Parse for characters, and end if str terminator is found
+		while ((*pParseStr))
+		{
+			if (_pStrTerminators)
+			{
+				const t_CTerminator *pStrTerminators = _pStrTerminators;
+
+				while (*pStrTerminators)
+				{
+					if ((*pParseStr) == (*pStrTerminators))
+						goto Return;
+
+					++pStrTerminators;
+				}
+			}
+
+			switch (SearchMode)
+			{
+			case 0:
+				{
+					if ((*pParseStr) == '+')
+					{
+						Sign = 1.0;
+					}
+					else if ((*pParseStr) == '-')
+					{
+						Sign = -1.0;
+					}
+					else if ((*pParseStr) == 'e' || (*pParseStr) == 'E')
+					{
+						SearchMode = 3;
+						DestNumber = 1.0;
+					}
+					else if (CharIsNumber((*pParseStr)))
+					{							
+						SearchMode = 1;
+						--pParseStr;
+					}						
+					else if ((*pParseStr) == '.')
+					{							
+						SearchMode = 2;
+					}
+					else if (!CharIsWhiteSpace((*pParseStr)))
+						return _FailValue;
+				}
+				break;
+			case 1:
+				// Search Pre number
+				{
+					if ((*pParseStr) >= '0' && (*pParseStr) <= '9')
+					{
+						DestNumber *= t_CReturn(10.0);
+						DestNumber += (t_CReturn)((*pParseStr) - '0');
+						bFoundNum = true;
+					}
+					else if ((*pParseStr) == '.')
+					{							
+						SearchMode = 2;
+					}
+					else if ((*pParseStr) == 'e' || (*pParseStr) == 'E')
+					{
+						SearchMode = 3;
+					}
+					else if (CharIsWhiteSpace((*pParseStr)))
+					{
+						SearchMode = 5;
+					}
+					else
+					{
+						return _FailValue;
+					}
+				}
+				break;
+			case 2:
+				// Post
+				{
+					if ((*pParseStr) >= '0' && (*pParseStr) <= '9')
+					{
+						DecimalPlace *= t_CReturn(10.0);
+						DestDecimals += ((t_CReturn)((*pParseStr) - '0')) / DecimalPlace;
+						bFoundNum = true;
+					}
+					else if ((*pParseStr) == 'e' || (*pParseStr) == 'E')
+					{							
+						SearchMode = 3;
+					}
+					else if (CharIsWhiteSpace((*pParseStr)))
+					{
+						SearchMode = 5;
+					}
+					else
+					{
+						return _FailValue;
+					}
+				}
+				break;
+			case 3:
+				// Exponent
+				{
+					if ((*pParseStr) >= '0' && (*pParseStr) <= '9')
+					{
+						DestExponent *= t_CReturn(10.0);
+						DestExponent += (t_CReturn)((*pParseStr) - '0');
+						bFoundNum = true;
+					}
+					else if ((*pParseStr) == '-')
+					{							
+						ExponentSign = -1.0;
+					}
+					else if ((*pParseStr) == '+')
+					{							
+						ExponentSign = -1.0;
+					}
+					else if (CharIsWhiteSpace((*pParseStr)))
+					{
+						SearchMode = 5;
+					}
+					else
+					{
+						return _FailValue;
+					}
+				}
+				break;
+
+			case 5:
+				// The end
+				{
+					if (!CharIsWhiteSpace((*pParseStr)))
+						DestNumber = _FailValue;
+				}
+				break;
+			}
+
+			++pParseStr;
+
+		}	
+
+Return:
+
+		if (bFoundNum)
+		{			
+			return (DestNumber + DestDecimals) * M_Pow((t_CReturn)10.0, DestExponent * ExponentSign) * Sign;
+		}
+		else
+		{
+			return _FailValue;
+		}
+	}
+
+	template<class t_CData, class t_CReturn>
+		t_CReturn StrToFloatParse(const t_CData *&_pStr, t_CReturn _FailValue)
+	{
+		return StrToFloatParse(_pStr, _FailValue, (const ch8 *)NULL);
+	}
+
+	template<class t_CData, class t_CReturn, class t_CTerminator>
+		t_CReturn StrToFloat(const t_CData *_pStr, t_CReturn _FailValue, t_CTerminator *_pStrTerminators = (const ch8 *)DNP)
+	{
+		const t_CData *pParse = _pStr;
+		return StrToFloatParse(pParse, _FailValue, _pStrTerminators);
+	}
+
+	template<class t_CData, class t_CReturn>
+		t_CReturn StrToFloat(const t_CData *_pStr, t_CReturn _FailValue)
+	{
+		const t_CData *pParse = _pStr;
+		return StrToFloatParse(pParse, _FailValue, (const ch8 *)NULL);
+	}
+
+
+	template<class t_CData, class t_CReturn, class t_CTerminator>
+		DIdsPInlineS t_CReturn StrToInt(const t_CData *_pStr, t_CReturn _FailValue, t_CTerminator *_pStrTerminators = (const ch8 *)DNP)
+	{
+		const t_CData *pStr = _pStr;
+		return StrToIntParse(pStr, _FailValue, _pStrTerminators);
+	}
+
+	template<class t_CData, class t_CReturn>
+		DIdsPInlineS t_CReturn StrToInt(const t_CData *_pStr, t_CReturn _FailValue)
+	{
+		const t_CData *pStr = _pStr;
+		return StrToIntParse(pStr, _FailValue, (const ch8 *)DNP);
+	}
+
+	template<class t_CData, class t_CReturn, class t_CTerminator>
+		t_CReturn StrToIntParse(const t_CData *&_pStr, t_CReturn _FailValue, t_CTerminator *_pStrTerminators = (const ch8 *)DNP)
+	{
+		t_CReturn DestNumber = 0;
+		const t_CData *pParseStr = _pStr;
+
+		aint SearchMode = 0;
+		t_CReturn Sign = 1;
+
+		aint bFoundNum = false;
+
+		// Parse for characters, and end if str terminator is found
+		while ((*pParseStr))
+		{
+			if (_pStrTerminators)
+
+			{
+				const t_CTerminator *pStrTerminators = _pStrTerminators;
+
+				while (*pStrTerminators)
+				{
+					if ((*pParseStr) == (*pStrTerminators))
+						goto Return;
+
+					++pStrTerminators;
+				}
+			}
+
+			switch (SearchMode)
+			{
+			case 0:
+				{
+					if ((*pParseStr) == '+')
+					{
+						Sign = 1;
+					}
+					else if ((*pParseStr) == '-')
+					{
+						Sign = -1;
+					}
+					else if (CharIsNumber((*pParseStr)))
+					{							
+						if (CharIsAlphabetical((*(pParseStr+1))))
+						{
+							if ((*pParseStr) == '0' && (((*(pParseStr + 1)) == 'x') || ((*(pParseStr + 1)) == 'X')))
+							{
+								// HexString
+								SearchMode = 2;
+
+								++pParseStr;
+							}
+							else if ((*pParseStr) == '0' && (((*(pParseStr + 1)) == 'b') || ((*(pParseStr + 1)) == 'B')))
+							{
+								// Binary
+								SearchMode = 3;
+
+								++pParseStr;
+							}
+							else if ((*pParseStr) == '0' && (((*(pParseStr + 1)) == 'o') || ((*(pParseStr + 1)) == 'O')))
+							{
+								// Octal
+								SearchMode = 4;
+
+								++pParseStr;
+							}
+							else
+							{
+								// Base 10
+								SearchMode = 1;
+
+								continue;
+							}
+						}
+						else
+						{
+							// Base 10
+							SearchMode = 1;
+
+							continue;
+						}
+					}						
+					else if (!CharIsWhiteSpace((*pParseStr)))
+					{
+						//_pStr = pParseStr;
+						return _FailValue;
+					}
+				}
+				break;
+			case 1:
+				// Base 10
+				{
+					while ((*pParseStr) && (*pParseStr) >= '0' && (*pParseStr) <= '9')
+					{
+						DestNumber *= 10;
+						DestNumber += (*pParseStr) - '0';
+						bFoundNum = true;
+						++pParseStr;
+					}
+
+					goto Return;
+				}
+				break;
+			case 2:
+				// Hex
+				{
+					while ((*pParseStr))
+					{
+						if ((*pParseStr) >= '0' && (*pParseStr) <= '9')
+						{
+							aint Num = (*pParseStr) - '0';
+
+							DestNumber *= 16;
+							DestNumber += Num;
+							bFoundNum = true;
+						}
+						else if ((*pParseStr) >= 'a' && (*pParseStr) <= 'f')
+						{
+							aint Num = ((*pParseStr) - 'a') + 10;
+
+							DestNumber *= 16;
+							DestNumber += Num;										  
+							bFoundNum = true;
+						}
+						else if ((*pParseStr) >= 'A' && (*pParseStr) <= 'F')
+						{
+							aint Num = ((*pParseStr) - 'A') + 10;
+
+							DestNumber *= 16;
+							DestNumber += Num;										  
+							bFoundNum = true;
+						}
+						else
+						{
+							goto Return;
+						}
+						++pParseStr;
+					}
+				}
+				break;
+			case 3:
+				// Binary
+				{
+					while ((*pParseStr))
+					{
+						if ((*pParseStr) >= '0' && (*pParseStr) <= '1')
+						{
+							aint Num = (*pParseStr) - '0';
+
+							DestNumber *= 2;
+							DestNumber += Num;
+							bFoundNum = true;
+						}
+						else
+						{
+							goto Return;
+						}
+						++pParseStr;
+					}
+				}
+				break;
+			case 4:
+				// Octal
+				{
+					while ((*pParseStr))
+					{
+						if ((*pParseStr) >= '0' && (*pParseStr) <= '7')
+						{
+							aint Num = (*pParseStr) - '0';
+
+							DestNumber *= 8;
+							DestNumber += Num;
+							bFoundNum = true;
+						}
+						else
+						{
+							goto Return;
+						}
+						++pParseStr;
+					}
+				}
+				break;
+			case 5:
+				// The end
+				{
+
+					if (!CharIsWhiteSpace((*pParseStr)))
+					{
+						_pStr = pParseStr;
+						return _FailValue;
+					}
+				}
+				break;
+			}
+
+			if (*pParseStr)
+				++pParseStr;
+
+		}	
+
+Return:
+
+		_pStr = pParseStr;
+
+		if (bFoundNum)			
+			return DestNumber * Sign;
+		else
+			return _FailValue;
+	}
+
+	template<class t_CData, class t_CReturn>
+		t_CReturn StrToIntParse(const t_CData *&_pStr, t_CReturn _FailValue)
+	{
+		return StrToIntParse(_pStr, _FailValue, (const ch8 *)DNP);
+	}
+
+	template<class t_CData, class t_CReturn>
+		DIdsPInlineS t_CReturn StrToIntBase10(const t_CData *_pStr, t_CReturn _FailValue)
+	{
+		const t_CData *pStr = _pStr;
+		return StrToIntBase10Parse(pStr, _FailValue);
+	}
+
+
+	template<class t_CData, class t_CReturn>
+		t_CReturn StrToIntBase10Parse(const t_CData *&_pStr, t_CReturn _FailValue)
+	{
+		t_CReturn DestNumber = 0;
+		const t_CData *pParseStr = _pStr;
+
+		t_CReturn Sign = 1;
+
+		aint bFoundNum = false;
+
+		if ((*pParseStr) == '-')
+		{
+			++pParseStr;
+			Sign = -1;
+		}
+
+		// Parse for characters, and end if str terminator is found
+		while ((*pParseStr))
+		{
+			if ((*pParseStr) < '0' || (*pParseStr) > '9')
+				break;
+
+			DestNumber *= 10;
+			DestNumber += (*pParseStr) - '0';
+			bFoundNum = true;
+			++pParseStr;
+		}	
+
+		_pStr = pParseStr;
+
+		if (bFoundNum)			
+			return DestNumber * Sign;
+		else
+			return _FailValue;
+	}
+
+
+	template<class t_CData, class t_CReturn>
+		DIdsPInlineL t_CReturn StrToIntBase10NoSign(const t_CData *_pStr, t_CReturn _FailValue)
+	{
+		t_CReturn DestNumber = 0;
+		//	const t_CData *pParseStr = _pStr;
+
+		// Parse for characters, and end if str terminator is found
+		while ((*_pStr) >= '0' && (*_pStr) <= '9')
+		{
+			DestNumber *= 10;
+			DestNumber += (*(_pStr++)) - '0';
+		}	
+
+		//	_pStr = pParseStr;
+
+		return DestNumber;
+	}
+
+
+	template<class t_CData, class t_CReturn>
+		DIdsPInlineL t_CReturn StrToIntBase10ParseNoSign(const t_CData *&_pStr, t_CReturn _FailValue)
+	{
+		t_CReturn DestNumber = 0;
+		const t_CData *pParseStr = _pStr;
+
+		// Parse for characters, and end if str terminator is found
+		while ((*pParseStr) >= '0' && (*pParseStr) <= '9')
+		{
+			DestNumber *= 10;
+			DestNumber += (*(pParseStr++)) - '0';
+		}	
+
+		_pStr = pParseStr;
+
+		return DestNumber;
+	}
+}
+
 template <typename t_CType>
 void StrReplaceChar(t_CType *_pStr, t_CType _Find, t_CType _Replace)
 {
@@ -136,6 +730,9 @@ public:
 	static void wcscpy(wchar *_dest, const wchar *_src);
 //	static int swscanf( const wchar *_src, const wchar *_format, ... );
 	static mint vswprintf(wchar *_pbuffer, int _BufSize, const wchar *_pStr, va_list _arg);
+	static void HexStr(char* _pDest, const void* _pMem, int _nBytes);
+	static void HexStr(wchar* _pDest, const void* _pMem, int _nBytes);
+
 
 	/*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
 		Function:			String formating function with range-checking.
@@ -172,14 +769,14 @@ public:
 	virtual void Clear() pure;
 
 	static int Val_int(const char* _p, int& _Value);	// Returns number of characters processed.
-	static int Val_fp8(const char* _p, fp8& _Value);	// Returns number of characters processed.
+	static int Val_fp64(const char* _p, fp64& _Value);	// Returns number of characters processed.
 	static int Val_int(const wchar* _p, int& _Value);	// Returns number of characters processed.
-	static int Val_fp8(const wchar* _p, fp8& _Value);	// Returns number of characters processed.
+	static int Val_fp64(const wchar* _p, fp64& _Value);	// Returns number of characters processed.
 	static int Val_int(const void* _p, int& _Value, int _Fmt);	// Returns number of characters processed.
-	static int Val_fp8(const void* _p, fp8& _Value, int _Fmt);	// Returns number of characters processed.
+	static int Val_fp64(const void* _p, fp64& _Value, int _Fmt);	// Returns number of characters processed.
 
 	virtual int Val_int() const;
-	virtual fp8 Val_fp8() const;
+	virtual fp64 Val_fp64() const;
 
 	virtual int Len() const pure;
 	virtual void Capture(const char* _pStr) pure;
@@ -236,9 +833,9 @@ public:
 	bool IsNumeric();
 
 	int GetIntSep(const char* _pSeparator);				// Single sep.
-	fp8 Getfp8Sep(const char* _pSeparator);
+	fp64 Getfp64Sep(const char* _pSeparator);
 	int GetIntMSep(const char* _pSeparators);			// Multi sep.
-	fp8 Getfp8MSep(const char* _pSeparators);
+	fp64 Getfp64MSep(const char* _pSeparators);
 
 	static bool IsWhiteSpace(char _ch);
 	static bool IsWhiteSpace(wchar _ch);
@@ -251,7 +848,7 @@ public:
 	static mint StrLen(const char*);
 	static mint StrLen(const wchar*);
 
-	static uint32 StrHash(const char*);
+	static uint32 StrHash(const char*, uint32 _BaseHash = 0);
 	uint32 StrHash() const;
 
 	static int TranslateInt(const char* _pVal, const char** _pStrings);
@@ -449,9 +1046,9 @@ public:
 	\*____________________________________________________________________*/
 	TFStr(char ch, int n)
 	{
-		n = Min(GetMax()-1, n);
-		memset(GetStr(), ch, n);
-		GetStr()[n] = 0;
+		n = Min(TMaxLen-1, n);
+		memset(m_Str, ch, n);
+		m_Str[n] = 0;
 	}
 
 
@@ -478,7 +1075,20 @@ public:
 	\*____________________________________________________________________*/
 	TFStr(const TFStr& _s)
 	{
-		Capture(_s.GetStr(), _s.Len());
+		strncpy(m_Str, _s.m_Str, TMaxLen);
+		m_Str[TMaxLen-1] = 0;
+	}
+
+	TFStr& operator= (const TFStr& _s)
+	{
+		strncpy(m_Str, _s.m_Str, TMaxLen);
+		m_Str[TMaxLen-1] = 0;
+		return *this;
+	}
+
+	M_FORCEINLINE bool IsEmpty() const
+	{
+		return (m_Str[0] == 0);
 	}
 
 //	friend TFStr operator+ (const TFStr& _s1, const TFStr& _s2);
@@ -696,7 +1306,7 @@ public:
 		}
 	}
 
-	static TFStr GetFilteredString(fp8 _f, int _iDecimals = -1)
+	static TFStr GetFilteredString(fp64 _f, int _iDecimals = -1)
 	{
 		TFStr s;
 		switch(_iDecimals)
@@ -870,6 +1480,16 @@ private:
 		virtual const char* GetStr() const;					// Returns NULL on empty strings
 		virtual const char* Str() const;					// Always return a valid string.
 
+		const char* GetString() const
+		{
+			return GetStr();
+		}
+
+		const wchar* GetStringW() const
+		{
+			return GetStrW();
+		}
+
 		virtual operator wchar*();							// Returns NULL on empty strings
 		virtual operator const wchar*() const;				// Returns NULL on empty strings
 		virtual wchar* GetStrW();							// Returns NULL on empty strings
@@ -934,12 +1554,28 @@ private:
 		CStr(const CStrBase&);
 		CStr(const CStr&);
 		CStr(CStrData*);									// Advanced usage. You'd better keep an eye on the refcounts and smartpointers.
-		CStr& operator=(const char *);
-		CStr& operator=(const wchar *);
+		CStr& operator=(const char *s)
+		{
+			MAUTOSTRIP(CStr_operator_assign, *this);
+			Capture(s);
+			return *this;
+		}
+		CStr& operator=(const wchar *s)
+		{
+			MAUTOSTRIP(CStr_operator_assign_2, *this);
+			Capture(s);
+			return *this;
+		}
 		CStr& operator=(const CStrBase&);
 		CStr& operator=(const CStr&);
 		~CStr();
-		
+
+		M_FORCEINLINE bool IsEmpty() const
+		{
+			const CStrData* pData = m_spD.p;
+			return (!pData || pData->f_bIsEmpty());
+		}
+
 		CStr& operator+=(const CStr&);
 		friend CStr operator+(const CStr& _s1, const CStr& _s2);
 
@@ -955,17 +1591,36 @@ private:
 			}
 		}
 		CStr Copy(int start, int len) const;
-		CStr CopyFrom(int start) const;
 		CStr Left(int len) const;
 		CStr Right(int len) const;
 		CStr Del(int start, int len) const;
 		CStr Insert(int pos, const CStr &x) const;
+		CStr CopyFrom(int start) const
+		{
+			MAUTOSTRIP(CStr_CopyFrom, CStr());
+			return Copy(start, 100000000);
+		}
 		
-		CStr SubStr(int pos, int len) const;
-		CStr LeftTo(int pos) const; // Inclusive
-		CStr RightFrom(int pos) const; // Inclusive
-		CStr DelTo(int pos) const; // Inclusive
-		CStr DelFrom(int pos) const; // Inclusive
+		CStr SubStr(int pos, int len) const
+		{
+			return Copy(pos, len);
+		}
+		CStr LeftTo(int pos) const // Inclusive
+		{
+			return Left(pos + 1);
+		}
+		CStr RightFrom(int pos) const // Inclusive
+		{
+			return Right(Len() - pos);
+		}
+		CStr DelTo(int pos) const // Inclusive
+		{
+			return Del(0, pos + 1);
+		}
+		CStr DelFrom(int pos) const // Inclusive
+		{
+			return Del(pos, Len() - pos);
+		}
 
 		CStr Separate(const char* _pSeparator);
 		
@@ -991,7 +1646,7 @@ private:
 		wchar *GetBufferW(int _Len);
 
 		
-		static CStr GetFilteredString(fp8 _f, int _iDecimals = -1);
+		static CStr GetFilteredString(fp64 _f, int _iDecimals = -1);
 
 		void ReadFromFile( CStr _Filename );
 		void WriteToFile( CStr _Filename ) const;

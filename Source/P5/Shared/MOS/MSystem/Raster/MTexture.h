@@ -93,32 +93,33 @@ enum
 	CTC_PROPERTIES_VERSION = 0x0103,
 
 	// Flags
-	CTC_TEXTUREFLAGS_NOMIPMAP = DBit(0),
-	CTC_TEXTUREFLAGS_NOPICMIP = DBit(1),
-	CTC_TEXTUREFLAGS_CLAMP_U = DBit(2),
-	CTC_TEXTUREFLAGS_CLAMP_V = DBit(3),
-	CTC_TEXTUREFLAGS_HIGHQUALITY = DBit(4),
-	CTC_TEXTUREFLAGS_NOCOMPRESS = DBit(5),
-	CTC_TEXTUREFLAGS_RENDER = DBit(6),
-	CTC_TEXTUREFLAGS_CUBEMAP = DBit(7),			// This texture is used on all 6 faces of the cube
+	CTC_TEXTUREFLAGS_NOMIPMAP = M_Bit(0),
+	CTC_TEXTUREFLAGS_NOPICMIP = M_Bit(1),
+	CTC_TEXTUREFLAGS_CLAMP_U = M_Bit(2),
+	CTC_TEXTUREFLAGS_CLAMP_V = M_Bit(3),
+	CTC_TEXTUREFLAGS_HIGHQUALITY = M_Bit(4),
+	CTC_TEXTUREFLAGS_NOCOMPRESS = M_Bit(5),
+	CTC_TEXTUREFLAGS_RENDER = M_Bit(6),
+	CTC_TEXTUREFLAGS_CUBEMAP = M_Bit(7),			// This texture is used on all 6 faces of the cube
 
-	CTC_TEXTUREFLAGS_CUBEMAPCHAIN = DBit(8),	// This and the 5 following textures make up a cubemap
-	CTC_TEXTUREFLAGS_PROCEDURAL = DBit(9),		// 
-	CTC_TEXTUREFLAGS_NORMALMAP = DBit(10),
-	CTC_TEXTUREFLAGS_BACKBUFFER = DBit(11),
-	CTC_TEXTUREFLAGS_BACKBUFFERDISCARDOLD = DBit(12),
-	CTC_TEXTUREFLAGS_PALETTE = DBit(13),
-	CTC_TEXTUREFLAGS_DISCARDABLE = DBit(14),
-	CTC_TEXTUREFLAGS_NOSHARPEN = DBit(15),
-	CTC_TEXTUREFLAGS_BORDERCOLOR_U = DBit(16),
-	CTC_TEXTUREFLAGS_BORDERCOLOR_V = DBit(17),
+	CTC_TEXTUREFLAGS_CUBEMAPCHAIN = M_Bit(8),	// This and the 5 following textures make up a cubemap
+	CTC_TEXTUREFLAGS_PROCEDURAL = M_Bit(9),		// 
+	CTC_TEXTUREFLAGS_NORMALMAP = M_Bit(10),
+	CTC_TEXTUREFLAGS_BACKBUFFER = M_Bit(11),
+	CTC_TEXTUREFLAGS_BACKBUFFERDISCARDOLD = M_Bit(12),
+	CTC_TEXTUREFLAGS_PALETTE = M_Bit(13),
+	CTC_TEXTUREFLAGS_DISCARDABLE = M_Bit(14),
+	CTC_TEXTUREFLAGS_NOSHARPEN = M_Bit(15),
+	CTC_TEXTUREFLAGS_BORDERCOLOR_U = M_Bit(16),
+	CTC_TEXTUREFLAGS_BORDERCOLOR_V = M_Bit(17),
 
-	CTC_TEXTUREFLAGS_DOUBLEBUFFER = DBit(18),
-	CTC_TEXTUREFLAGS_RENDEROLDBUFFER = DBit(19),
-	CTC_TEXTUREFLAGS_CONTINUETILING = DBit(20),
-	CTC_TEXTUREFLAGS_RENDERDISABLEZBUFFER = DBit(21),
-	CTC_TEXTUREFLAGS_RENDERUSEBACKBUFFERFORMAT = DBit(22),
-	CTC_TEXTUREFLAGS_CLEARWHENCONTINUETILING = DBit(23),
+	CTC_TEXTUREFLAGS_DOUBLEBUFFER = M_Bit(18),
+	CTC_TEXTUREFLAGS_RENDEROLDBUFFER = M_Bit(19),
+	CTC_TEXTUREFLAGS_CONTINUETILING = M_Bit(20),
+	CTC_TEXTUREFLAGS_RENDERDISABLEZBUFFER = M_Bit(21),
+	CTC_TEXTUREFLAGS_RENDERUSEBACKBUFFERFORMAT = M_Bit(22),
+	CTC_TEXTUREFLAGS_CLEARWHENCONTINUETILING = M_Bit(23),
+	CTC_TEXTUREFLAGS_RENDERTARGET = M_Bit(24),
 
 	// Magnification filter
 	CTC_MAGFILTER_DEFAULT = 0,
@@ -229,7 +230,7 @@ public:
 \*************************************************************************************************/
 enum 
 {
-	ETCBuildFlags_NewTexture = DBit(0),
+	ETCBuildFlags_NewTexture = M_Bit(0),
 };
 class SYSTEMDLLEXPORT CTextureContainer : public CReferenceCount
 {
@@ -263,8 +264,8 @@ public:
 	virtual int GetTextureID(int _iLocal) pure;
 	virtual void SetTextureParam(int _iLocal, int _Param, int _Value);
 	virtual int GetTextureParam(int _iLocal, int _Param);
-	virtual void SetTextureParamfv(int _iLocal, int _Param, const fp4* _pValues);
-	virtual void GetTextureParamfv(int _iLocal, int _Param, fp4* _pRetValues);
+	virtual void SetTextureParamfv(int _iLocal, int _Param, const fp32* _pValues);
+	virtual void GetTextureParamfv(int _iLocal, int _Param, fp32* _pRetValues);
 	virtual int GetTextureDesc(int _iLocal, CImage* _pTargetImg, int& _Ret_nMipmaps) pure;
 	virtual void GetTextureProperties(int _iLocal, CTC_TextureProperties&);
 	virtual int GetFirstMipmapLevel(int _iLocal) { return 0; }
@@ -278,12 +279,36 @@ public:
 	virtual void BuildInto(int _iLocal, CImage** _ppImg, int _nMipmaps, int _TextureVersion, int _ConvertType = IMAGE_CONVERT_RGB, int _iStartMip = 0, uint32 _BuildFlags = 0) pure;
 	virtual void BuildInto(int _iLocal, class CRenderContext* _pRC) {};
 
+	virtual void OpenPrecache() {};
+	virtual void ClosePrecache() {};
+
 	M_INLINE MRTC_CriticalSection& GetLock() { return m_Lock; }
 
 	friend class CTextureContext;
 };
 
 typedef TPtr<CTextureContainer> spCTextureContainer;
+
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| CTextureCache
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+class SYSTEMDLLEXPORT CTextureCache
+{
+public:
+	uint64 m_CheckSum;
+	TArray<spCTextureContainer> m_lspTC;
+	CTextureCache()
+	{
+		m_lspTC.SetGrow(1024);
+	}
+
+	uint64 ReadCheckSum(const char* _pFilename);
+	bool ReadCache(const char* _pFilename);
+	void WriteCache(const char* _pFilename);
+};
 
 
 /*************************************************************************************************\
@@ -298,12 +323,12 @@ class SYSTEMDLLEXPORT CTextureContext : public CReferenceCount
 	MRTC_DECLARE;
 
 protected:
-	TList_Vector<CTextureContainer*> m_lpTC;
-	TList_Vector<CTC_TxtIDInfo> m_lTxtIDInfo;
+	TArray<CTextureContainer*> m_lpTC;
+	TArray<CTC_TxtIDInfo> m_lTxtIDInfo;
 	int m_IDCapacity;
 	CIDHeap m_TIHeap;
 
-	TList_Vector<CRenderContext*> m_lpRC;
+	TArray<CRenderContext*> m_lpRC;
 
 	int AllocRCID(int _iRC, int _tnr);
 	void FreeRCID(int _iRC, int _ID);
@@ -339,8 +364,8 @@ public:
 	virtual int GetTextureFlags(int _ID);
 	virtual void SetTextureParam(int _ID, int _Param, int _Value);
 	virtual int GetTextureParam(int _ID, int _Param);
-	virtual void SetTextureParamfv(int _ID, int _Param, const fp4* _pValues);
-	virtual void GetTextureParamfv(int _ID, int _Param, fp4* _pRetValues);
+	virtual void SetTextureParamfv(int _ID, int _Param, const fp32* _pValues);
+	virtual void GetTextureParamfv(int _ID, int _Param, fp32* _pRetValues);
 	virtual int GetTextureDesc(int _ID, CImage* _pTextureDesc, int& _Ret_nMipmaps);
 	virtual void GetTextureProperties(int _ID, CTC_TextureProperties&);
 	virtual int GetTextureID(const char* _pTxtName);
@@ -395,7 +420,7 @@ public:
 			const char *pSecondStr = pTCSecond->GetContainerSortName();
 			if (pFirstStr != pSecondStr)
 			{
-				int iCmp = CStrBase::stricmp(pFirstStr, pSecondStr);
+				int iCmp = CStrBase::CompareNoCase(pFirstStr, pSecondStr);
 				if (iCmp != 0)
 					return iCmp;
 			}

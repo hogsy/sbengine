@@ -88,6 +88,11 @@ public:
 
 	CCFile();
 	~CCFile();
+
+	CStream *GetStream()
+	{
+		return m_pStream;
+	}
 	
 	void Open(TArray<uint8> _lStream, int _Mode, int _MinGrow = 32768);
 	void Open(void * _pStream, int _CurrentLen, int _MaxLen, int _Mode);
@@ -95,7 +100,7 @@ public:
 	void Open(CStr _Name, int _Mode, ECompressTypes _eType = NO_COMPRESSION, ESettings _eSet = NORMAL_COMPRESSION);
 //	void OpenExt(CStream* _pStream, int _Mode, bool _bOwnStream = false, float _Priority = 0, int _NumCacheLines = -1, int _CacheLineSize = -1);
 	void OpenExt(CStr _Name, int _Mode, ECompressTypes _eType = NO_COMPRESSION, ESettings _eSet = NORMAL_COMPRESSION, float _Priority = 0, aint _NumCacheLines = -1, aint _CacheLineSize = -1);
-	void SetPriority(fp4 _Priority);
+	void SetPriority(fp32 _Priority);
 	void Close();
 	CStr GetFileName();
 	bint IsOpen();
@@ -185,8 +190,8 @@ public:
 	MACRO_CFILE_READ_LE(uint32, ReadLE, ByteSwap_uint32, uint32);
 	MACRO_CFILE_READ_LE(int64, ReadLE, ByteSwap_uint64, uint64);
 	MACRO_CFILE_READ_LE(uint64, ReadLE, ByteSwap_uint64, uint64);
-	MACRO_CFILE_READ_LE(fp4, ReadLE, ByteSwap_uint32, uint32);
-	MACRO_CFILE_READ_LE(fp8, ReadLE, ByteSwap_uint64, uint64);
+	MACRO_CFILE_READ_LE(fp32, ReadLE, ByteSwap_uint32, uint32);
+	MACRO_CFILE_READ_LE(fp64, ReadLE, ByteSwap_uint64, uint64);
 #ifdef	M_WCHARDISTINCTTYPE
 	MACRO_CFILE_READ_LE(wchar, ReadLE, Swap_wchar, wchar);
 #endif
@@ -266,16 +271,16 @@ public:
 	MACRO_CFILE_WRITE_LE(uint32, WriteLE, ByteSwap_uint32, uint32);
 	MACRO_CFILE_WRITE_LE(int64, WriteLE, ByteSwap_uint64, uint64);
 	MACRO_CFILE_WRITE_LE(uint64, WriteLE, ByteSwap_uint64, uint64);
-	MACRO_CFILE_WRITE_LE(fp4, WriteLE, ByteSwap_uint32, uint32);
-	MACRO_CFILE_WRITE_LE(fp8, WriteLE, ByteSwap_uint64, uint64);
+	MACRO_CFILE_WRITE_LE(fp32, WriteLE, ByteSwap_uint32, uint32);
+	MACRO_CFILE_WRITE_LE(fp64, WriteLE, ByteSwap_uint64, uint64);
 #ifdef	M_WCHARDISTINCTTYPE
 	MACRO_CFILE_WRITE_LE(wchar, WriteLE, Swap_wchar, wchar);
 #endif
 
 	// --------------------------------
 	// --------------------------------
-	void ReadLE(fp4* _pData, int _Count);
-	void ReadLE(fp8* _pData, int _Count);
+	void ReadLE(fp32* _pData, int _Count);
+	void ReadLE(fp64* _pData, int _Count);
 	void ReadLE(int32* _pData, int _Count);
 	void ReadLE(uint32* _pData, int _Count);
 	void ReadLE(int16* _pData, int _Count);
@@ -286,8 +291,8 @@ public:
 	void ReadLE(wchar* _pData, int _Count);
 #endif
 
-	void WriteLE(const fp4* _pData, int _Count);
-	void WriteLE(const fp8* _pData, int _Count);
+	void WriteLE(const fp32* _pData, int _Count);
+	void WriteLE(const fp64* _pData, int _Count);
 	void WriteLE(const int32* _pData, int _Count);
 	void WriteLE(const uint32* _pData, int _Count);
 	void WriteLE(const int16* _pData, int _Count);
@@ -351,8 +356,8 @@ public:
 	MACRO_CFILE_READ_BE(uint32, ReadBE, ByteSwap_uint32, uint32);
 	MACRO_CFILE_READ_BE(int64, ReadBE, ByteSwap_int64, int64);
 	MACRO_CFILE_READ_BE(uint64, ReadBE, ByteSwap_uint64, uint64);
-	MACRO_CFILE_READ_BE(fp4, ReadBE, ByteSwap_int32, int32);
-	MACRO_CFILE_READ_BE(fp8, ReadBE, ByteSwap_int64, int64);
+	MACRO_CFILE_READ_BE(fp32, ReadBE, ByteSwap_int32, int32);
+	MACRO_CFILE_READ_BE(fp64, ReadBE, ByteSwap_int64, int64);
 #ifdef	M_WCHARDISTINCTTYPE
 	MACRO_CFILE_READ_BE(wchar, ReadBE, Swap_wchar, wchar);
 #endif
@@ -437,8 +442,8 @@ public:
 	MACRO_CFILE_WRITE_BE(uint32, WriteBE, ByteSwap_uint32, uint32);
 	MACRO_CFILE_WRITE_BE(int64, WriteBE, ByteSwap_int64, int64);
 	MACRO_CFILE_WRITE_BE(uint64, WriteBE, ByteSwap_uint64, uint64);
-	MACRO_CFILE_WRITE_BE(fp4, WriteBE, ByteSwap_int32, int32);
-	MACRO_CFILE_WRITE_BE(fp8, WriteBE, ByteSwap_int64, int64);
+	MACRO_CFILE_WRITE_BE(fp32, WriteBE, ByteSwap_int32, int32);
+	MACRO_CFILE_WRITE_BE(fp64, WriteBE, ByteSwap_int64, int64);
 #ifdef	M_WCHARDISTINCTTYPE
 	MACRO_CFILE_WRITE_BE(wchar, WriteBE, Swap_wchar, wchar);
 #endif

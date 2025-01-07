@@ -124,8 +124,7 @@ void SDA_DefraggableFreeLink::Remove()
 //			TheClass->m_pMemoryManager->m_SizesPool.Delete(TheClass);
 			CDA_MemoryManager_SizeClass *TheClass = (CDA_MemoryManager_SizeClass *)((mint)m_pPrevFree - M_GETOFFSET(CDA_MemoryManager_SizeClass, m_FirstFreeBlock));
 
-			TheClass->~CDA_MemoryManager_SizeClass();
-			TheClass->m_pMemoryManager->m_SizesPool.CDA_Pool_Static::Delete(TheClass);
+			TheClass->m_pMemoryManager->m_SizesPool.Delete(TheClass);
 		}
 	}
 }
@@ -367,9 +366,10 @@ static mint CheckTreeObjects(CDA_MemoryManager_SizeClass *Object)
 
 static void ValidateTree(CDA_MemoryManager *Manager)
 {
-	if (!CheckTreeObjects(Manager->m_SizesFreeTree.GetRoot()))
+	if (!CheckTreeObjects(Manager->m_SizesFreeTreeNormal.GetRoot()))
 		M_BREAKPOINT;
-	
+	if (!CheckTreeObjects(Manager->m_SizesFreeTreeFragments.GetRoot()))
+		M_BREAKPOINT;
 }
 
 
@@ -440,22 +440,26 @@ CDA_MemoryManager_SizeClass::~CDA_MemoryManager_SizeClass()
 //		M_TRACEALWAYS("~CDA_MemoryManager_SizeClass() 0x%08x\n", this);
 
 	if (m_TreeLink.IsInTree())
-		m_pMemoryManager->m_SizesFreeTree.f_RemoveLowStack(this, (void*)NULL);
+	{
+		CDA_MemoryManager_SizeClass *pSizeClass = m_pMemoryManager->m_SizesFreeTreeNormal.FindEqual(m_Size);
+		if (pSizeClass == this)
+			m_pMemoryManager->m_SizesFreeTreeNormal.f_RemoveLowStack(this, (void*)NULL);
+		else
+		{
+			pSizeClass = m_pMemoryManager->m_SizesFreeTreeFragments.FindEqual(m_Size);
+			if (pSizeClass == this)
+				m_pMemoryManager->m_SizesFreeTreeFragments.f_RemoveLowStack(this, (void*)NULL);
+			else
+				M_BREAKPOINT; // Error!!!
+		}
+
+	}
 
 	if (m_nContainedDefraggable)
 	{
 		M_TRACE("Leaked %d blocks of size %d\n", m_nContainedDefraggable, m_Size);	
 	}
 
-//	while (m_pDA_Linkable_First)
-//		deleteP(m_pDA_Linkable_First, &LinkablePool);
-
-//	while (DA__m_pFirstTreeable)
-//	{
-//		CDA_AVLTree *Tree = DA__m_pFirstTreeable->m_pTree;
-//
-//		Tree->Remove(&Tree->m_pRoot, Tree->GetValue(DA__m_pFirstTreeable->m_pTreeable));
-//	}
 
 #ifdef DA__HEAPVALIDATE
 	if (m_pMemoryManager->m_bValidateHeap)
@@ -465,18 +469,36 @@ CDA_MemoryManager_SizeClass::~CDA_MemoryManager_SizeClass()
 
 
 
-CDA_MemoryManager_SizeClass *CDA_MemoryManager::GetFreeSizeClass(mint _Size)
+CDA_MemoryManager_SizeClass *CDA_MemoryManager::GetFreeSizeClass(mint _Size, bint _bFragment)
 {
-	CDA_MemoryManager_SizeClass *SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTree.FindEqual(_Size);
-	if (!SizeClass)
+	CDA_MemoryManager_SizeClass *SizeClass;
+	if (_bFragment)
 	{
-		SizeClass = m_SizesPool.New(this);
-		SizeClass->m_Size = _Size;
-		m_SizesFreeTree.f_InsertLowStack(SizeClass, (void*)NULL);
-#ifdef DA__HEAPVALIDATE
-		if (m_bValidateHeap)
-			ValidateHeap();
-#endif
+		SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTreeFragments.FindEqual(_Size);
+		if (!SizeClass)
+		{
+			SizeClass = m_SizesPool.New(this);
+			SizeClass->m_Size = _Size;
+			m_SizesFreeTreeFragments.f_InsertLowStack(SizeClass, (void*)NULL);
+	#ifdef DA__HEAPVALIDATE
+			if (m_bValidateHeap)
+				ValidateHeap();
+	#endif
+		}
+	}
+	else
+	{
+		SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTreeNormal.FindEqual(_Size);
+		if (!SizeClass)
+		{
+			SizeClass = m_SizesPool.New(this);
+			SizeClass->m_Size = _Size;
+			m_SizesFreeTreeNormal.f_InsertLowStack(SizeClass, (void*)NULL);
+	#ifdef DA__HEAPVALIDATE
+			if (m_bValidateHeap)
+				ValidateHeap();
+	#endif
+		}
 	}
 
 	return SizeClass;
@@ -514,7 +536,7 @@ CDA_MemoryManager_HeapChunk::CDA_MemoryManager_HeapChunk(CDA_MemoryManager *_pMe
 	m_pFirstBlock->SetFree();
 	m_pFirstBlock->ClearDebug();
 
-	CDA_MemoryManager_SizeClass *SizeClass = m_pMemmanager->GetFreeSizeClass(_Size);
+	CDA_MemoryManager_SizeClass *SizeClass = m_pMemmanager->GetFreeSizeClass(_Size, false);
 
 	((SDA_DefraggableFree *)m_pFirstBlock)->m_FreeLink.AddFirst(SizeClass);
 
@@ -559,6 +581,8 @@ void CDA_MemoryManager::PrivateInit()
 	
 	m_CommitGranularity = 0;
 
+	m_LargeBlockThreshold = 512 * 1024;
+
 
 	m_AllocatedMem = 0;
 	m_AlignAlloc = MDA_ALIGNMENT;
@@ -586,32 +610,13 @@ void CDA_MemoryManager::PrivateInit()
 
 	m_DynamicGrowSize = 0x100000; // 1 meg
 
-#ifdef PLATFORM_CONSOLE
-	m_SizesPool.Init(sizeof(CDA_MemoryManager_SizeClass), 4096);
-	m_ChunksPool.Init(sizeof(CDA_MemoryManager_HeapChunk), 4096);
-#ifdef M_SUPPORTMEMORYDEBUG
-	m_DebugStringsPool.Init(sizeof(CDA_MemoryManager_DebugAllocFile), 4096);
-	m_MemTracking_TrackedPool.Init(sizeof(NMemMgr::CMemTrack_Class), 4096);
-	m_MemTracking_TrackedChildPool.Init(sizeof(NMemMgr::CMemTrack_Child), 4096);
-#endif
-#else
-	m_SizesPool.Init(sizeof(CDA_MemoryManager_SizeClass), 65536);
-	m_ChunksPool.Init(sizeof(CDA_MemoryManager_HeapChunk), 65536);
-#ifdef M_SUPPORTMEMORYDEBUG
-	m_DebugStringsPool.Init(sizeof(CDA_MemoryManager_DebugAllocFile), 65536);
-	m_MemTracking_TrackedPool.Init(sizeof(NMemMgr::CMemTrack_Class), 65536);
-	m_MemTracking_TrackedChildPool.Init(sizeof(NMemMgr::CMemTrack_Child), 65536);
-#endif
-#endif
-
-#ifdef M_SUPPORTMEMORYDEBUG
-	m_bDebugHashInit = false;
-#endif
 
 #ifdef MRTC_DEFAULTMAINHEAP
 	m_pDefaultManager = NULL;
 	m_bUseDefaultMainHeap = false;
 #endif
+
+	gf_RDSendRegisterHeap((mint)this, "Main", 0, 0);
 
 }
 
@@ -670,9 +675,14 @@ void CDA_MemoryManager::Destroy()
 #endif
 
 	{
-		while (m_SizesFreeTree.GetRoot())
+		while (m_SizesFreeTreeFragments.GetRoot())
 		{
-			CDA_MemoryManager_SizeClass *pRoot = m_SizesFreeTree.GetRoot();
+			CDA_MemoryManager_SizeClass *pRoot = m_SizesFreeTreeFragments.GetRoot();
+			m_SizesPool.Delete(pRoot);
+		}
+		while (m_SizesFreeTreeNormal.GetRoot())
+		{
+			CDA_MemoryManager_SizeClass *pRoot = m_SizesFreeTreeNormal.GetRoot();
 			m_SizesPool.Delete(pRoot);
 		}
 	}
@@ -687,11 +697,12 @@ void CDA_MemoryManager::Destroy()
 
 #ifdef M_SUPPORTMEMORYDEBUG
 	{
-		SICDA_MemoryManager_DebugAllocFile Iterator = m_DebugStings;
-		while (Iterator)
+		CDA_MemoryManager_DebugAllocFile *pDebugAlloc = m_DebugStringTree.GetRoot();
+		while (pDebugAlloc)
 		{
-			m_DebugStringsPool.Delete(Iterator);
-			Iterator = m_DebugStings;
+			m_DebugStringTree.f_Remove(pDebugAlloc);
+			m_DebugStringsPool.Delete(pDebugAlloc);
+			pDebugAlloc = m_DebugStringTree.GetRoot();
 		}
 	}
 #endif
@@ -717,13 +728,18 @@ void CDA_MemoryManager::InitStatic(mint _HeapSize)
 		}
 	}
 
+	mint Min = (mint)m_ChunksTree.FindSmallest()->m_pHeap;
+	mint Max = (mint)m_ChunksTree.FindLargest()->m_pHeapEnd;
+
+	gf_RDSendRegisterHeap((mint)this, "Main", Min, Max);
+
 	m_bDynamicSize = false;
 
 }
 
 void *CDA_MemoryManager::AllocHeap(mint Size, bool _bCommit)
 {
-	return MRTC_SystemInfo::OS_Alloc(Size, _bCommit);
+	return MRTC_SystemInfo::OS_Alloc(Size, 4096);
 }
 
 void CDA_MemoryManager::FreeHeap(void *Block)
@@ -857,7 +873,7 @@ EDA_MemoryManager_DefragErrors CDA_MemoryManager::Defrag(bool _bFreeBottom)
 								NewBlock->m_pNextBlock = NextFromMove;
 								NewBlock->m_pPrevBlockSet(&FreeBlock->m_BlockLink);
 								
-								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize);				
+								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize, false);
 								
 								FreeBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
 								#ifdef DA__HEAPVALIDATE
@@ -894,7 +910,7 @@ EDA_MemoryManager_DefragErrors CDA_MemoryManager::Defrag(bool _bFreeBottom)
 								NewBlock->m_pNextBlock = NextFromMove;
 								NewBlock->m_pPrevBlockSet(&FreeBlock->m_BlockLink);
 								
-								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize);				
+								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize, false);
 								
 								FreeBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
 							#ifdef DA__HEAPVALIDATE
@@ -1052,7 +1068,7 @@ EDA_MemoryManager_DefragErrors CDA_MemoryManager::Defrag(bool _bFreeBottom)
 								Current->m_pNextBlock = &FreeBlock->m_BlockLink;
 								Current->m_pPrevBlockSet(PrevFromMove);
 								
-								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize);				
+								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize, false);
 								
 								FreeBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
 								#ifdef DA__HEAPVALIDATE
@@ -1088,7 +1104,7 @@ EDA_MemoryManager_DefragErrors CDA_MemoryManager::Defrag(bool _bFreeBottom)
 								Current->m_pNextBlock = &FreeBlock->m_BlockLink;
 								Current->m_pPrevBlockSet(PrevFromMove);
 								
-								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize);				
+								CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(FreeBlockSize, false);
 								
 								FreeBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
 							#ifdef DA__HEAPVALIDATE
@@ -1278,7 +1294,6 @@ void CDA_MemoryManager::DeCommitMemory(void *_pMemStart, void *_pMemEnd)
 	}
 }
 
-
 void *CDA_MemoryManager::AllocImp(mint Size, mint _Alignment)
 {
 #ifdef MRTC_DEFAULTMAINHEAP
@@ -1325,6 +1340,8 @@ void *CDA_MemoryManager::AllocImp(mint Size, mint _Alignment)
 	#endif
 
 		CDA_MemoryManager_SizeClass* SizeClass = GetSizeClass(SizeNeeded);
+		if (!SizeClass)
+			return NULL;
 
 		M_ASSERT(SizeClass->m_FirstFreeBlock.m_pNextFree, "Heap search error");
 
@@ -1337,22 +1354,21 @@ void *CDA_MemoryManager::AllocImp(mint Size, mint _Alignment)
 		mint LeftOverSize = 0;
 		mint FinalBlockSize = SizeClassSize;
 
-		if (Alignment > m_AlignAlloc)
+		if (SizeNeeded >= m_LargeBlockThreshold)
 		{
 			// Insert a free block before our block and adjust Block
 			mint BlockAddress = (mint)(Block);
-			mint EndAddress = BlockAddress + sizeof(SDA_DefraggableFree) + sizeof(SDA_Defraggable);
+			mint EndAddress = (BlockAddress + FinalBlockSize) - (RealSizeNeeded);
 
-			mint AlignedEndAddress = (EndAddress + (Alignment - 1)) & (~(Alignment - 1)); // Align
+			mint AlignedEndAddress = AlignDown(EndAddress, Alignment);
 
-			mint AlignOffset = AlignedEndAddress - EndAddress;
 			mint StartDefraggable = AlignedEndAddress - sizeof(SDA_Defraggable);
 			mint PreBlockSize = StartDefraggable - BlockAddress;
 			if (PreBlockSize)
 			{
 				FinalBlockSize -= PreBlockSize;
 
-				CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(PreBlockSize);
+				CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(PreBlockSize, true);
 
 				SDA_DefraggableFree *NewBlock = Block;
 				SDA_DefraggableFree *NextBlock = (SDA_DefraggableFree *)StartDefraggable;
@@ -1371,36 +1387,93 @@ void *CDA_MemoryManager::AllocImp(mint Size, mint _Alignment)
 
 				Block = NextBlock;
 			}
+
+			LeftOverSize = FinalBlockSize - RealSizeNeeded;
+
+			if (LeftOverSize > sizeof(SDA_DefraggableFree))
+			{
+				FinalBlockSize -= LeftOverSize;
+
+				CDA_MemoryManager_SizeClass *LeftOverSizeClass;
+				if (LeftOverSize > m_LargeBlockThreshold)
+					LeftOverSizeClass = GetFreeSizeClass(LeftOverSize, false);
+				else
+					LeftOverSizeClass = GetFreeSizeClass(LeftOverSize, true);
+
+				SDA_DefraggableFree *NewBlock = (SDA_DefraggableFree *)(((uint8 *)Block) + FinalBlockSize);
+
+				NewBlock->m_BlockLink.SetFree();
+				NewBlock->m_BlockLink.ClearDebug();
+
+				if (Block->m_BlockLink.m_pNextBlock)
+					Block->m_BlockLink.m_pNextBlock->m_pPrevBlockSet(&NewBlock->m_BlockLink);
+
+				NewBlock->m_BlockLink.m_pNextBlock = Block->m_BlockLink.m_pNextBlock;
+				Block->m_BlockLink.m_pNextBlock = &NewBlock->m_BlockLink;
+				NewBlock->m_BlockLink.m_pPrevBlockSet(&Block->m_BlockLink);		
+
+				NewBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
+			}
 		}
-
-
-		LeftOverSize = FinalBlockSize - RealSizeNeeded;
-
-		if (LeftOverSize > sizeof(SDA_DefraggableFree))
+		else
 		{
-			FinalBlockSize -= LeftOverSize;
+			if (Alignment > m_AlignAlloc)
+			{
+				// Insert a free block before our block and adjust Block
+				mint BlockAddress = (mint)(Block);
+				mint EndAddress = BlockAddress + sizeof(SDA_DefraggableFree) + sizeof(SDA_Defraggable);
 
-			CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(LeftOverSize);
+				mint AlignedEndAddress = (EndAddress + (Alignment - 1)) & (~(Alignment - 1)); // Align
 
-			SDA_DefraggableFree *NewBlock = (SDA_DefraggableFree *)(((uint8 *)Block) + FinalBlockSize);
+				mint StartDefraggable = AlignedEndAddress - sizeof(SDA_Defraggable);
+				mint PreBlockSize = StartDefraggable - BlockAddress;
+				if (PreBlockSize)
+				{
+					FinalBlockSize -= PreBlockSize;
 
-			NewBlock->m_BlockLink.SetFree();
-			NewBlock->m_BlockLink.ClearDebug();
+					CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(PreBlockSize, false);
 
-			if (Block->m_BlockLink.m_pNextBlock)
-				Block->m_BlockLink.m_pNextBlock->m_pPrevBlockSet(&NewBlock->m_BlockLink);
+					SDA_DefraggableFree *NewBlock = Block;
+					SDA_DefraggableFree *NextBlock = (SDA_DefraggableFree *)StartDefraggable;
 
-			NewBlock->m_BlockLink.m_pNextBlock = Block->m_BlockLink.m_pNextBlock;
-			Block->m_BlockLink.m_pNextBlock = &NewBlock->m_BlockLink;
-			NewBlock->m_BlockLink.m_pPrevBlockSet(&Block->m_BlockLink);		
+					*((SDA_Defraggable *)NextBlock) = *((SDA_Defraggable *)NewBlock);
 
-			NewBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
-	//#ifdef M_SUPPORTMEMORYDEBUG
-	//		if (m_bDebugMemory)
-	//		{
-	//			memset(((SDA_DefraggableFree *)NewBlock) + 1, GetBlockSize((SDA_Defraggable *)NewBlock) - sizeof(SDA_DefraggableFree), 0xdd);
-	//		}
-	//#endif
+					NewBlock->m_BlockLink.SetFree();
+					NewBlock->m_BlockLink.ClearDebug();
+					
+					NextBlock->m_BlockLink.m_pPrevBlockSet(&NewBlock->m_BlockLink);
+					NewBlock->m_BlockLink.m_pNextBlock = &NextBlock->m_BlockLink;
+					if (NextBlock->m_BlockLink.m_pNextBlock)
+						NextBlock->m_BlockLink.m_pNextBlock->m_pPrevBlockSet(&NextBlock->m_BlockLink);
+
+					NewBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
+
+					Block = NextBlock;
+				}
+			}
+
+			LeftOverSize = FinalBlockSize - RealSizeNeeded;
+
+			if (LeftOverSize > sizeof(SDA_DefraggableFree))
+			{
+				FinalBlockSize -= LeftOverSize;
+
+				CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(LeftOverSize, false);
+
+				SDA_DefraggableFree *NewBlock = (SDA_DefraggableFree *)(((uint8 *)Block) + FinalBlockSize);
+
+				NewBlock->m_BlockLink.SetFree();
+				NewBlock->m_BlockLink.ClearDebug();
+
+				if (Block->m_BlockLink.m_pNextBlock)
+					Block->m_BlockLink.m_pNextBlock->m_pPrevBlockSet(&NewBlock->m_BlockLink);
+
+				NewBlock->m_BlockLink.m_pNextBlock = Block->m_BlockLink.m_pNextBlock;
+				Block->m_BlockLink.m_pNextBlock = &NewBlock->m_BlockLink;
+				NewBlock->m_BlockLink.m_pPrevBlockSet(&Block->m_BlockLink);		
+
+				NewBlock->m_FreeLink.AddFirst(LeftOverSizeClass);
+			}
 		}
 
 
@@ -1494,6 +1567,9 @@ void *CDA_MemoryManager::AllocDebugImp(mint Size, mint _Alignment, uint16 BlockT
 
 		CDA_MemoryManager_SizeClass* SizeClass = GetSizeClass(SizeNeeded);
 
+		if (!SizeClass)
+			return NULL;
+
 		M_ASSERT(SizeClass->m_FirstFreeBlock.m_pNextFree, "Heap search error");
 
 		SDA_DefraggableFree *Block = (SDA_DefraggableFree *)((uint8 *)SizeClass->m_FirstFreeBlock.m_pNextFree - sizeof(SDA_Defraggable));
@@ -1514,14 +1590,13 @@ void *CDA_MemoryManager::AllocDebugImp(mint Size, mint _Alignment, uint16 BlockT
 
 			mint AlignedEndAddress = (EndAddress + (Alignment - 1)) & (~(Alignment - 1)); // Align
 
-			mint AlignOffset = AlignedEndAddress - EndAddress;
 			mint StartDefraggable = AlignedEndAddress - (sizeof(SDA_Defraggable) + sizeof(SDA_DefraggableDebug_Pre));
 			mint PreBlockSize = StartDefraggable - BlockAddress;
 
 			if (PreBlockSize)
 			{
 				FinalBlockSize -= PreBlockSize;
-				CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(PreBlockSize);
+				CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(PreBlockSize, false);
 
 				SDA_DefraggableFree *NewBlock = Block;
 				SDA_DefraggableFree *NextBlock = (SDA_DefraggableFree *)StartDefraggable;
@@ -1549,7 +1624,7 @@ void *CDA_MemoryManager::AllocDebugImp(mint Size, mint _Alignment, uint16 BlockT
 		{
 			FinalBlockSize -= LeftOverSize;
 
-			CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(LeftOverSize);
+			CDA_MemoryManager_SizeClass *LeftOverSizeClass = GetFreeSizeClass(LeftOverSize, false);
 
 			SDA_DefraggableFree *NewBlock = (SDA_DefraggableFree *)(((uint8 *)Block) + FinalBlockSize);
 
@@ -1633,20 +1708,13 @@ void *CDA_MemoryManager::AllocDebugImp(mint Size, mint _Alignment, uint16 BlockT
 		
 		if (BlockType != 5 && File)
 		{
-			if (!m_bDebugHashInit)
+			CDA_MemoryManager_DebugAllocFile *pFileMap = m_DebugStringTree.FindEqual(File);
+			if (!pFileMap)
 			{
-				m_bDebugHashInit = true;
-				m_DebugStringsHash.InitHash(2, (mint)&((CDA_MemoryManager_DebugAllocFile *)(0x70000000))->m_pOriginalPtr - (mint)(CDA_Hashable *)((CDA_MemoryManager_DebugAllocFile *)(0x70000000)), 4, 2);
-			}
-			
-			CDA_MemoryManager_DebugAllocFile *FileMap = m_DebugStringsHash.GetByID(&File);
-			if (!FileMap)
-			{
-				FileMap = m_DebugStringsPool.New();
-				strncpy(FileMap->m_FileName, File, sizeof(FileMap->m_FileName));
-				FileMap->m_pOriginalPtr = File;
-				FileMap->Hash_Insert(m_DebugStringsHash);
-				m_DebugStings.Insert(FileMap);
+				pFileMap = m_DebugStringsPool.New();
+				strncpy(pFileMap->m_FileName, File, sizeof(pFileMap->m_FileName));
+				pFileMap->m_pOriginalPtr = File;
+				m_DebugStringTree.f_Insert(pFileMap);
 			}
 		}
 		else
@@ -2006,15 +2074,13 @@ mint CDA_MemoryManager::GetLargestFreeMem()
 #endif
 	M_LOCK(m_Lock);
 
-	CDA_MemoryManager_SizeClass *SizeClass = (CDA_MemoryManager_SizeClass *)(m_SizesFreeTree.FindLargest());
+	CDA_MemoryManager_SizeClass *SizeClassNormal = (CDA_MemoryManager_SizeClass *)(m_SizesFreeTreeNormal.FindLargest());
+	CDA_MemoryManager_SizeClass *SizeClassFragment = (CDA_MemoryManager_SizeClass *)(m_SizesFreeTreeFragments.FindLargest());
 
-	if (!SizeClass)
-		return 0;
+	mint SizeNormal = SizeClassNormal ? SizeClassNormal->m_Size : 0;
+	mint SizeFragment = SizeClassFragment ? SizeClassFragment->m_Size : 0;
 
-	mint Return = SizeClass->m_Size;
-
-
-	return Return;
+	return Max(SizeNormal, SizeFragment);
 }
 
 void CDA_MemoryManager::Free(void *_Block)
@@ -2077,9 +2143,9 @@ void CDA_MemoryManager::Free(void *_Block)
 
 			CheckMemoryToBe(Pre->m_PreBlockCheck, 0xFD, MDA_DEBUG_BLOCK_PRECHECK - 1, "Damage at start of block when freeing", true);
 #ifdef CPU_BIGENDIAN
-			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xFE, 1, "Damage at start of block when freeing", true);
+//			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xFE, 1, "Damage at start of block when freeing", true);
 #else
-			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xbd, 1, "Damage at start of block when freeing", true);
+//			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xbd, 1, "Damage at start of block when freeing", true);
 #endif
 #endif
 			CheckMemoryToBe(Post->m_PostBlockCheck, 0xFD, MDA_DEBUG_BLOCK_POSTCHECK, "Damage at end of block when freeing", true);
@@ -2155,7 +2221,7 @@ void CDA_MemoryManager::Free(void *_Block)
 */
 	((SDA_DefraggableFree *)StartBlock)->m_BlockLink.SetFree();
 	((SDA_DefraggableFree *)StartBlock)->m_BlockLink.ClearDebug();
-	((SDA_DefraggableFree *)StartBlock)->m_FreeLink.AddFirst(GetFreeSizeClass(GetBlockSize(StartBlock)));
+	((SDA_DefraggableFree *)StartBlock)->m_FreeLink.AddFirst(GetFreeSizeClass(GetBlockSize(StartBlock), false));
 
 
 #ifdef DA__HEAPVALIDATE
@@ -2202,10 +2268,10 @@ void *CDA_MemoryManager::ReallocAlign(void *_Block, mint _Size, mint _Alignment)
 		
 	if (!_Block)
 	{
-		return Alloc(_Size);
+		return AllocAlign(_Size, _Alignment);
 	}
 
-	void *NewBlock = Alloc(_Size);
+	void *NewBlock = AllocAlign(_Size, _Alignment);
 
 	if (_Block && NewBlock)
 	{
@@ -2308,15 +2374,15 @@ void *CDA_MemoryManager::ReallocDebugAlign(void *_Block, mint _Size, mint _Align
 		
 	if (!_Block)
 	{
-		return AllocDebug(_Size, _BlockType, File, Line);
+		return AllocDebugAlign(_Size, _Align, _BlockType, File, Line);
 	}
 
-	void *NewBlock = AllocDebug(_Size, _BlockType, File, Line);
+	void *NewBlock = AllocDebugAlign(_Size, _Align, _BlockType, File, Line);
 
 	if (_Block && NewBlock)
 	{
 		mint OldSize = MemorySize(_Block);
-		memcpy(NewBlock, _Block, OldSize);
+		memcpy(NewBlock, _Block, Min(OldSize, _Size));
 	}
 
 	Free(_Block);
@@ -2371,7 +2437,7 @@ void *CDA_MemoryManager::ReallocDebug(void *_Block, mint _Size, uint16 _BlockTyp
 	if (_Block && NewBlock)
 	{
 		mint OldSize = MemorySize(_Block);
-		memcpy(NewBlock, _Block, OldSize);
+		memcpy(NewBlock, _Block, Min(OldSize, _Size));
 	}
 
 	Free(_Block);
@@ -2430,10 +2496,14 @@ mint CDA_MemoryManager::UserBlockSize(SDA_Defraggable *_Block)
 
 CDA_MemoryManager_SizeClass* CDA_MemoryManager::GetSizeClass(mint _SizeNeeded)
 {
-	CDA_MemoryManager_SizeClass *SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTree.FindSmallestGreaterThanEqual(_SizeNeeded);
+	CDA_MemoryManager_SizeClass *SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTreeNormal.FindSmallestGreaterThanEqual(_SizeNeeded);
 
 	if (!SizeClass)
 	{
+		SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTreeFragments.FindSmallestGreaterThanEqual(_SizeNeeded);
+
+		if (SizeClass)
+			return SizeClass;
 	
 		if (m_bCanDefrag)
 			// The memory is defragmented, must defrag to fit element
@@ -2464,13 +2534,15 @@ CDA_MemoryManager_SizeClass* CDA_MemoryManager::GetSizeClass(mint _SizeNeeded)
 			}
 		}
 
-		SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTree.FindSmallestGreaterThanEqual(_SizeNeeded);
+		SizeClass = (CDA_MemoryManager_SizeClass *)m_SizesFreeTreeNormal.FindSmallestGreaterThanEqual(_SizeNeeded);
 		
 		if (!SizeClass)
 		{
 
-#ifdef M_SUPPORTMEMORYDEBUG
+#if defined(PLATFORM_CONSOLE) || defined(M_SUPPORTMEMORYDEBUG)
 			ReportOutOfMemory(_SizeNeeded, this);
+#endif
+#ifdef M_SUPPORTMEMORYDEBUG
 
 			MemTracking_ReportMemUsage(0);
 			MemTracking_ReportMemUsage(1);
@@ -2522,7 +2594,8 @@ void CDA_MemoryManager::DisplayLeaks()
 					
 					unsigned char *Mem = (unsigned char *)MemFromBlock(CurrentBlock);
 					mint Size = UserBlockSize(CurrentBlock);
-					SDA_DefraggableDebug_Post *Post = (SDA_DefraggableDebug_Post *)((mint)Mem + Size);
+					SDA_DefraggableDebug_Post *Post = (SDA_DefraggableDebug_Post *)((mint)CurrentBlock + GetBlockSize(CurrentBlock) - sizeof(SDA_DefraggableDebug_Post));
+
 					if (!CurrentBlock->IsDebug() || (Post->m_BlockType != _CRT_BLOCK && Post->m_BlockType != 5))
 					{
 						// Damn runtime dont clean up
@@ -2560,7 +2633,7 @@ void CDA_MemoryManager::DisplayLeaks()
 												
 						if (CurrentBlock->IsDebug() && Post->m_pFile)
 						{
-							CDA_MemoryManager_DebugAllocFile *FileMap = m_DebugStringsHash.GetByID(&Post->m_pFile);
+							CDA_MemoryManager_DebugAllocFile *FileMap = m_DebugStringTree.FindEqual(Post->m_pFile);
 							if (FileMap)
 							{
 								sprintf((char *)TempStr, "%s(%d) : %d leaked uint8s at (0x%08x). Type: %s. First %d uint8s:\n", FileMap->m_FileName, Post->m_Line, (mint)Size, (mint)Mem, Class, (mint)TestSize);
@@ -2718,7 +2791,7 @@ void M_CDECL CDA_MemoryManager::MemTracking_Report(bool Verbose)
 		return;
 	
 	
-	NMemMgr::SICMemTrack_Class TrackIter = m_MemTracking_ClassesList;
+	NMemMgr::CMemTrack_ClassIter TrackIter = m_MemTracking_ClassesList;
 	CFStr OutputString;
 
 	bool First = true;
@@ -2769,7 +2842,7 @@ void M_CDECL CDA_MemoryManager::MemTracking_Report(bool Verbose)
 			
 				if (Verbose && TrackIter->m_pChild)
 				{
-					NMemMgr::SICMemTrack_Class TrackChildIter = TrackIter->m_pChild->m_Children;
+					NMemMgr::CMemTrack_ClassIter TrackChildIter = TrackIter->m_pChild->m_Children;
 				
 					while (TrackChildIter)
 					{
@@ -2872,7 +2945,7 @@ void M_CDECL CDA_MemoryManager::MemTracking_ReportMemUsage(int Verbose)
 		
 		M_LOCK(LockasFromGCHell);
 			
-			NMemMgr::SICMemTrack_Class TrackIter = m_MemTracking_ClassesList;
+			NMemMgr::CMemTrack_ClassIter TrackIter = m_MemTracking_ClassesList;
 		CFStr OutputString;
 		
 		mint FoundMem = 0;
@@ -2913,7 +2986,7 @@ void M_CDECL CDA_MemoryManager::MemTracking_ReportMemUsage(int Verbose)
 			{
 				static CMemReportSortEntry lMemReportChild[256];
 				int nMemReportChild = 0;
-				NMemMgr::SICMemTrack_Class TrackChildIter = TrackIter->m_pChild->m_Children;
+				NMemMgr::CMemTrack_ClassIter TrackChildIter = TrackIter->m_pChild->m_Children;
 				
 				while (TrackChildIter)
 				{
@@ -2972,11 +3045,11 @@ void M_CDECL CDA_MemoryManager::MemTracking_ReportMemUsage(int Verbose)
 }
 
 
-void CDA_MemoryManager::MemTracking_GetMemUsageInfo(TList_Vector<SMemInfo> &_Result, const char* _pClassName)
+void CDA_MemoryManager::MemTracking_GetMemUsageInfo(TArray<SMemInfo> &_Result, const char* _pClassName)
 {
 	M_LOCK(m_Lock);
 	{
-		NMemMgr::SICMemTrack_Class TrackIter = m_MemTracking_ClassesList;
+		NMemMgr::CMemTrack_ClassIter TrackIter = m_MemTracking_ClassesList;
 		while (TrackIter)
 		{
 			SMemInfo tmp;
@@ -2992,7 +3065,7 @@ void CDA_MemoryManager::MemTracking_GetMemUsageInfo(TList_Vector<SMemInfo> &_Res
 			else if ((TrackIter->m_ClassName == _pClassName) && TrackIter->m_pChild)
 			{
 				// all info about specified class
-				NMemMgr::SICMemTrack_Class TrackChildIter = TrackIter->m_pChild->m_Children;
+				NMemMgr::CMemTrack_ClassIter TrackChildIter = TrackIter->m_pChild->m_Children;
 				while (TrackChildIter)
 				{
 					if (TrackChildIter->m_AllocData.m_MemUsed > 0)
@@ -3030,7 +3103,7 @@ void CDA_MemoryManager::MemTracking_TrackAlloc(NMemMgr::CMemTrack_UniquePair &_T
 		{
 			if (pContextStack->m_lpContexts[i]->m_pMemoryCategory)
 			{
-				Class = pContexctStack->m_lpContexts[i]->m_pMemoryCategory;
+				Class = pContextStack->m_lpContexts[i]->m_pMemoryCategory;
 				break;
 			}
 			
@@ -3074,12 +3147,7 @@ void CDA_MemoryManager::MemTracking_TrackAlloc(NMemMgr::CMemTrack_UniquePair &_T
 		
 	}*/
 
-	if (!m_MemTracking_Classes.m_NumHashBits)
-	{
-		m_MemTracking_Classes.InitHash(2, (mint)&((NMemMgr::CMemTrack_Class *)this)->m_ClassName - (mint)((CDA_Hashable *)(NMemMgr::CMemTrack_Class *)this), 2);
-	}
-	
-	NMemMgr::CMemTrack_Class *Track = m_MemTracking_Classes.GetTyped(&Class);
+	NMemMgr::CMemTrack_Class *Track = m_MemTracking_Classes.FindEqual(Class);
 	
 	if (!Track)
 	{
@@ -3087,7 +3155,7 @@ void CDA_MemoryManager::MemTracking_TrackAlloc(NMemMgr::CMemTrack_UniquePair &_T
 		Track = m_MemTracking_TrackedPool.New();
 		Track->m_ClassName = Class;		
 		m_MemTracking_ClassesList.Insert(Track);
-		Track->m_HashLink.Hash_Insert(&m_MemTracking_Classes, Track);
+		m_MemTracking_Classes.f_Insert(Track);
 	}
 
 	++Track->m_AllocData.m_TimesAlloced;
@@ -3123,14 +3191,14 @@ void CDA_MemoryManager::MemTracking_TrackAlloc(NMemMgr::CMemTrack_UniquePair &_T
 	if (!Track->m_pChild)
 		Track->m_pChild = m_MemTracking_TrackedChildPool.New();
 
-	NMemMgr::CMemTrack_Class *ChildTrack = Track->m_pChild->m_ChildrenHash.GetTyped(&Stack);
+	NMemMgr::CMemTrack_Class *ChildTrack = Track->m_pChild->m_ChildrenTree.FindEqual(Stack);
 
 	if (!ChildTrack)
 	{
 		ChildTrack = m_MemTracking_TrackedPool.New();
 		ChildTrack->m_ClassName = Stack;
 		Track->m_pChild->m_Children.Insert(ChildTrack);
-		ChildTrack->m_HashLink.Hash_Insert(&Track->m_pChild->m_ChildrenHash, ChildTrack);
+		Track->m_pChild->m_ChildrenTree.f_Insert(ChildTrack);
 	}
 
 	++ChildTrack->m_AllocData.m_TimesAlloced;
@@ -3189,12 +3257,24 @@ bool CDA_MemoryManager::CheckMemory()
 				}
 				else if (CurrentBlock->IsDebug())
 				{
+
 					SDA_DefraggableDebug_Pre *Pre = (SDA_DefraggableDebug_Pre *)((mint)CurrentBlock + sizeof(SDA_Defraggable));
 					SDA_DefraggableDebug_Post *Post = (SDA_DefraggableDebug_Post *)((mint)CurrentBlock + GetBlockSize(CurrentBlock) - sizeof(SDA_DefraggableDebug_Post));
+#if defined(PLATFORM_XENON) || defined(PLATFORM_PS3)
+					if (!CheckMemoryToBe(Pre->m_PreBlockCheck, 0xFD, 7, "Damage at start of block", false))
+						HeapIsOk = false;
+					if (!CheckMemoryToBe(Pre->m_PreBlockCheck+7, 0xFE, 1, "Damage at start of block", false))
+						HeapIsOk = false;
+					if (!CheckMemoryToBe(Pre->m_PreBlockCheck+8, 0xFD, MDA_DEBUG_BLOCK_PRECHECK - 8, "Damage at start of block", false))
+						HeapIsOk = false;
+//			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xFE, 1, "Damage at start of block when freeing", true);
+//			CheckMemoryToBe(((uint8*)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xbd, 1, "Damage at start of block when freeing", true);
+#else
 					if (!CheckMemoryToBe(Pre->m_PreBlockCheck, 0xFD, MDA_DEBUG_BLOCK_PRECHECK - 1, "Damage at start of block", false))
 						HeapIsOk = false;
-					if (!CheckMemoryToBe(((uint8 *)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xbd, 1, "Damage at start of block", false))
-						HeapIsOk = false;
+#endif
+//					if (!CheckMemoryToBe(((uint8 *)Pre->m_PreBlockCheck) + MDA_DEBUG_BLOCK_PRECHECK - 1, 0xbd, 1, "Damage at start of block", false))
+//						HeapIsOk = false;
 					if (!CheckMemoryToBe(Post->m_PostBlockCheck, 0xFD, MDA_DEBUG_BLOCK_POSTCHECK, "Damage at end of block", false))
 						HeapIsOk = false;
 				}
@@ -3217,301 +3297,8 @@ bool CDA_MemoryManager::CheckMemory()
 #endif
 
 
-CBlockManager::CBlock *CBlockManager::Alloc(mint _Size)
-{
-	CBlockSize *pSizeClass = m_FreeSizeTree.FindSmallestGreaterThanEqual(_Size);
-	
-	if (!pSizeClass)
-		return NULL;
-	
-	CBlock * pBlock = pSizeClass->GetBlock();
-	mint BlockSize = pSizeClass->m_Size;
 
-	// Align all allocated sizes to keep alignment in heap
-	_Size = (_Size + (m_Align - 1)) & (~(m_Align - 1));
-	
-	if (pSizeClass->m_FreeList.IsEmpty())
-	{
-		m_BlockSizePool.Delete(pSizeClass);
-		pSizeClass = NULL;
-	}
-	
-	mint SizeLeft = BlockSize - _Size;
-	
-	if (SizeLeft > 0)
-	{
-		// Add remainder of block to free blocks
-		CBlock * pNewBlock = m_BlockPool.New();
-		
-		pNewBlock->m_pMemory = (void *)((uint8 *)pBlock->m_pMemory + _Size);
-		pNewBlock->m_pNextBlock = pBlock->m_pNextBlock;
-		if (pNewBlock->m_pNextBlock)
-		{
-			pNewBlock->m_pNextBlock->m_pPrevBlock = pNewBlock;
-		}
-		pBlock->m_pNextBlock = pNewBlock;
-		pNewBlock->m_pPrevBlock = pBlock;
-	
-		mint SizeLeft0 = SizeLeft;
-		CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindEqual(SizeLeft0);
-		
-		if (!pSizeClass)
-		{
-			pSizeClass = m_BlockSizePool.New();
-			pSizeClass->m_Size = SizeLeft;
-			m_FreeSizeTree.f_InsertLowStack(pSizeClass, (void*)NULL);
-		}
-		
-		pSizeClass->AddBlock(pNewBlock);
-	}
-	
-	return pBlock;
-}
-
-void CBlockManager::Free(CBlock *&_pBlock)
-{
-	mint BlockSize = GetBlockSize(_pBlock);
-	void *pBlockPos = _pBlock->m_pMemory;
-	CBlock *pFinalBlock = _pBlock;
-	CBlock *pPrevBlock = _pBlock->m_pPrevBlock;
-	CBlock *pNextBlock = _pBlock->m_pNextBlock;
-	bool bDeleteBlock1 = false;
-	bool bDeleteBlock2 = false;
-	
-	if (pPrevBlock)
-	{
-		if (pPrevBlock->m_FreeLink.IsInList())
-		{
-			BlockSize += GetBlockSize(pPrevBlock);
-			pBlockPos = pPrevBlock->m_pMemory;
-			pFinalBlock = pPrevBlock;
-			
-			RemoveFreeBlock(pPrevBlock);
-			
-			bDeleteBlock1 = true;
-		}
-	}
-	
-	if (pNextBlock)
-	{
-		if (pNextBlock->m_FreeLink.IsInList())
-		{
-			BlockSize += GetBlockSize(pNextBlock);
-			
-			RemoveFreeBlock(pNextBlock);
-			
-			bDeleteBlock2 = true;
-		}
-	}
-	
-	CBlockSize *pSizeClass = GetSizeBlock(BlockSize);
-	
-	pSizeClass->AddBlock(pFinalBlock);
-
-	if (bDeleteBlock1)
-		DeleteBlock(_pBlock);
-	if (bDeleteBlock2)
-		DeleteBlock(pNextBlock);
-
-	if (m_bAutoDefrag)
-		Defrag();
-
-	_pBlock = NULL;
-}
-
-void CBlockManager::Create(void *_pMemory, mint _Blocksize, mint _Alignment, bool _bAutoDefrag)
-{
-	m_bAutoDefrag = _bAutoDefrag;
-	m_Align = _Alignment;
-	m_pBlockStart = _pMemory;
-	m_pBlockEnd = ((uint8 *)m_pBlockStart + _Blocksize);
-	
-	m_pFirstBlock = m_BlockPool.New();
-	
-	m_pFirstBlock->m_pMemory = _pMemory;
-	m_pFirstBlock->m_pNextBlock = NULL;
-	m_pFirstBlock->m_pPrevBlock = NULL;
-	
-	CBlockSize *pSizeClass = m_BlockSizePool.New();
-	pSizeClass->m_Size = _Blocksize;
-	m_FreeSizeTree.f_InsertLowStack(pSizeClass, (void*)NULL);
-	pSizeClass->AddBlock(m_pFirstBlock);
-}
-
-void CBlockManager::Defrag()
-{
-	// Iterate all blocks
-	CBlock *pCurrent = m_pFirstBlock;
-	
-	while (pCurrent)
-	{
-
-		if (pCurrent->m_FreeLink.IsInList() && pCurrent->m_pNextBlock)
-		{
-			// Move the next block to this location
-			CBlock *pBlockToMove = pCurrent->m_pNextBlock;
-			
-			M_ASSERT(!pBlockToMove->m_FreeLink.IsInList(), "Internal error: Two sequential free blocks.");
-			
-			if (pBlockToMove->m_pNextBlock && pBlockToMove->m_pNextBlock->m_FreeLink.IsInList())
-			{
-				CBlock *pNextBlock = pBlockToMove->m_pNextBlock;
-				// The block after the nextblock is free, move the original block and make one of the free blocks
-				// |1111|22222|333333|
-				// |22222|33333333333|
-				// 1 = pCurrent, 2=pBlockToMove, 3=pNextBlock
-
-				mint Size = GetBlockSize(pBlockToMove);
-				mint FreeBlockSize = GetBlockSize(pCurrent) + GetBlockSize(pNextBlock);
-
-				MoveBlock(pCurrent->m_pMemory, pBlockToMove->m_pMemory, Size);
-				pBlockToMove->m_pMemory = (void *)((mint)pCurrent->m_pMemory + Size);
-				CBlockSize *pSizeClass = GetSizeBlock(FreeBlockSize);
-				pSizeClass->AddBlock(pBlockToMove);
-
-				// Remove free blocks
-				RemoveFreeBlock(pCurrent);
-				RemoveFreeBlock(pNextBlock);
-				DeleteBlock(pNextBlock);
-				
-
-			}
-			else 
-			{
-				// The next two blocks is allocate, only move the block
-				// |11111|222222|
-				// |222222|11111|
-				// 1 = pCurrent, 2=pBlockToMove
-
-				mint Size = GetBlockSize(pBlockToMove);
-				mint FreeBlockSize = GetBlockSize(pCurrent);
-
-				
-				MoveBlock(pCurrent->m_pMemory, pBlockToMove->m_pMemory, Size);
-				pBlockToMove->m_pMemory = (void *)((mint)pCurrent->m_pMemory + Size);
-				CBlockSize *pSizeClass = GetSizeBlock(FreeBlockSize);
-				pSizeClass->AddBlock(pBlockToMove);
-
-				RemoveFreeBlock(pCurrent);				
-			}
-		}
-
-		pCurrent = pCurrent->m_pNextBlock;
-	}		
-	
-}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 
-
-void CBlockManager::MoveBlock(void *_To, void*_From, mint _Size)
-{
-	memcpy(_To, _From, _Size);
-}
-
-void CBlockManager::RemoveFreeBlock(CBlock *_pBlock)
-{
-	if (_pBlock->m_FreeLink.LoneInList())
-	{				
-		CBlockSize *pSizeClass1 = CBlockSize::BlockSizeFromFreeList(_pBlock->m_FreeLink.m_pPrev);
-		_pBlock->m_FreeLink.Remove();
-		m_BlockSizePool.Delete(pSizeClass1);					
-	}
-	else
-	{
-		_pBlock->m_FreeLink.Remove();
-	}
-}
-
-CBlockManager::CBlockSize *CBlockManager::GetSizeBlock(mint _BlockSize)
-{
-	CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindEqual(_BlockSize);
-
-	if (!pSizeClass)
-	{
-		pSizeClass = m_BlockSizePool.New();
-		pSizeClass->m_Size = _BlockSize;
-		m_FreeSizeTree.f_InsertLowStack(pSizeClass, (void*)NULL);
-	}
-	return pSizeClass;
-}
-
-void CBlockManager::DeleteBlock(CBlock *_pBlock)
-{
-	if (_pBlock->m_pPrevBlock)
-		_pBlock->m_pPrevBlock->m_pNextBlock = _pBlock->m_pNextBlock;
-	else
-		m_pFirstBlock = _pBlock;
-
-	if (_pBlock->m_pNextBlock)
-		_pBlock->m_pNextBlock->m_pPrevBlock = _pBlock->m_pPrevBlock;
-
-	m_BlockPool.Delete(_pBlock);
-}
-
-mint CBlockManager::GetBlockSize(CBlock *_pBlock)
-{		
-	if (_pBlock->m_pNextBlock)
-		return (uint8 *)_pBlock->m_pNextBlock->m_pMemory - (uint8 *)_pBlock->m_pMemory;
-	else
-		return (uint8 *)m_pBlockEnd - (uint8 *)_pBlock->m_pMemory;
-}
-
-
-#ifdef PLATFORM_DOLPHIN
-CBlockManagerAram g_AramManagerMisc;
-CBlockManager g_AramManagerSound;
-#define SCD_MaxMemoryBlocks 4
-static mint gs_AramMemAllocArray[SCD_MaxMemoryBlocks];
-
-class CDolphinInitializer
-{
-public:
-	CDolphinInitializer()
-	{
-	    ARInit(gs_AramMemAllocArray, SCD_MaxMemoryBlocks);
-	    ARQInit();
-
-		mint SoundSize = 8*1024*1024;
-		g_AramManagerSound.Create((void *)ARAlloc(SoundSize), SoundSize, ARQ_DMA_ALIGNMENT, false);
-		mint MiscSize = 8*1024*1024 - 64*1024;
-		g_AramManagerMisc.Create((void *)ARAlloc(MiscSize), MiscSize, ARQ_DMA_ALIGNMENT, false);
-
-	}
-};
-
-static CDolphinInitializer gs_InitDolphinAram;
-
-#endif
-
-
-#if 0
-
-
-class CTestBlockManager
-{
-public:
-
-	CBlockManager m_BlockManager;
-
-	CTestBlockManager()
-	{
-		m_BlockManager.Create(MRTC_SystemInfo::OS_Alloc(2048*1024, true), 2048*1024, 1024, false);
-
-		CBlockManager::CBlock *pBlock1 = m_BlockManager.Alloc(1224);
-		CBlockManager::CBlock *pBlock2 = m_BlockManager.Alloc(1224);
-		CBlockManager::CBlock *pBlock3 = m_BlockManager.Alloc(1224);
-		CBlockManager::CBlock *pBlock4 = m_BlockManager.Alloc(1224);
-
-		m_BlockManager.Free(pBlock2);
-		m_BlockManager.Defrag();
-		m_BlockManager.Free(pBlock4);
-		m_BlockManager.Free(pBlock1);
-		m_BlockManager.Free(pBlock3);
-
-		
-
-	}
-};
-
-CTestBlockManager g_DaBigTestFromHell;
-#endif //0

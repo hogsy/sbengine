@@ -89,7 +89,7 @@ class SYSTEMDLLEXPORT CTextureContainer_Video_XMV : public CTextureContainer_Vid
 
 protected:
 	TArray<spCTC_XMVTexture> m_lspVideos;
-	fp4 m_CloseTimeOut;
+	fp32 m_CloseTimeOut;
 	
 public:
 	CTextureContainer_Video_XMV();
@@ -100,7 +100,7 @@ public:
 	void ValidateLocalID(int _iLocal);
 	
 	virtual void CloseVideo(int _iLocal);
-	virtual void SetVolume(int _iLocal, fp4 fpVol); // NOT SUPPORTED
+	virtual void SetVolume(int _iLocal, fp32 fpVol); // NOT SUPPORTED
 	virtual void Pause(int _iLocal, bool _Paused = true);  // NOT SUPPORTED
 	virtual void AutoRestart(int _iLocal, bool _EnableAutoRestart = true); // NOT SUPPORTED
 	virtual void Rewind(int _iLocal);
@@ -121,7 +121,7 @@ public:
 	virtual int GetWidth(int _iLocal);
 	virtual int GetHeight(int _iLocal);
 
-	virtual fp4 GetTime(int _iLocal);
+	virtual fp32 GetTime(int _iLocal);
 };
 
 #endif

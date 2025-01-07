@@ -1,0 +1,16 @@
+
+DEFINES=-DTARGET_PS3
+
+INCLUDES=-I. -IPCH
+
+FILES=Mda.o MDA_AVLTree.o MDA_Hash.o MDA_LinkedList.o MDA_Reference.o MDA_Stack.o MDataFile.o\
+	MFile.o MFile_AsyncCopy.o MFile_DiskUtil.o MFile_Dolphin.o MFile_MegaFile.o MFile_Misc.o MFile_PS2.o MFile_RAM.o MFile_Stream.o\
+	MFile_StreamMgr.o MFile_Stream_Compressed.o MFile_Stream_Disk.o MFile_Stream_MegaFile.o MFile_Stream_Memory.o MFile_Stream_RAM.o\
+	MFile_Stream_SubFile.o MFile_Stream_XDF.o MFile_XDF.o MFile_XTL.o MFloat.o MMath.o MMath_fp2.o MMemMgrHeap.o\
+	MMemMgrPool.o MMisc.o MNetwork.o MSIMD.o MThreadManager.o Mcomp.o Mrtc.o
+
+.cpp.o:
+	ppu-lv2-gcc $(DEFINES) $(INCLUDES) -c $<
+
+PS3/lib_mcc_d: $(FILES)
+	ppu-lv2-ar -r PS3/lib_mcc_d.lib $(FILES)

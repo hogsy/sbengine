@@ -105,17 +105,17 @@ namespace NScript
 
 	enum ESymbol
 	{
-		ESymbol_Class_Registered = DBit(0),
-		ESymbol_Class_Script = DBit(1),
-		ESymbol_Function_Registered = DBit(2),
-		ESymbol_Function_Script = DBit(3),
-		ESymbol_ClassFunction_Registered = DBit(4),
-		ESymbol_ClassFunction_Script = DBit(5),
-		ESymbol_Variable_Script = DBit(6),
-		ESymbol_Variable_Registered = DBit(7),
-		ESymbol_Operator = DBit(8),
-		ESymbol_Constant = DBit(9),
-		ESymbol_NameSpace = DBit(10),
+		ESymbol_Class_Registered = M_Bit(0),
+		ESymbol_Class_Script = M_Bit(1),
+		ESymbol_Function_Registered = M_Bit(2),
+		ESymbol_Function_Script = M_Bit(3),
+		ESymbol_ClassFunction_Registered = M_Bit(4),
+		ESymbol_ClassFunction_Script = M_Bit(5),
+		ESymbol_Variable_Script = M_Bit(6),
+		ESymbol_Variable_Registered = M_Bit(7),
+		ESymbol_Operator = M_Bit(8),
+		ESymbol_Constant = M_Bit(9),
+		ESymbol_NameSpace = M_Bit(10),
 		ESymbol_Class = ESymbol_Class_Registered | ESymbol_Class_Script,
 		ESymbol_Function = ESymbol_Function_Registered | ESymbol_Function_Script,
 		ESymbol_ClassFunction = ESymbol_ClassFunction_Registered | ESymbol_ClassFunction_Script,
@@ -252,9 +252,9 @@ namespace NScript
 			}
 		}
 
-		virtual TList_Vector<CStr> GetSymbols(int _Type = ESymbol_All)
+		virtual TArray<CStr> GetSymbols(int _Type = ESymbol_All)
 		{
-			TList_Vector<CStr> RetList;
+			TArray<CStr> RetList;
 
 			CTreeIter Iter = m_Children;
 
@@ -332,7 +332,7 @@ namespace NScript
 			return "Function:\t" + Str;
 		}
 
-		TList_Vector<spCSymbol_Class> m_splArgumentTypes;
+		TArray<spCSymbol_Class> m_splArgumentTypes;
 		spCSymbol_Class m_spReturnType;
 		int m_nStackVariables;
 
@@ -437,7 +437,7 @@ namespace NScript
 		CContext *m_pParser;
 		spCSymbol m_spRootSymbol;
 
-		TList_Vector<uint8> m_Stack;
+		TArray<uint8> m_Stack;
 
 		int m_iCurrentStackPosition;
 		int m_iFunctionStackPosition;
@@ -664,7 +664,7 @@ namespace NScript
 
 		class CSymbol_UserFunction *m_pFunction;
 		CStatement *m_pParentStatement;
-		TList_Vector< TPtr<CStatement> > m_splStatements;
+		TArray< TPtr<CStatement> > m_splStatements;
 
 		int GetStatementPlace(CStatement *_pStatement)
 		{
@@ -912,7 +912,7 @@ namespace NScript
 		{
 			M_ASSERT(m_splStatements.Len() == 1, "Must be so");
 
-			TList_Vector< TPtr<CStatement> > splStateMents = m_splStatements[0]->m_splStatements;
+			TArray< TPtr<CStatement> > splStateMents = m_splStatements[0]->m_splStatements;
 
 			m_splStatements = splStateMents;
 
@@ -1136,7 +1136,7 @@ namespace NScript
 
 		DIdsTreeAVLAligned_Link(CParseHandler, m_NameLink, const char *, CCompare);
 
-		TList_Vector < TPtr<CParseHandler> > m_splChildren;
+		TArray < TPtr<CParseHandler> > m_splChildren;
 
 		CParseHandler(CContext *_pParser, const char *_pName);
 

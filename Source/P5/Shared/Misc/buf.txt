@@ -1,0 +1,9 @@
+" description dependency DevEnv > > >   > > assemblyIdentity " Microsoft . Microsoft " assemblyIdentity > >   /> " " processorArchitecture  
+     " microsoft  
+    encoding encoding encoding encoding encoding encoding encoding encoding encoding encoding encoding  
+    microsoft 
+    
+    
+
+		 / // Build Into may fuck up current textyre texture so we have to re bind glClientActiveTexture glClientActiveTexture 
+				 Unbuilt s   ( d () (), _TextureID (), _TextureID s   ( d )  glBindTexture glBindTexture _GLImageTarget _GLImageTarget , _TextureOD _TextureID ) ); ); 

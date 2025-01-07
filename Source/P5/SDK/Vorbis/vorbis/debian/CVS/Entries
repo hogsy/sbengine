@@ -1,0 +1,15 @@
+/.cvsignore/1.1/Sat Nov 18 04:24:29 2000//Tvorbis1_0_public_release_candidate_2
+/Makefile.am/1.3/Mon Aug 13 02:45:09 2001//Tvorbis1_0_public_release_candidate_2
+/README.Debian/1.4/Sun Feb 18 05:25:22 2001//Tvorbis1_0_public_release_candidate_2
+/changelog/1.13/Mon Aug 13 02:45:09 2001//Tvorbis1_0_public_release_candidate_2
+/control/1.20/Mon Aug 13 02:53:36 2001//Tvorbis1_0_public_release_candidate_2
+/copyright/1.6/Mon Feb 26 15:10:57 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis-dev.dirs/1.3/Thu Jan 25 04:58:45 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis-dev.docs/1.3/Thu Jan 25 04:58:45 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis-dev.examples/1.3/Thu Jan 25 04:58:45 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis-dev.files/1.3/Thu Jan 25 04:58:45 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis0.dirs/1.2/Sat Nov 18 04:33:48 2000//Tvorbis1_0_public_release_candidate_2
+/libvorbis0.docs/1.2/Sat Nov 18 04:49:13 2000//Tvorbis1_0_public_release_candidate_2
+/libvorbis0.files/1.1/Thu Nov 09 22:23:18 2000//Tvorbis1_0_public_release_candidate_2
+/rules/1.15/Mon Aug 13 02:45:09 2001//Tvorbis1_0_public_release_candidate_2
+D

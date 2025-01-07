@@ -65,7 +65,7 @@ public:
 class MCCDLLEXPORT CDirectoryNode : public CReferenceCount
 {
 	// A list of files contained in directory
-	TList_SortableVector<CDir_FileRec> m_lFiles;
+	TArray_Sortable<CDir_FileRec> m_lFiles;
 
 	CStr GetErrorStr(int _ErrNo);
 

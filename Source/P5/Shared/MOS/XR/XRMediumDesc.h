@@ -8,33 +8,33 @@
 // -------------------------------------------------------------------
 enum
 {
-	XW_MEDIUM_SOLID				= DBit(0),
-	XW_MEDIUM_PHYSSOLID			= DBit(1),
-	XW_MEDIUM_PLAYERSOLID		= DBit(2),
-	XW_MEDIUM_GLASS				= DBit(3),
-	XW_MEDIUM_AISOLID			= DBit(4),
-	XW_MEDIUM_CAMERASOLID		= DBit(5),
-//	XW_MEDIUM_LAVA				= DBit(6),
-//	XW_MEDIUM_SLIME				= DBit(7),
-	XW_MEDIUM_LIQUID			= DBit(6),
+	XW_MEDIUM_SOLID				= M_Bit(0),
+	XW_MEDIUM_PHYSSOLID			= M_Bit(1),
+	XW_MEDIUM_PLAYERSOLID		= M_Bit(2),
+	XW_MEDIUM_GLASS				= M_Bit(3),
+	XW_MEDIUM_AISOLID			= M_Bit(4),
+	XW_MEDIUM_DYNAMICSSOLID		= M_Bit(5),
+//	XW_MEDIUM_LAVA				= M_Bit(6),
+//	XW_MEDIUM_SLIME				= M_Bit(7),
+	XW_MEDIUM_LIQUID			= M_Bit(6),
 	XW_MEDIUM_WATER				= XW_MEDIUM_LIQUID,
-	XW_MEDIUM_RAIN				= DBit(7),
-	XW_MEDIUM_AIR				= DBit(8),
+	XW_MEDIUM_CAMERASOLID		= M_Bit(7),
+	XW_MEDIUM_AIR				= M_Bit(8),
 	
-	XW_MEDIUM_SEETHROUGH		= DBit(9),
-	XW_MEDIUM_DUALSIDED			= DBit(10),
-	XW_MEDIUM_FOG				= DBit(11),		// Has NHF,
-	XW_MEDIUM_LITFOG			= DBit(12),		// The NHF has lighting.
-	XW_MEDIUM_INVISIBLE			= DBit(13),		// Surfaces are invisible
-	XW_MEDIUM_CLIPFOG			= DBit(14),		// NHF should be clipped. (what that means is very complicated so if you really want to know you have to ask me.  /mh)
-	XW_MEDIUM_NAVIGATION		= DBit(15),
-	XW_MEDIUM_FOGADDITIVE		= DBit(16),		// The NHF is drawn with additive blending.
-	XW_MEDIUM_FOGNOTESS			= DBit(17),		// No auto-tesselation of faces in the fog.
-	XW_MEDIUM_SKY				= DBit(18),
-	XW_MEDIUM_NAVGRIDFLAGS		= DBit(19),		// User1 contain nav-grid flags.
-	XW_MEDIUM_NOMERGE			= DBit(20),		// Brushes with this medium cannot be CSG merged.
-	XW_MEDIUM_NOSTRUCTUREMERGE	= DBit(21),		// Structure brushes with this medium cannot be CSG merged.
-	XW_MEDIUM_DEPTHFOG			= DBit(22),		// Override depth-fogging
+	XW_MEDIUM_SEETHROUGH		= M_Bit(9),
+	XW_MEDIUM_DUALSIDED			= M_Bit(10),
+	XW_MEDIUM_FOG				= M_Bit(11),		// Has NHF,
+	XW_MEDIUM_LITFOG			= M_Bit(12),		// The NHF has lighting.
+	XW_MEDIUM_INVISIBLE			= M_Bit(13),		// Surfaces are invisible
+	XW_MEDIUM_CLIPFOG			= M_Bit(14),		// NHF should be clipped. (what that means is very complicated so if you really want to know you have to ask me.  /mh)
+	XW_MEDIUM_NAVIGATION		= M_Bit(15),
+	XW_MEDIUM_FOGADDITIVE		= M_Bit(16),		// The NHF is drawn with additive blending.
+	XW_MEDIUM_FOGNOTESS			= M_Bit(17),		// No auto-tesselation of faces in the fog.
+	XW_MEDIUM_SKY				= M_Bit(18),
+	XW_MEDIUM_NAVGRIDFLAGS		= M_Bit(19),		// User1 contain nav-grid flags.
+	XW_MEDIUM_NOMERGE			= M_Bit(20),		// Brushes with this medium cannot be CSG merged.
+	XW_MEDIUM_NOSTRUCTUREMERGE	= M_Bit(21),		// Structure brushes with this medium cannot be CSG merged.
+	XW_MEDIUM_DEPTHFOG			= M_Bit(22),		// Override depth-fogging
 
 	XW_MEDIUM_TYPEMASK			= DBitRange(0, 8),
 	XW_MEDIUM_ATTRMASK			= DBitRange(9, 31),
@@ -47,19 +47,19 @@ class CXR_MediumDesc
 {
 public:
 	int32 m_MediumFlags;	// Medium type
-	fp4 m_CSGPriority;		// CSG carve priority when medium types are equal
-	fp4 m_Density;			// Controls whether an object floats or sinks.
-	fp4 m_Thickness;		// Controls how much the medium's velocity influence an object's velocity.
+	fp32 m_CSGPriority;		// CSG carve priority when medium types are equal
+	fp32 m_Density;			// Controls whether an object floats or sinks.
+	fp32 m_Thickness;		// Controls how much the medium's velocity influence an object's velocity.
 	uint32 m_Color;			// Controls colorizing.
 
-	CVec3Dfp4 m_Velocity;	// Units per second
-	CVec3Dfp4 m_RotationPivot;
-	CVec3Dfp4 m_RotationAxis;
-	fp4 m_Rotation;			// Normalized degrees per second.
+	CVec3Dfp32 m_Velocity;	// Units per second
+	CVec3Dfp32 m_RotationPivot;
+	CVec3Dfp32 m_RotationAxis;
+	fp32 m_Rotation;			// Normalized degrees per second.
 
-	CPlane3Dfp4 m_FogPlane;	// Density(v) = FogPlane.Distance(v)*Attenuation + Density;
-	fp4 m_FogDensity;
-	fp4 m_FogAttenuation;
+	CPlane3Dfp32 m_FogPlane;	// Density(v) = FogPlane.Distance(v)*Attenuation + Density;
+	fp32 m_FogDensity;
+	fp32 m_FogAttenuation;
 	uint32 m_FogColor;
 	int16 m_FogResolution;
 
@@ -70,7 +70,7 @@ public:
 
 	void Clear();
 	CXR_MediumDesc();
-	CXR_MediumDesc(int _MediumFlags, fp4 _Density, fp4 _Thickness, CVec3Dfp4 _Velocity);
+	CXR_MediumDesc(int _MediumFlags, fp32 _Density, fp32 _Thickness, CVec3Dfp32 _Velocity);
 	void SetSolid();
 	void SetWater();
 	void SetAir();

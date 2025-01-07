@@ -36,13 +36,13 @@
 //  CTypeDescriptor
 // -------------------------------------------------------------------
 #if 0
-const fp4 CTypeDesc_fp4::ms_cMin(_FP4_MIN);
-const fp4 CTypeDesc_fp4::ms_cMax(_FP4_MAX);
-const fp4 CTypeDesc_fp4::ms_cEpsilon(_FP4_EPSILON);
+const fp32 CTypeDesc_fp32::ms_cMin(_FP32_MIN);
+const fp32 CTypeDesc_fp32::ms_cMax(_FP32_MAX);
+const fp32 CTypeDesc_fp32::ms_cEpsilon(_FP32_EPSILON);
 
-const fp8 CTypeDesc_fp8::ms_cMin(_FP8_MIN);
-const fp8 CTypeDesc_fp8::ms_cMax(_FP8_MAX);
-const fp8 CTypeDesc_fp8::ms_cEpsilon(_FP8_EPSILON);
+const fp64 CTypeDesc_fp64::ms_cMin(_FP64_MIN);
+const fp64 CTypeDesc_fp64::ms_cMax(_FP64_MAX);
+const fp64 CTypeDesc_fp64::ms_cEpsilon(_FP64_EPSILON);
 
 const int CTypeDesc_int8::ms_cMin = -0x80;
 const int CTypeDesc_int8::ms_cMax = 0x7f;
@@ -102,7 +102,7 @@ CMathAccel* GetMathAccel()
 
 CMathAccel::CMathAccel()
 {
-	InitInverseTable_fp4();
+	InitInverseTable_fp32();
 	InitInverseTable_Fixed16();
 	InitSqrtTable();
 }
@@ -121,15 +121,15 @@ void CMathAccel::InitInverseTable_Fixed16()
 	};
 };
 
-void CMathAccel::InitInverseTable_fp4()
+void CMathAccel::InitInverseTable_fp32()
 {
-	if (m_pFp4InverseTab == NULL)
+	if (m_pFp32InverseTab == NULL)
 	{
-		m_pFp4InverseTab = DNew(fp4) fp4[CONST_INVERSEMAX];
-		if (m_pFp4InverseTab == NULL) Error_static("GetInverse_fp4", "Out of memory.");
-		m_pFp4InverseTab[0] = _FP4_MAX/2;
+		m_pFp32InverseTab = DNew(fp32) fp32[CONST_INVERSEMAX];
+		if (m_pFp32InverseTab == NULL) Error_static("GetInverse_fp32", "Out of memory.");
+		m_pFp32InverseTab[0] = _FP32_MAX/2;
 		for (int i = 1; i < CONST_INVERSEMAX; i++)
-			m_pFp4InverseTab[i] = 1.0f/i;
+			m_pFp32InverseTab[i] = 1.0f/i;
 	};
 };
 
@@ -172,7 +172,7 @@ void CMathAccel::InitSqrtTable()
 }
 
 #if !defined(PLATFORM_DOLPHIN) && !defined(PLATFORM_PS3)
-float CMathAccel::fsqrt(fp4 n) const
+float CMathAccel::fsqrt(fp32 n) const
 {
 	unsigned int *num = (unsigned int *)&n;
 				// to access the bits of a float in C
@@ -239,16 +239,16 @@ int CMathAccel::FastMulDiv64(int factor1, int factor2, int namnare)
 }
 
 //-------------------------------------------------------------------
-//FastDivFp4Int,  fp4 / int32
+//FastDivFp32Int,  fp32 / int32
 //
 //	13 c. Inc. loop. 30 om ingen opt.
 //	30 c. Inc loop, Kåd med vanlig division.
 
-int CMathAccel::FastDivFp4Int(fp4 taljare, int namnare)
+int CMathAccel::FastDivFp32Int(fp32 taljare, int namnare)
 {
 	if ((namnare < CONST_INVERSEMAX) && (namnare >= 0))
 	{
-		return TruncToInt(m_pFp4InverseTab[(namnare)] * (taljare));
+		return TruncToInt(m_pFp32InverseTab[(namnare)] * (taljare));
 	}
 	else
 		return TruncToInt((taljare)/(namnare));

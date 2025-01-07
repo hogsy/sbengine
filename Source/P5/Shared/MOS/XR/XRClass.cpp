@@ -109,13 +109,21 @@ void CXR_LightFieldElement::Read(CCFile* _pF, int _Ver)
 {
 	switch(_Ver)
 	{
+	case 0x0102:
+		{
+			m_Scaler.Read(_pF);
+			_pF->ReadLE(&(m_Axis[0][0]), 6 * 3);
+			break;
+		}
 	case 0x0101:
 		{
+			m_Scaler.m_Half = FP2_ONE;
 			_pF->ReadLE(&(m_Axis[0][0]), 6 * 3);
 			break;
 		};
 	case 0x0100:
 		{
+			m_Scaler.m_Half = FP2_ONE;
 			CPixel32 lAxis[6];
 			_pF->ReadLE((uint32*)lAxis, 6);
 			for(int i = 0; i < 6; i++)
@@ -131,6 +139,7 @@ void CXR_LightFieldElement::Read(CCFile* _pF, int _Ver)
 
 void CXR_LightFieldElement::Write(CCFile* _pF) const
 {
+	m_Scaler.Write(_pF);
 	_pF->WriteLE(&(m_Axis[0][0]), 6 * 3);
 }
 
@@ -159,36 +168,36 @@ void CXR_BoxMapping::CreateUnit()
 	m_Rot = 0;
 }
 
-void CXR_BoxMapping::Create(const class CXR_PlaneMapping& _Plane, fp4 _Epsilon)
+void CXR_BoxMapping::Create(const class CXR_PlaneMapping& _Plane, fp32 _Epsilon)
 {
 	MAUTOSTRIP(CXR_BoxMapping_Create, MAUTOSTRIP_VOID);
-	const CVec3Dfp4& _U = _Plane.m_U;
-	const CVec3Dfp4& _V = _Plane.m_V;
-	CVec3Dfp4 n, u0, v0;
+	const CVec3Dfp32& _U = _Plane.m_U;
+	const CVec3Dfp32& _V = _Plane.m_V;
+	CVec3Dfp32 n, u0, v0;
 	_U.CrossProd(_V, n);
 
 	if (M_Fabs(n.k[2] + _Epsilon) > M_Sqrt(Sqr(n.k[0]) + Sqr(n.k[1])))
 	{
-		u0 = CVec3Dfp4(1.0f, 0.0f, 0.0f);
-		v0 = CVec3Dfp4(0.0f, -1.0f, 0.0f);
+		u0 = CVec3Dfp32(1.0f, 0.0f, 0.0f);
+		v0 = CVec3Dfp32(0.0f, -1.0f, 0.0f);
 	}
 	else
 	{
 		if (M_Fabs(n.k[0]) + _Epsilon > M_Fabs(n.k[1]))
 		{
-			u0 = CVec3Dfp4(0.0f, 1.0f, 0.0f);
-			v0 = CVec3Dfp4(0.0f, 0.0f, -1.0f);
+			u0 = CVec3Dfp32(0.0f, 1.0f, 0.0f);
+			v0 = CVec3Dfp32(0.0f, 0.0f, -1.0f);
 		}
 		else
 		{
-			u0 = CVec3Dfp4(1.0f, 0.0f, 0.0f);
-			v0 = CVec3Dfp4(0.0f, 0.0f, -1.0f);
+			u0 = CVec3Dfp32(1.0f, 0.0f, 0.0f);
+			v0 = CVec3Dfp32(0.0f, 0.0f, -1.0f);
 		}
 	}
 	float ud0 = u0 * _U;
 	float ud1 = _U.Length() * u0.Length();
 
-	CVec3Dfp4 RefN;
+	CVec3Dfp32 RefN;
 	u0.CrossProd(v0, RefN);
 
 	float RotU = M_ACos(Max(Min(ud0 / ud1, 1.0f), -1.0f)) / (2.0f * _PI);
@@ -205,7 +214,7 @@ void CXR_BoxMapping::Create(const class CXR_PlaneMapping& _Plane, fp4 _Epsilon)
 	m_Offset[1] = _Plane.m_VOffset;
 }
 
-bool CXR_BoxMapping::AlmostEqual(const CXR_BoxMapping& _Map, fp4 _Epsilon) const
+bool CXR_BoxMapping::AlmostEqual(const CXR_BoxMapping& _Map, fp32 _Epsilon) const
 {
 	MAUTOSTRIP(CXR_BoxMapping_AlmostEqual, false);
 	if (M_Fabs(m_Rot - _Map.m_Rot) > _Epsilon) return false;
@@ -236,39 +245,39 @@ void CXR_BoxMapping::Write(CCFile* _pFile) const
 void CXR_PlaneMapping::CreateUnit()
 {
 	MAUTOSTRIP(CXR_PlaneMapping_CreateUnit, MAUTOSTRIP_VOID);
-	m_U = CVec3Dfp4(1,0,0);
-	m_V = CVec3Dfp4(0,1,0);
+	m_U = CVec3Dfp32(1,0,0);
+	m_V = CVec3Dfp32(0,1,0);
 	m_UOffset = 0;
 	m_VOffset = 0;
 }
 
-void CXR_PlaneMapping::Create(const class CXR_BoxMapping& _Mapping, const CPlane3Dfp8& _Plane)
+void CXR_PlaneMapping::Create(const class CXR_BoxMapping& _Mapping, const CPlane3Dfp64& _Plane)
 {
 	MAUTOSTRIP(CXR_PlaneMapping_Create, MAUTOSTRIP_VOID);
-	CVec3Dfp4 u;
-	CVec3Dfp4 v;
+	CVec3Dfp32 u;
+	CVec3Dfp32 v;
 	if (M_Fabs(_Plane.n.k[2] + 0.001f) > M_Sqrt(Sqr(_Plane.n.k[0]) + Sqr(_Plane.n.k[1])))
 	{
-		u = CVec3Dfp4(1.0f, 0.0f, 0.0f);
-		v = CVec3Dfp4(0.0f, -1.0f, 0.0f);
-		RotateElements(u.k[0], u.k[1], fp4(-_Mapping.m_Rot/360.0f));
-		RotateElements(v.k[0], v.k[1], fp4(-_Mapping.m_Rot/360.0f));
+		u = CVec3Dfp32(1.0f, 0.0f, 0.0f);
+		v = CVec3Dfp32(0.0f, -1.0f, 0.0f);
+		RotateElements(u.k[0], u.k[1], fp32(-_Mapping.m_Rot/360.0f));
+		RotateElements(v.k[0], v.k[1], fp32(-_Mapping.m_Rot/360.0f));
 	}
 	else
 	{
 		if (M_Fabs(_Plane.n.k[0]) + 0.001f > M_Fabs(_Plane.n.k[1]))
 		{
-			u = CVec3Dfp4(0.0f, 1.0f, 0.0f);
-			v = CVec3Dfp4(0.0f, 0.0f, -1.0f);
-			RotateElements(u.k[1], u.k[2], fp4(-_Mapping.m_Rot/360.0f));
-			RotateElements(v.k[1], v.k[2], fp4(-_Mapping.m_Rot/360.0f));
+			u = CVec3Dfp32(0.0f, 1.0f, 0.0f);
+			v = CVec3Dfp32(0.0f, 0.0f, -1.0f);
+			RotateElements(u.k[1], u.k[2], fp32(-_Mapping.m_Rot/360.0f));
+			RotateElements(v.k[1], v.k[2], fp32(-_Mapping.m_Rot/360.0f));
 		}
 		else
 		{
-			u = CVec3Dfp4(1.0f, 0.0f, 0.0f);
-			v = CVec3Dfp4(0.0f, 0.0f, -1.0f);
-			RotateElements(u.k[0], u.k[2], fp4(-_Mapping.m_Rot/360.0f));
-			RotateElements(v.k[0], v.k[2], fp4(-_Mapping.m_Rot/360.0f));
+			u = CVec3Dfp32(1.0f, 0.0f, 0.0f);
+			v = CVec3Dfp32(0.0f, 0.0f, -1.0f);
+			RotateElements(u.k[0], u.k[2], fp32(-_Mapping.m_Rot/360.0f));
+			RotateElements(v.k[0], v.k[2], fp32(-_Mapping.m_Rot/360.0f));
 		}
 	}
 	u *= _Mapping.m_Scale.k[0];
@@ -280,17 +289,17 @@ void CXR_PlaneMapping::Create(const class CXR_BoxMapping& _Mapping, const CPlane
 	m_VOffset = _Mapping.m_Offset.k[1];
 }
 
-void CXR_PlaneMapping::Create(const class CXR_BoxMapping& _Mapping, const CPlane3Dfp4& _Plane)
+void CXR_PlaneMapping::Create(const class CXR_BoxMapping& _Mapping, const CPlane3Dfp32& _Plane)
 {
 	MAUTOSTRIP(CXR_PlaneMapping_Create_2, MAUTOSTRIP_VOID);
-	CPlane3Dfp8 Planefp8(_Plane.n.Getfp8(), _Plane.d);
-	Create(_Mapping, Planefp8);
+	CPlane3Dfp64 Planefp64(_Plane.n.Getfp64(), _Plane.d);
+	Create(_Mapping, Planefp64);
 }
 
-int CXR_PlaneMapping::AlmostEqual(const CXR_PlaneMapping& _Map, fp4 _Epsilon) const
+int CXR_PlaneMapping::AlmostEqual(const CXR_PlaneMapping& _Map, fp32 _Epsilon) const
 {
 	MAUTOSTRIP(CXR_PlaneMapping_AlmostEqual, 0);
-	fp4 EpsSqr = Sqr(_Epsilon);
+	fp32 EpsSqr = Sqr(_Epsilon);
 	if ((m_U - _Map.m_U).LengthSqr() > EpsSqr) return 0;
 	if ((m_V - _Map.m_V).LengthSqr() > EpsSqr) return 0;
 	if (M_Fabs(m_UOffset - _Map.m_UOffset) > _Epsilon) return 0;
@@ -342,41 +351,41 @@ void CXR_PlaneMapping::Struct_SwapLE()
 // -------------------------------------------------------------------
 //  CXR_LightPosition
 // -------------------------------------------------------------------
-void CXR_LightPosition::SetDirection(const CVec3Dfp4& _Dir)
+void CXR_LightPosition::SetDirection(const CVec3Dfp32& _Dir)
 {
 	_Dir.SetRow(m_Pos, 0);
 }
 
-const CVec3Dfp4& CXR_LightPosition::GetDirection() const
+const CVec3Dfp32& CXR_LightPosition::GetDirection() const
 {
-	return CVec3Dfp4::GetRow(m_Pos, 0);
+	return CVec3Dfp32::GetRow(m_Pos, 0);
 }
 
-void CXR_LightPosition::SetPosition(const CVec3Dfp4& _Pos)
+void CXR_LightPosition::SetPosition(const CVec3Dfp32& _Pos)
 {
 	_Pos.SetRow(m_Pos, 3);
 }
 
-const CVec3Dfp4& CXR_LightPosition::GetPosition() const
+const CVec3Dfp32& CXR_LightPosition::GetPosition() const
 {
-	return CVec3Dfp4::GetRow(m_Pos, 3);
+	return CVec3Dfp32::GetRow(m_Pos, 3);
 }
 
-fp4 CXR_LightPosition::GetDistance(const CVec3Dfp4& _Pos) const
+fp32 CXR_LightPosition::GetDistance(const CVec3Dfp32& _Pos) const
 {
-	return CVec3Dfp4::GetRow(m_Pos, 3).Distance(_Pos);
+	return CVec3Dfp32::GetRow(m_Pos, 3).Distance(_Pos);
 }
 
-fp4 CXR_LightPosition::GetDistanceSqr(const CVec3Dfp4& _Pos) const
+fp32 CXR_LightPosition::GetDistanceSqr(const CVec3Dfp32& _Pos) const
 {
-	return CVec3Dfp4::GetRow(m_Pos, 3).DistanceSqr(_Pos);
+	return CVec3Dfp32::GetRow(m_Pos, 3).DistanceSqr(_Pos);
 }
 
-void CXR_LightPosition::Transform(const CMat43fp4& _Mat, CXR_LightPosition& _Dest) const
+void CXR_LightPosition::Transform(const CMat4Dfp32& _Mat, CXR_LightPosition& _Dest) const
 {
 	_Dest.m_Flags = m_Flags;
 	_Dest.m_Type = m_Type;
-	CMat43fp4 Temp;
+	CMat4Dfp32 Temp;
 	m_Pos.Multiply(_Mat, _Dest.m_Pos);
 	if (m_Flags & CXR_LIGHT_PROJMAPTRANSFORM)
 		m_ProjMapTransform.Multiply(_Mat, _Dest.m_ProjMapTransform);
@@ -391,7 +400,7 @@ int CXR_Light::ParseFlags(const char* _pStr)
 	static const char *lpFlagsTranslate[] =
 	{
 		"NoShadows", "Flare", "LightFieldMap", "Enabled", "FlareDirectional", "ProjMapTransform", "Hint_Additive",
-		"Hint_DontAffectModels", "AnimTime", "NoDiffuse", "NoSpecular", "RadiosityLight", NULL
+		"Hint_DontAffectModels", "AnimTime", "NoDiffuse", "NoSpecular", "RadiosityLight","FlareOnly", NULL
 	};
 
 	return CStr::TranslateFlags(_pStr, lpFlagsTranslate);
@@ -403,10 +412,11 @@ CXR_Light::CXR_Light()
 	m_Flags = CXR_LIGHT_ENABLED;
 	m_LightGUID = 0;
 	m_iLight = ~0;
+	m_iLightf = -1.0f;
 	m_Type = 0;
 	m_Pos.Unit();
 	m_Intensity = 1.0f;
-	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
+//	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
 	m_Range = 512.0f;
 	m_RangeInv = 1.0f/m_Range;
 	m_SpotWidth = 1.0f;
@@ -417,19 +427,21 @@ CXR_Light::CXR_Light()
 	m_pPVS = 0;
 }
 
-CXR_Light::CXR_Light(const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags, int _Type)
+CXR_Light::CXR_Light(const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags, int _Type)
 {
 	MAUTOSTRIP(CXR_Light_ctor_2, MAUTOSTRIP_VOID);
 	m_Flags = CXR_LIGHT_ENABLED | _Flags;
 	m_LightGUID = 0;
 	m_iLight = ~0;
+	m_iLightf = -1.0f;
 	m_Type = _Type;
 	m_Pos.Unit();
 	_Pos.SetRow(m_Pos, 3);
 	m_Intensity[0] = _Intensity[0];
 	m_Intensity[1] = _Intensity[1];
 	m_Intensity[2] = _Intensity[2];
-	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
+	m_Intensity[3] = 1.0f;
+//	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
 	m_Range = _Range;
 	m_RangeInv = 1.0f/m_Range;
 	m_SpotWidth = 1.0f;
@@ -441,47 +453,20 @@ CXR_Light::CXR_Light(const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Ra
 	m_pPVS = 0;
 }
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-CXR_Light::CXR_Light(const CMat43fp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags, int _Type)
-{
-	MAUTOSTRIP(CXR_Light_ctor_2, MAUTOSTRIP_VOID);
-	m_Flags = CXR_LIGHT_ENABLED | _Flags;
-	m_LightGUID = 0;
-	m_iLight = -1;
-	m_Type = _Type;
-	m_Pos = _Pos;
-	m_Intensity[0] = _Intensity[0];
-	m_Intensity[1] = _Intensity[1];
-	m_Intensity[2] = _Intensity[2];
-	m_IntensityInt32 = CPixel32(m_Intensity.k[0]*255.0f, m_Intensity.k[1]*255.0f, m_Intensity.k[2]*255.0f);
-	m_Range = _Range;
-	m_RangeInv = 1.0f/m_Range;
-	m_SpotWidth = 1.0f;
-	m_SpotHeight = 1.0f;
-	m_AnimTime = 0;
- 	m_ProjMapID = 0;
-
-	m_pNext = NULL;
-	m_iPortalLeaf = 0;
-}
-#endif
-
-CXR_Light::CXR_Light(const CMat4Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags, int _Type)
+CXR_Light::CXR_Light(const CMat4Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags, int _Type)
 {
 	MAUTOSTRIP(CXR_Light_ctor_2, MAUTOSTRIP_VOID);
 	m_Flags = CXR_LIGHT_ENABLED | _Flags;
 	m_LightGUID = 0;
 	m_iLight = ~0;
+	m_iLightf = -1.0f;
 	m_Type = _Type;
-#ifndef DEFINE_MAT43_IS_MAT4D
-	m_Pos.CreateFrom(_Pos);
-#else
 	m_Pos = _Pos;
-#endif
 	m_Intensity[0] = _Intensity[0];
 	m_Intensity[1] = _Intensity[1];
 	m_Intensity[2] = _Intensity[2];
-	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
+	m_Intensity[3] = 1.0f;
+//	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
 	m_Range = _Range;
 	m_RangeInv = 1.0f/m_Range;
 	m_SpotWidth = 1.0f;
@@ -507,7 +492,7 @@ bool CXR_Light::IsStaticMatch(CXR_Light *_pLight)
 }
 #endif
 
-void CXR_Light::SetProjectionMap(int _TextureID, const CMat43fp4* _pTransform)
+void CXR_Light::SetProjectionMap(int _TextureID, const CMat4Dfp32* _pTransform)
 {
 	m_ProjMapID = _TextureID;
 	if (m_ProjMapID && _pTransform)
@@ -519,12 +504,13 @@ void CXR_Light::SetProjectionMap(int _TextureID, const CMat43fp4* _pTransform)
 		m_Flags &= ~CXR_LIGHT_PROJMAPTRANSFORM;
 }
 
-void CXR_Light::SetIntensity(const CVec3Dfp4& _Intensity)
+void CXR_Light::SetIntensity(const CVec3Dfp32& _Intensity)
 {
 	m_Intensity[0] = _Intensity[0];
 	m_Intensity[1] = _Intensity[1];
 	m_Intensity[2] = _Intensity[2];
-	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
+	m_Intensity[3] = 1.0f;
+//	m_IntensityInt32 = CPixel32(int(m_Intensity.k[0]*255.0f), int(m_Intensity.k[1]*255.0f), int(m_Intensity.k[2]*255.0f));
 }
 
 #ifndef PLATFORM_CONSOLE
@@ -540,31 +526,31 @@ TPtr<class CSolid> CXR_Light::CreateBoundSolid() const
 	{
 	case CXR_LIGHTTYPE_POINT : 
 		{
-			spBound->CreateFromBox(GetPosition().Getfp8() - CVec3Dfp8(m_Range), GetPosition().Getfp8() + CVec3Dfp8(m_Range));
+			spBound->CreateFromBox(GetPosition().Getfp64() - CVec3Dfp64(m_Range), GetPosition().Getfp64() + CVec3Dfp64(m_Range));
 		}
 		break;
 
 	case CXR_LIGHTTYPE_SPOT : 
 		{
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(1,0,0), -m_Range));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-m_SpotWidth, 1.0f, 0.0f).Normalize(), 0));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-m_SpotWidth, -1.0f, 0.0f).Normalize(), 0));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-m_SpotHeight, 0.0f, 1.0f).Normalize(), 0));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-m_SpotHeight, 0.0f, -1.0f).Normalize(), 0));
-/*			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-_SQRT2,-_SQRT2,0), 0));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-_SQRT2,0,_SQRT2), 0));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-_SQRT2,0,-_SQRT2), 0));*/
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(1,0,0), -m_Range));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-m_SpotWidth, 1.0f, 0.0f).Normalize(), 0));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-m_SpotWidth, -1.0f, 0.0f).Normalize(), 0));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-m_SpotHeight, 0.0f, 1.0f).Normalize(), 0));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-m_SpotHeight, 0.0f, -1.0f).Normalize(), 0));
+/*			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-_SQRT2,-_SQRT2,0), 0));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-_SQRT2,0,_SQRT2), 0));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-_SQRT2,0,-_SQRT2), 0));*/
 
 			spBound->UpdateMesh();
 			spBound->Apply(m_Pos, false);
 
-			fp4 r = m_Range;
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(1, 0, 0), CVec3Dfp8(r, 0, 0) + GetPosition().Getfp8()));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(-1, 0, 0), CVec3Dfp8(-r, 0, 0) + GetPosition().Getfp8()));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(0, 1, 0), CVec3Dfp8(0, r, 0) + GetPosition().Getfp8()));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(0, -1, 0), CVec3Dfp8(0, -r, 0) + GetPosition().Getfp8()));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(0, 0, 1), CVec3Dfp8(0, 0, r) + GetPosition().Getfp8()));
-			spBound->AddPlane(CPlane3Dfp8(CVec3Dfp8(0, 0, -1), CVec3Dfp8(0, 0, -r) + GetPosition().Getfp8()));
+			fp32 r = m_Range;
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(1, 0, 0), CVec3Dfp64(r, 0, 0) + GetPosition().Getfp64()));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(-1, 0, 0), CVec3Dfp64(-r, 0, 0) + GetPosition().Getfp64()));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(0, 1, 0), CVec3Dfp64(0, r, 0) + GetPosition().Getfp64()));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(0, -1, 0), CVec3Dfp64(0, -r, 0) + GetPosition().Getfp64()));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(0, 0, 1), CVec3Dfp64(0, 0, r) + GetPosition().Getfp64()));
+			spBound->AddPlane(CPlane3Dfp64(CVec3Dfp64(0, 0, -1), CVec3Dfp64(0, 0, -r) + GetPosition().Getfp64()));
 
 			spBound->UpdateMesh();
 
@@ -594,8 +580,8 @@ void CXR_Light::CalcBoundBoxFast()
 	{
 	case CXR_LIGHTTYPE_SPOT : 
 		{
-			fp4 HalfRange = m_Range * 0.5f;
-			CVec3Dfp4 Pos = GetPosition() + CVec3Dfp4::GetRow( m_Pos, 0 ) * HalfRange;
+			fp32 HalfRange = m_Range * 0.5f;
+			CVec3Dfp32 Pos = GetPosition() + CVec3Dfp32::GetRow( m_Pos, 0 ) * HalfRange;
 			m_BoundBox.m_Min[0] = Pos[0] - HalfRange;
 			m_BoundBox.m_Min[1] = Pos[1] - HalfRange;
 			m_BoundBox.m_Min[2] = Pos[2] - HalfRange;
@@ -607,8 +593,8 @@ void CXR_Light::CalcBoundBoxFast()
 		
 	case CXR_LIGHTTYPE_POINT :		// FIXME: optimize spot box later
 		{
-			const CVec3Dfp4& Pos = GetPosition();
-			fp4 r = m_Range;
+			const CVec3Dfp32& Pos = GetPosition();
+			fp32 r = m_Range;
 			m_BoundBox.m_Min[0] = Pos[0] - r;
 			m_BoundBox.m_Min[1] = Pos[1] - r;
 			m_BoundBox.m_Min[2] = Pos[2] - r;
@@ -630,9 +616,9 @@ void CXR_Light::CalcBoundBoxFast()
 
 }
 
-void CXR_Light::Transform(const CMat43fp4& _Mat)
+void CXR_Light::Transform(const CMat4Dfp32& _Mat)
 {
-	CMat43fp4 Temp;
+	CMat4Dfp32 Temp;
 	m_Pos.Multiply(_Mat, Temp);
 	m_Pos = Temp;
 	if (m_Flags & CXR_LIGHT_PROJMAPTRANSFORM)
@@ -644,6 +630,7 @@ void CXR_Light::Transform(const CMat43fp4& _Mat)
 
 void CXR_Light::Read(CCFile* _pFile, int _Version)
 {
+	CVec3Dfp32 I;
 	switch(_Version)
 	{
 	case 0x0100 : 
@@ -651,7 +638,7 @@ void CXR_Light::Read(CCFile* _pFile, int _Version)
 			_pFile->ReadLE(m_Flags);
 			_pFile->ReadLE(m_Type);
 			m_Pos.Read(_pFile);
-			m_Intensity.Read(_pFile);
+			I.Read(_pFile);
 			_pFile->ReadLE(m_Range);
 			_pFile->ReadLE(m_AnimTime);
 			_pFile->ReadLE(m_SpotWidth);
@@ -665,7 +652,8 @@ void CXR_Light::Read(CCFile* _pFile, int _Version)
 	}
 
 	m_RangeInv = 1.0f / m_Range;
-	m_IntensityInt32 = CPixel32::From_fp4(m_Intensity.k[0]*255.0f, m_Intensity.k[1]*255.0f, m_Intensity.k[2]*255.0f);
+	SetIntensity(I);
+//	m_IntensityInt32 = CPixel32::From_fp32(m_Intensity.k[0]*255.0f, m_Intensity.k[1]*255.0f, m_Intensity.k[2]*255.0f);
 }
 
 void CXR_Light::Write(CCFile* _pFile) const
@@ -673,7 +661,7 @@ void CXR_Light::Write(CCFile* _pFile) const
 	_pFile->WriteLE(m_Flags);
 	_pFile->WriteLE(m_Type);
 	m_Pos.Write(_pFile);
-	m_Intensity.Write(_pFile);
+	_pFile->WriteLE(m_Intensity.k, 3);
 	_pFile->WriteLE(m_Range);
 	_pFile->WriteLE(m_AnimTime);
 	_pFile->WriteLE(m_SpotWidth);
@@ -695,7 +683,7 @@ void CXR_Light::SwapLE()
 	m_BoundBox.SwapLE();
 
 	m_RangeInv = 1.0f / m_Range;
-	m_IntensityInt32 = CPixel32::From_fp4(m_Intensity.k[0]*255.0f, m_Intensity.k[1]*255.0f, m_Intensity.k[2]*255.0f);
+//	m_IntensityInt32 = CPixel32::From_fp32(m_Intensity.k[0]*255.0f, m_Intensity.k[1]*255.0f, m_Intensity.k[2]*255.0f);
 }
 #endif
 
@@ -744,13 +732,13 @@ void CXR_WorldLightState::PrepareFrame()
 	m_nStatic = 0;
 }
 
-void CXR_WorldLightState::Set(int _LightID, const CVec3Dfp4& _Intensity)
+void CXR_WorldLightState::Set(int _LightID, const CVec3Dfp32& _Intensity)
 {
 	MAUTOSTRIP(CXR_WorldLightState_Set, MAUTOSTRIP_VOID);
 	if ((_LightID <= 0) || (_LightID >= m_lLightIDs.Len())) return;
 
 //	m_lLightIDs[_LightID].m_Intensity = _Intensity;
-	m_lLightIDs[_LightID].m_IntensityInt32 = CPixel32::From_fp4(_Intensity.k[0]*255.0f, _Intensity.k[1]*255.0f, _Intensity.k[2]*255.0f);
+	m_lLightIDs[_LightID].m_IntensityInt32 = CPixel32::From_fp32(_Intensity.k[0]*255.0f, _Intensity.k[1]*255.0f, _Intensity.k[2]*255.0f);
 }
 
 void CXR_WorldLightState::AddDynamic(const CXR_Light& _Light)
@@ -766,7 +754,7 @@ void CXR_WorldLightState::AddDynamic(const CXR_Light& _Light)
 	m_nDynamic++;
 }
 
-void CXR_WorldLightState::AddDynamic(const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags, int _Type)
+void CXR_WorldLightState::AddDynamic(const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags, int _Type)
 {
 	MAUTOSTRIP(CXR_WorldLightState_AddDynamic_2, MAUTOSTRIP_VOID);
 	if ((m_nDynamic < 0) || (m_nDynamic >= m_lDynamic.Len()))
@@ -794,7 +782,7 @@ void CXR_WorldLightState::AddStatic(const CXR_Light& _Light)
 	m_nStatic++;
 }
 
-void CXR_WorldLightState::AddStatic(int _LightID, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags, int _Type)
+void CXR_WorldLightState::AddStatic(int _LightID, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags, int _Type)
 {
 	MAUTOSTRIP(CXR_WorldLightState_AddStatic_2, MAUTOSTRIP_VOID);
 	if ((m_nStatic < 0) || (m_nStatic >= m_lStatic.Len())) 
@@ -806,15 +794,15 @@ void CXR_WorldLightState::AddStatic(int _LightID, const CVec3Dfp4& _Pos, const C
 	}
 	if ((_LightID < 0) || (_LightID >= m_lLightIDs.Len())) return;
 
-	CVec3Dfp4 Intens(
-		(fp4)(m_lLightIDs[_LightID].m_IntensityInt32.GetR())/255.0f * _Intensity.k[0],
-		(fp4)(m_lLightIDs[_LightID].m_IntensityInt32.GetG())/255.0f * _Intensity.k[1],
-		(fp4)(m_lLightIDs[_LightID].m_IntensityInt32.GetB())/255.0f * _Intensity.k[2]);
+	CVec3Dfp32 Intens(
+		(fp32)(m_lLightIDs[_LightID].m_IntensityInt32.GetR())/255.0f * _Intensity.k[0],
+		(fp32)(m_lLightIDs[_LightID].m_IntensityInt32.GetG())/255.0f * _Intensity.k[1],
+		(fp32)(m_lLightIDs[_LightID].m_IntensityInt32.GetB())/255.0f * _Intensity.k[2]);
 	m_lStatic[m_nStatic] = CXR_Light(_Pos, Intens, _Range, _Flags, _Type);
 	m_nStatic++;
 }
 
-void CXR_WorldLightState::AddLightVolume(CXR_LightVolume* _pLightVolume, const CVec3Dfp4& _ReferencePos)
+void CXR_WorldLightState::AddLightVolume(CXR_LightVolume* _pLightVolume, const CVec3Dfp32& _ReferencePos)
 {
 	MAUTOSTRIP(CXR_WorldLightState_AddLightVolume, MAUTOSTRIP_VOID);
 	while(_pLightVolume)
@@ -830,10 +818,12 @@ void CXR_WorldLightState::AddLightVolume(CXR_LightVolume* _pLightVolume, const C
 		CXR_Light& Light = m_lStatic[m_nStatic];
 		m_nStatic++;
 
-		CVec3Dfp4 LightDir;
-		fp4 Bias = _pLightVolume->Light_EvalVertex(m_lLightIDs.GetBasePtr(), _ReferencePos, LightDir, Light.m_Intensity);
+		CVec3Dfp32 LightDir;
+		CVec3Dfp32 LightI;
+		fp32 Bias = _pLightVolume->Light_EvalVertex(m_lLightIDs.GetBasePtr(), _ReferencePos, LightDir, LightI);
 		Light.SetDirection(LightDir);
-		Light.m_IntensityInt32 = CPixel32::From_fp4(Light.m_Intensity.k[0]*255.0f, Light.m_Intensity.k[1]*255.0f, Light.m_Intensity.k[2]*255.0f);
+		Light.SetIntensity(LightI);
+//		Light.m_IntensityInt32 = CPixel32::From_fp32(Light.m_Intensity.k[0]*255.0f, Light.m_Intensity.k[1]*255.0f, Light.m_Intensity.k[2]*255.0f);
 		Light.m_Type = CXR_LIGHTTYPE_LIGHTVOLUME;
 		Light.m_Flags = 0;
 		Light.m_Range = Bias;
@@ -922,7 +912,7 @@ void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, CXR_View
 										// hard-hit'n list-class up your sleve.  ;-)
 }
 
-void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, fp4 _BoundR, const CVec3Dfp4 _BoundPos, int _MaxStatic, int _MaxDynamic)
+void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, fp32 _BoundR, const CVec3Dfp32 _BoundPos, int _MaxStatic, int _MaxDynamic)
 {
 	MAUTOSTRIP(CXR_WorldLightState_CopyAndCull_2, MAUTOSTRIP_VOID);
 	
@@ -935,15 +925,16 @@ void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, fp4 _Bou
 	{
 		const CXR_Light* pL = &_pWLS->m_lDynamic[i];
 		CXR_Light* pLights = m_lDynamic.GetBasePtr();
-		CVec3Dfp4 lv;
+		CVec3Dfp32 lv;
 		pL->GetPosition().Sub(_BoundPos, lv);
-		fp4 DistSqr = lv.LengthSqr();
+		fp32 DistSqr = lv.LengthSqr();
 
 		if (DistSqr < Sqr(pL->m_Range + _BoundR))
 		{
-			fp4 Dist = Min(pL->m_Range, (fp4) M_Sqrt(DistSqr)) * pL->m_RangeInv;
-			fp4 Intens = pL->m_Intensity.k[0] + 2.0f*pL->m_Intensity.k[1] + pL->m_Intensity.k[2];
-			fp4 Scale = Intens * (1.0f - Dist);
+			fp32 Dist = Min(pL->m_Range, (fp32) M_Sqrt(DistSqr)) * pL->m_RangeInv;
+			CVec4Dfp32 LightColor = pL->GetIntensityv();
+			fp32 Intens = LightColor[0] + 2.0f * LightColor[1] + LightColor[2];
+			fp32 Scale = Intens * (1.0f - Dist);
 
 			if(m_nDynamic == _MaxDynamic)
 			{
@@ -972,15 +963,16 @@ void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, fp4 _Bou
 	{
 		const CXR_Light* pL = &_pWLS->m_lStatic[i];
 		CXR_Light* pLights = m_lStatic.GetBasePtr();
-		CVec3Dfp4 lv;
+		CVec3Dfp32 lv;
 		pL->GetPosition().Sub(_BoundPos, lv);
-		fp4 DistSqr = lv.LengthSqr();
+		fp32 DistSqr = lv.LengthSqr();
 
 		if (DistSqr < Sqr(pL->m_Range + _BoundR))
 		{
-			fp4 Dist = Min(pL->m_Range, (fp4) M_Sqrt(DistSqr)) * pL->m_RangeInv;
-			fp4 Intens = pL->m_Intensity.k[0] + 2.0f*pL->m_Intensity.k[1] + pL->m_Intensity.k[2];
-			fp4 Scale = Intens * (1.0f - Dist);
+			fp32 Dist = Min(pL->m_Range, (fp32) M_Sqrt(DistSqr)) * pL->m_RangeInv;
+			CVec4Dfp32 LightColor = pL->GetIntensityv();
+			fp32 Intens = LightColor[0] + 2.0f * LightColor[1] + LightColor[2];
+			fp32 Scale = Intens * (1.0f - Dist);
 
 			if(m_nStatic == _MaxStatic)
 			{
@@ -1020,14 +1012,14 @@ void CXR_WorldLightState::CopyAndCull(const CXR_WorldLightState* _pWLS, fp4 _Bou
 	m_lLightIDs = _pWLS->m_lLightIDs;
 }
 
-void CXR_WorldLightState::Transform(const CMat43fp4& _Mat)
+void CXR_WorldLightState::Transform(const CMat4Dfp32& _Mat)
 {
 	InitLinks();
 
 	CXR_Light* pL = GetFirst();
 	while(pL)
 	{
-		CMat43fp4 M;
+		CMat4Dfp32 M;
 		pL->m_Pos.Multiply(_Mat, M);
 		pL->m_Pos = M;
 
@@ -1056,6 +1048,7 @@ void CCollisionInfo::Clear()
 	m_Time = 0;
 	m_Distance = 0;
 	m_SurfaceType = 0;
+	m_Friction = 0.4f;
 }
 
 CCollisionInfo::CCollisionInfo()
@@ -1165,7 +1158,7 @@ bool CCollisionInfo::IsImprovement(const CCollisionInfo& _CInfo) const
 	return false;
 }
 
-bool CCollisionInfo::IsImprovement(fp4 _Time, fp4 _Distance) const
+bool CCollisionInfo::IsImprovement(fp32 _Time, fp32 _Distance) const
 {
 	if (!m_bIsCollision)
 		return true;
@@ -1206,13 +1199,13 @@ CXR_Model::CXR_Model()
 	SetThreadSafe(false);
 }
 
-fp4 CXR_Model::GetBound_Sphere(const CXR_AnimState* _pAnimState)
+fp32 CXR_Model::GetBound_Sphere(const CXR_AnimState* _pAnimState)
 { 
 	MAUTOSTRIP(CXR_Model_GetBound_Sphere, 0.0f);
 	return 0;
 };
 
-void CXR_Model::GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState)
+void CXR_Model::GetBound_Box(CBox3Dfp32& _Box, const CXR_AnimState* _pAnimState)
 {
 	MAUTOSTRIP(CXR_Model_GetBound_Box, MAUTOSTRIP_VOID);
 //	M_ASSERT(false, "GetBound_Box not implemented!");
@@ -1220,7 +1213,7 @@ void CXR_Model::GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState)
 	_Box.m_Max = 0;
 };
 
-void CXR_Model::GetBound_Box(CBox3Dfp4& _Box, int _Mask, const CXR_AnimState* _pAnimState)
+void CXR_Model::GetBound_Box(CBox3Dfp32& _Box, int _Mask, const CXR_AnimState* _pAnimState)
 {
 	MAUTOSTRIP(CXR_Model_GetBound_Box, MAUTOSTRIP_VOID);
 	CXR_Model::GetBound_Box(_Box, _pAnimState);
@@ -1306,7 +1299,7 @@ CXR_Model* CXR_Model_VariationProxy::OnResolveVariationProxy(const CXR_AnimState
 	return m_spModel;
 }
 
-CXR_Model* CXR_Model_VariationProxy::GetLOD(const CMat4Dfp4& _WMat, const CMat4Dfp4& _VMat, CXR_Engine* _pEngine, int *_piLod)
+CXR_Model* CXR_Model_VariationProxy::GetLOD(const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, CXR_Engine* _pEngine, int *_piLod)
 {
 	return m_spModel->GetLOD(_WMat, _VMat, _pEngine, _piLod);
 }
@@ -1331,17 +1324,17 @@ void CXR_Model_VariationProxy::SetParam(int _Param, aint _Value)
 	m_spModel->SetParam(_Param, _Value);
 }
 
-int CXR_Model_VariationProxy::GetParamfv(int _Param, fp4* _pRetValues)
+int CXR_Model_VariationProxy::GetParamfv(int _Param, fp32* _pRetValues)
 {
 	return m_spModel->GetParamfv(_Param, _pRetValues);
 }
 
-void CXR_Model_VariationProxy::SetParamfv(int _Param, const fp4* _pValues)
+void CXR_Model_VariationProxy::SetParamfv(int _Param, const fp32* _pValues)
 {
 	return m_spModel->SetParamfv(_Param, _pValues);
 }
 
-fp4 CXR_Model_VariationProxy::GetBound_Sphere(const CXR_AnimState* _pAnimState)
+fp32 CXR_Model_VariationProxy::GetBound_Sphere(const CXR_AnimState* _pAnimState)
 {
 	if (!_pAnimState)
 		return m_spModel->GetBound_Sphere(_pAnimState);
@@ -1351,7 +1344,7 @@ fp4 CXR_Model_VariationProxy::GetBound_Sphere(const CXR_AnimState* _pAnimState)
 	return m_spModel->GetBound_Sphere(&Anim);
 }
 
-void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState)
+void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp32& _Box, const CXR_AnimState* _pAnimState)
 {
 	if (!_pAnimState)
 	{
@@ -1365,7 +1358,7 @@ void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState
 	}
 }
 
-void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp4& _Box, int _Mask, const CXR_AnimState* _pAnimState)
+void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp32& _Box, int _Mask, const CXR_AnimState* _pAnimState)
 {
 	if (!_pAnimState)
 	{
@@ -1380,7 +1373,7 @@ void CXR_Model_VariationProxy::GetBound_Box(CBox3Dfp4& _Box, int _Mask, const CX
 }
 
 void CXR_Model_VariationProxy::PreRender(CXR_Engine* _pEngine, CXR_ViewClipInterface* _pViewClip,
-	const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags)
+	const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags)
 {
 	if (!_pAnimState)
 		return;
@@ -1392,7 +1385,7 @@ void CXR_Model_VariationProxy::PreRender(CXR_Engine* _pEngine, CXR_ViewClipInter
 
 void CXR_Model_VariationProxy::OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, 
 	CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-	const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags)
+	const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags)
 {
 	if (!_pAnimState)
 		return;
@@ -1497,14 +1490,14 @@ void CXR_ViewClipInterface::View_SetState(int _iView, int _State, int _Value)
 // -------------------------------------------------------------------
 //  CXR_PhysicsModel
 // -------------------------------------------------------------------
-void CXR_PhysicsModel::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4* _pV, int _nV, uint32* _pRetMediums)
+void CXR_PhysicsModel::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32* _pV, int _nV, uint32* _pRetMediums)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Phys_GetMedium, MAUTOSTRIP_VOID);
 	for(int v = 0; v < _nV; v++)
 		_pRetMediums[v] = Phys_GetMedium(_pPhysContext, _pV[v]);
 }
 
-void CXR_PhysicsModel::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4* _pV, int _nV, CXR_MediumDesc* _pRetMediums)
+void CXR_PhysicsModel::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32* _pV, int _nV, CXR_MediumDesc* _pRetMediums)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Phys_GetMedium_2, MAUTOSTRIP_VOID);
 	for(int v = 0; v < _nV; v++)
@@ -1514,23 +1507,23 @@ void CXR_PhysicsModel::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const C
 // -------------------------------------------------------------------
 //  CXR_PhysicsModel_Sphere
 // -------------------------------------------------------------------
-void CXR_PhysicsModel_Sphere::Phys_SetDimensions(fp4 _Radius)
+void CXR_PhysicsModel_Sphere::Phys_SetDimensions(fp32 _Radius)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_SetDimensions, MAUTOSTRIP_VOID);
 	m_PhysRadius = _Radius;
 }
 
-void CXR_PhysicsModel_Sphere::Phys_GetBound_Sphere(const CMat43fp4& _Pos, CVec3Dfp4& _RetPos, fp4& _Radius)
+void CXR_PhysicsModel_Sphere::Phys_GetBound_Sphere(const CMat4Dfp32& _Pos, CVec3Dfp32& _RetPos, fp32& _Radius)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_GetBound_Sphere, MAUTOSTRIP_VOID);
-	_RetPos = CVec3Dfp4::GetMatrixRow(_Pos, 3);
+	_RetPos = CVec3Dfp32::GetMatrixRow(_Pos, 3);
 	_Radius = m_PhysRadius;
 }
 
-void CXR_PhysicsModel_Sphere::Phys_GetBound_Box(const CMat43fp4& _Pos, CBox3Dfp4& _RetBox)
+void CXR_PhysicsModel_Sphere::Phys_GetBound_Box(const CMat4Dfp32& _Pos, CBox3Dfp32& _RetBox)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_GetBound_Box, MAUTOSTRIP_VOID);
-	fp4 r = m_PhysRadius + 0.0001f;
+	fp32 r = m_PhysRadius + 0.0001f;
 	_RetBox.m_Min = _Pos.k[3][0] - r;
 	_RetBox.m_Min = _Pos.k[3][1] - r;
 	_RetBox.m_Min = _Pos.k[3][2] - r;
@@ -1545,29 +1538,29 @@ void CXR_PhysicsModel_Sphere::Phys_Init(CXR_PhysicsContext* _pPhysContext)
 //	m_PhysWMat = _WMat;
 }
 
-int CXR_PhysicsModel_Sphere::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0)
+int CXR_PhysicsModel_Sphere::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_GetMedium, 0);
 	return XW_MEDIUM_AIR | XW_MEDIUM_SEETHROUGH;
 };
 
-void CXR_PhysicsModel_Sphere::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, CXR_MediumDesc& _RetMedium)
+void CXR_PhysicsModel_Sphere::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, CXR_MediumDesc& _RetMedium)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_GetMedium_2, MAUTOSTRIP_VOID);
 	_RetMedium.SetAir();
 };
 
-bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
+bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_IntersectLine, false);
 
-	const CVec3Dfp4& SpherePos = _pPhysContext->m_WMat.GetRow(3);
-	CVec3Dfp4 Origin = _v0 - SpherePos;
-	CVec3Dfp4 Dir = _v1 - _v0;
+	const CVec3Dfp32& SpherePos = _pPhysContext->m_WMat.GetRow(3);
+	CVec3Dfp32 Origin = _v0 - SpherePos;
+	CVec3Dfp32 Dir = _v1 - _v0;
 
-	fp4 a = Dir * Dir;
-	fp4 b = 2.0f * (Dir * Origin);
-	fp4 c = (Origin * Origin) - Sqr(m_PhysRadius);
+	fp32 a = Dir * Dir;
+	fp32 b = 2.0f * (Dir * Origin);
+	fp32 c = (Origin * Origin) - Sqr(m_PhysRadius);
 
 	if (c < 0.0f) // check if v0 is inside sphere
 	{
@@ -1579,13 +1572,13 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysConte
 		return true;
 	}
 
-	fp4 x = b*b - 4.0f*a*c;
+	fp32 x = b*b - 4.0f*a*c;
 	if (x >= 0.0f)				// Real solution?
 	{
- 		fp4 Base = -b;
-		fp4 Root = M_Sqrt(x);
+ 		fp32 Base = -b;
+		fp32 Root = M_Sqrt(x);
 
-		fp4 t = _FP4_MAX;
+		fp32 t = _FP32_MAX;
 		if (Base > Root)
 			t = Base - Root;	// First root is above zero
 		else if (-Base < Root)
@@ -1593,7 +1586,7 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysConte
 		else
 			return false;		// Both are below zero
 
-		fp4 den = 2.0f*a;
+		fp32 den = 2.0f*a;
 		if (t > den)
 			return false;		// Root is beyond one
 
@@ -1610,11 +1603,11 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysConte
 
 				if (_pCollisionInfo->m_ReturnValues & (CXR_COLLISIONRETURNVALUE_LOCALPOSITION | CXR_COLLISIONRETURNVALUE_POSITION))
 				{
-					CVec3Dfp4 Pos;
+					CVec3Dfp32 Pos;
 					_v0.Combine(Dir, t, Pos);	
 					_pCollisionInfo->m_Pos = Pos;					// return: global pos
 
-					CVec3Dfp4 Normal = Pos - SpherePos; 
+					CVec3Dfp32 Normal = Pos - SpherePos; 
 					Normal.Normalize();
 					_pCollisionInfo->m_Plane.CreateNV(Normal, Pos);	// return: plane
 
@@ -1632,10 +1625,10 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectLine(CXR_PhysicsContext* _pPhysConte
 	return false;
 }
 
-bool CXR_PhysicsModel_Sphere::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _Origin, const CVec3Dfp4& _Dest, fp4 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
+bool CXR_PhysicsModel_Sphere::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _Origin, const CVec3Dfp32& _Dest, fp32 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_IntersectSphere, false);
-	fp4 dsqr = Sqr(_pPhysContext->m_WMat.k[3][0] - _Dest.k[0]) + Sqr(_pPhysContext->m_WMat.k[3][1] - _Dest.k[1]) + Sqr(_pPhysContext->m_WMat.k[3][2] - _Dest.k[2]);
+	fp32 dsqr = Sqr(_pPhysContext->m_WMat.k[3][0] - _Dest.k[0]) + Sqr(_pPhysContext->m_WMat.k[3][1] - _Dest.k[1]) + Sqr(_pPhysContext->m_WMat.k[3][2] - _Dest.k[2]);
 	if (dsqr < Sqr(m_PhysRadius + _Radius))
 	{
 		if (!_pCollisionInfo)
@@ -1644,9 +1637,9 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysCon
 		_pCollisionInfo->m_bIsValid = true;
 		_pCollisionInfo->m_bIsCollision = true;
 
-		const CVec3Dfp4& p = _pPhysContext->m_WMat.GetRow(3);
+		const CVec3Dfp32& p = _pPhysContext->m_WMat.GetRow(3);
 		_pCollisionInfo->m_Distance = M_Sqrt(dsqr) - (m_PhysRadius + _Radius);
-		CVec3Dfp4 n = (_Dest - p).Normalize();
+		CVec3Dfp32 n = (_Dest - p).Normalize();
 		_pCollisionInfo->m_Plane.d = -m_PhysRadius;
 		_pCollisionInfo->m_Plane.n = n;
 		_pCollisionInfo->m_Pos = n*m_PhysRadius;
@@ -1656,8 +1649,8 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysCon
 		if (_pCollisionInfo->m_ReturnValues & CXR_COLLISIONRETURNVALUE_TIME)
 		{
 			// This isn't really correct, but it's probably better than nothing  -ar
-			CVec3Dfp4 Dir = (_Dest - _Origin);
-			fp4 neg_dt = (Dir * n) * _pCollisionInfo->m_Distance / Dir.LengthSqr();
+			CVec3Dfp32 Dir = (_Dest - _Origin);
+			fp32 neg_dt = (Dir * n) * _pCollisionInfo->m_Distance / Dir.LengthSqr();
 			_pCollisionInfo->m_Time = Clamp01(1.0f + neg_dt);
 		}
 
@@ -1676,6 +1669,20 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysCon
 bool CXR_PhysicsModel_Sphere::Phys_IntersectBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _BoxOrigin, const CPhysOBB& _BoxDest, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Sphere_Phys_IntersectBox, false);
+	CVec3Dfp32 Pos;
+	_BoxDest.TransformToBoxSpace(CVec3Dfp32::GetMatrixRow(_pPhysContext->m_WMat, 3), Pos);
+
+	if (!_pCollisionInfo)
+		return _BoxDest.GetMinSqrDistance(Pos) < Sqr(m_PhysRadius);
+	else
+	{
+		if (_BoxDest.GetMinSqrDistance(Pos) < Sqr(m_PhysRadius))
+		{
+			_pCollisionInfo->m_bIsValid = false;
+			_pCollisionInfo->m_bIsCollision = true;
+			return true;
+		}
+	}
 
 	return false;
 }
@@ -1684,19 +1691,19 @@ bool CXR_PhysicsModel_Sphere::Phys_IntersectBox(CXR_PhysicsContext* _pPhysContex
 // -------------------------------------------------------------------
 //  CXR_PhysicsModel_Box
 // -------------------------------------------------------------------
-void CXR_PhysicsModel_Box::Phys_SetDimensions(const CVec3Dfp4& _Dim)
+void CXR_PhysicsModel_Box::Phys_SetDimensions(const CVec3Dfp32& _Dim)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_SetDimensions, MAUTOSTRIP_VOID);
 	m_Box.SetDimensions(_Dim);
 }
 
-void CXR_PhysicsModel_Box::Phys_GetBound_Sphere(const CMat43fp4& _Pos, CVec3Dfp4& _RetPos, fp4& _Radius)
+void CXR_PhysicsModel_Box::Phys_GetBound_Sphere(const CMat4Dfp32& _Pos, CVec3Dfp32& _RetPos, fp32& _Radius)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_GetBound_Sphere, MAUTOSTRIP_VOID);
 	Error("Phys_GetBound_Sphere", "Not implemented.");
 }
 
-void CXR_PhysicsModel_Box::Phys_GetBound_Box(const CMat43fp4& _Pos, CBox3Dfp4& _RetBox)
+void CXR_PhysicsModel_Box::Phys_GetBound_Box(const CMat4Dfp32& _Pos, CBox3Dfp32& _RetBox)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_GetBound_Box, MAUTOSTRIP_VOID);
 	Error("Phys_GetBound_Box", "Not implemented.");
@@ -1707,25 +1714,73 @@ void CXR_PhysicsModel_Box::Phys_Init(CXR_PhysicsContext* _pPhysContext)
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_Init, MAUTOSTRIP_VOID);
 }
 
-int CXR_PhysicsModel_Box::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0)
+int CXR_PhysicsModel_Box::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_GetMedium, 0);
 	return XW_MEDIUM_AIR | XW_MEDIUM_SEETHROUGH;
 };
 
-void CXR_PhysicsModel_Box::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, CXR_MediumDesc& _RetMedium)
+void CXR_PhysicsModel_Box::Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, CXR_MediumDesc& _RetMedium)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_GetMedium_2, MAUTOSTRIP_VOID);
 	_RetMedium.SetAir();
 };
 
-bool CXR_PhysicsModel_Box::Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
+bool CXR_PhysicsModel_Box::Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_IntersectLine, false);
-	return false;
+	CPhysOBB TestBox = m_Box;
+	TestBox.SetPosition(_pPhysContext->m_WMat);
+	CVec3Dfp32 HitPos, v0, v1;
+	TestBox.TransformToBoxSpace(_v0, v0);
+	TestBox.TransformToBoxSpace(_v1, v1);
+
+	if (TestBox.LocalPointInBox(v0))
+	{
+		//ConOut("Source Inside MissedBox.");
+		if (_pCollisionInfo)
+		{
+			_pCollisionInfo->m_bIsValid = false;
+			_pCollisionInfo->m_bIsCollision = true;
+		}
+		return true;
+	}
+
+	if (_pCollisionInfo)
+	{
+		if (TestBox.IntersectLine(v0, v1, HitPos))
+		{
+			_pCollisionInfo->m_bIsValid = true;
+			_pCollisionInfo->m_bIsCollision = true;
+
+			if (_pCollisionInfo->m_ReturnValues & CXR_COLLISIONRETURNVALUE_TIME)
+			{
+				fp32 Dist = v0.Distance(HitPos);
+				fp32 LineLength = v0.Distance(v1);
+				_pCollisionInfo->m_Distance = Dist;
+				if (LineLength > _FP32_EPSILON)
+					_pCollisionInfo->m_Time = Dist / LineLength;
+				else
+					_pCollisionInfo->m_Time = 0.0f;
+
+				if (_pCollisionInfo->m_ReturnValues & (CXR_COLLISIONRETURNVALUE_POSITION | CXR_COLLISIONRETURNVALUE_LOCALPOSITION))
+				{
+					_pCollisionInfo->m_LocalPos = HitPos;
+					TestBox.TransformFromBoxSpace(HitPos, _pCollisionInfo->m_Pos);
+					TestBox.GetPlaneFromLocalPoint(_pCollisionInfo->m_LocalPos, _pCollisionInfo->m_Plane);
+				}
+				_pCollisionInfo->m_pSurface = NULL;
+			}
+			return true;
+		}
+		//ConOut("MissedBox.");
+		return false;
+	}
+	else
+		return TestBox.IntersectLine(v0, v1, HitPos);
 }
 
-bool CXR_PhysicsModel_Box::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _Origin, const CVec3Dfp4& _Dest, fp4 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
+bool CXR_PhysicsModel_Box::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _Origin, const CVec3Dfp32& _Dest, fp32 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_IntersectSphere, false);
 	return false;
@@ -1734,7 +1789,10 @@ bool CXR_PhysicsModel_Box::Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContex
 bool CXR_PhysicsModel_Box::Phys_IntersectBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _BoxOrigin, const CPhysOBB& _BoxDest, int _MediumFlags, CCollisionInfo* _pCollisionInfo)
 {
 	MAUTOSTRIP(CXR_PhysicsModel_Box_Phys_IntersectBox, false);
-	return false;
+	CPhysOBB TestBox = m_Box;
+	TestBox.SetPosition(_pPhysContext->m_WMat);
+	return Phys_Intersect_OBB(TestBox, _BoxOrigin, _BoxDest, _pCollisionInfo);
+//	return false;
 }
 
 int CXR_PhysicsModel_Box::Phys_CollideBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _Box, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions)

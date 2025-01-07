@@ -23,9 +23,9 @@ class CInputEnvelopePoint : public CReferenceCount
 {
 public:
 	CInputEnvelopePoint();
-	CInputEnvelopePoint( fp4 _fTime, fp4 _fValue );
-	fp4	m_fValue;
-	fp4	m_fTime;
+	CInputEnvelopePoint( fp32 _fTime, fp32 _fValue );
+	fp32	m_fValue;
+	fp32	m_fTime;
 
 	MACRO_OPERATOR_TPTR(CInputEnvelopePoint);
 };
@@ -39,12 +39,12 @@ class SYSTEMDLLEXPORT CInputEnvelopeChannel : public CReferenceCount
 {
 	friend class CInputEnvelope;
 private:
-	void AddPoint(const fp4 _fTime, const fp4 _fValue);
+	void AddPoint(const fp32 _fTime, const fp32 _fValue);
 public:
 	int32 m_ID;
 	TArray<spCInputEnvelopePoint> m_lPoints;
 
-	fp4 GetFeedbackForce(fp4 _fTime);
+	fp32 GetFeedbackForce(fp32 _fTime);
 };
 
 typedef TPtr<CInputEnvelopeChannel> spCInputEnvelopeChannel;
@@ -62,11 +62,11 @@ public:
 	void Create(const CStr &_name);
 
 	spCInputEnvelopeChannel GetChannel(int32 _Channel=0);
-	fp4 GetFeedbackForce(fp4 _fTime, int32 _Channel=0);
-	void AddPoint(const fp4 _fTime, const fp4 _fValue, int32 _Channel);
+	fp32 GetFeedbackForce(fp32 _fTime, int32 _Channel=0);
+	void AddPoint(const fp32 _fTime, const fp32 _fValue, int32 _Channel);
 
 	CStr	m_Name;		// Name of envelope
-	fp4		m_fEndTime;	// To speed up removal of envelopes
+	fp32		m_fEndTime;	// To speed up removal of envelopes
 
 	MACRO_OPERATOR_TPTR(CInputEnvelope)
 };
@@ -80,14 +80,14 @@ class SYSTEMDLLEXPORT CInputEnvelopeInstance : public CReferenceCount
 {
 protected:
 	CMTime	m_fStartTime;		// When was this envelope triggered
-	fp4		m_fCeiling;			// Where does the envelopes ceiling lie
+	fp32		m_fCeiling;			// Where does the envelopes ceiling lie
 
 public:
 	CInputEnvelope  *m_pEnvelope;
 	
 	CInputEnvelopeInstance( );
 	CInputEnvelopeInstance(CInputEnvelope * );
-	fp4 GetFeedbackForce(CMTime _fTime, int32 _Channel=0);
+	fp32 GetFeedbackForce(CMTime _fTime, int32 _Channel=0);
 	bool IsActive( const CMTime _fTime );
 
 	MACRO_OPERATOR_TPTR(CInputEnvelopeInstance)
@@ -109,7 +109,7 @@ public:
 	void FlushEnvelopes();
 	void RemoveEnvelope(CInputEnvelopeInstance *_pEnvelope );
 
-	fp4 GetFeedbackForce(CMTime _fTime, int32 _Channel=0);
+	fp32 GetFeedbackForce(CMTime _fTime, int32 _Channel=0);
 	void Update();
 
 	MACRO_OPERATOR_TPTR(CInputEnvelopeInstanceList)
@@ -134,7 +134,7 @@ public:
 	void FlushEnvelopes( const int _index );
 	void RemoveEnvelope( const int _index, CInputEnvelopeInstance *_pEnvelope);
 
-	fp4 GetFeedbackForce( int _index, CMTime _fTime, int32 _Channel=0);
+	fp32 GetFeedbackForce( int _index, CMTime _fTime, int32 _Channel=0);
 	void Update();
 };
 

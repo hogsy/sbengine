@@ -14,59 +14,43 @@
 
 \*____________________________________________________________________________________________*/
 
-#if defined( PLATFORM_XBOX1 ) || defined(PLATFORM_PS2)
-#define	DEF_CRC_MAXTEXTURES	4
-#else
-#define	DEF_CRC_MAXTEXTURES	8
-#endif
+#include "MRender_Classes_VPUShared.h"
 
-enum
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| CRC_ClipVolume
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+enum 
 {
-	CRC_MAXTEXTUREENV			= 4,	// Maximum number of supported textures coordinates.
-#if	(DEF_CRC_MAXTEXTURES==4)
-	CRC_MAXTEXCOORDS			= 4,	// Maximum number of supported textures coordinates.
-	CRC_MAXTEXTURES				= 4,	// Maximum number of supported textures channels. (Multitexture) Affects CRC_MATRIXSTACKS
-#else
-	CRC_MAXTEXCOORDS			= 8,	// Maximum number of supported textures coordinates.
-	CRC_MAXTEXTURES				= 16,	// Maximum number of supported textures channels. (Multitexture) Affects CRC_MATRIXSTACKS
-#endif
-	CRC_MAXLIGHTS				= 8,	// Maximum simultaneous lights.
-	CRC_NUMTEXCOORDCOMP			= 4,	// U,V,W,?  ehum...   S,T,R,Q..
-
-	CRC_ATTRIBSTACKDEPTH		= 48,
-	CRC_MATRIXSTACKDEPTH		= 12,
-	CRC_VIEWPORTSTACKDEPTH		= 4,
-	CRC_MATRIXSTACKS			= 2 + CRC_MAXTEXCOORDS,
-
-	CRC_MAXPOLYGONVERTICES		= 32,
-
-	CRC_DEFAULT_FRONTPLANE		= 4,
-	CRC_DEFAULT_BACKPLANE		= 2048,
-	CRC_DEFAULT_FOV				= 90,
-
-	CRC_MAXPICMIPS				= 16,
+	CRC_RENDEROPTION_NOZBUFFER = M_Bit(0),
+	CRC_RENDEROPTION_NOANTIALIAS = M_Bit(1),
+	CRC_RENDEROPTION_PRESERVEZ = M_Bit(2),
+	CRC_RENDEROPTION_CONTINUETILING = M_Bit(3),
+	CRC_RENDEROPTION_ = M_Bit(4),
 };
 
-//----------------------------------------------------------------
-// Instructions for RenderIndexedPrimitives()
-//----------------------------------------------------------------
-enum
+class CRC_RenderTargetDesc
 {
-	CRC_RIP_END				= 0,
-	CRC_RIP_TRIANGLES		= 1,
-	CRC_RIP_QUADS			= 2,
-	CRC_RIP_TRISTRIP		= 3,
-	CRC_RIP_TRIFAN			= 4,
-	CRC_RIP_QUADSTRIP		= 5,
-	CRC_RIP_POLYGON			= 6,
-	CRC_RIP_PRIMLIST		= 7,		// A primitive list in a prim list
-	CRC_RIP_TEXT			= 8,
-	CRC_RIP_PARTICLES		= 9,
-	CRC_RIP_TYPEMASK		= 0x0f,
+public:
+	CVec4Dfp32 m_lColorClearColor[CRC_MAXMRT];
+	uint32 m_lTextureFormats[CRC_MAXMRT];
+	uint16 m_lColorTextureID[CRC_MAXMRT];
+	uint8 m_lSlice[CRC_MAXMRT];
 
+	CRct m_ClearRect;
+	uint32 m_ClearBuffers:8;
+	uint32 m_ClearValueStencil:8;
+	uint32 m_Options:16;
+	fp32 m_ClearValueZ;
+	CRct m_ResolveRect;
 
-	CRC_RIP_COPLANAR		= 0x40,		// All faces in primitive lay in the same plane.
-	CRC_RIP_COPLANARLAST	= 0x80,		// All faces in primitive lay in last primitive's plane.
+	void Clear();
+	void SetRenderTarget(int _iBuffer, int _TextureID, const CVec4Dfp32& _ClearColor, uint32 _Format = 0, uint32 _Slice = 0);
+	void SetClear(int _Buffers, CRct _Rect, fp32 _ClearZ, int _ClearStencil);
+	void SetOptions(int _Options);
+	void SetResolveRect(CRct _Rect);
 };
 
 /*************************************************************************************************\
@@ -82,11 +66,10 @@ public:
 
 	DECLARE_OPERATOR_NEW
 
-
+	CVec3Dfp32 m_POV;
 	int m_nPlanes;
-	CVec3Dfp4 m_POV;
-	CVec3Dfp4 m_Vertices[CRC_CLIPVOLUME_MAXPLANES];
-	CPlane3Dfp4 m_Planes[CRC_CLIPVOLUME_MAXPLANES];
+	CPlane3Dfp32 m_Planes[CRC_CLIPVOLUME_MAXPLANES];
+	CVec3Dfp32 m_Vertices[CRC_CLIPVOLUME_MAXPLANES];
 
 	CRC_ClipVolume();
 	const CRC_ClipVolume& operator = (const CRC_ClipVolume &ToCopy)
@@ -110,20 +93,20 @@ public:
 	}
 
 
-	void Init(const CVec3Dfp4& _POV);
-	void GetVertices(const CVec3Dfp4* _pVertices, int _nVertices, const CVec3Dfp4& _POV, bool _bFlipDirection);
+	void Init(const CVec3Dfp32& _POV);
+	void GetVertices(const CVec3Dfp32* _pVertices, int _nVertices, const CVec3Dfp32& _POV, bool _bFlipDirection);
 	void CreateFromVertices();
 	void CreateFromVertices2();
-	void CreateFromVertices3(const CPlane3Dfp4& _ProjPlane);
+	void CreateFromVertices3(const CPlane3Dfp32& _ProjPlane);
 
 	void Invert();
-	void Transform(const CMat43fp4& _Mat);
+	void Transform(const CMat4Dfp32& _Mat);
 
 	void Copy(const CRC_ClipVolume& _SrcClip);
-	void CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat43fp4& _pMat);
+	void CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat4Dfp32& _pMat);
 
-	int BoxInVolume(const CBox3Dfp4& _Box) const;
-	int SphereInVolume(const CVec3Dfp4& _v, fp4 _r) const;
+	int BoxInVolume(const CBox3Dfp32& _Box) const;
+	int SphereInVolume(const CVec3Dfp32& _v, fp32 _r) const;
 };
 
 /*************************************************************************************************\
@@ -142,9 +125,9 @@ public:
 	int32 m_Type;
 	CPixel32 m_Color;
 	CPixel32 m_Ambient;
-	CVec3Dfp4 m_Pos;
-	CVec3Dfp4 m_Direction;
-	fp4 m_Attenuation[3];		// Constant, Linear and Quadratic attenuation.
+	CVec3Dfp32 m_Pos;
+	CVec3Dfp32 m_Direction;
+	fp32 m_Attenuation[3];		// Constant, Linear and Quadratic attenuation.
 
 	CRC_Light()
 	{
@@ -159,68 +142,6 @@ public:
 	}
 };
 
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| CRC_VertexBuffer
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-class SYSTEMDLLEXPORT CRC_VertexBuffer
-{
-public:
-	uint32 m_nV:16;
-	uint32 m_nMWComp:16;		// Weight components per vertex, allowed range is [0..4] (works as m_nTVComp)
-
-	CVec3Dfp4* m_pV;
-	fp4* m_pTV[CRC_MAXTEXCOORDS];
-	uint8  m_nTVComp[CRC_MAXTEXCOORDS];
-	CVec3Dfp4* m_pN;
-	CPixel32* m_pCol;
-
-	CPixel32* m_pSpec;
-/*	fp4* m_pFog;
-	*/
-
-	uint32* m_pMI;		// Matrix index array, Points to an array of uint32[nV] (uint8[nV][4])  256 matrices _should_ be enough for a while, but I'll probably regrett this much sooner than I think.  /mh
-	fp4* m_pMW;			// Matrix weight array, Points to an array of fp4[nV][m_nMatricesPerVertex];
-
-	// Disable the color because it does not belong here
-//	CPixel32 m_Color;	// Constant color, ignored if m_pCol != NULL;
-
-	uint16* m_piPrim;
-	uint16 m_nPrim;
-	int16 m_PrimType;
-
-	void Clear()
-	{
-		m_nV = 0;
-		m_pV = NULL;
-		for(int i = 0; i < CRC_MAXTEXCOORDS; i++) { m_pTV[i] = NULL; m_nTVComp[i] = 0; }
-		m_pN = NULL;
-		m_pCol = NULL;
-		m_pSpec = NULL;
-//		m_pFog = NULL;
-		m_pMI = NULL;
-		m_pMW = NULL;
-		m_nMWComp = 0;
-
-//		m_Color = 0xffffffff;
-
-		m_piPrim = NULL;
-		m_nPrim = NULL;
-		m_PrimType = NULL;
-	}
-
-	CRC_VertexBuffer()
-	{
-		Clear();
-	}
-};
-
-#ifdef	PLATFORM_PS2
-typedef CMat4Dfp4 CMat43fp4_MP;
-#else
-typedef TMatrix43<fp4> CMat43fp4_MP;
-#endif
 
 /***************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -230,28 +151,33 @@ typedef TMatrix43<fp4> CMat43fp4_MP;
 
 enum ERC_MatrixPaletteFlags
 {
-	 ERC_MatrixPaletteFlags_SpecialCubePosition = DBit(0)
-	,ERC_MatrixPaletteFlags_SpecialCubeTexture = DBit(1)
-	,ERC_MatrixPaletteFlags_SpecialCubeTextureScaleByZ = DBit(2)
-	,ERC_MatrixPaletteFlags_SpecialCubeTextureScale2 = DBit(3)
-	,ERC_MatrixPaletteFlags_DoNotCache = DBit(4)
+	 ERC_MatrixPaletteFlags_SpecialCubePosition = M_Bit(0)
+	,ERC_MatrixPaletteFlags_SpecialCubeTexture = M_Bit(1)
+	,ERC_MatrixPaletteFlags_SpecialCubeTextureScaleByZ = M_Bit(2)
+	,ERC_MatrixPaletteFlags_SpecialCubeTextureScale2 = M_Bit(3)
+	,ERC_MatrixPaletteFlags_DoNotCache = M_Bit(4)
 	,ERC_MatrixPaletteFlags_SpecialCubeFlags = ERC_MatrixPaletteFlags_SpecialCubePosition | ERC_MatrixPaletteFlags_SpecialCubeTexture | ERC_MatrixPaletteFlags_SpecialCubeTextureScale2 | ERC_MatrixPaletteFlags_SpecialCubeTextureScaleByZ
 };
 
 class SYSTEMDLLEXPORT CRC_MatrixPalette
 {
 public:
+	CRC_MatrixPalette()
+	{
+		m_VpuTaskId=InvalidVpuTask;
+	}
     const void* m_pMatrices;
     const uint16* m_piMatrices;
     uint32 m_nMatrices;
-	uint32 m_Flags;
+	uint16 m_Flags;
+	uint16 m_VpuTaskId;
 
-	const CMat43fp4_MP &Index(int _Index) const
+	const CMat43fp32 &Index(int _Index) const
 	{
 		if (m_piMatrices)
-			return ((const CMat43fp4_MP*)m_pMatrices)[m_piMatrices[_Index]];
+			return ((const CMat43fp32*)m_pMatrices)[m_piMatrices[_Index]];
 		else
-			return ((const CMat43fp4_MP*)m_pMatrices)[_Index];
+			return ((const CMat43fp32*)m_pMatrices)[_Index];
 	}
 };
 
@@ -263,10 +189,10 @@ public:
 class SYSTEMDLLEXPORT CRC_Viewport
 {
 	// Big stuff first
-	CMat4Dfp4 m_PMat;					// Projection matrix
-	CVec3Dfp4 m_VViewVertices[8];		// Viewport space by vertices
-	CPlane3Dfp4 m_VViewPlanes[4];		// Viewport space
-	CVec2Dfp4 m_PixelAspect;
+	CMat4Dfp32 m_PMat;					// Projection matrix
+	CVec3Dfp32 m_VViewVertices[8];		// Viewport space by vertices
+	CPlane3Dfp32 m_VViewPlanes[4];		// Viewport space
+	CVec2Dfp32 m_PixelAspect;
 	CClipRect m_Clip;					// The clipping area.
 
 	enum
@@ -276,14 +202,14 @@ class SYSTEMDLLEXPORT CRC_Viewport
 	};
 
 	int m_Mode;
-	fp4 m_FOV;
-	fp4 m_FOVAspect;
-	fp4 m_Scale;
-	fp4 m_AspectRatio;
-	fp4 m_xScale;
-	fp4 m_yScale;
-	fp4 m_FrontPlane;
-	fp4 m_BackPlane;
+	fp32 m_FOV;
+	fp32 m_FOVAspect;
+	fp32 m_Scale;
+	fp32 m_AspectRatio;
+	fp32 m_xScale;
+	fp32 m_yScale;
+	fp32 m_FrontPlane;
+	fp32 m_BackPlane;
 	CRct m_Rect;						// The desired view, before clipping.
 	// Viewport geometry, in view-space
 	int m_nViewVertices;
@@ -312,40 +238,43 @@ public:
 	}
 
 
-	void SetBorder(CVec2Dfp4 _Border, bool _bRemove = false); // Adds a border to the viewport, (0, 0) removes it
+	void SetBorder(CVec2Dfp32 _Border, bool _bRemove = false); // Adds a border to the viewport, (0, 0) removes it
 		
-	void SetFOV(fp4 _fp);
-	void SetFOVAspect(fp4 _Aspect);
-	void SetScale(fp4 _Scale);
-	void SetAspectRatio(fp4 _Aspect);
-	void SetPixelAspect(fp4 _AspectX, fp4 _AspectY);
-	void SetFrontPlane(fp4 _FrontPlane);
-	void SetBackPlane(fp4 _BackPlane);
+	void SetFOV(fp32 _fp);
+	void SetFOVAspect(fp32 _Aspect);
+	void SetScale(fp32 _Scale);
+	void SetAspectRatio(fp32 _Aspect);
+	void SetPixelAspect(fp32 _AspectX, fp32 _AspectY);
+	void SetFrontPlane(fp32 _FrontPlane);
+	void SetBackPlane(fp32 _BackPlane);
 	void SetView(const CClipRect& clip, const CRct& rect);
 	void SetView(CImage* pImg);
 
-	const CMat4Dfp4& GetProjectionMatrix();
-	void GetClipVolume(CRC_ClipVolume& _Clip, const CMat43fp4* _pViewWMat = NULL);
+	const CMat4Dfp32& GetProjectionMatrix();
+	void GetClipVolume(CRC_ClipVolume& _Clip, const CMat4Dfp32* _pViewWMat = NULL);
 
 	int GetNumViewVertices();
-	const CVec3Dfp4* GetViewVertices();
-	const CPlane3Dfp4* GetViewPlanes();
+	const CVec3Dfp32* GetViewVertices();
+	const CPlane3Dfp32* GetViewPlanes();
 
-	static void DebugViewControl(CMat4Dfp4& mat, fp4 Ctrl_x, fp4 Ctrl_z, fp4 Ctrl_y, fp4 Ctrl_xaxis, fp4 Ctrl_yaxis, fp4 _apan1);
+	static void DebugViewControl(CMat4Dfp32& mat, fp32 Ctrl_x, fp32 Ctrl_z, fp32 Ctrl_y, fp32 Ctrl_xaxis, fp32 Ctrl_yaxis, fp32 _apan1);
 
-	fp4 GetFOV() const { return m_FOV; };
-	fp4 GetFOVAspect() const { return m_FOVAspect; };
-	fp4 GetScale() { Update(); return m_Scale; };
-	fp4 GetAspectRatio() const { return m_AspectRatio; };
-	fp4 GetFrontPlane() const { return m_FrontPlane; };
-	fp4 GetBackPlane() const { return m_BackPlane; };
-	fp4 GetXScale() { Update(); return m_xScale; };
-	fp4 GetYScale() { Update(); return m_yScale; };
-	const CClipRect& GetViewClip() const { return m_Clip; };
-	const CRct& GetViewRect() const { return m_Rect; };
+	M_FORCEINLINE fp32 GetFOV() const { return m_FOV; };
+	M_FORCEINLINE fp32 GetFOVAspect() const { return m_FOVAspect; };
+	M_FORCEINLINE fp32 GetScale() { Update(); return m_Scale; };
+	M_FORCEINLINE fp32 GetAspectRatio() const { return m_AspectRatio; };
+	M_FORCEINLINE fp32 GetFrontPlane() const { return m_FrontPlane; };
+	M_FORCEINLINE fp32 GetBackPlane() const { return m_BackPlane; };
+	M_FORCEINLINE fp32 GetXScale() { Update(); return m_xScale; };
+	M_FORCEINLINE fp32 GetYScale() { Update(); return m_yScale; };
+	M_FORCEINLINE const CClipRect& GetViewClip() const { return m_Clip; };
+	M_FORCEINLINE const CRct& GetViewRect() const { return m_Rect; };
 	CRct GetViewArea() const;
 
-	int SphereInView(const CVec3Dfp4& p, fp4 _Radius);
+	void Get2DMatrix(CMat4Dfp32& _Mat, fp32 _Z);
+	void Get2DMatrix_RelBackPlane(CMat4Dfp32& _Mat, fp32 _BackPlaneOfs = -16.0f);
+
+	int SphereInView(const CVec3Dfp32& p, fp32 _Radius);
 };
 
 // -------------------------------------------------------------------
@@ -366,6 +295,7 @@ enum
 	CRC_GLOBALVAR_GAMMA			= 3,
 	CRC_GLOBALVAR_WIRE			= 4,
 	CRC_GLOBALVAR_ALLOWTEXTURELOAD = 5,
+	CRC_GLOBALVAR_GAMMARAMP		= 6,
 
 	CRC_GLOBALVAR_NUMTEXTURES	= 10,				// Number of multitexture units
 	CRC_GLOBALVAR_NUMAUTOMIP	= 11,
@@ -378,37 +308,38 @@ enum
 	CRC_GLOBALFILTER_TRILINEAR	= 2,
 
 	// -------------------------------------------------------------------
-	CRC_CAPS_FLAGS_HWAPI					= DBit(0),
-//	CRC_CAPS_FLAGS_FULLBLENDING				= DBit(1),		// I don't think this is relevant any longer  :)   -mh
-	CRC_CAPS_FLAGS_RENDERTEXTUREVERTICALFLIP= DBit(1),
-	CRC_CAPS_FLAGS_GAMMARAMP				= DBit(2),
-	CRC_CAPS_FLAGS_SPECULARCOLOR			= DBit(3),
-	CRC_CAPS_FLAGS_COPYDEPTH				= DBit(4),
-	CRC_CAPS_FLAGS_CUBEMAP					= DBit(5),
-	CRC_CAPS_FLAGS_MATRIXPALETTE			= DBit(6),
-	CRC_CAPS_FLAGS_OFFSCREENTEXTURERENDER	= DBit(7),
-	CRC_CAPS_FLAGS_OCCLUSIONQUERY			= DBit(8),
-	CRC_CAPS_FLAGS_READDEPTH				= DBit(9),
-	CRC_CAPS_FLAGS_TEXGENMODE_ENV			= DBit(10),
-	CRC_CAPS_FLAGS_TEXGENMODE_ENV2			= DBit(11),
-	CRC_CAPS_FLAGS_TEXGENMODE_LINEARNHF     = DBit(12),
-	CRC_CAPS_FLAGS_TEXGENMODE_BOXNHF        = DBit(13),
-	CRC_CAPS_FLAGS_EXTATTRIBUTES_TEXENV		= DBit(14), // 65536
-	CRC_CAPS_FLAGS_EXTATTRIBUTES_NV10		= DBit(15),
-	CRC_CAPS_FLAGS_EXTATTRIBUTES_NV20		= DBit(16),
-	CRC_CAPS_FLAGS_GAMECUBE					= DBit(17),
-	CRC_CAPS_FLAGS_TEXENVMODE_COMBINE		= DBit(18),
-	CRC_CAPS_FLAGS_TEXENVMODE2	 			= DBit(19),
-	CRC_CAPS_FLAGS_VBOPERATOR_WAVE			= DBit(20),
-	CRC_CAPS_FLAGS_ARBITRARY_TEXTURE_SIZE	= DBit(21),
-	CRC_CAPS_FLAGS_BACKBUFFERASTEXTURE		= DBit(22),
-	CRC_CAPS_FLAGS_FRONTBUFFERASTEXTURE		= DBit(23),
-	CRC_CAPS_FLAGS_SEPARATESTENCIL 			= DBit(24),
-	CRC_CAPS_FLAGS_FRAGMENTPROGRAM11	 	= DBit(25),
-	CRC_CAPS_FLAGS_FRAGMENTPROGRAM14		= DBit(26),
-	CRC_CAPS_FLAGS_FRAGMENTPROGRAM20		= DBit(27),
-	CRC_CAPS_FLAGS_FRAGMENTPROGRAM30 		= DBit(28),
-	CRC_CAPS_FLAGS_PRIMITIVERESTART			= DBit(29),
+	CRC_CAPS_FLAGS_HWAPI					= M_Bit(0),
+//	CRC_CAPS_FLAGS_FULLBLENDING				= M_Bit(1),		// I don't think this is relevant any longer  :)   -mh
+	CRC_CAPS_FLAGS_RENDERTEXTUREVERTICALFLIP= M_Bit(1),
+	CRC_CAPS_FLAGS_GAMMARAMP				= M_Bit(2),
+	CRC_CAPS_FLAGS_SPECULARCOLOR			= M_Bit(3),
+	CRC_CAPS_FLAGS_COPYDEPTH				= M_Bit(4),
+	CRC_CAPS_FLAGS_CUBEMAP					= M_Bit(5),
+	CRC_CAPS_FLAGS_MATRIXPALETTE			= M_Bit(6),
+	CRC_CAPS_FLAGS_OFFSCREENTEXTURERENDER	= M_Bit(7),
+	CRC_CAPS_FLAGS_OCCLUSIONQUERY			= M_Bit(8),
+	CRC_CAPS_FLAGS_READDEPTH				= M_Bit(9),
+	CRC_CAPS_FLAGS_TEXGENMODE_ENV			= M_Bit(10),
+	CRC_CAPS_FLAGS_TEXGENMODE_ENV2			= M_Bit(11),
+	CRC_CAPS_FLAGS_TEXGENMODE_LINEARNHF     = M_Bit(12),
+	CRC_CAPS_FLAGS_TEXGENMODE_BOXNHF        = M_Bit(13),
+	CRC_CAPS_FLAGS_EXTATTRIBUTES_TEXENV		= M_Bit(14), // 65536
+	CRC_CAPS_FLAGS_EXTATTRIBUTES_NV10		= M_Bit(15),
+	CRC_CAPS_FLAGS_EXTATTRIBUTES_NV20		= M_Bit(16),
+	CRC_CAPS_FLAGS_GAMECUBE					= M_Bit(17),
+	CRC_CAPS_FLAGS_TEXENVMODE_COMBINE		= M_Bit(18),
+	CRC_CAPS_FLAGS_TEXENVMODE2	 			= M_Bit(19),
+	CRC_CAPS_FLAGS_VBOPERATOR_WAVE			= M_Bit(20),
+	CRC_CAPS_FLAGS_ARBITRARY_TEXTURE_SIZE	= M_Bit(21),
+	CRC_CAPS_FLAGS_BACKBUFFERASTEXTURE		= M_Bit(22),
+	CRC_CAPS_FLAGS_FRONTBUFFERASTEXTURE		= M_Bit(23),
+	CRC_CAPS_FLAGS_SEPARATESTENCIL 			= M_Bit(24),
+	CRC_CAPS_FLAGS_FRAGMENTPROGRAM11	 	= M_Bit(25),
+	CRC_CAPS_FLAGS_FRAGMENTPROGRAM14		= M_Bit(26),
+	CRC_CAPS_FLAGS_FRAGMENTPROGRAM20		= M_Bit(27),
+	CRC_CAPS_FLAGS_FRAGMENTPROGRAM30 		= M_Bit(28),
+	CRC_CAPS_FLAGS_PRIMITIVERESTART			= M_Bit(29),
+	CRC_CAPS_FLAGS_MRT						= M_Bit(30),
 
 };
 
@@ -428,11 +359,16 @@ enum
 	DestBlend
 */
 
+#ifdef CPU_BIGENDIAN
+#define MAKE_SOURCEDEST_BLEND(_Src_, _Dest_) (((_Src_) << 8) | (_Dest_))
+#else
+#define MAKE_SOURCEDEST_BLEND(_Src_, _Dest_) (((_Dest_) << 8) | (_Src_))
+#endif
 // --- FLAGS ---
 
 enum
 {
-	CRC_FLAGS_0x00000001			= 0x00000001,	// <- Free enum
+	CRC_FLAGS_ALPHATOCOVERAGE		= 0x00000001,	// <- Free enum
 	CRC_FLAGS_ZCOMPARE				= 0x00000002,
 	CRC_FLAGS_ZWRITE				= 0x00000004,
 	CRC_FLAGS_BLEND					= 0x00000008,
@@ -440,23 +376,35 @@ enum
 	CRC_FLAGS_SCISSOR				= 0x00000020,
 	CRC_FLAGS_FOG					= 0x00000040,
 	CRC_FLAGS_SEPARATESTENCIL		= 0x00000080,	// m_StencilBackXxx attributes should be used
-//	CRC_FLAGS_LIGHTMAP_COLORFIT		= 0x00000100,
+	CRC_FLAGS_ALPHATOCOVERAGEDITHER	= 0x00000100,
 	CRC_FLAGS_PERSPECTIVE			= 0x00000200,
-	CRC_FLAGS_ALPHAWRITE			= 0x00000400,
 	CRC_FLAGS_CULL					= 0x00000800,	// Face-culling
 	CRC_FLAGS_CULLCW				= 0x00001000,	// Cull counter clockwise.
 	CRC_FLAGS_CLIP					= 0x00002000,	// Clip all geometry to clipping planes..
 	CRC_FLAGS_STENCIL				= 0x00004000,
-	CRC_FLAGS_COLORWRITE			= 0x00008000,
 	CRC_FLAGS_SECONDARYCOLOR		= 0x00010000,
 //	CRC_FLAGS_FOGCOORD				= 0x00020000,
 	CRC_FLAGS_POLYGONOFFSET			= 0x00040000,
 	CRC_FLAGS_LIGHTING				= 0x00080000,	// Enable vertex lighting using lights provided with Attrib_SetLights. Normals must be supplied.
 
+	CRC_FLAGS_COLORWRITE			= 0x00100000,
+	CRC_FLAGS_COLORWRITE0			= 0x00100000,
+	CRC_FLAGS_COLORWRITE1			= 0x00200000,
+	CRC_FLAGS_COLORWRITE2			= 0x00400000,
+	CRC_FLAGS_COLORWRITE3			= 0x00800000,
+	CRC_FLAGS_COLORWRITEALL			= CRC_FLAGS_COLORWRITE0 | CRC_FLAGS_COLORWRITE1 | CRC_FLAGS_COLORWRITE2 | CRC_FLAGS_COLORWRITE3,
+
+	CRC_FLAGS_ALPHAWRITE			= 0x01000000,
+	CRC_FLAGS_ALPHAWRITE0			= CRC_FLAGS_ALPHAWRITE,
+	CRC_FLAGS_ALPHAWRITE1			= 0x02000000,
+	CRC_FLAGS_ALPHAWRITE2			= 0x04000000,
+	CRC_FLAGS_ALPHAWRITE3			= 0x08000000,
+	CRC_FLAGS_ALPHAWRITEALL			= CRC_FLAGS_ALPHAWRITE0 | CRC_FLAGS_ALPHAWRITE1 | CRC_FLAGS_ALPHAWRITE2 | CRC_FLAGS_ALPHAWRITE3,
+
 	// --- RASTERMODES ---
 	CRC_RASTERMODE_NONE				= 0,		//  D = S,
 	CRC_RASTERMODE_ALPHABLEND		= 1,		//  D = D*S.InvAlpha + S*S.Alpha,
-	CRC_RASTERMODE_LIGHTMAPBLEND	= 2,		//  D = D*S, or  D*S.InvAlpha + S*SrcAlpha,
+	CRC_RASTERMODE_LIGHTMAPBLEND	= 2,		//  D = D*S.InvColor
 	CRC_RASTERMODE_MULTIPLY			= 3,		//  D = D*S,
 	CRC_RASTERMODE_ADD				= 4,		//  D = D + S,
 	CRC_RASTERMODE_ALPHAADD			= 5,		//  D = D + S*S.Alpha,
@@ -470,10 +418,10 @@ enum
 	CRC_RASTERMODE_MULADD_DESTALPHA = 13,		//  D = D + S*D.Alpha
 
 	// Clear What
-	CRC_CLEAR_COLOR					= DBit(0),
-	CRC_CLEAR_ZBUFFER				= DBit(1),
-	CRC_CLEAR_STENCIL				= DBit(2),
-
+/*	CRC_CLEAR_COLOR					= M_Bit(0),
+	CRC_CLEAR_ZBUFFER				= M_Bit(1),
+	CRC_CLEAR_STENCIL				= M_Bit(2),
+*/
 	// _CopyType enums for RenderTarget_Copy
 	CRC_COPYTYPE_NORMAL				= 0,
 	CRC_COPYTYPE_DEPTHTOCOLOR		= 1,
@@ -595,6 +543,8 @@ enum
 	CRC_TEXGENMODE_ENV				,			// VP-Mode only, TexCoord.x = N.x, TexCoord.y = -N.y, viewspace
 	CRC_TEXGENMODE_SHADOWVOLUME		,			// VP-Mode only
 	CRC_TEXGENMODE_LIGHTING			,			// VP-Mode only, TexCoord.rgb = Diffuse lighting, 6 TexGenAttr
+	CRC_TEXGENMODE_LIGHTING_NONORMAL,			// VP-Mode only, lighting for billboards
+	CRC_TEXGENMODE_LIGHTFIELD		,
 
 	// Modes from here on use tangents
 	CRC_TEXGENMODE_BUMPCUBEENV		,			// VP-Mode only, TexCoord = <insert lots of math here>
@@ -617,6 +567,8 @@ enum
 	CRC_TEXGENMODE_NULL			    ,			// VP-Mode only, TexCoord is written with 0
 	CRC_TEXGENMODE_DECALTSTRANSFORM	,			// Texparam0..1 are transformed to tangent-space and used as tangents
 
+	CRC_TEXGENMODE_MAX				,
+
 	CRC_TEXGENMODE_FIRSTUSENORMAL = CRC_TEXGENMODE_NORMALMAP,
 	CRC_TEXGENMODE_FIRSTUSETANGENT = CRC_TEXGENMODE_BUMPCUBEENV,
 
@@ -626,6 +578,9 @@ enum
 	CRC_TEXGENCOMP_Q				= 8,
 	CRC_TEXGENCOMP_ALL				= 15,
 	CRC_TEXGENCOMP_MASK				= 15,
+
+	CRC_TEXSAMPLERMODE_LINEAR		= 0,
+	CRC_TEXSAMPLERMODE_SRGB			= 1,
 
 /*	CRC_TEXGENMODE_MASK			= 15,
 	CRC_TEXGENMODE_SHIFT_U		= 0,
@@ -670,31 +625,32 @@ enum
 //----------------------------------------------------------------
 enum
 {
-	CRC_ATTRCHG_RASTERMODE		= DBit(0),
-	CRC_ATTRCHG_BLEND			= DBit(1),
-	CRC_ATTRCHG_ZCOMPARE		= DBit(2),
-	CRC_ATTRCHG_TEXTUREID		= DBit(3),
-	CRC_ATTRCHG_TEXENVMODE		= DBit(4),
-	CRC_ATTRCHG_TEXENVCOLOR		= DBit(5),
-	CRC_ATTRCHG_ALPHACOMPARE	= DBit(6),
-	CRC_ATTRCHG_FOG				= DBit(7),
-	CRC_ATTRCHG_POLYGONOFFSET	= DBit(8),
-	CRC_ATTRCHG_STENCIL			= DBit(9),
-	CRC_ATTRCHG_TEXGEN			= DBit(10),
-	CRC_ATTRCHG_MATRIXPALETTE	= DBit(11),
-	CRC_ATTRCHG_MATRIX			= DBit(12),	// Any transform
-	CRC_ATTRCHG_SCISSOR			= DBit(13),
-	CRC_ATTRCHG_EXATTR			= DBit(14),
-	CRC_ATTRCHG_TEXGENCOMP		= DBit(15),
-	CRC_ATTRCHG_TEXGENATTR		= DBit(16),
-	CRC_ATTRCHG_TEXCOORDSET		= DBit(17),
-	CRC_ATTRCHG_LIGHTING		= DBit(18),
-	CRC_ATTRCHG_FLAG_FOG		= DBit(19),
-	CRC_ATTRCHG_FLAG_STENCIL	= DBit(20),
-	CRC_ATTRCHG_FLAG_ALHPAWRITE = DBit(21),
-	CRC_ATTRCHG_FLAG_BLEND		= DBit(22),
-	CRC_ATTRCHG_VB_FLAGS		= DBit(23),
-	CRC_ATTRCHG_FLAG_OTHER		= DBit(24),
+//	CRC_ATTRCHG_RASTERMODE		= M_Bit(0),
+	CRC_ATTRCHG_BLEND			= M_Bit(1),
+	CRC_ATTRCHG_ZCOMPARE		= M_Bit(2),
+	CRC_ATTRCHG_TEXTUREID		= M_Bit(3),
+	CRC_ATTRCHG_TEXENVMODE		= M_Bit(4),
+	CRC_ATTRCHG_TEXENVCOLOR		= M_Bit(5),
+	CRC_ATTRCHG_ALPHACOMPARE	= M_Bit(6),
+	CRC_ATTRCHG_FOG				= M_Bit(7),
+	CRC_ATTRCHG_POLYGONOFFSET	= M_Bit(8),
+	CRC_ATTRCHG_STENCIL			= M_Bit(9),
+	CRC_ATTRCHG_TEXGEN			= M_Bit(10),
+	CRC_ATTRCHG_MATRIXPALETTE	= M_Bit(11),
+	CRC_ATTRCHG_MATRIX			= M_Bit(12),	// Any transform
+	CRC_ATTRCHG_SCISSOR			= M_Bit(13),
+	CRC_ATTRCHG_EXATTR			= M_Bit(14),
+	CRC_ATTRCHG_TEXGENCOMP		= M_Bit(15),
+	CRC_ATTRCHG_TEXGENATTR		= M_Bit(16),
+	CRC_ATTRCHG_TEXCOORDSET		= M_Bit(17),
+	CRC_ATTRCHG_LIGHTING		= M_Bit(18),
+	CRC_ATTRCHG_FLAG_FOG		= M_Bit(19),
+	CRC_ATTRCHG_FLAG_STENCIL	= M_Bit(20),
+	CRC_ATTRCHG_FLAG_ALHPAWRITE = M_Bit(21),
+	CRC_ATTRCHG_FLAG_BLEND		= M_Bit(22),
+	CRC_ATTRCHG_VB_FLAGS		= M_Bit(23),
+	CRC_ATTRCHG_FLAG_OTHER		= M_Bit(24),
+	CRC_ATTRCHG_TEXSAMPLERMODE	= M_Bit(25),
 
 	CRC_ATTRCHG_OTHER			= CRC_ATTRCHG_EXATTR | CRC_ATTRCHG_TEXGENCOMP | CRC_ATTRCHG_TEXGENATTR | CRC_ATTRCHG_TEXCOORDSET | CRC_ATTRCHG_LIGHTING,
 
@@ -743,7 +699,7 @@ class CRC_ExtAttributes_FragmentProgram14 : public CRC_ExtAttributes
 public:
 	const char *m_pProgramName;
 	uint32 m_ProgramNameHash;
-	CVec4Dfp4* m_pParams;
+	CVec4Dfp32* m_pParams;
 	int m_nParams;
 
 	void Clear()
@@ -758,10 +714,20 @@ public:
 	void SetProgram(const char* _pProgramName, uint32 _ProgramNameHash)
 	{
 		m_pProgramName = _pProgramName;
+#ifndef M_RTM
+		{
+			uint32 Hash = StringToHash(_pProgramName);
+			if(_ProgramNameHash && Hash != _ProgramNameHash)
+			{
+				LogFile(CStrF("Program '%s' added with wrong HASH (0x%.8X vs 0x%.8X), this will cause bugs!!!!!", _pProgramName, _ProgramNameHash, Hash));
+				_ProgramNameHash = Hash;
+			}
+		}
+#endif
 		m_ProgramNameHash = _ProgramNameHash;
 	}
 
-	void SetParameters(CVec4Dfp4* _pParams, int _nParams)
+	void SetParameters(CVec4Dfp32* _pParams, int _nParams)
 	{
 		m_pParams = _pParams;
 		m_nParams = _nParams;
@@ -790,132 +756,210 @@ public:
 
 
 //----------------------------------------------------------------
-class SYSTEMDLLEXPORT CRC_Attributes// : public CObj
+class M_ALIGN(16) SYSTEMDLLEXPORT CRC_Attributes	// 0xa0 bytes, this shit needs shrinking
 {
+	struct CRasterModeBlend
+	{
+		uint8 m_SrcBlend, m_DstBlend;
+	};
+
+	static CRasterModeBlend ms_lRasterModeBlend[];
+
+	class CAttributeCheck { public: CAttributeCheck(); };
+	static CAttributeCheck ms_AttribCheck;
+
+	class CAttributeDefaultInit { public: CAttributeDefaultInit(); };
+	static CAttributeDefaultInit ms_AttribDefaultInit;
+	static CRC_Attributes M_ALIGN(16) ms_AttribDefault;
+
 public:
-	CRC_ExtAttributes* m_pExtAttrib;
-	const CRC_Light* m_pLights;
-
-	uint16 m_TextureID[CRC_MAXTEXTURES];
-	// Texture-state
-	uint16 m_nLights;
-#if	DEF_CRC_MAXTEXTURES == 4
-	uint16 m_TexGenComp;																// 4-bit per texture coord, 4 * CRC_MAXTEXTURES = 16
-#else
-	uint32 m_TexGenComp : (CRC_NUMTEXCOORDCOMP*CRC_MAXTEXCOORDS);						// 4-bit per texture coord, 4 * CRC_MAXTEXCOORDS = 32
-#endif
-	uint8 m_lTexGenMode[CRC_MAXTEXCOORDS];
-	uint8 m_iTexCoordSet[CRC_MAXTEXCOORDS];
-#ifdef PLATFORM_PS2
-	uint16 m_TexEnvMode[CRC_MAXTEXTUREENV];
-#else
-	uint16 m_TexEnvMode[CRC_MAXTEXTUREENV];
-	CPixel32* m_pTexEnvColors;
-#endif
-//	fp4* m_pTexGenParams[CRC_MAXTEXTURES][CRC_NUMTEXCOORDCOMP];
-	fp4* m_pTexGenAttr;
-	uint32 m_AttribLock;
-	uint32 m_AttribLockFlags;
-
-	uint8 m_RasterMode;
-	uint8 m_SourceBlend;
-	uint16 m_DestBlend;
-
-	uint32 m_VBFlags;
-
-	uint32 m_Flags;
-	uint8 m_ZCompare;
-	uint8 m_AlphaCompare;
-	uint16 m_AlphaRef;
-
-	fp4 m_PolygonOffsetScale;
-	fp4 m_PolygonOffsetUnits;
-
-#ifndef PLATFORM_PS2
-	CRect2Duint16 m_Scissor;
-
-	// Stencil: 32bit + 16bit
 	union
 	{
 		struct
 		{
-			uint8 m_StencilFrontFunc : 4;
-			uint8 m_StencilFrontOpFail : 4;
-			uint8 m_StencilFrontOpZFail : 4;
-			uint8 m_StencilFrontOpZPass : 4;
-			uint8 m_StencilBackFunc : 4;
-			uint8 m_StencilBackOpFail : 4;
-			uint8 m_StencilBackOpZFail : 4;
-			uint8 m_StencilBackOpZPass : 4;
+			CRC_ExtAttributes* m_pExtAttrib;
+			const CRC_Light* m_pLights;
+
+			uint16 m_TextureID[CRC_MAXTEXTURES];
+			// Texture-state
+			uint16 m_TexSamplerMode;
+			uint16 m_nLights;
+		#if	DEF_CRC_MAXTEXTURES == 4
+			uint16 m_TexGenComp;																// 4-bit per texture coord, 4 * CRC_MAXTEXTURES = 16
+		#else
+			uint32 m_TexGenComp : (CRC_NUMTEXCOORDCOMP*CRC_MAXTEXCOORDS);						// 4-bit per texture coord, 4 * CRC_MAXTEXCOORDS = 32
+		#endif
+			uint8 m_lTexGenMode[CRC_MAXTEXCOORDS];
+			uint8 m_iTexCoordSet[CRC_MAXTEXCOORDS];
+		#ifdef PLATFORM_PS2
+			uint16 m_TexEnvMode[CRC_MAXTEXTUREENV];
+		#else
+			uint16 m_TexEnvMode[CRC_MAXTEXTUREENV];
+			CPixel32* m_pTexEnvColors;
+		#endif
+		//	fp32* m_pTexGenParams[CRC_MAXTEXTURES][CRC_NUMTEXCOORDCOMP];
+			fp32* m_pTexGenAttr;
+			uint32 m_AttribLock;
+			uint32 m_AttribLockFlags;
+
+			uint32 m_VBFlags;
+
+			uint32 m_Flags;
+			uint8 m_ZCompare;
+			uint8 m_AlphaCompare;
+			uint16 m_AlphaRef;
+
+			fp32 m_PolygonOffsetScale;
+			fp32 m_PolygonOffsetUnits;
+
+		#ifndef PLATFORM_PS2
+		//	CRect2Duint16 m_Scissor;
+			CScissorRect m_Scissor;
+
+			// Stencil: 32bit + 16bit
+			union
+			{
+				struct
+				{
+					uint8 m_StencilFrontFunc : 4;
+					uint8 m_StencilFrontOpFail : 4;
+					uint8 m_StencilFrontOpZFail : 4;
+					uint8 m_StencilFrontOpZPass : 4;
+					uint8 m_StencilBackFunc : 4;
+					uint8 m_StencilBackOpFail : 4;
+					uint8 m_StencilBackOpZFail : 4;
+					uint8 m_StencilBackOpZPass : 4;
+				};
+				uint32 m_StencilDWord1;
+			};
+			uint8 m_StencilRef;
+			uint8 m_StencilFuncAnd;
+			uint8 m_StencilWriteMask;
+
+		#endif
+
+			CPixel32Aggr m_FogColor;
+			fp32 m_FogStart;
+			fp32 m_FogEnd;
+			fp32 m_FogDensity;
+
+		#ifdef PLATFORM_PS2
+			uint8 m_nChannels;
+		#endif
+
+			union
+			{
+				struct
+				{
+					uint8 m_SourceBlend;
+					uint8 m_DestBlend;
+				};
+				uint16 m_SourceDestBlend;
+			};
 		};
-		uint32 m_StencilDWord1;
+
+		struct
+		{
+			vec128 m_v128[0x0a];
+		};
 	};
-	uint8 m_StencilRef;
-	uint8 m_StencilFuncAnd;
-	uint8 m_StencilWriteMask;
-
-#endif
-
-	CPixel32 m_FogColor;
-	fp4 m_FogStart;
-	fp4 m_FogEnd;
-	fp4 m_FogDensity;
-
-#ifdef PLATFORM_PS2
-	uint8 m_nChannels;
-#endif
 
 
 	CRC_Attributes();
 	void Clear();
-	void SetDefault();
+	void SetDefault();		// Copies from ms_AttribDefault
+
+	void SetDefaultReal();	// Initializer for ms_AttribDefault
+
+	M_FORCEINLINE const CRC_Attributes& operator= (const CRC_Attributes& _Src)
+	{
+		if((mint(&_Src) & 0xf) || (mint(this) & 0xf))
+			M_BREAKPOINT;
+		vec128 v0 = _Src.m_v128[0];
+		vec128 v1 = _Src.m_v128[1];
+		vec128 v2 = _Src.m_v128[2];
+		vec128 v3 = _Src.m_v128[3];
+		vec128 v4 = _Src.m_v128[4];
+		vec128 v5 = _Src.m_v128[5];
+		vec128 v6 = _Src.m_v128[6];
+		vec128 v7 = _Src.m_v128[7];
+		vec128 v8 = _Src.m_v128[8];
+		vec128 v9 = _Src.m_v128[9];
+		m_v128[0] = v0;
+		m_v128[1] = v1;
+		m_v128[2] = v2;
+		m_v128[3] = v3;
+		m_v128[4] = v4;
+		m_v128[5] = v5;
+		m_v128[6] = v6;
+		m_v128[7] = v7;
+		m_v128[8] = v8;
+		m_v128[9] = v9;
+		return *this;
+	}
+
 	void ClearRasterModeSettings();
 
 	int Compare(const CRC_Attributes& _Attr) const;
 
 	// Attributes
-	void Attrib_Lock(int _Flags)										{ m_AttribLock = _Flags; };
-	void Attrib_LockFlags(int _Flags)									{ m_AttribLockFlags = _Flags; };
+	M_FORCEINLINE void Attrib_Lock(int _Flags)										{ m_AttribLock = _Flags; };
+	M_FORCEINLINE void Attrib_LockFlags(int _Flags)									{ m_AttribLockFlags = _Flags; };
 
-	M_INLINE void Attrib_Default()										{ m_Flags = CRC_FLAGS_ALPHAWRITE | CRC_FLAGS_COLORWRITE | CRC_FLAGS_ZWRITE | CRC_FLAGS_ZCOMPARE | CRC_FLAGS_SMOOTH | CRC_FLAGS_PERSPECTIVE; }
-	void Attrib_Enable(int _Flags)										{ m_Flags |= _Flags; };
-	void Attrib_Disable(int _Flags)										{ m_Flags &= ~_Flags; };
-	void Attrib_Switch(int _Flags)										{ m_Flags ^= _Flags; };
-	void Attrib_ZCompare(int _Compare)									{ m_ZCompare = _Compare; };
-	void Attrib_AlphaCompare(int _Compare, int _AlphaRef)				{ m_AlphaCompare = _Compare; m_AlphaRef = _AlphaRef; };
+	M_FORCEINLINE void Attrib_Default()												{ m_Flags = CRC_FLAGS_ALPHAWRITE | CRC_FLAGS_COLORWRITE | CRC_FLAGS_ZWRITE | CRC_FLAGS_ZCOMPARE | CRC_FLAGS_SMOOTH | CRC_FLAGS_PERSPECTIVE; }
+	M_FORCEINLINE void Attrib_Enable(int _Flags)									{ m_Flags |= _Flags; };
+	M_FORCEINLINE void Attrib_Disable(int _Flags)									{ m_Flags &= ~_Flags; };
+	M_FORCEINLINE void Attrib_Switch(int _Flags)									{ m_Flags ^= _Flags; };
+	M_FORCEINLINE void Attrib_ZCompare(int _Compare)								{ m_ZCompare = _Compare; };
+	M_FORCEINLINE void Attrib_AlphaCompare(int _Compare, int _AlphaRef)				{ m_AlphaCompare = _Compare; m_AlphaRef = _AlphaRef; };
 
 #ifndef PLATFORM_PS2
-	void Attrib_StencilWriteMask(int _Mask)								{ m_StencilWriteMask = _Mask; };
-	void Attrib_StencilRef(int _Ref, int _FuncAnd)		{ m_StencilRef = _Ref; m_StencilFuncAnd = _FuncAnd; };
-	void Attrib_StencilFrontOp(int _Func, int _OpFail, int _OpZFail, int _OpZPass) { m_StencilFrontFunc = _Func; m_StencilFrontOpFail = _OpFail; m_StencilFrontOpZFail = _OpZFail; m_StencilFrontOpZPass = _OpZPass; };
-	void Attrib_StencilBackOp(int _Func, int _OpFail, int _OpZFail, int _OpZPass) { m_StencilBackFunc = _Func; m_StencilBackOpFail = _OpFail; m_StencilBackOpZFail = _OpZFail; m_StencilBackOpZPass = _OpZPass; };
+	M_FORCEINLINE void Attrib_StencilWriteMask(int _Mask)							{ m_StencilWriteMask = _Mask; };
+	M_FORCEINLINE void Attrib_StencilRef(int _Ref, int _FuncAnd)					{ m_StencilRef = _Ref; m_StencilFuncAnd = _FuncAnd; };
+	M_FORCEINLINE void Attrib_StencilFrontOp(int _Func, int _OpFail, int _OpZFail, int _OpZPass) { m_StencilFrontFunc = _Func; m_StencilFrontOpFail = _OpFail; m_StencilFrontOpZFail = _OpZFail; m_StencilFrontOpZPass = _OpZPass; };
+	M_FORCEINLINE void Attrib_StencilBackOp(int _Func, int _OpFail, int _OpZFail, int _OpZPass) { m_StencilBackFunc = _Func; m_StencilBackOpFail = _OpFail; m_StencilBackOpZFail = _OpZFail; m_StencilBackOpZPass = _OpZPass; };
 #endif	// PLATFORM_PS2
 
-	void Attrib_RasterMode(int _Mode)									{ m_RasterMode = _Mode; };
+#ifndef PLATFORM_CONSOLE
+	void Attrib_RasterMode(uint _Mode);
+	static uint GetSourceDestBlend(uint _RasterMode);
+#else
+	M_FORCEINLINE void Attrib_RasterMode(uint _Mode)
+	{
+		m_SourceDestBlend = MAKE_SOURCEDEST_BLEND(ms_lRasterModeBlend[_Mode].m_SrcBlend, ms_lRasterModeBlend[_Mode].m_DstBlend);
+		m_Flags |= CRC_FLAGS_BLEND;
+	}
 
-	void Attrib_SourceBlend(int _Blend)									{ m_SourceBlend = _Blend; };
-	void Attrib_DestBlend(int _Blend)									{ m_DestBlend = _Blend; };
-	void Attrib_FogColor(CPixel32 _FogColor)							{ m_FogColor = _FogColor; };
-	void Attrib_FogStart(fp4 _FogStart)									{ m_FogStart = _FogStart; };
-	void Attrib_FogEnd(fp4 _FogEnd)										{ m_FogEnd = _FogEnd; };
-	void Attrib_FogDensity(fp4 _FogDensity)								{ m_FogDensity = _FogDensity; };
-	void Attrib_PolygonOffset(fp4 _Scale, fp4 _Offset)					{ m_PolygonOffsetScale = _Scale; m_PolygonOffsetUnits = _Offset; m_Flags |= CRC_FLAGS_POLYGONOFFSET; };
+	M_FORCEINLINE static uint GetSourceDestBlend(uint _RasterMode) { return MAKE_SOURCEDEST_BLEND(ms_lRasterModeBlend[_RasterMode].m_SrcBlend, ms_lRasterModeBlend[_RasterMode].m_DstBlend); };
+#endif
 
-	void Attrib_Lights(const CRC_Light* _pLights, int _nLights)			{ m_pLights = _pLights; m_nLights = _nLights; };
+	M_FORCEINLINE void Attrib_SourceBlend(int _Blend)								{ m_SourceBlend = _Blend; };
+	M_FORCEINLINE void Attrib_DestBlend(int _Blend)									{ m_DestBlend = _Blend; };
+	M_FORCEINLINE void Attrib_FogColor(CPixel32 _FogColor)							{ m_FogColor = _FogColor; };
+	M_FORCEINLINE void Attrib_FogStart(fp32 _FogStart)								{ m_FogStart = _FogStart; };
+	M_FORCEINLINE void Attrib_FogEnd(fp32 _FogEnd)									{ m_FogEnd = _FogEnd; };
+	M_FORCEINLINE void Attrib_FogDensity(fp32 _FogDensity)							{ m_FogDensity = _FogDensity; };
+	M_FORCEINLINE void Attrib_PolygonOffset(fp32 _Scale, fp32 _Offset)				{ m_PolygonOffsetScale = _Scale; m_PolygonOffsetUnits = _Offset; m_Flags |= CRC_FLAGS_POLYGONOFFSET; };
+
+	M_FORCEINLINE void Attrib_Lights(const CRC_Light* _pLights, int _nLights)		{ m_pLights = _pLights; m_nLights = _nLights; };
 
 	// Texture-state
-	void Attrib_TextureID(int _iTxt, int _TextureID)					{ m_TextureID[_iTxt] = _TextureID; };
-	void Attrib_TexCoordSet(int _iTxt, int _iTexCoordSet)				{ m_iTexCoordSet[_iTxt] = _iTexCoordSet; };
-	void Attrib_TexEnvMode(int _iTxt, int _TexEnvMode)					{ m_TexEnvMode[_iTxt] = _TexEnvMode; };
-//	void Attrib_TexEnvColor(int _iTxt, CPixel32 _TexEnvColor)			{ m_TexEnvColor[_iTxt] = _TexEnvColor; };
-	void Attrib_TexEnvColors(CPixel32* _pTexEnvColors)					{ m_pTexEnvColors = _pTexEnvColors; };
+	M_FORCEINLINE void Attrib_TextureID(int _iTxt, int _TextureID)					{ m_TextureID[_iTxt] = _TextureID; };
+	M_FORCEINLINE void Attrib_TexCoordSet(int _iTxt, int _iTexCoordSet)				{ m_iTexCoordSet[_iTxt] = _iTexCoordSet; };
+	M_FORCEINLINE void Attrib_TexEnvMode(int _iTxt, int _TexEnvMode)				{ m_TexEnvMode[_iTxt] = _TexEnvMode; };
+//	M_FORCEINLINE void Attrib_TexEnvColor(int _iTxt, CPixel32 _TexEnvColor)			{ m_TexEnvColor[_iTxt] = _TexEnvColor; };
+	M_FORCEINLINE void Attrib_TexEnvColors(CPixel32* _pTexEnvColors)				{ m_pTexEnvColors = _pTexEnvColors; };
 
-	void Attrib_TexGen(int _iTxt, int _TexGen, int _CompMask)			{ m_TexGenComp = (m_TexGenComp & ~(CRC_TEXGENCOMP_MASK << (_iTxt * CRC_NUMTEXCOORDCOMP))) | (_CompMask << (_iTxt * CRC_NUMTEXCOORDCOMP)); m_lTexGenMode[_iTxt] = _TexGen; };
-	void Attrib_TexGenAttr(fp4* _pTexGenAttr)							{ m_pTexGenAttr = _pTexGenAttr; };
+	M_FORCEINLINE void Attrib_TexSamplerMode(int _iTxt, int _SamplerMode)			{ m_TexSamplerMode = (m_TexSamplerMode & ~(M_BitD(_iTxt))) | (_SamplerMode << _iTxt); };
+	M_FORCEINLINE void Attrib_TexSamplerModeAll(int _SamplerMode)					{ m_TexSamplerMode = (_SamplerMode == CRC_TEXSAMPLERMODE_SRGB) ? 0xffff : 0; };
+	M_FORCEINLINE int GetTexSamplerMode(int _iTxt)									{ return (m_TexSamplerMode >> _iTxt) & 1; };
 
-	void Attrib_VBFlags(uint32 _Flags)									{ m_VBFlags = _Flags; }
+	M_FORCEINLINE void Attrib_TexGen(int _iTxt, int _TexGen, int _CompMask)			{ m_TexGenComp = (m_TexGenComp & ~(CRC_TEXGENCOMP_MASK << (_iTxt * CRC_NUMTEXCOORDCOMP))) | (_CompMask << (_iTxt * CRC_NUMTEXCOORDCOMP)); m_lTexGenMode[_iTxt] = _TexGen; };
+	M_FORCEINLINE void Attrib_TexGenAttr(fp32* _pTexGenAttr)						{ m_pTexGenAttr = _pTexGenAttr; };
 
-	int GetTexGenComp(int _iTxt) const									{ return (m_TexGenComp >> (_iTxt * 4)) & CRC_TEXGENCOMP_MASK; };
+	M_FORCEINLINE void Attrib_VBFlags(uint32 _Flags)								{ m_VBFlags = _Flags; }
+
+	M_FORCEINLINE int GetTexGenComp(int _iTxt) const								{ return (m_TexGenComp >> (_iTxt * 4)) & CRC_TEXGENCOMP_MASK; };
 
 	static int GetTexGenModeAttribSize(int _TexGenMode, int _TexGenComp);
 };
@@ -958,10 +1002,10 @@ enum
 
 
 	CRC_VREGFMT_VOID = 0,
-	CRC_VREGFMT_V1_F32,			// -_FP4_MAX.._FP4_MAX, 32-bits, 32
-	CRC_VREGFMT_V2_F32,			// -_FP4_MAX.._FP4_MAX, 64-bits, 32,32
-	CRC_VREGFMT_V3_F32,			// -_FP4_MAX.._FP4_MAX, 96-bits, 32,32,32
-	CRC_VREGFMT_V4_F32,			// -_FP4_MAX.._FP4_MAX, 128-bits, 32,32,32,32
+	CRC_VREGFMT_V1_F32,			// -_FP32_MAX.._FP32_MAX, 32-bits, 32
+	CRC_VREGFMT_V2_F32,			// -_FP32_MAX.._FP32_MAX, 64-bits, 32,32
+	CRC_VREGFMT_V3_F32,			// -_FP32_MAX.._FP32_MAX, 96-bits, 32,32,32
+	CRC_VREGFMT_V4_F32,			// -_FP32_MAX.._FP32_MAX, 128-bits, 32,32,32,32
 	CRC_VREGFMT_V1_I16,			// -32768..32767, 16-bits
 	CRC_VREGFMT_V2_I16,			// -32768..32767, 32-bits (16,16)
 	CRC_VREGFMT_V3_I16,			// -32768..32767, 48-bits (16,16,16)
@@ -976,6 +1020,17 @@ enum
 	CRC_VREGFMT_N4_UI8_P32_NORM,		// Normalized, 0..1, 32-bit, (8,8,8,8)
 	CRC_VREGFMT_N4_UI8_P32,		// Normalized, 0..255, 32-bit, (8,8,8,8)
 	CRC_VREGFMT_N4_COL,			// Normalized, 0..1, 32-bits, (8,8,8,8), BGRA byte order.
+
+	CRC_VREGFMT_U3_P32,			// Unsigned, 0..2048/1024, 32-bits (11,11,10)
+
+	CRC_VREGFMT_NS1_I16,		// Normalized signed, -1..1, 16-bits (16)
+	CRC_VREGFMT_NS2_I16,		// Normalized signed, -1..1, 32-bits (16,16)
+	CRC_VREGFMT_NS4_I16,		// Normalized signed, -1..1, 64-bits (16,16,16,16)
+
+	CRC_VREGFMT_NU1_I16,		// Normalized signed, 0..1, 16-bits (16)
+	CRC_VREGFMT_NU2_I16,		// Normalized signed, 0..1, 32-bits (16,16)
+	CRC_VREGFMT_NU3_I16,		// Normalized signed, 0..1, 48-bits (16,16,16)
+	CRC_VREGFMT_NU4_I16,		// Normalized signed, 0..1, 64-bits (16,16,16,16)
 
 //	CRC_VREGFMT_V8_F32,				// Like ..N8.. but marks dual lists
 //	CRC_VREGFMT_N8_UI8_P32_NORM,	// Like ..N4.. but marks dual lists
@@ -995,6 +1050,7 @@ public:
 	uint8 m_lVRegFormats[CRC_MAXVERTEXREG];
 	static uint8 ms_lVRegFormatSizes[CRC_VREGFMT_MAX];
 	static uint8 ms_lVRegFormatComp[CRC_VREGFMT_MAX];
+	static const char* ms_lVRegFormatName[CRC_VREGFMT_MAX];
 
 	void Clear()
 	{
@@ -1008,6 +1064,7 @@ public:
 
 	static int GetRegisterSize(uint32 _Format);
 	static int GetRegisterComponents(uint32 _Format);
+	static const char* GetRegisterName(uint32 _Format);
 
 	static void ConvertRegisterFormat(
 		const void* _pSrc, int _SrcFmt, int _SrcStride, const CRC_VRegTransform* _pSrcScale, 
@@ -1028,8 +1085,8 @@ void Geometry_##Name(Type* _p, int _iTxtChannel) { m_lpVReg[VReg+_iTxtChannel] =
 class CRC_VRegTransform
 {
 public:
-	CVec4Dfp4 m_Scale;
-	CVec4Dfp4 m_Offset;
+	CVec4Dfp32 m_Scale;
+	CVec4Dfp32 m_Offset;
 };
 
 class SYSTEMDLLEXPORT CRC_BuildVertexBuffer
@@ -1094,31 +1151,31 @@ public:
 		return m_WantFormat.GetStride();
 	}
 
-	CRC_BVB_SETVREG(VertexArray, CVec3Dfp4, CRC_VREG_POS, CRC_VREGFMT_V3_F32);
-	CRC_BVB_SETVREG(NormalArray, CVec3Dfp4, CRC_VREG_NORMAL, CRC_VREGFMT_V3_F32);
+	CRC_BVB_SETVREG(VertexArray, CVec3Dfp32, CRC_VREG_POS, CRC_VREGFMT_V3_F32);
+	CRC_BVB_SETVREG(NormalArray, CVec3Dfp32, CRC_VREG_NORMAL, CRC_VREGFMT_V3_F32);
 	CRC_BVB_SETVREG(ColorArray, CPixel32, CRC_VREG_COLOR, CRC_VREGFMT_N4_COL);
 	CRC_BVB_SETVREG(ColorArray, uint32, CRC_VREG_COLOR, CRC_VREGFMT_N4_COL);
 	CRC_BVB_SETVREG(ColorArray, int32, CRC_VREG_COLOR, CRC_VREGFMT_N4_COL);
-	CRC_BVB_SETVREG(SpecularArray, CVec3Dfp4, CRC_VREG_SPECULAR, CRC_VREGFMT_N4_COL);
+	CRC_BVB_SETVREG(SpecularArray, CVec3Dfp32, CRC_VREG_SPECULAR, CRC_VREGFMT_N4_COL);
 	CRC_BVB_SETVREG(MatrixIndex0, uint32, CRC_VREG_MI0, CRC_VREGFMT_N4_UI8_P32_NORM);
 	CRC_BVB_SETVREG(MatrixIndex0Int, uint32, CRC_VREG_MI0, CRC_VREGFMT_N4_UI8_P32);
 	CRC_BVB_SETVREG(MatrixIndex1, uint32, CRC_VREG_MI1, CRC_VREGFMT_N4_UI8_P32_NORM);
 	CRC_BVB_SETVREG(MatrixIndex1Int, uint32, CRC_VREG_MI1, CRC_VREGFMT_N4_UI8_P32);
-	CRC_BVB_SETVREG(MatrixWeight0, fp4, CRC_VREG_MW0, CRC_VREGFMT_V1_F32);
-	CRC_BVB_SETVREG(MatrixWeight0, CVec2Dfp4, CRC_VREG_MW0, CRC_VREGFMT_V2_F32);
-	CRC_BVB_SETVREG(MatrixWeight0, CVec3Dfp4, CRC_VREG_MW0, CRC_VREGFMT_V3_F32);
-	CRC_BVB_SETVREG(MatrixWeight0, CVec4Dfp4, CRC_VREG_MW0, CRC_VREGFMT_V4_F32);
-	CRC_BVB_SETVREG(MatrixWeight1, fp4, CRC_VREG_MW1, CRC_VREGFMT_V1_F32);
-	CRC_BVB_SETVREG(MatrixWeight1, CVec2Dfp4, CRC_VREG_MW1, CRC_VREGFMT_V2_F32);
-	CRC_BVB_SETVREG(MatrixWeight1, CVec3Dfp4, CRC_VREG_MW1, CRC_VREGFMT_V3_F32);
-	CRC_BVB_SETVREG(MatrixWeight1, CVec4Dfp4, CRC_VREG_MW1, CRC_VREGFMT_V4_F32);
-	CRC_BVB_SETVREG_TEX(TVertexArray, fp4, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V1_F32);
-	CRC_BVB_SETVREG_TEX(TVertexArray, CVec2Dfp4, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V2_F32);
-	CRC_BVB_SETVREG_TEX(TVertexArray, CVec3Dfp4, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V3_F32);
-	CRC_BVB_SETVREG_TEX(TVertexArray, CVec4Dfp4, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V4_F32);
+	CRC_BVB_SETVREG(MatrixWeight0, fp32, CRC_VREG_MW0, CRC_VREGFMT_V1_F32);
+	CRC_BVB_SETVREG(MatrixWeight0, CVec2Dfp32, CRC_VREG_MW0, CRC_VREGFMT_V2_F32);
+	CRC_BVB_SETVREG(MatrixWeight0, CVec3Dfp32, CRC_VREG_MW0, CRC_VREGFMT_V3_F32);
+	CRC_BVB_SETVREG(MatrixWeight0, CVec4Dfp32, CRC_VREG_MW0, CRC_VREGFMT_V4_F32);
+	CRC_BVB_SETVREG(MatrixWeight1, fp32, CRC_VREG_MW1, CRC_VREGFMT_V1_F32);
+	CRC_BVB_SETVREG(MatrixWeight1, CVec2Dfp32, CRC_VREG_MW1, CRC_VREGFMT_V2_F32);
+	CRC_BVB_SETVREG(MatrixWeight1, CVec3Dfp32, CRC_VREG_MW1, CRC_VREGFMT_V3_F32);
+	CRC_BVB_SETVREG(MatrixWeight1, CVec4Dfp32, CRC_VREG_MW1, CRC_VREGFMT_V4_F32);
+	CRC_BVB_SETVREG_TEX(TVertexArray, fp32, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V1_F32);
+	CRC_BVB_SETVREG_TEX(TVertexArray, CVec2Dfp32, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V2_F32);
+	CRC_BVB_SETVREG_TEX(TVertexArray, CVec3Dfp32, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V3_F32);
+	CRC_BVB_SETVREG_TEX(TVertexArray, CVec4Dfp32, CRC_VREG_TEXCOORD0, CRC_VREGFMT_V4_F32);
 
 //	CRC_BVB_SETVREG(MatrixIndex2, uint32, CRC_VREG_TEXCOORD6, CRC_VREGFMT_N4_UI8_P32_NORM);
-//	CRC_BVB_SETVREG(MatrixWeight2, CVec4Dfp4, CRC_VREG_TEXCOORD7, CRC_VREGFMT_V4_F32);
+//	CRC_BVB_SETVREG(MatrixWeight2, CVec4Dfp32, CRC_VREG_TEXCOORD7, CRC_VREGFMT_V4_F32);
 
 	void ConvertToInterleaved(void* _pDst, const CRC_VertexFormat& _DstFmt, CRC_VRegTransform* _pDstScale, uint32 _DestTransformEnable, int _nV);
 
@@ -1167,7 +1224,7 @@ public:
 		m_Average = m_AccValue / t_CData(t_nHistory);
 	}
 
-	void FillHistory(fp4 *_pHistory, int _nMax)
+	void FillHistory(fp32 *_pHistory, int _nMax)
 	{
 		int iCurrent = m_iCurrentHistory;
 		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
@@ -1180,7 +1237,7 @@ public:
 		}
 	}
 
-	void FillHistoryRelation(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, fp4 *_pHistory, int _nMax)
+	void FillHistoryRelation(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, fp32 *_pHistory, int _nMax)
 	{
 		int iCurrent = m_iCurrentHistory;
 		int iCurrent1 = _Other.m_iCurrentHistory;
@@ -1198,7 +1255,47 @@ public:
 		}
 	}
 
-	void FillHistoryRelationSub(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_OtherSub, fp4 *_pHistory, int _nMax)
+	void FillHistorySubRelationInv(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_OtherSub, fp32 *_pHistory, int _nMax)
+	{
+		int iCurrent = m_iCurrentHistory;
+		int iCurrent1 = _Other.m_iCurrentHistory;
+		int iCurrent2 = _OtherSub.m_iCurrentHistory;
+		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
+		{
+			_pHistory[i] = 1.0/(m_History[iCurrent] - _OtherSub.m_History[iCurrent2] - m_History[iCurrent] * (100.0 - _Other.m_History[iCurrent1]) * 0.01);
+
+			--iCurrent1;
+            if (iCurrent1 < 0)            
+				iCurrent1 = t_nHistory - 1;
+			--iCurrent2;
+            if (iCurrent2 < 0)            
+				iCurrent2 = t_nHistory - 1;
+
+			--iCurrent;
+            if (iCurrent < 0)            
+				iCurrent = t_nHistory - 1;
+		}
+	}
+
+	void FillHistoryRelationInv(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, fp32 *_pHistory, int _nMax)
+	{
+		int iCurrent = m_iCurrentHistory;
+		int iCurrent1 = _Other.m_iCurrentHistory;
+		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
+		{
+			_pHistory[i] = 1.0/(m_History[iCurrent] - m_History[iCurrent] * (100.0 - _Other.m_History[iCurrent1]) * 0.01);
+
+			--iCurrent1;
+            if (iCurrent1 < 0)            
+				iCurrent1 = t_nHistory - 1;
+
+			--iCurrent;
+            if (iCurrent < 0)            
+				iCurrent = t_nHistory - 1;
+		}
+	}
+
+	void FillHistoryRelationSub(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_OtherSub, fp32 *_pHistory, int _nMax)
 	{
 		int iCurrent = m_iCurrentHistory;
 		int iCurrent1 = _Other.m_iCurrentHistory;
@@ -1220,7 +1317,7 @@ public:
 		}
 	}
 
-	void FillHistoryInv(fp4 *_pHistory, int _nMax)
+	void FillHistoryInv(fp32 *_pHistory, int _nMax)
 	{
 		int iCurrent = m_iCurrentHistory;
 		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
@@ -1233,7 +1330,25 @@ public:
 		}
 	}
 
-	void FillHistoryComplemnt(fp4 *_pHistory, int _nMax)
+	void FillHistorySubInv(const CRC_StatCounter<t_CData, t_CDataIn, t_nHistory> &_Other, fp32 *_pHistory, int _nMax)
+	{
+		int iCurrent = m_iCurrentHistory;
+		int iCurrent1 = _Other.m_iCurrentHistory;
+		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
+		{
+			_pHistory[i] = 1.0/(m_History[iCurrent] - _Other.m_History[iCurrent1]);
+
+			--iCurrent;
+            if (iCurrent < 0)            
+				iCurrent = t_nHistory - 1;
+
+			--iCurrent1;
+            if (iCurrent1 < 0)            
+				iCurrent1 = t_nHistory - 1;
+		}
+	}
+
+	void FillHistoryComplemnt(fp32 *_pHistory, int _nMax)
 	{
 		int iCurrent = m_iCurrentHistory;
 		for (int i = Min(_nMax, t_nHistory) - 1; i >= 0; --i)
@@ -1250,10 +1365,10 @@ public:
 class CRC_Statistics
 {
 public:
-	CRC_StatCounter<fp8, fp4, 60> m_GPUUsage; // The fraction of the frame time the GPU did not spend waiting for the CPU
-	CRC_StatCounter<fp8, fp4, 60> m_CPUUsage; // The fraction of the frame time the CPU did not spend waiting for the GPU
-	CRC_StatCounter<fp8, fp4, 60> m_Time_FrameTime; // The frametime in seconds
-	CRC_StatCounter<fp8, fp4, 60> m_BlockTime; // Should be avoidable (only includes blocking that stops the CPU until all GPU activity is finished)
+	CRC_StatCounter<fp64, fp32, 60> m_GPUUsage; // The fraction of the frame time the GPU did not spend waiting for the CPU
+	CRC_StatCounter<fp64, fp32, 60> m_CPUUsage; // The fraction of the frame time the CPU did not spend waiting for the GPU
+	CRC_StatCounter<fp64, fp32, 60> m_Time_FrameTime; // The frametime in seconds
+	CRC_StatCounter<fp64, fp32, 60> m_BlockTime; // Should be avoidable (only includes blocking that stops the CPU until all GPU activity is finished)
 	CRC_StatCounter<int64, int64, 60> m_nPixlesZPass;
 	CRC_StatCounter<int64, int64, 60> m_nPixlesTotal;
 };
@@ -1274,12 +1389,5 @@ public:
 	mint m_BestCase;
 };
 
-enum 
-{
-	CRC_RENDEROPTION_NOZBUFFER = DBit(0),
-	CRC_RENDEROPTION_NOANTIALIAS = DBit(1),
-	CRC_RENDEROPTION_PRESERVEZ = DBit(2),
-	CRC_RENDEROPTION_CONTINUETILING = DBit(3),
-};
 
 #endif // _INC_MRender_Classes

@@ -1,5 +1,5 @@
 /*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
-	File:			SSE optimizations for CMat4Dfp4
+	File:			SSE optimizations for CMat4Dfp32
 
 	Author:			Magnus Högdahl
 
@@ -14,7 +14,7 @@
 
 #if defined(CPU_X86)
 
-MCCDLLEXPORT void SSE_Multiply_McMc_4x4(const CMat4Dfp4& _Src1, const CMat4Dfp4& _Src2, CMat4Dfp4& _Dst)
+MCCDLLEXPORT void SSE_Multiply_McMc_4x4(const CMat4Dfp32& _Src1, const CMat4Dfp32& _Src2, CMat4Dfp32& _Dst)
 {
 	// Athlon: ~114c
 	// Pentium 3: ~104c
@@ -100,7 +100,7 @@ MCCDLLEXPORT void SSE_Multiply_McMc_4x4(const CMat4Dfp4& _Src1, const CMat4Dfp4&
 
 #define MAT44_ROWSIZE 16
 
-MCCDLLEXPORT void SSE_Multiply_McMc_4x3on4x4(const CMat4Dfp4& _Src1, const CMat4Dfp4& _Src2, CMat4Dfp4& _Dst)
+MCCDLLEXPORT void SSE_Multiply_McMc_4x3on4x4(const CMat4Dfp32& _Src1, const CMat4Dfp32& _Src2, CMat4Dfp32& _Dst)
 {
 	__asm
 	{
@@ -185,7 +185,7 @@ MCCDLLEXPORT void SSE_Multiply_McMc_4x3on4x4(const CMat4Dfp4& _Src1, const CMat4
 
 #define MAT43_ROWSIZE 12
 
-MCCDLLEXPORT void SSE_Multiply_McMc_4x3(const TMatrix43<fp4>& _Src1, const TMatrix43<fp4>& _Src2, TMatrix43<fp4>& _Dst)
+MCCDLLEXPORT void SSE_Multiply_McMc_4x3(const TMatrix43<fp32>& _Src1, const TMatrix43<fp32>& _Src2, TMatrix43<fp32>& _Dst)
 {
 	__asm
 	{
@@ -350,7 +350,7 @@ MCCDLLEXPORT void SSE_Multiply_McMc_4x3(const TMatrix43<fp4>& _Src1, const TMatr
 
 #include "XTL.h"
 #include "Xboxmath.h"
-void SSE_Multiply_McMc_4x4(const CMat4Dfp4& _Src1, const CMat4Dfp4& _Src2, CMat4Dfp4& _Dst)
+void SSE_Multiply_McMc_4x4(const CMat4Dfp32& _Src1, const CMat4Dfp32& _Src2, CMat4Dfp32& _Dst)
 {
 	for (int row=0; row<4; row++)
 		for (int kol=0; kol<4; kol++)

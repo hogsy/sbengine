@@ -21,6 +21,16 @@
 #define TARGET_PS3
 #endif	// TARGET_PS2
 
+#define PS3_RENDERER_GCM
+//#define PS3_RENDERER_PSGL
+
+#if defined(PS3_RENDERER_GCM) && defined(PS3_RENDERER_PSGL)
+#error "Both GCM and PSGL renderer is selected, make a choice damnit you cannot have both!!!"
+#endif
+#if !defined(PS3_RENDERER_GCM) && !defined(PS3_RENDERER_PSGL)
+#error "Neither GCM nor PSGL renderer is selected, make a choice damnit you must have one!!!"
+#endif
+
 // -------------------------------------------------------------------
 //  COMPILE SETTINGS
 // -------------------------------------------------------------------
@@ -75,19 +85,17 @@
 //#define CPU_FEATURE_SSE			4
 //#define CPU_FEATURE_3DNOW		8
 
-//#define	CPU_SOFTWARE_FP8						// CPU does doubles in software (avoid at all cost!)
-#define CPU_SUPPORT_FP8							// CPU supports double
+//#define	CPU_SOFTWARE_FP64						// CPU does doubles in software (avoid at all cost!)
+#define CPU_SUPPORT_FP64							// CPU supports double
 #define CPU_QWORD_ALIGNMENT						// CPU requires QuadWord alignment for some datatypes
-#define CPU_ALIGNED_MEMORY_ACCESS				// All datatypes must be correctly aligned
+//#define CPU_ALIGNED_MEMORY_ACCESS				// All datatypes must be correctly aligned
 
 #define	NO_INLINE_FILESYSTEM
 
-#define	DEF_DISABLE_PERFGRAPH
+//#define	DEF_DISABLE_PERFGRAPH
 
 #define	UNICODE_WORKAROUND
 
-// no 43 matrices
-//#define DEFINE_MAT43_IS_MAT4D
 // -------------------------------------------------------------------
 //  DEBUG COMPILER SETTINGS
 // -------------------------------------------------------------------
@@ -123,15 +131,17 @@
 
 #define M_STATICINIT
 #define M_STATIC
-//#define M_STATIC_RENDERER
+#define M_STATIC_RENDERER
 
 #define M_ARGLISTCALL
 #define M_INLINE	inline
 #define M_CDECL
 #define M_STDCALL
-void DebugBreak();
-#define M_BREAKPOINT DebugBreak()
-#define M_FORCEINLINE inline
+#define M_FUNCTION __func__
+#define M_BREAKPOINT asm volatile("tw 31, 1, 1")
+//#define M_FORCEINLINE inline
+#define M_FORCEINLINE inline __attribute__((always_inline))
+#define M_NOINLINE __attribute__((noinline)) 
 
 #define M_RESTRICT 
 #define M_ALIGN(_Align) __attribute__((aligned(_Align)))
@@ -143,8 +153,10 @@ void DebugBreak();
 #define M_THREADSPINCOUNT 400
 
 
-//#define MRTC_THREADLOCAL __thread
-#define MRTC_THREADLOCAL
+#define MRTC_THREADLOCAL __thread
+#define M_PREZERO128(a, b) asm volatile("dcbz %0, %1" : : "b"(a), "r"(b) : "memory")
+#define M_ZERO128(_x, _y) M_PREZERO128(_x, _y)
+#define M_PRECACHE128(_x, _y) asm volatile("dcbt %0, %1" : : "b"(_x), "r"(_y))
 
 #define M_TRY
 #define M_CATCH(_ToCatch)
@@ -154,7 +166,7 @@ void DebugBreak();
 
 #define M_OFFSET(_Class, _Member, _Dest) aint _Dest;\
 			{\
-				const static _Class *pPtr = 0;\
+				const _Class *pPtr = 0;\
 				_Dest = (aint)(void *)(&((pPtr)->_Member));\
 			}
 #define _MAX_PATH 256
@@ -165,14 +177,16 @@ void DebugBreak();
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
+
 typedef signed char				int8;
 typedef unsigned char			uint8;
 typedef signed short			int16;
 typedef unsigned short			uint16;
 typedef signed int				int32;
 typedef unsigned int			uint32;
-typedef float					fp4;
-typedef double					fp8;
+typedef float					fp32;
+typedef double					fp64;
+typedef int						bint;
 
 typedef vector float			vec128;
 
@@ -200,5 +214,10 @@ typedef unsigned int			uint;
 typedef int64					fint;
 
 typedef uint16					wchar;
+typedef char ch8;
+
+#ifndef NULL
+#define NULL 0
+#endif
 
 #endif	// __INC_TARGET_PS3

@@ -32,14 +32,14 @@ class CSS_Msg
 public:
 	int m_Msg;
 	aint m_Params[4];
-	fp4 m_fParams[4];
+	fp32 m_fParams[4];
 	void* m_pData;
 	aint m_DataSize;
 
 	CSS_Msg();
 	CSS_Msg(int32 _Msg, 
 		aint _p0 = 0, aint _p1 = 0, aint _p2 = 0, aint _p3 = 0, 
-		fp4 _fp0 = 0.0f, fp4 _fp1 = 0.0f, fp4 _fp2 = 0.0f, fp4 _fp3 = 0.0f,
+		fp32 _fp0 = 0.0f, fp32 _fp1 = 0.0f, fp32 _fp2 = 0.0f, fp32 _fp3 = 0.0f,
 		void* _pData = NULL, int _DataSize = 0)
 	{
 		m_Msg = _Msg;

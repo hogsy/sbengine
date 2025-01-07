@@ -80,10 +80,7 @@ static int radpower[initrad];			/* radpower for precomputation */
 /* Initialise network in range (0,0,0) to (255,255,255) and set parameters
    ----------------------------------------------------------------------- */
 
-void initnet(thepic,len,sample)	
-unsigned char *thepic;
-int len;
-int sample;
+void initnet(unsigned char * thepic,int len,int sample)	
 {
 	register int i;
 	register int *p;
@@ -128,8 +125,7 @@ void unbiasnet()
 /* Output colour map
    ----------------- */
 
-void writecolourmap(f)
-unsigned char *f;
+void writecolourmap(unsigned char *f)
 {
 	int j;
 
@@ -200,8 +196,7 @@ void inxbuild()
 /* Search for BGR values 0..255 (after net is unbiased) and return colour index
    ---------------------------------------------------------------------------- */
 
-int inxsearch(b,g,r,alpha)
-register int b,g,r,alpha;
+int inxsearch(int b,int g,int r,int alpha)
 {
 	register int i,j,dist,a,bestd;
 	register int *p;
@@ -291,8 +286,7 @@ register int b,g,r,alpha;
 /* Search for biased BGR values
    ---------------------------- */
 
-int contest(b,g,r,alph)
-register int b,g,r,alph;
+int contest(int b,int g,int r,int alph)
 {
 	/* finds closest neuron (min dist) and updates freq */
 	/* finds best neuron (min dist-bias) and returns position */
@@ -336,8 +330,7 @@ register int b,g,r,alph;
 /* Move neuron i towards biased (b,g,r) by factor alpha
    ---------------------------------------------------- */
 
-void altersingle(alpha,i,b,g,r,alph)
-register int alpha,i,b,g,r,alph;
+void altersingle(int alpha,int i,int b,int g,int r,int alph)
 {
 	register int *n;
 
@@ -355,9 +348,7 @@ register int alpha,i,b,g,r,alph;
 /* Move adjacent neurons by precomputed alpha*(1-((i-j)^2/[r]^2)) in radpower[|i-j|]
    --------------------------------------------------------------------------------- */
 
-void alterneigh(rad,i,b,g,r,alph)
-int rad,i;
-register int b,g,r,alph;
+void alterneigh(int rad,int i,int b,int g,int r,int alph)
 {
 	register int j,k,lo,hi,a;
 	register int *p, *q;

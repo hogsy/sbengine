@@ -15,106 +15,14 @@
 
 \*____________________________________________________________________________________________*/
 
-template < typename t_CType >
-t_CType volatile& Volatile(t_CType& _Var)
-{
-    return const_cast<t_CType volatile&>(_Var);
-}
 
-#if 0
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| MRTC_Event
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-class MRTC_Event : public CReferenceCount
-{
-private:
+#ifndef MACRO_INC_MRTC_Thread_h
+#define MACRO_INC_MRTC_Thread_h
 
-#ifdef PLATFORM_WIN
-	void *m_hEvent;
-#elif defined PLATFORM_DOLPHIN
-	OSSemaphore m_Sema;
-#elif defined PLATFORM_PS2
-	int m_Sema;
-#else
-	#error "Implement this"
-#endif
-
-public:
-/*	
-	DECLARE_OPERATOR_NEW
-	*/
-
-	MRTC_Event();
-	~MRTC_Event();
-	void Signal(); 
-	bool Wait(int _TimeOut); // Returns true if the event was signaled, false if the timeout was reached. Pass -1 if no timeout is wanted
-};
+#include "VPUShared/MRTC_VPUShared_Thread.h"
 
 
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| MRTC_CriticalSection
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-class MRTC_CriticalSection : public CReferenceCount
-{
-	friend class MRTC_CriticalSectionLocker;
-	friend class MRTC_CriticalSectionUnlocker;
-	friend class MRTC_MutualWriteManyRead;
-
-private:
-
-#ifdef PLATFORM_WIN
-
-#if 0
-	volatile int32 m_LockValue;
-	volatile int32 m_ThreadLock;
-	volatile uint32 m_OwningThread;
-
-	void InternalLock();
-	void InternalUnlock();
-
-	static int32 Win32_InterlockedIncrement(volatile int32* _pValue);
-	static int32 Win32_InterlockedDecrement(volatile int32* _pValue);
-	static void Win32_Sleep();
-#else
-#ifdef PLATFORM_XBOX
-//	CRITICAL_SECTION m_Mutex;
-	uint8 m_Mutex[28];
-#else
-	uint8 m_Mutex[52];
-#endif
-#endif
-
-#elif defined PLATFORM_DOLPHIN
-	OSMutex m_Mutex;
-		
-#elif defined PLATFORM_PS2
-	int m_Sema;
-	int m_LockCount;
-	int m_ThreadID;
-#else
-	#error "Implement this"
-
-#endif
-
-public:
-/*	
-	DECLARE_OPERATOR_NEW
-	*/
-
-	MRTC_CriticalSection();
-	MRTC_CriticalSection(const char *_Description, bool _ShowLocking);
-	~MRTC_CriticalSection();
-	void Init(const char *_Description, bool _ShowLocking);
-	void Lock();
-	void Unlock();
-	bool TryLock();
-};
-
-#endif
+//#define MRTC_LOCK_TIMING
 
 namespace NThread
 {
@@ -173,7 +81,7 @@ namespace NThread
 		}
 
 		// Returns true if the wait timed out
-		DIdsPInlineS bint WaitTimeout(fp8 _Timeout)
+		DIdsPInlineS bint WaitTimeout(fp64 _Timeout)
 		{
 			return MRTC_SystemInfo::Event_WaitTimeout(m_pSemaphore, _Timeout);
 		}
@@ -257,7 +165,7 @@ namespace NThread
 			MRTC_SystemInfo::Event_Wait(m_pEvent);
 		}
 
-		DIdsPInlineS bint WaitTimeout(fp8 _Timeout)
+		DIdsPInlineS bint WaitTimeout(fp64 _Timeout)
 		{
 			return MRTC_SystemInfo::Event_WaitTimeout(m_pEvent, _Timeout);
 		}
@@ -296,6 +204,14 @@ namespace NThread
 		DIdsPInlineS static void Unlock()
 		{
 		}
+
+		DIdsPInlineS static void Construct()
+		{
+		}
+
+		DIdsPInlineS static void Destruct()
+		{
+		}
 		class CScopeLocker
 		{
 		public:
@@ -326,77 +242,6 @@ namespace NThread
 		};
 	};
 
-	template <typename t_CLock>
-	class TCScopeLock
-	{
-		t_CLock *m_pLock;
-	public:
-
-		TCScopeLock(t_CLock &_Lock)
-		{
-			_Lock.Lock();
-			m_pLock = &_Lock;
-		}
-
-		~TCScopeLock()
-		{
-			m_pLock->Unlock();
-		}
-	};
-
-	template <typename t_CLock>
-	class TCScopeUnlock
-	{
-		t_CLock *m_pLock;
-	public:
-		TCScopeUnlock(t_CLock &_Lock)
-		{
-			_Lock.Unlock();
-			m_pLock = &_Lock;
-		}
-
-		~TCScopeUnlock()
-		{
-			m_pLock->Lock();
-		}
-	};
-
-	template <typename t_CLock>
-	class TCScopeLockRead
-	{
-		t_CLock *m_pLock;
-	public:
-
-		TCScopeLockRead(t_CLock &_Lock)
-		{
-			_Lock.LockRead();
-			m_pLock = &_Lock;
-		}
-
-		~TCScopeLockRead()
-		{
-			m_pLock->UnlockRead();
-		}
-	};
-
-	template <typename t_CLock>
-	class TCScopeUnlockRead
-	{
-		t_CLock *m_pLock;
-	public:
-		TCScopeUnlockRead(t_CLock &_Lock)
-		{
-			_Lock.UnlockRead();
-			m_pLock = &_Lock;
-		}
-
-		~TCScopeUnlockRead()
-		{
-			m_pLock->LockRead();
-		}
-	};
-
-	typedef void (FLock)(void *_pLock);
 
 	class CLockVirtual : public CLock
 	{
@@ -439,95 +284,6 @@ namespace NThread
 	};
 
 
-	class CAtomicIntAggregate
-	{
-		int32 volatile m_Int;
-	public:
-
-		void Construct()
-		{
-			m_Int = 0;
-		}
-		
-		void Construct(int32 _Init)
-		{
-			m_Int = _Init;
-		}
-
-		void Destruct()
-		{
-		}
-
-		// Returns old value
-		DIdsPInlineS int32 Increase()
-		{
-			return MRTC_SystemInfo::Atomic_Increase(&m_Int);
-		}
-
-		// Returns old value
-		DIdsPInlineS int32 Decrease()
-		{
-			return MRTC_SystemInfo::Atomic_Decrease(&m_Int);
-		}
-
-		// Returns old value
-		DIdsPInlineS int32 Exchange(int32 _Number)
-		{
-			return MRTC_SystemInfo::Atomic_Exchange(&m_Int, _Number);
-		}
-
-		// Returns old value
-		DIdsPInlineS int32 Add(int32 _Number)
-		{
-			return MRTC_SystemInfo::Atomic_Add(&m_Int, _Number);
-		}
-
-		// Returns the value in the variable
-		DIdsPInlineS int32 IfEqualExchange(int32 _CompareTo, int32 _SetTo)
-		{
-			return MRTC_SystemInfo::Atomic_IfEqualExchange(&m_Int, _CompareTo, _SetTo);
-		}
-
-		DIdsPInlineS int32 Get()
-		{
-			return m_Int;
-		}
-
-		DIdsPInlineS int32 operator ++()
-		{
-			return Increase() + 1;
-		}
-
-		DIdsPInlineS int32 operator --()
-		{
-			return Decrease() - 1;
-		}
-
-		DIdsPInlineS int32 operator += (int32 _ToAdd)
-		{
-			return Add(_ToAdd) + _ToAdd;
-		}
-
-		DIdsPInlineS int32 operator -= (int32 _ToSub)
-		{
-			return Add((0-_ToSub)) - _ToSub;
-		}
-
-	};
-
-	class CAtomicInt : public CAtomicIntAggregate
-	{
-	public:
-		CAtomicInt()
-		{
-			Construct();
-		}
-
-		CAtomicInt(int32 _Init)
-		{
-			Construct(_Init);
-		}
-	};
 
 
 
@@ -629,7 +385,19 @@ namespace NThread
 		CAtomicIntAggregate m_nCreated;
 		volatile mint m_ThreadID;
 		volatile aint m_nRecurse;
+#ifdef MRTC_LOCK_TIMING
+		volatile uint64 m_TimeSpentInLock;
+		volatile uint64 m_LockCount;
+#endif // MRTC_LOCK_TIMING
 		t_CEvent m_Event;
+
+		M_INLINE void ClearTime()
+		{
+#ifdef MRTC_LOCK_TIMING
+			m_TimeSpentInLock = 0;
+			m_LockCount = 0;
+#endif // MRTC_LOCK_TIMING
+		}
 
 		void Construct()
 		{
@@ -638,6 +406,7 @@ namespace NThread
 			m_nRecurse = 0;
 			m_ThreadID = 0;
 			m_Event.ConstructDontCreate();
+			ClearTime();
 		}
 
 		void Construct(void * _pSemaphore)
@@ -647,6 +416,7 @@ namespace NThread
 			m_nRecurse = 0;
 			m_ThreadID = 0;
 			m_Event.Construct(_pSemaphore);
+			ClearTime();
 		}			
 
 		void Destruct()
@@ -670,7 +440,10 @@ namespace NThread
 					MRTC_SystemInfo::OS_Sleep(0);
 				}
 			}
-			m_Event.Wait();
+			{
+				M_NAMEDEVENT("LockWait", 0);
+				m_Event.Wait();
+			}
 		}
 
 		bint OwnsLock()
@@ -750,6 +523,10 @@ namespace NThread
 				return;
 			}
 
+#ifdef MRTC_LOCK_TIMING
+			uint64 TimeStart = CMTimerFuncs_OS::Clock();
+#endif	// MRTC_LOCK_TIMING
+
 			// Try to take the lock
 			bint bLocked = 0;
 			int nCount = 400;
@@ -769,6 +546,10 @@ namespace NThread
 				m_nRecurse = 1;
 				M_IMPORTBARRIER;
 			}
+#ifdef MRTC_LOCK_TIMING
+			m_LockCount++;
+			m_TimeSpentInLock += CMTimerFuncs_OS::Clock() - TimeStart;
+#endif // MRTC_LOCK_TIMING
 		}
 
 		DIdsPNoInline void SignalIt()
@@ -845,151 +626,6 @@ namespace NThread
 	typedef TCMutualAggregate<CEventAutoResetAggregate> CMutualAggregate;
 	typedef TMutual<CEventAutoResetAggregate> CMutual;
 
-
-	class CScopeLock
-	{
-		void *m_pLock;
-		FLock *m_pUnlockFunc;
-	public:
-
-		template <typename t_Lock>
-		class TLocker
-		{
-		public:
-			static void Locker(void *_pLock)
-			{
-				((t_Lock *)_pLock)->Unlock();
-			}
-		};
-
-		template <typename t_Lock>
-		CScopeLock(t_Lock &_Lock)
-		{
-			_Lock.Lock();
-			m_pLock = &_Lock;
-			m_pUnlockFunc = TLocker<t_Lock>::Locker;
-		}
-
-		~CScopeLock()
-		{
-			m_pUnlockFunc(m_pLock);
-		}
-	};
-
-	class CScopeUnlock
-	{
-		void *m_pLock;
-		FLock *m_pLockFunc;
-	public:
-
-		template <typename t_Lock>
-		class TLocker
-		{
-		public:
-			static void Locker(void *_pLock)
-			{
-				((t_Lock *)_pLock)->Lock();
-			}
-		};
-
-		template <typename t_Lock>
-		CScopeUnlock(t_Lock &_Lock)
-		{
-			_Lock.Unlock();
-			m_pLock = &_Lock;
-			m_pLockFunc = TLocker<t_Lock>::Locker;
-		}
-
-		~CScopeUnlock()
-		{
-			m_pLockFunc(m_pLock);
-		}
-	};
-
-	class CScopeLockRead
-	{
-		void *m_pLock;
-		FLock *m_pUnlockFunc;
-	public:
-
-		template <typename t_Lock>
-		class TLocker
-		{
-		public:
-			static void Locker(void *_pLock)
-			{
-				((t_Lock *)_pLock)->UnlockRead();
-			}
-		};
-
-		template <typename t_Lock>
-		CScopeLockRead(t_Lock &_Lock)
-		{
-			_Lock.LockRead();
-			m_pLock = &_Lock;
-			m_pUnlockFunc = TLocker<t_Lock>::Locker;
-		}
-
-		~CScopeLockRead()
-		{
-			m_pUnlockFunc(m_pLock);
-		}
-	};
-
-	class CScopeUnlockRead
-	{
-		void *m_pLock;
-		FLock *m_pLockFunc;
-	public:
-
-		template <typename t_Lock>
-		class TLocker
-		{
-		public:
-			static void Locker(void *_pLock)
-			{
-				((t_Lock *)_pLock)->LockRead();
-			}
-		};
-
-		template <typename t_Lock>
-		CScopeUnlockRead(t_Lock &_Lock)
-		{
-			_Lock.UnlockRead();
-			m_pLock = &_Lock;
-			m_pLockFunc = TLocker<t_Lock>::Locker;
-		}
-
-		~CScopeUnlockRead()
-		{
-			m_pLockFunc(m_pLock);
-		}
-	};
-
-/*		template <class t_LockType>
-	t_LockType GetLockType()*/
-
-#		define DIdsLockTyped(_Type, _ToLock) _Type::CScopeLocker ScopeLockMutualTyped1(_ToLock)
-#		define DIdsUnlockTyped(_Type, _ToUnlock) _Type::CScopeUnlocker ScopeUnlockMutualTyped1(_ToUnlock)
-
-#		define DIdsLockReadTyped(_Type, _ToLock) _Type::CScopeLockerRead ScopeLockReadMutualTyped1(_ToLock)
-#		define DIdsUnlockReadTyped(_Type, _ToUnlock) _Type::CScopeUnlockerRead ScopeUnlockReadMutualTyped1(_ToUnlock)
-
-#		define DIdsLock(_ToLock) NThread::CScopeLock ScopeLockMutual1(_ToLock)
-#		define DIdsUnlock(_ToUnlock) NThread::CScopeUnlock ScopeUnlockMutual1(_ToUnlock)
-#		define DIdsLockRead(_ToLock) NThread::CScopeLockRead ScopeLockReadMutual1(_ToLock)
-#		define DIdsUnlockRead(_ToUnlock) NThread::CScopeUnlockRead ScopeUnlockReadMutual1(_ToUnlock)
-
-#		ifndef DIdsPNoShortCuts
-#			define DLock(_ToLock) DIdsLock(_ToLock)
-#			define DUnlock(_ToLock) DIdsUnlock(_ToLock)
-#			define DLockTyped(_Type, _ToLock) DIdsLockTyped(_Type, _ToLock)
-#			define DUnlockTyped(_Type, _ToLock) DIdsUnlockTyped(_Type, _ToLock)
-#			define DLockRead(_ToLock) DIdsLockRead(_ToLock)
-#			define DUnlockRead(_ToLock) DIdsUnlockRead(_ToLock)
-#			define DLockTypedRead(_Type, _ToLock) DIdsLockTypedRead(_Type, _ToLock)
-#			define DUnlockTypedRead(_Type, _ToLock) DIdsUnlockTypedRead(_Type, _ToLock)
-#		endif
 
 	/***************************************************************************************************\
 	|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|
@@ -1082,7 +718,7 @@ namespace NThread
 		{
 			MRTC_SystemInfo::Event_SetSignaled(m_pSemaphore);
 			{
-				DIdsLockTyped(CMutual, m_Lock);
+				DLockTyped(CMutual, m_Lock);
 				DIdsListLinkD_List(CReportListMember, m_LinkReportTo)::CIterator Iter(m_ReportTo);
 
 				while (Iter)
@@ -1099,7 +735,7 @@ namespace NThread
 
 		}
 
-		DIdsPInlineS bint WaitTimeout(fp8 _Timeout)
+		DIdsPInlineS bint WaitTimeout(fp64 _Timeout)
 		{
 			return MRTC_SystemInfo::Event_WaitTimeout(m_pSemaphore, _Timeout);
 		}
@@ -1118,54 +754,6 @@ namespace NThread
 			Construct();
 		}
 		~CEventAutoResetReportable()
-		{
-			Destruct();
-		}
-	};
-
-	class CSpinLockAggregate
-	{
-	public:
-		CAtomicInt m_Lock;
-		void Construct()
-		{
-			m_Lock.Exchange(0);
-		}
-		void Destruct()
-		{
-		}
-
-		void Lock()
-		{
-			Internal_Lock();
-			M_IMPORTBARRIER;
-		}
-
-		void Unlock()
-		{
-			M_EXPORTBARRIER;
-			Internal_Unlock();
-		}
-
-		void Internal_Lock()
-		{
-			while(m_Lock.IfEqualExchange(0, 1) != 0) {}
-		}
-
-		void Internal_Unlock()
-		{
-			m_Lock.Exchange(0);
-		}
-	};
-
-	class CSpinLock : public CSpinLockAggregate
-	{
-	public:
-		CSpinLock()
-		{
-			Construct();
-		}
-		~CSpinLock()
 		{
 			Destruct();
 		}
@@ -1456,7 +1044,9 @@ protected:
 public:
 	NThread::CEventAutoResetReportable m_QuitEvent;
 
-//	fp8 GetTime();
+//	fp64 GetTime();
+
+	virtual const char* Thread_GetName() const {return "Unknown";}
 
 public:
 	MRTC_Thread_Core();
@@ -1487,7 +1077,7 @@ public:
 	virtual void Thread_OnDestroy();						// Called after thread has terminated.  - " -
 
 	// Called by the new thread
-	virtual void Thread_Sleep(fp4 _Time);				// In seconds
+	virtual void Thread_Sleep(fp32 _Time);				// In seconds
 	virtual int Thread_Main() pure;
 	virtual void Thread_Exit(int _ExitCode);
 
@@ -1569,6 +1159,13 @@ public:
 		m_CreatedMembers.DeleteAll();
 	}
 
+	M_INLINE bint Allocated()
+	{
+		t_CType *pThreadStore = (t_CType *)MRTC_SystemInfo::Thread_LocalGetValue(m_ThreadLocalStorage);
+
+		return pThreadStore != 0;
+	}
+
 	M_INLINE t_CType *Get()
 	{
 		t_CType *pThreadStore = (t_CType *)MRTC_SystemInfo::Thread_LocalGetValue(m_ThreadLocalStorage);
@@ -1577,8 +1174,8 @@ public:
 			return pThreadStore;
 		
 		return fp_Get();
-
 	}
+
 
 	M_INLINE t_CType *operator -> ()
 	{
@@ -1676,3 +1273,4 @@ public:
 };
 */
 
+#endif //MACRO_INC_MRTC_Thread_h

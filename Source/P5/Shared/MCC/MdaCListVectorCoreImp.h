@@ -1,43 +1,44 @@
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| CListVectorCore
+| CArrayCore
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 #ifdef _DEBUG
-//#define DASSERT(pos, expr) if (expr) { 	LogFile(CStrF("(CListVectorCore::%s) NULL-data, throwing exception now.", (char*) pos)); };
-#define DASSERT(pos, expr) if (expr) { 	LogFile(CStrF("(CListVectorCore::%s) NULL-data, throwing exception now.", (char*) pos)); Error_static((char*)pos, #expr) };
+//#define DASSERT(pos, expr) if (expr) { 	LogFile(CStrF("(CArrayCore::%s) NULL-data, throwing exception now.", (char*) pos)); };
+#define DASSERT(pos, expr) if (expr) { 	LogFile(CStrF("(CArrayCore::%s) NULL-data, throwing exception now.", (char*) pos)); Error_static((char*)pos, #expr) };
 #else
 #define DASSERT(pos, expr)
 #endif
 
+#define ALLOCCOUNTWARNING 16
 
 template<>
-int CListVectorCore<DLVCImp>::m_GlobalFlags = 0;
+int CArrayCore<DLVCImp>::m_GlobalFlags = 0;
 
 template<>
-void CListVectorCore<DLVCImp>::SetGlobalFlags(int _Flg)
+void CArrayCore<DLVCImp>::SetGlobalFlags(int _Flg)
 {
 	m_GlobalFlags = _Flg;
 }
 
 template<>
-int CListVectorCore<DLVCImp>::GetGlobalFlags()
+int CArrayCore<DLVCImp>::GetGlobalFlags()
 {
 	return m_GlobalFlags;
 }
 
 template<>
-void* CListVectorCore<DLVCImp>::GetElement(void* m_pList, int _iElem)
+void* CArrayCore<DLVCImp>::GetElement(void* m_pList, int _iElem)
 {
-	DASSERT("CListVectorCore<DLVCImp>::GetElement", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::GetElement", !m_pData);
 	return &(((char*)m_pList)[_iElem*m_pData->m_ElemSize]);
 }
 
 template<>
-void CListVectorCore<DLVCImp>::CopyElements(const void* _pSrc, void* _pDest, int _nElems) const
+void CArrayCore<DLVCImp>::CopyElements(const void* _pSrc, void* _pDest, int _nElems) const
 {
-	DASSERT("CListVectorCore<DLVCImp>::CopyElement", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::CopyElement", !m_pData);
 	char* pSrc = (char*) _pSrc;
 	char* pDest = (char*) _pDest;
 	for(int i = 0; i < _nElems; i++) 
@@ -46,9 +47,9 @@ void CListVectorCore<DLVCImp>::CopyElements(const void* _pSrc, void* _pDest, int
 
 #ifdef M_BOUNDCHECK
 template<>
-void CListVectorCore<DLVCImp>::RangeCheckError(int _Pos) const
+void CArrayCore<DLVCImp>::RangeCheckError(int _Pos) const
 {
-//	DASSERT("CListVectorCore<DLVCImp>::RangeCheckError", !m_pData);
+//	DASSERT("CArrayCore<DLVCImp>::RangeCheckError", !m_pData);
 	{
 	}
 
@@ -56,9 +57,9 @@ void CListVectorCore<DLVCImp>::RangeCheckError(int _Pos) const
 #ifdef CPU_INTELP5
 	{
 		if (!m_pData)
-			LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
+			LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
 		else
-			LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error, invoking breakpoint interrupt now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
+			LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error, invoking breakpoint interrupt now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
 				_Pos, m_pData->m_Len, m_pData->m_AllocLen, m_pData->m_pList, (char*) m_pData->ClassName(), m_pData->m_ElemSize));
 		M_ASSERT(0, "RangeCheckError");
 	}
@@ -70,9 +71,9 @@ void CListVectorCore<DLVCImp>::RangeCheckError(int _Pos) const
 
 #ifdef DEBUG
 	if (!m_pData)
-		LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
+		LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
 	else
-		LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error, invoking breakpoint interrupt now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
+		LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error, invoking breakpoint interrupt now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
 			_Pos, m_pData->m_Len, m_pData->m_AllocLen, m_pData->m_pList, (char*) m_pData->ClassName(), m_pData->m_ElemSize));
 	#ifdef CPU_INTELP5
 		M_ASSERT(0, "RangeCheckError");
@@ -84,21 +85,21 @@ void CListVectorCore<DLVCImp>::RangeCheckError(int _Pos) const
 #else
 	if (!m_pData)
 	{
-		LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
-		Error_static("CListVectorCore<DLVCImp>::operator[]", CStrF("Index NULL array. (%d)", _Pos));
+		LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error on NULL array, invoking breakpoint interrupt now. (Index %d)", _Pos));
+		Error_static("CArrayCore<DLVCImp>::operator[]", CStrF("Index NULL array. (%d)", _Pos));
 	}
 	else
 	{
-		LogFile(CStrF("(CListVectorCore<DLVCImp>::RangeCheckError) Range check error, throwing exception now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
+		LogFile(CStrF("(CArrayCore<DLVCImp>::RangeCheckError) Range check error, throwing exception now. (Index %d, Len %d, Alloc %d, pList %.8x, Class %s, ElemSize %d", 
 			_Pos, m_pData->m_Len, m_pData->m_AllocLen, m_pData->m_pList, (char*) m_pData->ClassName(), m_pData->m_ElemSize));
-		Error_static("CListVectorCore<DLVCImp>::operator[]", CStrF("Index out of range. (%d, %d)", _Pos, m_pData->m_Len));
+		Error_static("CArrayCore<DLVCImp>::operator[]", CStrF("Index out of range. (%d, %d)", _Pos, m_pData->m_Len));
 	}
 #endif
 }
 #endif
 
 template<>
-CListVectorCore<DLVCImp>::CListVectorCore()
+CArrayCore<DLVCImp>::CArrayCore()
 {
 	m_pData = NULL;
 //	Init();
@@ -106,7 +107,7 @@ CListVectorCore<DLVCImp>::CListVectorCore()
 }
 
 template<>
-CListVectorCore<DLVCImp>::~CListVectorCore()
+CArrayCore<DLVCImp>::~CArrayCore()
 {
 	if (m_pData)
 	{
@@ -116,7 +117,7 @@ CListVectorCore<DLVCImp>::~CListVectorCore()
 				m_pData->FreeScalar(m_pData->m_pList, m_pData->m_AllocLen);
 				m_pData->m_pList = NULL;
 			}
-//			if (m_pData->m_pList) Error_static("CListVectorCore<DLVCImp>::~", "m_pList != NULL, cannot delete at this point.");
+//			if (m_pData->m_pList) Error_static("CArrayCore<DLVCImp>::~", "m_pList != NULL, cannot delete at this point.");
 
 		if (!m_pData->m_nRef)
 		{
@@ -127,7 +128,7 @@ CListVectorCore<DLVCImp>::~CListVectorCore()
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Clear()
+void CArrayCore<DLVCImp>::Clear()
 {
 	if (m_pData)
 	{
@@ -143,13 +144,13 @@ void CListVectorCore<DLVCImp>::Clear()
 }
 
 template<>
-void CListVectorCore<DLVCImp>::InsertxBlank(int _Pos, int _nElem, bool _bRespectGrow)
+void CArrayCore<DLVCImp>::InsertxBlank(int _Pos, int _nElem, bool _bRespectGrow)
 {
-	DASSERT("CListVectorCore<DLVCImp>::InsertxBlank", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::InsertxBlank", !m_pData);
 
 #ifdef M_BOUNDCHECK
 	if ((_Pos < 0) || (_Pos > m_pData->m_Len))
-		Error_static("CListVectorCore<DLVCImp>::InsertxBlank", CStrF("Invalid position: %d/%d", _Pos, m_pData->m_Len));
+		Error_static("CArrayCore<DLVCImp>::InsertxBlank", CStrF("Invalid position: %d/%d", _Pos, m_pData->m_Len));
 #endif
 	if (!_nElem) return;
 
@@ -161,7 +162,7 @@ void CListVectorCore<DLVCImp>::InsertxBlank(int _Pos, int _nElem, bool _bRespect
 		if(_bRespectGrow)
 		{
 			int nGrow = m_pData->m_nGrow;
-			DASSERT("CListVectorCore<DLVCImp>::InsertxBlank", !nGrow);
+			DASSERT("CArrayCore<DLVCImp>::InsertxBlank", !nGrow);
 			// Always respect grow
 			while(AllocLenNew < RequiredSize)
 				AllocLenNew += nGrow;	
@@ -185,6 +186,15 @@ void CListVectorCore<DLVCImp>::InsertxBlank(int _Pos, int _nElem, bool _bRespect
 //			pSrc = NextElement(pSrc);
 //			pDest = NextElement(pDest);
 		}
+
+#ifndef M_RTM
+		m_pData->m_nAllocCount++;
+		if(m_pData->m_nAllocCount >= ALLOCCOUNTWARNING)
+		{
+			if(!(m_pData->m_nAllocCount % ALLOCCOUNTWARNING))
+				M_TRACEALWAYS("Array 0x%.8X has been allocated %d times\r\n", m_pData, m_pData->m_nAllocCount);
+		}
+#endif
 	} 
 	else
 	{
@@ -205,13 +215,13 @@ void CListVectorCore<DLVCImp>::InsertxBlank(int _Pos, int _nElem, bool _bRespect
 }
 
 template<>
-void CListVectorCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, int _nElem, bool _bInitGrow)
+void CArrayCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, int _nElem, bool _bInitGrow)
 {
-	DASSERT("CListVectorCore<DLVCImp>::InsertxElements", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::InsertxElements", !m_pData);
 
 #ifdef M_BOUNDCHECK
 	if ((_Pos < 0) || (_Pos > m_pData->m_Len))
-		Error_static("CListVectorCore<DLVCImp>::InsertxElements", CStrF("Invalid position: %d/%d", _Pos, m_pData->m_Len));
+		Error_static("CArrayCore<DLVCImp>::InsertxElements", CStrF("Invalid position: %d/%d", _Pos, m_pData->m_Len));
 #endif
 	if (!_nElem) return;
 
@@ -221,7 +231,7 @@ void CListVectorCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, i
 	if (RequiredSize > m_pData->m_AllocLen)
 	{
 		if (m_pData->m_AllocLen < _Pos)
-			Error_static("CListVectorCore<DLVCImp>::InsertxElements", "Internal error. (3)");
+			Error_static("CArrayCore<DLVCImp>::InsertxElements", "Internal error. (3)");
 
 		bool bGrow = (m_pData->m_nGrow > 0) && (_bInitGrow || (m_pData->m_Len > 0));
 		int nNewLen = RequiredSize;
@@ -240,14 +250,22 @@ void CListVectorCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, i
 		if (!pListNew) MemError_static(CStrF("InsertxElements (Ins %d, Resize %d -> %d, Grow %d)", _nElem, m_pData->m_Len, AllocLenNew, m_pData->m_nGrow));
 
 		if (m_pData->m_AllocLen < _Pos)
-			Error_static("CListVectorCore<DLVCImp>::InsertxElements", "Internal error. (4)");
+			Error_static("CArrayCore<DLVCImp>::InsertxElements", "Internal error. (4)");
 //		if (RequiredSize + m_pData->m_nGrow < _Pos)
-//			Error_static("CListVectorCore<DLVCImp>::InsertxElements", "Internal error. (5)");
+//			Error_static("CArrayCore<DLVCImp>::InsertxElements", "Internal error. (5)");
 
 		char* pSrc = (char*) m_pData->m_pList;
 		char* pDest = (char*) pListNew;
 		for(int i = 0; i < _Pos; i++) 
 			m_pData->Copy(&(pSrc[i*m_pData->m_ElemSize]), &(pDest[i*m_pData->m_ElemSize]));
+#ifndef M_RTM
+		m_pData->m_nAllocCount++;
+		if(m_pData->m_nAllocCount >= ALLOCCOUNTWARNING)
+		{
+			if(!(m_pData->m_nAllocCount % ALLOCCOUNTWARNING))
+				M_TRACEALWAYS("Array 0x%.8X has been allocated %d times\r\n", m_pData, m_pData->m_nAllocCount);
+		}
+#endif
 	} 
 	else
 	{
@@ -257,7 +275,7 @@ void CListVectorCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, i
 
 
 	if (!pListNew) 
-		Error_static("CListVectorCore<DLVCImp>::InsertxElements", "Internal error.");
+		Error_static("CArrayCore<DLVCImp>::InsertxElements", "Internal error.");
 
 	{ 
 		for (int i = (m_pData->m_Len - _Pos - 1); i >= 0; i--) 
@@ -277,14 +295,14 @@ void CListVectorCore<DLVCImp>::InsertxElements(int _Pos, const  void* _pElems, i
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Delx(int _Pos, int _nDel, bool _bAlwaysKeepData)
+void CArrayCore<DLVCImp>::Delx(int _Pos, int _nDel, bool _bAlwaysKeepData)
 {
 	if (!_nDel) return;
 
 	// Valid indata?
 #ifdef M_BOUNDCHECK
 	if (!m_pData || (_Pos < 0) || (_Pos + _nDel > m_pData->m_Len))
-		Error_static("CListVectorCore<DLVCImp>::Delx", CStrF("Invalid position: %d/%d", _Pos, Len()));
+		Error_static("CArrayCore<DLVCImp>::Delx", CStrF("Invalid position: %d/%d", _Pos, Len()));
 #endif
 
 	// Check if there will be anything left.
@@ -317,6 +335,14 @@ void CListVectorCore<DLVCImp>::Delx(int _Pos, int _nDel, bool _bAlwaysKeepData)
 		for(int i = 0; i < _Pos; i++)
 			m_pData->Copy(&(((char*)m_pData->m_pList)[i*m_pData->m_ElemSize]), &(((char*)pListNew)[i*m_pData->m_ElemSize]));
 
+#ifndef M_RTM
+		m_pData->m_nAllocCount++;
+		if(m_pData->m_nAllocCount >= ALLOCCOUNTWARNING)
+		{
+			if(!(m_pData->m_nAllocCount % ALLOCCOUNTWARNING))
+				M_TRACEALWAYS("Array 0x%.8X has been allocated %d times\r\n", m_pData, m_pData->m_nAllocCount);
+		}
+#endif
 //		for(int i = 0; i < _Pos; i++) pListNew[i] = p->list[i];
 		//Move(p->list, listnew, _Pos*sizeof(T));
 	}
@@ -342,19 +368,20 @@ void CListVectorCore<DLVCImp>::Delx(int _Pos, int _nDel, bool _bAlwaysKeepData)
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Del(int _Pos)
+void CArrayCore<DLVCImp>::Del(int _Pos)
 {
 	Delx(_Pos, 1);
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Core_SetLen(int _Len)
+void CArrayCore<DLVCImp>::Core_SetLen(int _Len)
 {
-	DASSERT("CListVectorCore<DLVCImp>::SetLen", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::SetLen", !m_pData);
 
 	if (_Len == Len() &&
 		_Len == m_pData->m_AllocLen) return;
 
+	MSCOPESHORT(CArrayCore::Core_SetLen);
 	if (_Len != m_pData->m_Len)
 	{
 		int OldGrow = m_pData->m_nGrow;
@@ -382,7 +409,7 @@ void CListVectorCore<DLVCImp>::Core_SetLen(int _Len)
 		if (!_Len) return;
 
 		if (_Len != m_pData->m_Len)
-			Error_static("CListVectorCore<DLVCImp>::SetLen", "Internal error.");
+			Error_static("CArrayCore<DLVCImp>::SetLen", "Internal error.");
 
 		void* pListNew = m_pData->AllocObjects(_Len);
 		if (!pListNew) MemError_static(CStrF("SetLen (Resize %d -> %d, Grow %d)", m_pData->m_Len, _Len, m_pData->m_nGrow));
@@ -393,6 +420,15 @@ void CListVectorCore<DLVCImp>::Core_SetLen(int _Len)
 		m_pData->FreeScalar(m_pData->m_pList, m_pData->m_AllocLen);
 		m_pData->m_pList = pListNew;
 		m_pData->m_AllocLen = _Len;
+
+#ifndef M_RTM
+		m_pData->m_nAllocCount++;
+		if(m_pData->m_nAllocCount >= ALLOCCOUNTWARNING)
+		{
+			if(!(m_pData->m_nAllocCount % ALLOCCOUNTWARNING))
+				M_TRACEALWAYS("Array 0x%.8X has been allocated %d times\r\n", m_pData, m_pData->m_nAllocCount);
+		}
+#endif
 	}
 
 /*	int Diff = _Len - m_pData->m_Len;
@@ -404,9 +440,9 @@ void CListVectorCore<DLVCImp>::Core_SetLen(int _Len)
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Core_GrowLen(int _Len)
+void CArrayCore<DLVCImp>::Core_GrowLen(int _Len)
 {
-	DASSERT("CListVectorCore<DLVCImp>::GrowLen", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::GrowLen", !m_pData);
 
 	if (_Len == Len()) return;
 
@@ -433,7 +469,7 @@ void CListVectorCore<DLVCImp>::Core_GrowLen(int _Len)
 		if (!_Len) return;
 
 		if (_Len != m_pData->m_Len)
-			Error_static("CListVectorCore<DLVCImp>::SetLen", "Internal error.");
+			Error_static("CArrayCore<DLVCImp>::SetLen", "Internal error.");
 
 		void* pListNew = m_pData->AllocObjects(_Len);
 		if (!pListNew) MemError_static(CStrF("SetLen (Resize %d -> %d, Grow %d)", m_pData->m_Len, _Len, m_pData->m_nGrow));
@@ -444,6 +480,15 @@ void CListVectorCore<DLVCImp>::Core_GrowLen(int _Len)
 		m_pData->FreeScalar(m_pData->m_pList, m_pData->m_AllocLen);
 		m_pData->m_pList = pListNew;
 		m_pData->m_AllocLen = _Len;
+
+#ifndef M_RTM
+		m_pData->m_nAllocCount++;
+		if(m_pData->m_nAllocCount >= ALLOCCOUNTWARNING)
+		{
+			if(!(m_pData->m_nAllocCount % ALLOCCOUNTWARNING))
+				M_TRACEALWAYS("Array 0x%.8X has been allocated %d times\r\n", m_pData, m_pData->m_nAllocCount);
+		}
+#endif
 	}
 
 /*	int Diff = _Len - m_pData->m_Len;
@@ -455,13 +500,13 @@ void CListVectorCore<DLVCImp>::Core_GrowLen(int _Len)
 }
 
 template<>
-void CListVectorCore<DLVCImp>::Core_QuickSetLen(int _Len)
+void CArrayCore<DLVCImp>::Core_QuickSetLen(int _Len)
 {
-	DASSERT("CListVectorCore<DLVCImp>::QuickSetLen", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::QuickSetLen", !m_pData);
 
 #ifdef M_BOUNDCHECK
 	if (_Len < 0)
-		Error_static("CListVectorCore<DLVCImp>::QuickSetLen", CStrF("Invalid length %d", _Len));
+		Error_static("CArrayCore<DLVCImp>::QuickSetLen", CStrF("Invalid length %d", _Len));
 #endif
 
 	if (_Len > m_pData->m_AllocLen)
@@ -471,16 +516,16 @@ void CListVectorCore<DLVCImp>::Core_QuickSetLen(int _Len)
 }
 
 template<>
-void CListVectorCore<DLVCImp>::OptimizeMemory()
+void CArrayCore<DLVCImp>::OptimizeMemory()
 {
 	if (!m_pData) return;
 	Core_SetLen(Len());
 }
 
 template<>
-int CListVectorCore<DLVCImp>::ListAllocatedSize() const
+int CArrayCore<DLVCImp>::ListAllocatedSize() const
 {
-	DASSERT("CListVectorCore<DLVCImp>::ListAllocatedSize", !m_pData);
+	DASSERT("CArrayCore<DLVCImp>::ListAllocatedSize", !m_pData);
 
 	if (!m_pData) return 0;
 	return m_pData->m_AllocLen*m_pData->m_ElemSize;

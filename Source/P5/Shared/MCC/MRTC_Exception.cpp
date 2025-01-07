@@ -387,6 +387,7 @@ void CCExceptionLog::DisplayFatal()
 				{
 					delete pObj;
 					throw;
+					M_BREAKPOINT;
 				}
 				)
 				delete pObj;
@@ -521,6 +522,28 @@ CFStr CCException::GetSourcePosStr(int _Line, const char* _pFileName)
 	return CFStrF("Line %d, %s", _Line,  _pFileName);
 }
 
+#ifdef M_NOEXCEPTIONINFO
+void CCException::DoThrow()
+{
+#if M_EXCEPTIONS
+	throw CCException();
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#else
+void CCException::DoThrow(const CObj* _pObj, const char* _pLocation, const char* _pSourcePos, const char* _pMessage, int _ErrCode)
+{
+#if M_EXCEPTIONS
+	throw CCException(_pObj, _pLocation, _pSourcePos, _pMessage, _ErrCode);
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#endif
+
 // -------------------------------------------------------------------
 //  CCExceptionMemory
 // -------------------------------------------------------------------
@@ -533,6 +556,28 @@ CCExceptionMemory::CCExceptionMemory(const CObj* _pObj, const char* _pLocation, 
 #endif
 {
 }
+
+#ifdef M_NOEXCEPTIONINFO
+void CCExceptionMemory::DoThrow()
+{
+#if M_EXCEPTIONS
+	throw CCExceptionMemory();
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#else
+void CCExceptionMemory::DoThrow(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr)
+{
+#if M_EXCEPTIONS
+	throw CCExceptionMemory(_pObj, _pLocationStr, _pSourcePosStr);
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#endif
 
 // -------------------------------------------------------------------
 //  CCExceptionFile
@@ -547,6 +592,28 @@ CCExceptionFile::CCExceptionFile(const CObj* _pObj, const char* _pLocation, cons
 #endif
 {
 }
+
+#ifdef M_NOEXCEPTIONINFO
+void CCExceptionFile::DoThrow()
+{
+#if M_EXCEPTIONS
+	throw CCExceptionFile();
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#else
+void CCExceptionFile::DoThrow(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr, const char* _pMessageStr, int _ErrCode)
+{
+#if M_EXCEPTIONS
+	throw CCExceptionFile(_pObj, _pLocationStr, _pSourcePosStr, _pMessageStr, _ErrCode);
+#else
+	M_BREAKPOINT;
+#endif
+}
+
+#endif
 
 // -------------------------------------------------------------------
 //  CCExceptionGraphicsHAL

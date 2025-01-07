@@ -47,7 +47,7 @@ public:
 	bool FileExists(CStr _name, int _mode);
 	void Open(const CStr _name, int _mode);
 	void OpenExt(const CStr _name, int _mode, float _Priority = 0, aint _NumCacheLines = -1, aint _CacheLineSize = -1);
-	void SetPriority(fp4 _Priority);
+	void SetPriority(fp32 _Priority);
 	CStr GetFileName();
 	
 	bool Read(CAsyncRequest *_pRequest);

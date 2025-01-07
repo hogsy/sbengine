@@ -76,7 +76,7 @@ M_INLINE fint CByteStream::Len()
 	return m_pData->Len();
 }
 
-M_INLINE void CByteStream::SetPriority(fp4 _Priority)
+M_INLINE void CByteStream::SetPriority(fp32 _Priority)
 {
 	m_pData->SetPriority(_Priority);
 }
@@ -237,7 +237,7 @@ M_INLINE CByteStreamDrive *CByteStreamManager::GetDrive(CStr &_Drive)
 {
 	M_LOCK(m_Lock);
 
-	CByteStreamDrive *pDrive = m_DriveHash.GetTyped(&_Drive);
+	CByteStreamDrive *pDrive = m_DriveTree.FindEqual(_Drive);
 
 	if (!pDrive)
 	{
@@ -344,6 +344,26 @@ M_INLINE bool CByteStreamData::EndOfFile()
 	return bIsEOF;
 }
 
+M_INLINE bool CByteStreamCacheLine::Done(bool _bThrows, bool &_bWantedToThrow)
+{
+	DLock(m_pDrive->m_Lock);
+	{
+		M_LOCK(m_Lock);
+		if (m_PendingOperation.m_pInstance)
+		{
+			if (m_PendingOperation.Done(_bThrows, _bWantedToThrow))
+			{
+				m_PendingLink.Unlink();
+				return true;
+			}
+			return false;
+		}
+		else
+			return !m_bPending;
+	}
+}
+
+
 
 M_INLINE fint CByteStreamData::Len()
 {
@@ -370,7 +390,7 @@ M_INLINE CByteStreamCacheLine *CByteStreamData::GetCacheLine(fint _Start, mint _
 {		
 	if (m_pLastCacheLine)
 	{
-		M_ASSERT(m_pLastCacheLine->m_CacheLineList.IsInList(), "nono");
+		M_ASSERT(m_pLastCacheLine->m_CacheLineLink.IsInList(), "nono");
 		bool bWantThrow = false;
 		M_ASSERT(m_pLastCacheLine->Done(false, bWantThrow), "");
 		M_ASSERT(!m_pLastCacheLine->GetOperating(), "");
@@ -517,13 +537,29 @@ M_INLINE aint CByteStreamDrive::GetCacheNum()
 	return m_NumCaches;
 }
 
+class CCompare_ByteStreamDrive
+{
+public:
+	static int Compare(void *_pContext, CByteStreamCacheLine *pFirst, CByteStreamCacheLine *pSecond)
+	{
+		if (pFirst->m_Prio > pSecond->m_Prio)
+			return 1;
+		if (pFirst->m_Prio < pSecond->m_Prio)
+			return -1;
+		return 0;
+	}
+};
+
+
 M_INLINE void CByteStreamDrive::AddRequest(CByteStreamCacheLine *_pCacheLine)
 {
 	{
 		M_LOCK(m_Lock);
+		if (_pCacheLine->m_PendingLink.IsInList())
+			M_BREAKPOINT;
 		_pCacheLine->m_Prio = _pCacheLine->m_pStream->m_Priority;
 		_pCacheLine->SetPending(true);
-		_pCacheLine->m_DriveList.LinkSortedStartTail(&m_Requests, _pCacheLine);
+		m_RequestsSorted.InsertSorted<CCompare_ByteStreamDrive>(_pCacheLine);
 	}
 	Service(_pCacheLine->m_pStream);
 }

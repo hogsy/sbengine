@@ -52,15 +52,15 @@ template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, ui
 	_SRet = (int32)_Ret;
 }
 
-template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, fp4 _Ret)
+template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, fp32 _Ret)
 {
 	_SRet = _Ret;
 }
 
 
-template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, fp8 _Ret)
+template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, fp64 _Ret)
 {
-	_SRet = (fp4)_Ret;
+	_SRet = (fp32)_Ret;
 }
 
 template <> void ScriptReturnConvert(CScriptMultiType &_SRet, CStr &_TempStr, const char * _Ret)
@@ -174,22 +174,22 @@ CScriptTypeConvert::operator uint64()
 }
 
 template <>
-CScriptTypeConvert::operator fp4()
+CScriptTypeConvert::operator fp32()
 {
 	if (m_Combined.IsString())
 	{
-		return NStr::StrToFloat(m_Combined.GetStr(), (fp4)0);
+		return NStr::StrToFloat(m_Combined.GetStr(), (fp32)0);
 	}
 	else
 		return m_Combined.SafeGetFloat();
 }
 
 template <>
-CScriptTypeConvert::operator fp8()
+CScriptTypeConvert::operator fp64()
 {
 	if (m_Combined.IsString())
 	{
-		return NStr::StrToFloat(m_Combined.GetStr(), (fp8)0);
+		return NStr::StrToFloat(m_Combined.GetStr(), (fp64)0);
 	}
 	else
 		return m_Combined.SafeGetFloat();

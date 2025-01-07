@@ -42,9 +42,9 @@ void CRC_ConsoleViewport::Refresh()
 //	CMTime Time = CMTime::GetCPU();
 	CMTime Time;
 	Time.Snapshot();
-	fp4 dTime = Clamp01((Time - m_LastRefresh).GetTime());
+	fp32 dTime = Clamp01((Time - m_LastRefresh).GetTime());
 
-	fp4 Zoom = dTime * 400.0f;
+	fp32 Zoom = dTime * 400.0f;
 
 	if (m_TargetFOV < GetFOV())
 		SetFOV(GetFOV() - Min(Zoom, GetFOV() - m_TargetFOV));
@@ -85,13 +85,13 @@ void CRC_ConsoleViewport::WriteSettings(CRegistry* _pReg)
 		_pReg->DeleteKey("VP_BACKPLANE");
 }
 
-void CRC_ConsoleViewport::Con_SetFOV(fp4 _Value)
+void CRC_ConsoleViewport::Con_SetFOV(fp32 _Value)
 {
 	MAUTOSTRIP(CRC_ConsoleViewport_Con_SetFOV, MAUTOSTRIP_VOID);
 	SetFOV(_Value);
 }
 
-void CRC_ConsoleViewport::Con_Zoom(fp4 _Value)
+void CRC_ConsoleViewport::Con_Zoom(fp32 _Value)
 {
 	MAUTOSTRIP(CRC_ConsoleViewport_Con_Zoom, MAUTOSTRIP_VOID);
 	m_TargetFOV = _Value;
@@ -99,19 +99,19 @@ void CRC_ConsoleViewport::Con_Zoom(fp4 _Value)
 	m_LastRefresh.Snapshot();
 }
 
-void CRC_ConsoleViewport::Con_SetAspectRatio(fp4 _Value)
+void CRC_ConsoleViewport::Con_SetAspectRatio(fp32 _Value)
 {
 	MAUTOSTRIP(CRC_ConsoleViewport_Con_SetAspectRatio, MAUTOSTRIP_VOID);
 	SetAspectRatio(_Value);
 }
 
-void CRC_ConsoleViewport::Con_SetFrontPlane(fp4 _Value)
+void CRC_ConsoleViewport::Con_SetFrontPlane(fp32 _Value)
 {
 	MAUTOSTRIP(CRC_ConsoleViewport_Con_SetFrontPlane, MAUTOSTRIP_VOID);
 	SetFrontPlane(_Value);
 }
 
-void CRC_ConsoleViewport::Con_SetBackPlane(fp4 _Value)
+void CRC_ConsoleViewport::Con_SetBackPlane(fp32 _Value)
 {
 	MAUTOSTRIP(CRC_ConsoleViewport_Con_SetBackPlane, MAUTOSTRIP_VOID);
 	SetBackPlane(_Value);
@@ -223,7 +223,10 @@ CRC_Font::CRC_Font()
 {
 	MAUTOSTRIP(CRC_Font_ctor, MAUTOSTRIP_VOID);
 	m_OriginalSize = 1.0f;
+	m_OriginalSizeRcp = 1.0f;
 	m_TextureID = 0;
+	m_TexturePixelUV.SetScalar(1.0f);
+	CXR_Util::Init();
 }
 
 CRC_Font::~CRC_Font()
@@ -283,7 +286,7 @@ CRC_FontChar& CRC_Font::GetCharDesc(wchar _Char)
 	return m_lCharDesc[iCharDesc];
 }
 
-fp4 CRC_Font::GetOriginalSize()
+fp32 CRC_Font::GetOriginalSize()
 {
 	MAUTOSTRIP(CRC_Font_GetOriginalSize, 0.0f);
 	return m_OriginalSize;
@@ -441,13 +444,13 @@ int CRC_Font::GetControlCodes(const wchar *_pStr, wchar *_pRes, int _ResLen)
 	return iIndex;
 }
 
-fp4 CRC_Font::GetWidth(fp4 _SizeX, const char* _pStr)
+fp32 CRC_Font::GetWidth(fp32 _SizeX, const char* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetWidth, 0.0f);
-	fp4 SizeX = _SizeX;
+	fp32 SizeX = _SizeX;
 
 	mint Len = strlen(_pStr);
-	fp4 Pos = 0.0f;
+	fp32 Pos = 0.0f;
 	for(int i = 0; i < Len; i++)
 	{
 		int CodeLen = IsControlCode(_pStr, i);
@@ -458,16 +461,16 @@ fp4 CRC_Font::GetWidth(fp4 _SizeX, const char* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					SizeX = z * _SizeX;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					SizeX = z;
 					break;
 				}
@@ -477,19 +480,19 @@ fp4 CRC_Font::GetWidth(fp4 _SizeX, const char* _pStr)
 		else
 		{
 			CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
-			Pos += fp4(Desc.m_Spacing)*SizeX;
+			Pos += fp32(Desc.m_Spacing)*SizeX;
 		}
 	}
-	return Pos / m_OriginalSize;
+	return Pos * m_OriginalSizeRcp;
 }
 
-fp4 CRC_Font::GetWidthOfCL(int CharLength, const char* _pStr)
+fp32 CRC_Font::GetWidthOfCL(int CharLength, const char* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetWidthOfCL, 0.0f);
-	fp4 SizeX = 0.0f, _SizeX = 0.0f;
+	fp32 SizeX = 0.0f, _SizeX = 0.0f;
 
 	int Len = CharLength;
-	fp4 Pos = 0.0f;
+	fp32 Pos = 0.0f;
 	for(int i = 0; i < Len; i++)
 	{
 		int CodeLen = IsControlCode(_pStr, i);
@@ -500,16 +503,16 @@ fp4 CRC_Font::GetWidthOfCL(int CharLength, const char* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					SizeX = z * _SizeX;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					SizeX = z;
 					break;
 				}
@@ -519,16 +522,16 @@ fp4 CRC_Font::GetWidthOfCL(int CharLength, const char* _pStr)
 		else
 		{
 			CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
-			Pos += fp4(Desc.m_Spacing)*SizeX;
+			Pos += fp32(Desc.m_Spacing)*SizeX;
 		}
 	}
-	return Pos / m_OriginalSize;
+	return Pos * m_OriginalSizeRcp;
 }
 
-fp4 CRC_Font::GetHeight(fp4 _Size, const char* _pStr)
+fp32 CRC_Font::GetHeight(fp32 _Size, const char* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetHeight, 0.0f);
-	fp4 MaxSize = -1;
+	fp32 MaxSize = -1;
 
 	mint Len = strlen(_pStr);
 	for(int i = 0; i < Len; i++)
@@ -541,16 +544,16 @@ fp4 CRC_Font::GetHeight(fp4 _Size, const char* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					MaxSize = Max(MaxSize, z * _Size);
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					MaxSize = Max(MaxSize, z);
 					break;
 				}
@@ -567,15 +570,15 @@ fp4 CRC_Font::GetHeight(fp4 _Size, const char* _pStr)
 }
 
 
-int CRC_Font::GetFit(fp4 _Size, const char* _pStr, int FontWidth, bool _bWordWrap)
+int CRC_Font::GetFit(fp32 _Size, const char* _pStr, int FontWidth, bool _bWordWrap)
 {
 	MAUTOSTRIP(CRC_Font_GetFit, 0);
 	// Returns the number of chars that will fit within FontWidth, with optional word-check.
 
-	fp4 Size = _Size / m_OriginalSize;
+	fp32 Size = _Size * m_OriginalSizeRcp;
 	
 	int i = 0;
-	fp4 x = 0;
+	fp32 x = 0;
 	int LastBreak = 0;
 	while(_pStr[i])
 	{
@@ -587,17 +590,17 @@ int CRC_Font::GetFit(fp4 _Size, const char* _pStr, int FontWidth, bool _bWordWra
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
-					Size = z * _Size / m_OriginalSize;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
+					Size = z * _Size * m_OriginalSizeRcp;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
-					Size = z / m_OriginalSize;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
+					Size = z * m_OriginalSizeRcp;
 					break;
 				}
 			}
@@ -610,7 +613,7 @@ int CRC_Font::GetFit(fp4 _Size, const char* _pStr, int FontWidth, bool _bWordWra
 
 			if (Desc.m_iLocal < 0) continue;
 
-			fp4 w = fp4(Desc.m_Spacing) * Size;
+			fp32 w = fp32(Desc.m_Spacing) * Size;
 			if (w + x > FontWidth)
 			{
 	//LogFile(CStrF("%f, %f, %d, %d, %d", w, w+x, FontWidth, LastBreak, i));
@@ -632,13 +635,13 @@ int CRC_Font::GetFit(fp4 _Size, const char* _pStr, int FontWidth, bool _bWordWra
 | wchar versions
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-fp4 CRC_Font::GetWidth(fp4 _SizeX, const wchar* _pStr)
+fp32 CRC_Font::GetWidth(fp32 _SizeX, const wchar* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetWidth_2, 0.0f);
-	fp4 SizeX = _SizeX;
+	fp32 SizeX = _SizeX;
 
 	int Len = CStrBase::StrLen(_pStr);
-	fp4 Pos = 0.0f;
+	fp32 Pos = 0.0f;
 	for(int i = 0; i < Len; i++)
 	{
 		int CodeLen = IsControlCode(_pStr, i);
@@ -649,16 +652,16 @@ fp4 CRC_Font::GetWidth(fp4 _SizeX, const wchar* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					SizeX = z * _SizeX;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					SizeX = z;
 					break;
 				}
@@ -668,19 +671,19 @@ fp4 CRC_Font::GetWidth(fp4 _SizeX, const wchar* _pStr)
 		else
 		{
 			CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
-			Pos += fp4(Desc.m_Spacing)*SizeX;
+			Pos += fp32(Desc.m_Spacing)*SizeX;
 		}
 	}
-	return Pos / m_OriginalSize;
+	return Pos * m_OriginalSizeRcp;
 }
 
-fp4 CRC_Font::GetWidthOfCL(int CharLength, const wchar* _pStr)
+fp32 CRC_Font::GetWidthOfCL(int CharLength, const wchar* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetWidthOfCL_2, 0.0f);
-	fp4 SizeX = 0.0f, _SizeX = 0.0f;
+	fp32 SizeX = 0.0f, _SizeX = 0.0f;
 
 	int Len = CharLength;
-	fp4 Pos = 0.0f;
+	fp32 Pos = 0.0f;
 	for(int i = 0; i < Len; i++)
 	{
 		int CodeLen = IsControlCode(_pStr, i);
@@ -691,16 +694,16 @@ fp4 CRC_Font::GetWidthOfCL(int CharLength, const wchar* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					SizeX = z * _SizeX;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					SizeX = z;
 					break;
 				}
@@ -710,16 +713,17 @@ fp4 CRC_Font::GetWidthOfCL(int CharLength, const wchar* _pStr)
 		else
 		{
 			CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
-			Pos += fp4(Desc.m_Spacing)*SizeX;
+			Pos += fp32(Desc.m_Spacing)*SizeX;
 		}
 	}
-	return Pos / m_OriginalSize;
+	return Pos * m_OriginalSizeRcp;
 }
 
-fp4 CRC_Font::GetHeight(fp4 _Size, const wchar* _pStr)
+#if 0
+fp32 CRC_Font::GetHeight(fp32 _Size, const wchar* _pStr)
 {
 	MAUTOSTRIP(CRC_Font_GetHeight_2, 0.0f);
-	fp4 MaxSize = -1;
+	fp32 MaxSize = -1;
 
 	int Len = CStrBase::StrLen(_pStr);
 	for(int i = 0; i < Len; i++)
@@ -732,16 +736,16 @@ fp4 CRC_Font::GetHeight(fp4 _Size, const wchar* _pStr)
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
 					MaxSize = Max(MaxSize, z * _Size);
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
 					MaxSize = Max(MaxSize, z);
 					break;
 				}
@@ -757,16 +761,74 @@ fp4 CRC_Font::GetHeight(fp4 _Size, const wchar* _pStr)
 	return MaxSize;
 }
 
+#else
 
-int CRC_Font::GetFit(fp4 _Size, const wchar* _pStr, int FontWidth, bool _bWordWrap)
+fp32 CRC_Font::GetHeight(fp32 _Size, const wchar* _pStr)
+{
+	MAUTOSTRIP(CRC_Font_GetHeight_2, 0.0f);
+	vec128 MaxSize = M_VScalar(-1.0f);
+	vec128 VSize = M_VLdScalar(_Size);
+
+	int Len = CStrBase::StrLen(_pStr);
+	for(int i = 0; i < Len; i++)
+	{
+		int CodeLen = IsControlCode(_pStr, i);
+		if(CodeLen > 0)
+		{
+			switch(_pStr[i + 1])
+			{
+			case 'z' :
+				{
+					// Relative size
+//					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+//					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
+					vec128 chars = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VSubs_u16(M_VMrgL_u16(M_VLdScalar_u16((uint16&)_pStr[i + 2]), M_VLdScalar_u16((uint16&)_pStr[i + 3])), M_VScalar_u16('0'))));
+					vec128 tmp = M_VMul(chars, M_VConst(1.0f, 0.1f, 0.0f, 0.0f));
+					vec128 vz = M_VAdd(M_VSplatX(tmp), M_VSplatY(tmp));
+					MaxSize = M_VMax(MaxSize, M_VMul(vz, VSize));
+//					MaxSize = Max(MaxSize, z * _Size);
+					break;
+				}
+			case 'Z' :
+				{
+					// Absolute size
+/*					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
+					MaxSize = Max(MaxSize, z);*/
+					vec128 chars = M_VCnvL_u16_u32(M_VSubs_u16(M_VMrgL_u16(M_VLdScalar_u16((uint16&)_pStr[i + 2]), M_VLdScalar_u16((uint16&)_pStr[i + 3])), M_VScalar_u16('0')));
+					vec128 tmp = M_VMul(M_VCnv_i32_f32(chars), M_VConst(10.0f, 1.0f, 0.0f, 0.0f));
+					vec128 vz = M_VAdd(M_VSplatX(tmp), M_VSplatY(tmp));
+					MaxSize = M_VMax(MaxSize, vz);
+					break;
+				}
+			}
+			i += CodeLen - 1;
+		}
+		else
+		{
+			//			CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
+		}
+	}
+	MaxSize = M_VSelMsk(M_VCmpLTMsk(MaxSize, M_VZero()), VSize, MaxSize);
+	fp32 Ret;
+	M_VStAny32(MaxSize, &Ret);
+	return Ret;
+//	if (MaxSize < 0) MaxSize = _Size;
+//	return MaxSize;
+}
+
+#endif
+
+
+int CRC_Font::GetFit(fp32 _Size, const wchar* _pStr, int FontWidth, bool _bWordWrap)
 {
 	MAUTOSTRIP(CRC_Font_GetFit_2, 0);
 	// Returns the number of chars that will fit within FontWidth, with optional word-check.
 
-	fp4 Size = _Size / m_OriginalSize;
+	fp32 Size = _Size * m_OriginalSizeRcp;
 	
 	int i = 0;
-	fp4 x = 0;
+	fp32 x = 0;
 	int LastBreak = 0;
 	while(_pStr[i])
 	{
@@ -778,17 +840,17 @@ int CRC_Font::GetFit(fp4 _Size, const wchar* _pStr, int FontWidth, bool _bWordWr
 			case 'z' :
 				{
 					// Relative size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
-					Size = z * _Size / m_OriginalSize;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
+					Size = z * _Size * m_OriginalSizeRcp;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute size
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
-					Size = z / m_OriginalSize;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
+					Size = z * m_OriginalSizeRcp;
 					break;
 				}
 			}
@@ -801,7 +863,7 @@ int CRC_Font::GetFit(fp4 _Size, const wchar* _pStr, int FontWidth, bool _bWordWr
 
 			if (Desc.m_iLocal < 0) continue;
 
-			fp4 w = fp4(Desc.m_Spacing) * Size;
+			fp32 w = fp32(Desc.m_Spacing) * Size;
 			if (w + x > FontWidth)
 			{
 	//LogFile(CStrF("%f, %f, %d, %d, %d", w, w+x, FontWidth, LastBreak, i));
@@ -823,7 +885,7 @@ int CRC_Font::GetFit(fp4 _Size, const wchar* _pStr, int FontWidth, bool _bWordWr
 | CStr versions
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-fp4 CRC_Font::GetWidth(fp4 _Size, CStr _Str)
+fp32 CRC_Font::GetWidth(fp32 _Size, CStr _Str)
 {
 	MAUTOSTRIP(CRC_Font_GetWidth_3, 0.0f);
 	if (_Str.IsUnicode())
@@ -832,7 +894,7 @@ fp4 CRC_Font::GetWidth(fp4 _Size, CStr _Str)
 		return GetWidth(_Size, _Str.Str());
 }
 
-fp4 CRC_Font::GetHeight(fp4 _Size, CStr _Str)
+fp32 CRC_Font::GetHeight(fp32 _Size, CStr _Str)
 {
 	MAUTOSTRIP(CRC_Font_GetHeight_3, 0.0f);
 	if (_Str.IsUnicode())
@@ -841,7 +903,7 @@ fp4 CRC_Font::GetHeight(fp4 _Size, CStr _Str)
 		return GetHeight(_Size, _Str.Str());
 }
 
-fp4 CRC_Font::GetWidthOfCL(int CharLength, CStr _Str)
+fp32 CRC_Font::GetWidthOfCL(int CharLength, CStr _Str)
 {
 	MAUTOSTRIP(CRC_Font_GetWidthOfCL_3, 0.0f);
 	if (_Str.IsUnicode())
@@ -850,7 +912,7 @@ fp4 CRC_Font::GetWidthOfCL(int CharLength, CStr _Str)
 		return GetWidthOfCL(CharLength, _Str.Str());
 }
 
-int CRC_Font::GetFit(fp4 _Size, CStr _Str, int _Width, bool _bWordWrap)
+int CRC_Font::GetFit(fp32 _Size, CStr _Str, int _Width, bool _bWordWrap)
 {
 	MAUTOSTRIP(CRC_Font_GetFit_3, 0);
 	if (_Str.IsUnicode())
@@ -935,10 +997,22 @@ void CRC_Font::ReadFromXFC(CDataFile* _pDFile)
 
 	_pDFile->PushPosition();
 	if (_pDFile->GetNext("ORIGINALSIZE"))
+	{
 		_pDFile->GetFile()->ReadLE(m_OriginalSize);
+		m_OriginalSizeRcp = 1.0f / m_OriginalSize;
+	}
 	else
+	{
 		m_OriginalSize = 1.0f;
+		m_OriginalSizeRcp = 1.0f;
+	}
 	_pDFile->PopPosition();
+
+	m_TextureID = m_spTC->GetTextureID(0);
+	CImage Desc; int nMipMaps = 0;
+	m_spTC->GetTextureDesc(0, &Desc, nMipMaps);
+	m_TexturePixelUV = CVec2Dfp32(1.0f / Desc.GetWidth(), 1.0f / Desc.GetHeight());
+	
 
 /*	Vad är det här för nonsense?
 
@@ -977,7 +1051,7 @@ void CRC_Font::ReadFromScript(CStr _Filename)
 	int CurSpacing = 0;
 	int CurHeight = 0;
 	int CurWidth = 0;
-	CVec2Dfp4 CurOffset = 0;
+	CVec2Dfp32 CurOffset = 0;
 	int CurTexture = -1;
 
 	m_lCharDesc.SetLen(256);
@@ -1026,7 +1100,7 @@ void CRC_Font::ReadFromScript(CStr _Filename)
 				ch.m_yOfs = CurOffset.k[1];
 				ch.m_TVec0.k[0] = (s.GetStrSep(",")).Val_int();
 				ch.m_TVec0.k[1] = (s.GetStrSep(",")).Val_int();
-				fp4 TxtSp = (s.GetStrSep(",")).Val_fp8();
+				fp32 TxtSp = (s.GetStrSep(",")).Val_fp64();
 				ch.m_Dimensions.k[0] = CurWidth;
 				ch.m_Dimensions.k[1] = CurHeight;
 				ch.m_Spacing = CurSpacing;
@@ -1115,7 +1189,8 @@ void CRC_Font::ReadFromScript(CStr _Filename)
 			}
 			else if(KeyW == (const char *)"ORGSIZE")
 			{
-				m_OriginalSize = s.GetStrSep(",").Val_fp8();
+				m_OriginalSize = s.GetStrSep(",").Val_fp64();
+				m_OriginalSizeRcp = 1.0f / m_OriginalSize;
 			}
 			else
 				Error("ReadFromScript", CStrF("Invalid command: '%s'", (char*)KeyW));
@@ -1133,8 +1208,8 @@ void CRC_Font::ReadFromScript(CStr _Filename)
 			int nMipmaps;
 			m_spTC->GetTextureDesc(ch.m_iLocal, &Desc, nMipmaps);
 
-			fp4 ws = 1.0f/Desc.GetWidth();
-			fp4 hs = 1.0f/Desc.GetHeight();
+			fp32 ws = 1.0f/Desc.GetWidth();
+			fp32 hs = 1.0f/Desc.GetHeight();
 			ch.m_TVec0.k[0] *= ws;
 			ch.m_TVec0.k[1] *= hs;
 			ch.m_TVec1.k[0] = ch.m_Dimensions.k[0] * ws + ch.m_TVec0.k[0];
@@ -1518,7 +1593,10 @@ void CRC_Font::ReadFromScriptWin32(CStr _Filename)
 	CClipRect WholeTexture(0, 0, TextureWidth, TextureHeight);
 	// Create Data
 
-	TextureImage->Fill(WholeTexture, CPixel32(255,255,255,0));
+	if (nShadow)
+		TextureImage->Fill(WholeTexture, CPixel32(0,0,0,0));
+	else
+		TextureImage->Fill(WholeTexture, CPixel32(255,255,255,0));
 
 ///	uint8 *LockedTexture = (uint8 *)TextureImage->Lock();
 	
@@ -1533,6 +1611,7 @@ void CRC_Font::ReadFromScriptWin32(CStr _Filename)
 	// Create The Font Data
 
 	m_OriginalSize = Height / spEnv->GetValuef("Size", 1.0);	
+	m_OriginalSizeRcp = 1.0f / m_OriginalSize;
 	int OffsetY = m_OriginalSize * Offy;
 
 	int CurrentX = TexturBorder;
@@ -1661,6 +1740,7 @@ void CRC_Font::ReadFromScriptWin32(CStr _Filename)
 	LocalTextureID = m_spTC->GetLocal(OutputTextureName);
 	m_TextureName = OutputTextureName;
 	m_TextureID = m_spTC->GetTextureID(LocalTextureID);
+	m_TexturePixelUV = CVec2Dfp32(1.0f / TextureWidth, 1.0f / TextureHeight);
 	CTexture *Tex = m_spTC->GetTextureMap(LocalTextureID, CTC_TEXTUREVERSION_ANY);
 	Tex->m_Properties.m_Flags |= CTC_TEXTUREFLAGS_HIGHQUALITY | CTC_TEXTUREFLAGS_NOPICMIP | CTC_TEXTUREFLAGS_NOCOMPRESS;
 
@@ -1671,12 +1751,10 @@ void CRC_Font::ReadFromScriptWin32(CStr _Filename)
 			CRC_FontChar ch = m_lCharDesc[i];
 			ch.m_iLocal = LocalTextureID;
 			
-			fp4 ws = 1.0f/TextureWidth;
-			fp4 hs = 1.0f/TextureHeight;
-			ch.m_TVec0.k[0] *= ws;
-			ch.m_TVec0.k[1] *= hs;
-			ch.m_TVec1.k[0] = ch.m_Dimensions.k[0] * ws + ch.m_TVec0.k[0];
-			ch.m_TVec1.k[1] = ch.m_Dimensions.k[1] * hs + ch.m_TVec0.k[1];
+			ch.m_TVec0.k[0] *= m_TexturePixelUV[0];
+			ch.m_TVec0.k[1] *= m_TexturePixelUV[1];
+			ch.m_TVec1.k[0] = ch.m_Dimensions.k[0] * m_TexturePixelUV[0] + ch.m_TVec0.k[0];
+			ch.m_TVec1.k[1] = ch.m_Dimensions.k[1] * m_TexturePixelUV[1] + ch.m_TVec0.k[1];
 			
 			m_lCharDesc[i] = ch;
 		}		
@@ -1732,9 +1810,12 @@ void CRC_Font::WriteXFC(CDataFile* _pDFile)
 | Rendering
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol, uint16* _piPrim, 
-		CPixel32 _Color, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+
+#if 0
+
+int CRC_Font::Write(int _MaxV, CVec3Dfp32* _pV, CVec2Dfp32* _pTV, CPixel32* _pCol, uint16* _piPrim, 
+		CPixel32 _Color, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write, 0);
 	// _piPrim must have space for _MaxV*3/2 indices.
@@ -1743,22 +1824,25 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 	if (Len < 1) return 0;
 	if (Len*4 > _MaxV) return 0;
 
-	fp4 InvOriginalSize = 1.0f / m_OriginalSize;
-	CVec3Dfp4 p(_Pos);
-	fp4 SizeX = _Size.k[0] * InvOriginalSize;
-	fp4 SizeY = _Size.k[1] * InvOriginalSize;
+	fp32 InvOriginalSize = m_OriginalSizeRcp;
+	CVec3Dfp32 p(_Pos);
+	fp32 SizeX = _Size.k[0] * InvOriginalSize;
+	fp32 SizeY = _Size.k[1] * InvOriginalSize;
+	CVec2Dfp32 SizeRcp = CVec2Dfp32(1.0f / _Size[0], 1.0f / _Size[1]);
+	fp32 SizeXRcp = m_OriginalSize * SizeRcp[0];
+	fp32 SizeYRcp = m_OriginalSize * SizeRcp[1];
 
 //	uint32 IndexRamp[4] = { 0, 1, 2, 3 };
 
 	int nP = 0;
 	int nV = 0;
 
-	CVec3Dfp4 Pos(_Pos);
+	CVec3Dfp32 Pos(_Pos);
 
 	CPixel32 CurColor = _Color;
 
-	fp4 x = 0;
-	fp4 y = 0;
+	fp32 x = 0;
+	fp32 y = 0;
 	for(int i = 0; i < Len; i++)
 	{
 		int CodeLen = IsControlCode(_pStr, i);
@@ -1847,19 +1931,25 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 			case 'z' :
 				{
 					// Relative
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 1.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
+					fp32 zrcp = 1.0f / z;
 					SizeX = z * _Size.k[0] * InvOriginalSize;
 					SizeY = z * _Size.k[1] * InvOriginalSize;
+					SizeXRcp = m_OriginalSize * SizeRcp[0] * zrcp;
+					SizeYRcp = m_OriginalSize * SizeRcp[1] * zrcp;
 					break;
 				}
 			case 'Z' :
 				{
 					// Absolute
-					fp4 z = fp4((uint8)_pStr[i + 2] - '0') * 10.0f;
-					z += fp4((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
+					fp32 zrcp = 1.0f / z;
 					SizeX = z * InvOriginalSize;
 					SizeY = z * InvOriginalSize;
+					SizeXRcp = m_OriginalSize * zrcp;
+					SizeYRcp = m_OriginalSize * zrcp;
 					break;
 				}
 			}
@@ -1871,13 +1961,13 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 		CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
 		if (Desc.m_iLocal < 0) continue;
 
-		fp4 ws = Desc.m_Dimensions.k[0] * SizeX;
-		fp4 hs = Desc.m_Dimensions.k[1] * SizeY;
-		fp4 CurX = x + Desc.m_xOfs * SizeX;
-		fp4 CurY = y + Desc.m_yOfs * SizeY;
+		fp32 ws = Desc.m_Dimensions.k[0] * SizeX;
+		fp32 hs = Desc.m_Dimensions.k[1] * SizeY;
+		fp32 CurX = x + Desc.m_xOfs * SizeX;
+		fp32 CurY = y + Desc.m_yOfs * SizeY;
 		_Pos.Combine(_Dir, CurX, Pos);
 		Pos.Combine(_VDown, CurY, Pos);
-		
+
 
 		if (CurX+ws < _MinLimit.k[0]) goto Cont;
 		if (CurX > _MaxLimit.k[0]) goto Cont;
@@ -1934,22 +2024,25 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 				}
 				else
 				{
-					fp4 tx0 = (bXMinClip) ? (_MinLimit.k[0] - CurX) : 0;
-					fp4 tx1 = (bXMaxClip) ? (_MaxLimit.k[0] - CurX) : ws;
-					fp4 ty0 = (bYMinClip) ? (_MinLimit.k[1] - CurY) : 0;
-					fp4 ty1 = (bYMaxClip) ? (_MaxLimit.k[1] - CurY) : hs;
+					fp32 tx0 = (bXMinClip) ? (_MinLimit.k[0] - CurX) : 0;
+					fp32 tx1 = (bXMaxClip) ? (_MaxLimit.k[0] - CurX) : ws;
+					fp32 ty0 = (bYMinClip) ? (_MinLimit.k[1] - CurY) : 0;
+					fp32 ty1 = (bYMaxClip) ? (_MaxLimit.k[1] - CurY) : hs;
 
 					Pos.Combine(_Dir, tx0, _pV[nV + 0]); _pV[nV + 0].Combine(_VDown, ty0, _pV[nV + 0]);
 					Pos.Combine(_Dir, tx1, _pV[nV + 1]); _pV[nV + 1].Combine(_VDown, ty0, _pV[nV + 1]);
 					Pos.Combine(_Dir, tx1, _pV[nV + 2]); _pV[nV + 2].Combine(_VDown, ty1, _pV[nV + 2]);
 					Pos.Combine(_Dir, tx0, _pV[nV + 3]); _pV[nV + 3].Combine(_VDown, ty1, _pV[nV + 3]);
 
-					CVec2Dfp4 dTV(Desc.m_TVec1.k[0] - Desc.m_TVec0.k[0], Desc.m_TVec1.k[1] - Desc.m_TVec0.k[1]);
+					CVec2Dfp32 dTV(m_TexturePixelUV[0] * SizeXRcp, m_TexturePixelUV[1] * SizeYRcp);
 
-					tx0 /= ws;
-					tx1 /= ws;
-					ty0 /= hs;
-					ty1 /= hs;
+/*					CVec2Dfp32 dTV(Desc.m_TVec1.k[0] - Desc.m_TVec0.k[0], Desc.m_TVec1.k[1] - Desc.m_TVec0.k[1]);
+					fp32 wsrcp = 1.0f / ws;
+					fp32 hsrcp = 1.0f / hs;
+					tx0 *= wsrcp;
+					tx1 *= wsrcp;
+					ty0 *= hsrcp;
+					ty1 *= hsrcp;*/
 					_pTV[nV + 0][0] = Desc.m_TVec0[0] + dTV[0] * tx0;		_pTV[nV + 0][1] = Desc.m_TVec0[1] + dTV[1] * ty0;
 					_pTV[nV + 1][0] = Desc.m_TVec0[0] + dTV[0] * tx1;		_pTV[nV + 1][1] = Desc.m_TVec0[1] + dTV[1] * ty0;
 					_pTV[nV + 2][0] = Desc.m_TVec0[0] + dTV[0] * tx1;		_pTV[nV + 2][1] = Desc.m_TVec0[1] + dTV[1] * ty1;
@@ -1966,7 +2059,7 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 			}
 		}
 Cont:
-		fp4 dx = fp4(Desc.m_Spacing) * SizeX;
+		fp32 dx = fp32(Desc.m_Spacing) * SizeX;
 		x += dx;
 		CurX += dx;
 		Pos.Combine(_Dir, dx, Pos);
@@ -1975,6 +2068,7 @@ Cont:
 	}
 
 	// Build triangle-list
+	if (_piPrim)
 	{
 		int iV = 0;
 		int nChars = nV >> 2;
@@ -1993,12 +2087,308 @@ Cont:
 		}
 	}
 
-	return nP / 3;
+	return nV / 2;	// Num triangles
 }
 
-int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol, uint16* _piPrim, 
-		CPixel32 _Color, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+#else
+
+//M_FORCEINLINE void M_VStR(vec128 _a, void *__restrict _pDest) { __stvx(_a, _pDest, 0); }
+
+int CRC_Font::Write(int _MaxV, CVec3Dfp32* _pV, CVec2Dfp32* _pTV, CPixel32* _pCol, uint16* _piPrim, 
+					CPixel32 _Color, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+					const CVec2Dfp32& _Size, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
+{
+	MAUTOSTRIP(CRC_Font_Write, 0);
+	// _piPrim must have space for _MaxV*3/2 indices.
+
+	uint Len = CStrBase::StrLen(_pStr);
+	if (!Len) return 0;
+	if (Len*4 > _MaxV) return 0;
+
+	vec128 SizeParam = M_VLd(_Size[0], _Size[1], _Size[0], _Size[1]);
+	vec128 SizeParamRcp = M_VRcp(SizeParam);
+	vec128 OriginalSize = M_VLdScalar(m_OriginalSize);
+	vec128 OriginalSizeRcp = M_VLdScalar(m_OriginalSizeRcp);
+	vec128 Size = M_VMul(SizeParam, OriginalSizeRcp);
+	vec128 SizeRcp = M_VMul(SizeParamRcp, OriginalSize);
+	vec128 MaxLimit = M_VLd(_MaxLimit[0], _MaxLimit[1], _MaxLimit[0], _MaxLimit[1]);
+	vec128 MinLimit = M_VLd(_MinLimit[0], _MinLimit[1], _MinLimit[0], _MinLimit[1]);
+	vec128 PosParam = M_VLd_P3_Slow(&_Pos);
+	vec128 VRight = M_VLd_V3_Slow(&_Dir);
+	vec128 VDown = M_VLd_V3_Slow(&_VDown);
+	vec128 TexturePixelUV = M_VLd(m_TexturePixelUV[0], m_TexturePixelUV[1], m_TexturePixelUV[0], m_TexturePixelUV[1]);
+
+/*	fp32 InvOriginalSize = m_OriginalSizeRcp;
+	CVec3Dfp32 p(_Pos);
+	fp32 SizeX = _Size.k[0] * InvOriginalSize;
+	fp32 SizeY = _Size.k[1] * InvOriginalSize;
+//	CVec2Dfp32 SizeRcp = CVec2Dfp32(1.0f / _Size[0], 1.0f / _Size[1]);
+	fp32 SizeXRcp = m_OriginalSize * SizeRcp[0];
+	fp32 SizeYRcp = m_OriginalSize * SizeRcp[1];
+*/
+	//	uint32 IndexRamp[4] = { 0, 1, 2, 3 };
+
+	uint nP = 0;
+	uint nV = 0;
+
+//	CVec3Dfp32 Pos(_Pos);
+
+	vec128 Pos2D = M_VZero();
+
+	vec128 VCurColor = M_VLdScalar_u32(_Color);
+	CPixel32 CurColor = _Color;
+
+//	fp32 x = 0;
+//	fp32 y = 0;
+	for(uint i = 0; i < Len; i++)
+	{
+		uint CodeLen = IsControlCode(_pStr, i);
+		if(CodeLen > 0)
+		{
+			switch(_pStr[i + 1])
+			{
+			case 'a' :
+			case 'A' :
+				{
+					int v = (uint8)_pStr[i + 2] - '0';
+					if(v > 9) v -= 'a' - '0' - 10;
+					int A = v * 255 / 15;
+					CurColor = CPixel32(CurColor.GetR(), CurColor.GetG(), CurColor.GetB(), A);
+					VCurColor = M_VLdScalar_u32(CurColor);
+					break;
+				}
+			case 'c' :
+				{
+					// Multiply
+					int v = (uint8)_pStr[i + 2] - '0'; if(v > 9) v += -'a' + '0' + 10; int R = v * 255 / 15;
+					v = (uint8)_pStr[i + 3] - '0'; if(v > 9) v += -'a' + '0' + 10; int G = v * 255 / 15;
+					v = (uint8)_pStr[i + 4] - '0'; if(v > 9) v += -'a' + '0' + 10; int B = v * 255 / 15;
+
+					CurColor = _Color;
+					CurColor *= CPixel32(R, G, B, 255);
+					VCurColor = M_VLdScalar_u32(CurColor);
+					break;
+				}
+			case 'C' :
+				{
+					// Absolute
+					int v = (uint8)_pStr[i + 2] - '0'; if(v > 9) v += -'a' + '0' + 10; int R = v * 255 / 15;
+					v = (uint8)_pStr[i + 3] - '0'; if(v > 9) v += -'a' + '0' + 10; int G = v * 255 / 15;
+					v = (uint8)_pStr[i + 4] - '0'; if(v > 9) v += -'a' + '0' + 10; int B = v * 255 / 15;
+					CurColor = CPixel32(R, G, B, CurColor.GetA());
+					VCurColor = M_VLdScalar_u32(CurColor);
+					break;
+				}
+			case 'd' :
+			case 'D' :
+				{
+					CurColor = _Color;
+					VCurColor = M_VLdScalar_u32(CurColor);
+					break;
+				}
+			case 'n' :
+			case 'N' :
+				{
+					uint32 dy = ((uint8)_pStr[i + 2] - '0') * 100;
+					dy += ((uint8)_pStr[i + 3] - '0') * 10;
+					dy += ((uint8)_pStr[i + 4] - '0') * 1;
+
+					vec128 vdy = M_VCnv_i32_f32(M_VLdScalar_u32(dy));
+					Pos2D = M_VAnd(M_VAdd(Pos2D, vdy), M_VConstMsk(0,1,0,1));
+
+//					x = 0;
+//					y += dy;
+					break;
+				}
+			case 't' :
+			case 'T' :
+				{
+					int dy = ((uint8)_pStr[i + 2] - '0') * 100;
+					dy += ((uint8)_pStr[i + 3] - '0') * 10;
+					dy += ((uint8)_pStr[i + 4] - '0') * 1;
+
+					vec128 vdy = M_VCnv_i32_f32(M_VLdScalar_u32(dy));
+					Pos2D = M_VSelMsk(M_VConstMsk(1,0,1,0), vdy, Pos2D);
+//					x = dy;
+					break;
+				}
+			case 'x' :
+			case 'X' :
+				{
+					int dx = ((uint8)_pStr[i + 2] - '0') * 100;
+					dx += ((uint8)_pStr[i + 3] - '0') * 10;
+					dx += ((uint8)_pStr[i + 4] - '0') * 1;
+//					x += dx;
+					vec128 vdx = M_VCnv_i32_f32(M_VLdScalar_u32(dx));
+					Pos2D = M_VAdd(Pos2D, M_VAnd(M_VConstMsk(1,0,1,0), vdx));
+					//					_Pos.Combine(_Dir, x, Pos);
+					//					Pos.Combine(_VDown, y, Pos);
+					break;
+				}
+			case 'y' :
+			case 'Y' :
+				{
+					int dy = ((uint8)_pStr[i + 2] - '0') * 100;
+					dy += ((uint8)_pStr[i + 3] - '0') * 10;
+					dy += ((uint8)_pStr[i + 4] - '0') * 1;
+//					y += dy;
+					vec128 vdy = M_VCnv_i32_f32(M_VLdScalar_u32(dy));
+					Pos2D = M_VAdd(Pos2D, M_VAnd(M_VConstMsk(0,1,0,1), vdy));
+					//					_Pos.Combine(_Dir, x, Pos);
+					//					Pos.Combine(_VDown, y, Pos);
+					break;
+				}
+			case 'z' :
+				{
+					// Relative
+/*					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 1.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 0.1f;
+					vec128 vz = M_VLdScalar(z);*/
+					vec128 chars = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VSub_u16(M_VMrgL_u16(M_VLdScalar_u16((uint16&)_pStr[i + 2]), M_VLdScalar_u16((uint16&)_pStr[i + 3])), M_VScalar_u16('0'))));
+					vec128 tmp = M_VMul(chars, M_VConst(1.0f, 0.1f, 0.0f, 0.0f));
+					vec128 vz = M_VAdd(M_VSplatX(tmp), M_VSplatY(tmp));
+
+					vec128 vzrcp = M_VRcp(vz);
+					Size = M_VMul(M_VMul(vz, SizeParam), OriginalSizeRcp);
+					SizeRcp = M_VMul(M_VMul(vzrcp, SizeParamRcp), OriginalSize);
+/*					fp32 zrcp = 1.0f / z;
+					SizeX = z * _Size.k[0] * InvOriginalSize;
+					SizeY = z * _Size.k[1] * InvOriginalSize;
+					SizeXRcp = m_OriginalSize * SizeRcp[0] * zrcp;
+					SizeYRcp = m_OriginalSize * SizeRcp[1] * zrcp;*/
+					break;
+				}
+			case 'Z' :
+				{
+					// Absolute
+/*					fp32 z = fp32((uint8)_pStr[i + 2] - '0') * 10.0f;
+					z += fp32((uint8)_pStr[i + 3] - '0') * 1.0f;
+					vec128 vz = M_VLdScalar(z);*/
+
+					vec128 chars = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VSub_u16(M_VMrgL_u16(M_VLdScalar_u16((uint16&)_pStr[i + 2]), M_VLdScalar_u16((uint16&)_pStr[i + 3])), M_VScalar_u16('0'))));
+					vec128 tmp = M_VMul(chars, M_VConst(10.0f, 1.0f, 0.0f, 0.0f));
+					vec128 vz = M_VAdd(M_VSplatX(tmp), M_VSplatY(tmp));
+
+					vec128 vzrcp = M_VRcp(vz);
+					Size = M_VMul(vz, OriginalSizeRcp);
+					SizeRcp = M_VMul(vzrcp, OriginalSize);
+/*					fp32 zrcp = 1.0f / z;
+					SizeX = z * InvOriginalSize;
+					SizeY = z * InvOriginalSize;
+					SizeXRcp = m_OriginalSize * zrcp;
+					SizeYRcp = m_OriginalSize * zrcp;*/
+					break;
+				}
+			}
+
+			i += CodeLen - 1;
+			continue;
+		}
+
+		CRC_FontChar& Desc = GetCharDesc(_pStr[i]);
+		if (Desc.m_iLocal < 0) continue;
+
+/*		fp32 ws = Desc.m_Dimensions.k[0] * SizeX;
+		fp32 hs = Desc.m_Dimensions.k[1] * SizeY;
+		fp32 CurX = x + Desc.m_xOfs * SizeX;
+		fp32 CurY = y + Desc.m_yOfs * SizeY;
+		_Pos.Combine(_Dir, CurX, Pos);
+		Pos.Combine(_VDown, CurY, Pos);
+*/
+		vec128 CharSize = M_VMul(M_VLd64(&Desc.m_Dimensions), Size);
+		vec128 Descofs = M_VCnv_i32_f32(M_VShuf(M_VCnvL_i16_i32(M_VLdScalar_u32(*((uint32*)&Desc.m_xOfs))), M_VSHUF(0,1,0,1)) );
+		vec128 Cur = M_VMAdd(Descofs, Size, Pos2D);
+
+		vec128 zero = M_VZero();
+/*		vec128 Cmp = M_VOr(M_VCmpGEMsk(Cur, MaxLimit), M_VCmpLEMsk(M_VAdd(Cur, CharSize), MinLimit));
+		if (M_VCmpAnyGT_u32(Cmp, zero))
+			goto Cont;
+*/
+//		if (M_VCmpAnyGE(Cur, MaxLimit)) goto Cont;
+//		if (M_VCmpAnyLE(M_VAdd(Cur, CharSize), MinLimit)) goto Cont;
+
+		{
+			vec128 t0 = M_VMin(M_VMax(M_VSub(MinLimit, Cur), zero), CharSize);
+			vec128 t1 = M_VMin(M_VMax(M_VSub(MaxLimit, Cur), zero), CharSize);
+
+	//		vec128 Pos = M_VAdd(PosParam, M_VAdd(M_VMul(M_VSplatX(Cur), VRight), M_VMul(M_VSplatY(Cur), VDown)));
+			vec128 Pos = M_VMAdd(M_VSplatX(Cur), VRight, M_VMAdd(M_VSplatY(Cur), VDown, PosParam));
+
+			vec128 v0 = M_VMAdd(VDown, M_VSplatY(t0), M_VMAdd(VRight, M_VSplatX(t0), Pos));
+			vec128 v1 = M_VMAdd(VDown, M_VSplatY(t0), M_VMAdd(VRight, M_VSplatX(t1), Pos));
+			vec128 v2 = M_VMAdd(VDown, M_VSplatY(t1), M_VMAdd(VRight, M_VSplatX(t1), Pos));
+			vec128 v3 = M_VMAdd(VDown, M_VSplatY(t1), M_VMAdd(VRight, M_VSplatX(t0), Pos));
+
+			vec128 dTV = M_VMul(TexturePixelUV, SizeRcp);
+
+			vec128 txy01 = M_VMrgXY(t0, t1);		// = tx0, tx1, ty0, ty1
+			vec128 tvec0 = M_VLd64(&Desc.m_TVec0);
+			vec128 tv01 = M_VMAdd(dTV, M_VShuf(txy01, M_VSHUF(0, 2, 1, 2)), tvec0);
+			vec128 tv23 = M_VMAdd(dTV, M_VShuf(txy01, M_VSHUF(1, 3, 0, 3)), tvec0);
+
+			CVec3Dfp32 *M_RESTRICT pV = _pV+nV;
+			CVec2Dfp32 *M_RESTRICT pTV = _pTV+nV;
+			CPixel32 *M_RESTRICT pCol = _pCol+nV;
+			M_VSt_V3x4(pV, v0, v1, v2, v3);
+			M_VSt(tv01, pTV);
+			M_VSt(tv23, pTV + 2);
+			M_VSt(VCurColor, pCol);
+/*			pCol[0] = CurColor;
+			pCol[1] = CurColor;
+			pCol[2] = CurColor;
+			pCol[3] = CurColor;
+*/
+/*			M_VSt_V3x4(_pV+nV, v0, v1, v2, v3);
+			M_VSt(tv01, _pTV + nV);
+			M_VSt(tv23, _pTV + nV + 2);
+
+			_pCol[nV + 0] = CurColor;
+			_pCol[nV + 1] = CurColor;
+			_pCol[nV + 2] = CurColor;
+			_pCol[nV + 3] = CurColor;*/
+		}
+
+		nV += 4;
+//Cont:
+		vec128 dx = M_VAnd(M_VConstMsk(1,0,1,0), M_VMul(M_VCnv_i32_f32(M_VCnvL_i16_i32(M_VLdScalar_i16(Desc.m_Spacing))), Size));
+		Pos2D = M_VAdd(dx, Pos2D);
+		
+//		fp32 dx = fp32(Desc.m_Spacing) * SizeX;
+//		x += dx;
+//		CurX += dx;
+//		Pos.Combine(_Dir, dx, Pos);
+
+//		if (CurX > _MaxLimit.k[0]) break;
+	}
+
+	// Build triangle-list
+	if (_piPrim)
+	{
+		int iV = 0;
+		int nChars = nV >> 2;
+		while(nChars)
+		{
+			_piPrim[nP + 0] = iV;
+			_piPrim[nP + 1] = iV+1;
+			_piPrim[nP + 2] = iV+3;
+
+			_piPrim[nP + 3] = iV+3;
+			_piPrim[nP + 4] = iV+1;
+			_piPrim[nP + 5] = iV+2;
+			nP += 6;
+			iV += 4;
+			nChars--;
+		}
+	}
+
+	return nV / 2;	// Num triangles
+}
+
+#endif
+
+int CRC_Font::Write(int _MaxV, CVec3Dfp32* _pV, CVec2Dfp32* _pTV, CPixel32* _pCol, uint16* _piPrim, 
+		CPixel32 _Color, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_2, 0);
 	wchar Buffer[CRC_MAXSTRFORMAT];
@@ -2009,8 +2399,8 @@ int CRC_Font::Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol,
 	return Write(_MaxV, _pV, _pTV, _pCol, _piPrim, _Color, _Pos, _Dir, _VDown, Buffer, _Size, _MinLimit, _MaxLimit);
 }
 
-void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_3, MAUTOSTRIP_VOID);
 	int len = CStr::StrLen(_pStr);
@@ -2026,8 +2416,8 @@ void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp
 	if (nV > MaxV) return;
 	if (nP > MaxP) return;
 
-	static	CVec3Dfp4 Verts[MaxV];
-	static	CVec2Dfp4 TVerts[MaxV];
+	static	CVec3Dfp32 Verts[MaxV];
+	static	CVec2Dfp32 TVerts[MaxV];
 	static	CPixel32 Colors[MaxV];
 	static	uint16 Prim[MaxP];
 
@@ -2052,8 +2442,8 @@ void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp
 	_pRC->Attrib_Pop();
 }
 
-bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_4, false);
 	int len = CStr::StrLen(_pStr);
@@ -2062,18 +2452,20 @@ bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Df
 	int nV = len*4;
 	int nP = len*6;
 
-	CVec3Dfp4* pV = _pVBM->Alloc_V3(nV);
-	CVec2Dfp4* pTV = _pVBM->Alloc_V2(nV);
+	CVec3Dfp32* pV = _pVBM->Alloc_V3(nV);
+	CVec2Dfp32* pTV = _pVBM->Alloc_V2(nV);
 	CPixel32* pCol = _pVBM->Alloc_CPixel32(nV);
-	uint16* pPrim = _pVBM->Alloc_Int16(nP);
 
-	if (!pV || !pTV || !pCol || !pPrim) return false;
-	int nTri = Write(nV, pV, pTV, pCol, pPrim, _Color, _Pos, _Dir, _VDown, _pStr, _Size, _MinLimit, _MaxLimit);
-
+	if (!pV || !pTV || !pCol) return false;
+	int nTri = Write(nV, pV, pTV, pCol, NULL, _Color, _Pos, _Dir, _VDown, _pStr, _Size, _MinLimit, _MaxLimit);
 	if (!nTri) return false;
-	if (!_pVB->SetVBChain(_pVBM, false))
+
+	if (!_pVB->AllocVBChain(_pVBM, false))
 		return false;
-	_pVB->Render_IndexedTriangles(pPrim, nTri);
+	if (nTri > CXR_Util::MAXPARTICLES*2)
+		return false;
+	_pVB->Render_IndexedTriangles(CXR_Util::m_lQuadParticleTriangles, nTri);
+//	_pVB->Render_IndexedTriangles(pPrim, nTri);
 	_pVB->Geometry_VertexArray(pV, nTri * 2, true);
 	_pVB->Geometry_TVertexArray(pTV, 0);
 	_pVB->Geometry_ColorArray(pCol);
@@ -2089,8 +2481,8 @@ bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Df
 	return true;
 }
 
-void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_5, MAUTOSTRIP_VOID);
 	wchar Buffer[CRC_MAXSTRFORMAT];
@@ -2101,8 +2493,8 @@ void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp
 	Write(_pRC, _Pos, _Dir, _VDown, Buffer, _Size, _Color, _MinLimit, _MaxLimit);
 }
 
-bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_6, false);
 	wchar Buffer[CRC_MAXSTRFORMAT];
@@ -2113,8 +2505,8 @@ bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Df
 	return Write(_pVBM, _pVB, _Pos, _Dir, _VDown, Buffer, _Size, _Color, _MinLimit, _MaxLimit);
 }
 
-void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, CStr _Str, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const CStr& _Str, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_7, MAUTOSTRIP_VOID);
 	if (_Str.IsUnicode())
@@ -2123,8 +2515,8 @@ void CRC_Font::Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp
 		Write(_pRC, _Pos, _Dir, _VDown, _Str.Str(), _Size, _Color, _MinLimit, _MaxLimit);
 }
 
-bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, CStr _Str, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit, const CVec2Dfp4& _MaxLimit)
+bool CRC_Font::Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const CStr& _Str, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit, const CVec2Dfp32& _MaxLimit)
 {
 	MAUTOSTRIP(CRC_Font_Write_8, false);
 	if (_Str.IsUnicode())

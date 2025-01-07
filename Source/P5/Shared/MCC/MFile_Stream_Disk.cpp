@@ -58,7 +58,7 @@ void CStream_Disk::Open(const CStr _Name, int _Mode)
 	OpenExt(_Name, _Mode);
 };
 
-void CStream_Disk::SetPriority(fp4 _Priority)
+void CStream_Disk::SetPriority(fp32 _Priority)
 {
 	m_Stream.SetPriority(_Priority);
 }
@@ -96,7 +96,10 @@ void CStream_Disk::OpenExt(const CStr _Name, int _Mode, float _Priority, aint _N
 	}
 		
 	if (!m_Stream.Create(_Name, OpenMode, _Priority, _NumCacheLines, _CacheLineSize))
-	{	
+	{
+#ifdef PLATFORM_CONSOLE
+		M_TRACEALWAYS("Could not open file: %s\n", _Name.Str());
+#endif
 		FileError("Open", _Name, errno);
 	}
 

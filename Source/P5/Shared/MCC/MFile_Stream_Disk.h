@@ -38,7 +38,7 @@ public:
 	bool DirectoryExists(CStr _name, int _mode);
 	void Open(const CStr _Name, int _Mode);
 	void OpenExt(const CStr _name, int _mode, float _Priority = 0, aint _NumCacheLines = -1, aint _CacheLineSize = -1);
-	void SetPriority(fp4 _Priority);
+	void SetPriority(fp32 _Priority);
 
 	void Close();
 	void Rename(const CStr& _Name);

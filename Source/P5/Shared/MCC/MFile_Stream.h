@@ -38,7 +38,7 @@ public:
 	virtual bool DirectoryExists(CStr _name, int _mode) { return false; };
 	virtual void Open(const CStr _name, int _mode) {};
 	virtual void OpenExt(const CStr _name, int _mode, float _Priority = 0, aint _NumCacheLines = -1, aint _CacheLineSize = -1) {Open(_name, _mode);};
-	virtual void SetPriority(fp4 _Priority){};	
+	virtual void SetPriority(fp32 _Priority){};	
 	virtual void Close() {};
 
 	virtual CStr GetFileName(){return "";}

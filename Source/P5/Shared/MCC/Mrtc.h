@@ -81,11 +81,6 @@
 
 \*____________________________________________________________________________________________*/
 
-#ifdef MRTC_DLL
-	#define MRTCDLLEXPORT __declspec(dllexport)
-#else
-	#define MRTCDLLEXPORT
-#endif
 
 
 #ifdef M_RTM
@@ -122,7 +117,7 @@
 
 #ifndef MRTC_DISABLE_REMOTEDEBUGGER
 
-	#ifdef PLATFORM_XENON
+	#if defined(PLATFORM_XENON) || defined(PLATFORM_PS3)
 	#	define MRTC_ENABLE_REMOTEDEBUGGER
 	#elif defined(PLATFORM_XBOX1) && defined(M_Profile)
 	#ifndef _DEBUG
@@ -164,7 +159,7 @@
 
 #if (!defined(_DEBUG) || defined(M_MIXEDDEBUG)) && defined (PLATFORM_XBOX)
 // && !defined(M_Profile)
-	#define MRTC_DEFAULTMAINHEAP
+//	#define MRTC_DEFAULTMAINHEAP
 #endif
 
 #if defined(M_RTM) && defined(PLATFORM_DOLPHIN)
@@ -249,32 +244,9 @@
 #endif
 
 
-#define DBit(_x) (1 << (_x))
 
-template <mint t_CurrentNumber>
-class TCountBits
-{
-public:
-	enum
-	{
-		ENumBits = 1 + TCountBits< (t_CurrentNumber >> 1) >::ENumBits
-	};
-};
+#include "VPUShared/MRTC_VPUShared.h"
 
-template<> 
-class TCountBits<0>
-{
-public:
-	enum
-	{
-		ENumBits = 0 
-	};
-};
-
-#define DNumBits(_Number) (TCountBits<_Number>::ENumBits)
-
-#define DBitRange(_BitStart, _BitEnd) (((uint(1 << (_BitEnd)) - 1) | (1 << (_BitEnd))) ^ (uint(1 << (_BitStart)) - 1))
-#define DBitRangeTyped(_BitStart, _BitEnd, _Type) ((((((_Type)1) << (_BitEnd)) - 1) | (((_Type)1) << (_BitEnd))) ^ ((((_Type)1) << (_BitStart)) - 1))
 
 #define M_BITFIELD1(_Type_, _M1, _S1)				\
 union _Type_##_M1##_S1								\
@@ -497,12 +469,12 @@ union _Type_##_M1##_S1##_M2##_S2##_M3##_S3##_M4##_S4##_M5##_S5##_M6##_S6##_M7##_
 | STANDARD CONSTANTS
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-#define _FP4_MAX			3.402823466e+38F
-#define _FP4_MIN			1.175494351e-38F
-#define _FP4_EPSILON		1.192092896e-07F	// Minsta positiva tal sådant att 1.0+x != 1.0
-#define _FP8_MAX			1.7976931348623158e+307
-#define _FP8_MIN			2.2250738585072014e-308
-#define _FP8_EPSILON		2.2204460492503131e-016
+#define _FP32_MAX			3.402823466e+38F
+#define _FP32_MIN			1.175494351e-38F
+#define _FP32_EPSILON		1.192092896e-07F	// Minsta positiva tal sådant att 1.0+x != 1.0
+#define _FP64_MAX			1.7976931348623158e+307
+#define _FP64_MIN			2.2250738585072014e-308
+#define _FP64_EPSILON		2.2204460492503131e-016
 
 #if defined(PLATFORM_CONSOLE)
 	#define _PI					3.14159265358979323846264338327950288419716939937510582097494459f
@@ -548,39 +520,28 @@ M_INLINE t_CData *TDynamicCast(t_CDataIn *_pIn)
 }
 #endif
 // -------------------------------------------------------------------
-template <typename _t0> 
-inline _t0 Min(_t0 a, _t0 b)
-{
-	return ((a < b) ? a : b);
-};
-
-template <typename _t0> 
-inline _t0 Max(_t0 a, _t0 b)
-{
-	return ((a > b) ? a : b);
-};
 
 #ifdef PLATFORM_XENON
 template <>
-M_INLINE fp4 Min<fp4>(fp4 a, fp4 b)
+M_INLINE fp32 Min<fp32>(fp32 a, fp32 b)
 {
 	return fpmin(a, b);
 }
 
 template <>
-M_INLINE fp4 Max<fp4>(fp4 a, fp4 b)
+M_INLINE fp32 Max<fp32>(fp32 a, fp32 b)
 {
 	return fpmax(a, b);
 }
 
 template <>
-M_INLINE fp8 Min<fp8>(fp8 a, fp8 b)
+M_INLINE fp64 Min<fp64>(fp64 a, fp64 b)
 {
 	return fpmin(a, b);
 }
 
 template <>
-M_INLINE fp8 Max<fp8>(fp8 a, fp8 b)
+M_INLINE fp64 Max<fp64>(fp64 a, fp64 b)
 {
 	return fpmax(a, b);
 }
@@ -588,18 +549,18 @@ M_INLINE fp8 Max<fp8>(fp8 a, fp8 b)
 
 #ifdef PLATFORM_PS2
 template <>
-inline fp4 Min<fp4>(fp4 a, fp4 b)
+inline fp32 Min<fp32>(fp32 a, fp32 b)
 {
-	fp4 ret;
+	fp32 ret;
 	__asm ( "min.s ret, a, b" );
 	
 	return ret;
 }
 
 template <>
-inline fp4 Max<fp4>(fp4 a, fp4 b)
+inline fp32 Max<fp32>(fp32 a, fp32 b)
 {
-	fp4 ret;
+	fp32 ret;
 	__asm ( "max.s ret, a, b" );
 	
 	return ret;
@@ -856,47 +817,6 @@ inline fp4 Max<fp4>(fp4 a, fp4 b)
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-/*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
-	Template:			TAlignmentOf
-
-	Comments:			M_ALIGNMENTOF(Type) is the compile time constant
-						memory alignment requirement for objects of type 'Type'.
-
-						ex:
-							M_ALIGNMENTOF(int8) = 00000001
-							M_ALIGNMENTOF(int16) = 00000002
-							M_ALIGNMENTOF(int32) = 00000004
-							M_ALIGNMENTOF(int64) = 00000008
-							M_ALIGNMENTOF(fp8) = 00000008
-							M_ALIGNMENTOF(vec128) = 00000010
-							M_ALIGNMENTOF(CVec3Dfp4) = 00000004
-							M_ALIGNMENTOF(CVec4Dfp4) = 00000010
-							M_ALIGNMENTOF(CMat4Dfp4) = 00000010
-\*____________________________________________________________________*/
-#ifdef COMPILER_MSVC4
-#pragma warning(push)
-#pragma warning(disable:4624)
-#endif
-template<class T>
-class TAlignmentOf
-{
-public:
-	struct CAlign
-	{
-		uint8 m_Dummy;
-		T m_T;
-	};
-
-	enum
-	{
-		ALIGNMENT = sizeof(CAlign) - sizeof(T),
-	};
-};
-#ifdef COMPILER_MSVC4
-#pragma warning(pop)
-#endif
-
-#define M_ALIGNMENTOF(Type) TAlignmentOf< Type >::ALIGNMENT
 
 
 /*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
@@ -1636,22 +1556,6 @@ class CObj;
 class CReferenceCount;
 class CReferenceCountMT;
 
-#ifndef M_RTM
-	#ifdef PLATFORM_CONSOLE
-		#define M_STATIC_ASSERT(expn) typedef char __C_ASSERT__[(expn)?1:-1] 
-		#define M_ASSERT(f, Mess) if(!(f)) { M_BREAKPOINT; MRTC_Assert(Mess, __FILE__, __LINE__); }
-		#define M_ASSERTHANDLER(f, Mess, Action) if (!(f)) { M_BREAKPOINT; MRTC_Assert(Mess, __FILE__, __LINE__); Action; }
-	#else
-		#define M_STATIC_ASSERT(expn) typedef char __C_ASSERT__[(expn)?1:-1] 
-		#define M_ASSERT(f, Mess) if(!(f)) { MRTC_Assert(Mess, __FILE__, __LINE__); }
-		#define M_ASSERTHANDLER(f, Mess, Action) if (!(f)) { MRTC_Assert(Mess, __FILE__, __LINE__); Action; }
-	#endif
-#else
-	#define M_STATIC_ASSERT(expn) ((void)0) 
-	#define M_ASSERT(f, Mess) ((void)0)
-	#define M_ASSERTHANDLER(f, Mess, Action) ((void)0)
-#endif
-
 
 #include "MDA_IDS_TreeAVL.h"
 
@@ -1661,23 +1565,12 @@ public:
 	const char* m_ClassName;
 	CReferenceCount*(*m_pfnCreateObject)();
 	MRTC_CRuntimeClass* m_pClassBase;
+	uint32 m_ClassNameHash;						// set from MRTC_CClassInit
 
-#ifdef M_RTM
-#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
-	int AddInstance();
-	int DelInstance();
-#else
-	M_INLINE int AddInstance(){return 0;}
-	M_INLINE int DelInstance(){return 0;}
-#endif
-	M_INLINE int Instances(){return 0;}
-#else
+#ifndef M_RTM
 	int m_nDynamicInstances;
-	int AddInstance();
-	int DelInstance();
-	int Instances();
 #endif
-	
+
 	class CTreeCompare
 	{
 	public:
@@ -1685,8 +1578,13 @@ public:
 		M_INLINE static int Compare(const MRTC_CRuntimeClass *_pTest, const char *_Key, void *_pContext);
 	};
 
-
 	DAVLAlignedA_Link(MRTC_CRuntimeClass, m_Link, const char *, CTreeCompare);
+
+public:
+	int AddInstance();
+	int DelInstance();
+	int Instances();
+	
 
 	//	int m_Size;
 	//	int m_Version;
@@ -1695,6 +1593,19 @@ public:
 	//	MRTC_CRuntimeClass(const char* _ClassName, CReferenceCount*(*_pfnCreateObject)(), MRTC_CRuntimeClass* _pClassBase, const char *File, int Line);
 	//	MRTC_CRuntimeClass(const char* _ClassName, CReferenceCount*(*_pfnCreateObject)(), MRTC_CRuntimeClass* _pClassBase);
 };
+
+
+#if defined(M_RTM) 
+# if !defined(MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES)
+	M_FORCEINLINE int MRTC_CRuntimeClass::AddInstance() { return 0; }
+	M_FORCEINLINE int MRTC_CRuntimeClass::DelInstance() { return 0; }
+# endif
+	M_FORCEINLINE int MRTC_CRuntimeClass::Instances() { return 0; }
+#else
+	// !RTM
+	M_FORCEINLINE int MRTC_CRuntimeClass::Instances() { return m_nDynamicInstances; }
+#endif
+
 
 // -------------------------------------------------------------------
 class MRTC_CClassInit
@@ -1718,36 +1629,36 @@ public:
 //#define MRTC_IMPLEMENTCONSTNOINFO(_BaseClass)
 #endif
 
-#define MRTC_DECLARE									\
-public:														\
-	static MRTC_CRuntimeClass m_RuntimeClass;				\
+#define MRTC_DECLARE											\
+public:															\
+	static MRTC_CRuntimeClass m_RuntimeClass;					\
 	virtual MRTC_CRuntimeClass* MRTC_GetRuntimeClass() const;	\
 private:
 
 
 #ifdef M_RTM
-#	define MRTC_IMPLEMENT_NO_IGNORE(Name, BaseClass)																					\
-		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, &BaseClass::m_RuntimeClass};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_NO_IGNORE(Name, BaseClass)													\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, &BaseClass::m_RuntimeClass, 0};			\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);										\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #else
-#	define MRTC_IMPLEMENT_NO_IGNORE(Name, BaseClass)																					\
-		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, &BaseClass::m_RuntimeClass, 0};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_NO_IGNORE(Name, BaseClass)													\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, &BaseClass::m_RuntimeClass, 0, 0};		\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);										\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #endif
 
 #define MRTC_IMPLEMENT(Name, BaseClass) MRTC_IMPLEMENT_NO_IGNORE(Name, BaseClass)
 
 #ifdef M_RTM
-#	define MRTC_IMPLEMENT_BASE_NO_IGNORE(Name)																					\
-		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, NULL};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_BASE_NO_IGNORE(Name)															\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, NULL, 0};								\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);										\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #else
-#	define MRTC_IMPLEMENT_BASE_NO_IGNORE(Name)																					\
-		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, NULL, 0};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_BASE_NO_IGNORE(Name)															\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, NULL, NULL, 0, 0};							\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);										\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #endif
 
@@ -1772,37 +1683,36 @@ CReferenceCount* CreateCObj()
 	return pObj; 
 }
 /*
-#define MRTC_DECLARE_DYNAMIC(Name)							\
-public:														\
-	static MRTC_CRuntimeClass m_RuntimeClass;				\
+#define MRTC_DECLARE_DYNAMIC(Name)								\
+public:															\
+	static MRTC_CRuntimeClass m_RuntimeClass;					\
 	virtual MRTC_CRuntimeClass* MRTC_GetRuntimeClass() const;	\
 private:*/
 
 #ifdef M_RTM
-#	define MRTC_IMPLEMENT_DYNAMIC_NO_IGNORE(Name, BaseClass)	\
-	MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, &BaseClass::m_RuntimeClass};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_DYNAMIC_NO_IGNORE(Name, BaseClass)													\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, &BaseClass::m_RuntimeClass, 0};	\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);												\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #else
-#	define MRTC_IMPLEMENT_DYNAMIC_NO_IGNORE(Name, BaseClass)	\
-	MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, &BaseClass::m_RuntimeClass, 0};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_DYNAMIC_NO_IGNORE(Name, BaseClass)													\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, &BaseClass::m_RuntimeClass, 0, 0};	\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);												\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
-
 #endif
 
 #define MRTC_IMPLEMENT_DYNAMIC(Name, BaseClass) MRTC_IMPLEMENT_DYNAMIC_NO_IGNORE(Name, BaseClass)
 
 
 #ifdef M_RTM
-#	define MRTC_IMPLEMENT_BASE_DYNAMIC_NO_IGNORE(Name)	\
-	MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, NULL};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_BASE_DYNAMIC_NO_IGNORE(Name)															\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, NULL, 0};							\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);												\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 #else
-#	define MRTC_IMPLEMENT_BASE_DYNAMIC_NO_IGNORE(Name)	\
-	MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, NULL, 0};	\
-		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);				\
+#	define MRTC_IMPLEMENT_BASE_DYNAMIC_NO_IGNORE(Name)															\
+		MRTC_CRuntimeClass Name::m_RuntimeClass = {#Name, &CreateCObj<Name>, NULL, 0, 0};						\
+		MRTC_CClassInit g_ClassReg##Name(&Name::m_RuntimeClass);												\
 		MRTC_CRuntimeClass* Name::MRTC_GetRuntimeClass() const { return &m_RuntimeClass; };
 
 #endif
@@ -1814,9 +1724,11 @@ private:*/
 #endif
 
 void MRTC_ReferenceSymbol(...);
-#	define MRTC_REFERENCE(_Name)																					\
-	extern MRTC_CClassInit g_ClassReg##_Name;\
+#define MRTC_REFERENCE(_Name)					\
+	extern MRTC_CClassInit g_ClassReg##_Name;	\
 	MRTC_ReferenceSymbol(&g_ClassReg##_Name);
+
+
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -2454,6 +2366,7 @@ public:
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 #include "MRTC_System.h"
+#include "MRTC_Time.h"
 #include "MRTC_Protect.h"
 
 
@@ -2810,12 +2723,15 @@ public:
 #ifdef PLATFORM_WIN_PC
 	#define D_MXDFCREATE MRTC_GetObjectManager()->m_bXDFCreate
 	#define D_MPLATFORM MRTC_GetObjectManager()->m_Platform
+	#define D_MBIGENDIAN MRTC_GetObjectManager()->m_Endian
 #else
 	#define D_MXDFCREATE 0
 	#ifdef PLATFORM_XENON
 		#define D_MPLATFORM 4
+		#define D_MBIGENDIAN 1
 	#elif defined PLATFORM_PS3
 		#define D_MPLATFORM 5
+		#define D_MBIGENDIAN 1
 	#else
 		#error "Implement this"
 	#endif
@@ -2862,7 +2778,9 @@ public:
 	void * m_hMainThread;
 	void* m_hScriptThread;
 
+	uint8* m_pThreadPoolManagerInternalMem;
 	class MRTC_ThreadPoolManagerInternal* m_pThreadPoolManagerInternal;
+	uint8* m_pScratchPadManagerInternalMem;
 	class MRTC_ScratchPadManagerInternal* m_pScratchPadManagerInternal;
 
 	MRTC_CriticalSection *m_pGlobalStrLock;
@@ -2874,6 +2792,7 @@ public:
 #ifdef PLATFORM_WIN_PC
 	int m_Platform;
 	int m_bXDFCreate;
+	int m_Endian;
 #endif
 
 #ifdef M_STATIC
@@ -2889,7 +2808,7 @@ public:
 	class MRTC_ForgiveDebugNewInternal *m_pForgiveContextInternal;
 #endif	// PLATFORM_PS3
 	MRTC_ObjectManager();
-	~MRTC_ObjectManager();
+	virtual ~MRTC_ObjectManager();
 
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
 #ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
@@ -3090,6 +3009,19 @@ M_INLINE T1 *safe_cast( T2 _Obj )
 }
 
 class CVPU_JobDefinition;
+enum VpuContextId
+{
+	VpuAIContext,
+	VpuSoundContext,
+	VpuWorkersContext,
+	VpuContextCount
+};
+
+#ifndef PLATFORM_PS3
+class CVPU_JobInfo;
+typedef uint32 (*VpuWorkerFunction)(uint32, CVPU_JobInfo&);
+#endif
+
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -3097,19 +3029,26 @@ class CVPU_JobDefinition;
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 typedef void (*MRTC_ThreadJobFunction)(int _iObj, void* _pArg);
+typedef void (FVPUCallManager)(void *_pManagerContext, uint32 _Message, uint32 _Context, uint32 &_Ret0, uint32 &_Ret1);
 class MRTC_ThreadPoolManager
 {
 public:
-	static void Create(int _nThreads, int _StackSize);	// Better not be using it while doing this
+	static void Create(int _nThreads, int _StackSize, uint32 _Priority = MRTC_THREAD_PRIO_ABOVENORMAL);	// Better not be using it while doing this
 	static void Enable(bool _bEnable);
 	static int GetNumThreads();
+	static void EvacuateCPU(int _PhysicalCPU);
+	static void RestoreCPU(int _PhysicalCPU);
 	static void ProcessEachInstance(int _nObj, void* _pArg, MRTC_ThreadJobFunction _pfnFunction, const char* _pTaskName = NULL, bint _bSync = false);
 
-	static uint32 VPU_AddTask(CVPU_JobDefinition& _JobDefinition);
-	static bool VPU_IsTaskComplete(uint32 _Task);
-	static void VPU_BlockOnTask(uint32 _Task);
-	static bool VPU_TryBlockUntilIdle();
-	static void VPU_BlockUntilIdle();
+	static uint16 VPU_AddTask(const CVPU_JobDefinition& _JobDefinition,VpuContextId _ContextId,bool _Async=true,uint16 LinkTaskId=InvalidVpuTask);
+	static bool VPU_IsTaskComplete(uint16 _TaskId,VpuContextId _ContextId);
+	static void VPU_BlockOnTask(uint16 _TaskId,VpuContextId _ContextId, FVPUCallManager *_pManager = NULL, void *_pManagerContext = NULL);
+	static bool VPU_TryBlockUntilIdle(VpuContextId _ContextId);
+	static void VPU_BlockUntilIdle(VpuContextId _ContextId);
+
+#ifndef PLATFORM_PS3
+	static void VPU_RegisterContext(VpuContextId _ContextId,VpuWorkerFunction _pfnVpuWorker);
+#endif
 };
 
 /*************************************************************************************************\
@@ -3202,13 +3141,13 @@ public:
 	}
 
 	// Random 0 to 1 inclusive (can return 0 and 1)
-	fp4 GenRand1Inclusive_fp4()
+	fp32 GenRand1Inclusive_fp32()
 	{
 		return GenRand32() * (1.0f/4294967295.0f);
 	}
 
 	// Random 0 to 1 exclusive (cannot return 1)
-	fp4 GenRand1Exclusive_fp4()
+	fp32 GenRand1Exclusive_fp32()
 	{
 		return GenRand32() * (1.0f/4294967296.0f);
 	}

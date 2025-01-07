@@ -48,12 +48,12 @@ static int ATICTX_GetEncodedSize(CImage* _pImg)
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 FindClosestError4(const CVec2Dfp4& _Color, const CVec2Dfp4* _pCodebook)
+static fp32 FindClosestError4(const CVec2Dfp32& _Color, const CVec2Dfp32* _pCodebook)
 {
-	fp4 fError0 = (_pCodebook[0] - _Color).LengthSqr();
-	fp4 fError1 = (_pCodebook[1] - _Color).LengthSqr();
-	fp4 fError2 = (_pCodebook[2] - _Color).LengthSqr();
-	fp4 fError3 = (_pCodebook[3] - _Color).LengthSqr();
+	fp32 fError0 = (_pCodebook[0] - _Color).LengthSqr();
+	fp32 fError1 = (_pCodebook[1] - _Color).LengthSqr();
+	fp32 fError2 = (_pCodebook[2] - _Color).LengthSqr();
+	fp32 fError3 = (_pCodebook[3] - _Color).LengthSqr();
 
 	return Min(fError0, Min(fError1, Min(fError2, fError3)));
 }
@@ -69,11 +69,11 @@ static fp4 FindClosestError4(const CVec2Dfp4& _Color, const CVec2Dfp4* _pCodeboo
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 FindClosestError3(const CVec2Dfp4& _Color, const CVec2Dfp4* _pCodebook)
+static fp32 FindClosestError3(const CVec2Dfp32& _Color, const CVec2Dfp32* _pCodebook)
 {
-	fp4 fError0 = (_pCodebook[0] - _Color).LengthSqr();
-	fp4 fError1 = (_pCodebook[1] - _Color).LengthSqr();
-	fp4 fError2 = (_pCodebook[2] - _Color).LengthSqr();
+	fp32 fError0 = (_pCodebook[0] - _Color).LengthSqr();
+	fp32 fError1 = (_pCodebook[1] - _Color).LengthSqr();
+	fp32 fError2 = (_pCodebook[2] - _Color).LengthSqr();
 
 	return Min(fError0, Min(fError1, fError2));
 }
@@ -91,15 +91,15 @@ static fp4 FindClosestError3(const CVec2Dfp4& _Color, const CVec2Dfp4* _pCodeboo
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetCTXError1(const CVec2Dfp4& _Start, const CVec2Dfp4& _Stop, const CVec2Dfp4* _pColors)
+static fp32 GetCTXError1(const CVec2Dfp32& _Start, const CVec2Dfp32& _Stop, const CVec2Dfp32* _pColors)
 {
-	CVec2Dfp4 aCodebook[4];
+	CVec2Dfp32 aCodebook[4];
 	aCodebook[0]	= _Start;
 	aCodebook[1]	= _Stop;
 	aCodebook[2]	= (_Start * (2.0f / 3.0f)) + (_Stop * (1.0f / 3.0f));
 	aCodebook[3]	= (_Start * (1.0f / 3.0f)) + (_Stop * (2.0f / 3.0f));
 
-	fp4 fError = FindClosestError4(_pColors[0], aCodebook);
+	fp32 fError = FindClosestError4(_pColors[0], aCodebook);
 	for(int i = 1; i < 16; i++)
 	{
 		fError += FindClosestError4(_pColors[i], aCodebook);
@@ -121,14 +121,14 @@ static fp4 GetCTXError1(const CVec2Dfp4& _Start, const CVec2Dfp4& _Stop, const C
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetCTXError2(const CVec2Dfp4& _Start, const CVec2Dfp4& _Stop, const CVec2Dfp4* _pColors)
+static fp32 GetCTXError2(const CVec2Dfp32& _Start, const CVec2Dfp32& _Stop, const CVec2Dfp32* _pColors)
 {
-	CVec2Dfp4 aCodebook[3];
+	CVec2Dfp32 aCodebook[3];
 	aCodebook[0]	= _Stop;
 	aCodebook[1]	= _Start;
 	aCodebook[2]	= (_Start * (1.0f / 2.0f)) + (_Stop * (1.0f / 2.0f));
 
-	fp4 fError = FindClosestError3(_pColors[0], aCodebook);;
+	fp32 fError = FindClosestError3(_pColors[0], aCodebook);;
 	for(int i = 1; i < 16; i++)
 	{
 		fError += FindClosestError3(_pColors[i], aCodebook);
@@ -155,15 +155,15 @@ static uint16 InterpolateLA8(uint16 _a, uint16 _b, uint32 _Value)
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static int FindClosest(const uint16& _Color, CVec2Dfp4* _pCodebook)
+static int FindClosest(const uint16& _Color, CVec2Dfp32* _pCodebook)
 {
-	CVec2Dfp4 Color(_Color & 0xff, (_Color >> 8) & 0xff);
+	CVec2Dfp32 Color(_Color & 0xff, (_Color >> 8) & 0xff);
 
 	int iClosest = 0;
-	fp4 BestDist = Color.DistanceSqr(_pCodebook[0]);
+	fp32 BestDist = Color.DistanceSqr(_pCodebook[0]);
 	for( int i = 1; i < 4; i++)
 	{
-		fp4 fDist = Color.DistanceSqr(_pCodebook[i]);
+		fp32 fDist = Color.DistanceSqr(_pCodebook[i]);
 		if(fDist < BestDist)
 		{
 			iClosest = i;
@@ -188,48 +188,48 @@ static int FindClosest(const uint16& _Color, CVec2Dfp4* _pCodebook)
 \*_____________________________________________________________________________*/
 static void CTXQuantizer( uint16* _pFinalCodebook, uint16* _pColors, uint32 _SrcModulo )
 {
-	CVec2Dfp4 M_ALIGN(16) aColors[16];
+	CVec2Dfp32 M_ALIGN(16) aColors[16];
 	for(int i = 0; i < 4; i++)
 	{
-		aColors[i*4 + 0]	= CVec2Dfp4(_pColors[i * _SrcModulo + 0] & 0xff, (_pColors[i * _SrcModulo + 0] >> 8) & 0xff);
-		aColors[i*4 + 1]	= CVec2Dfp4(_pColors[i * _SrcModulo + 1] & 0xff, (_pColors[i * _SrcModulo + 1] >> 8) & 0xff);
-		aColors[i*4 + 2]	= CVec2Dfp4(_pColors[i * _SrcModulo + 2] & 0xff, (_pColors[i * _SrcModulo + 2] >> 8) & 0xff);
-		aColors[i*4 + 3]	= CVec2Dfp4(_pColors[i * _SrcModulo + 3] & 0xff, (_pColors[i * _SrcModulo + 3] >> 8) & 0xff);
+		aColors[i*4 + 0]	= CVec2Dfp32(_pColors[i * _SrcModulo + 0] & 0xff, (_pColors[i * _SrcModulo + 0] >> 8) & 0xff);
+		aColors[i*4 + 1]	= CVec2Dfp32(_pColors[i * _SrcModulo + 1] & 0xff, (_pColors[i * _SrcModulo + 1] >> 8) & 0xff);
+		aColors[i*4 + 2]	= CVec2Dfp32(_pColors[i * _SrcModulo + 2] & 0xff, (_pColors[i * _SrcModulo + 2] >> 8) & 0xff);
+		aColors[i*4 + 3]	= CVec2Dfp32(_pColors[i * _SrcModulo + 3] & 0xff, (_pColors[i * _SrcModulo + 3] >> 8) & 0xff);
 	}
 
-	CRect2Dfp4 BoundRect( aColors[0], aColors[0] );
+	CRect2Dfp32 BoundRect( aColors[0], aColors[0] );
 	for(int i = 1; i < 16; i++)
 		BoundRect.Expand(aColors[i]);
 
 	int nIterations = 0;
-	CVec2Dfp4 StartMinVal = BoundRect.m_Min;
-	CVec2Dfp4 StopMinVal = BoundRect.m_Min;
-	CVec2Dfp4 aStartCenters[4], aStopCenters[4];
-	CVec2Dfp4 BoxOffset = (StartMinVal + BoundRect.m_Max) * 0.5f - StartMinVal;
+	CVec2Dfp32 StartMinVal = BoundRect.m_Min;
+	CVec2Dfp32 StopMinVal = BoundRect.m_Min;
+	CVec2Dfp32 aStartCenters[4], aStopCenters[4];
+	CVec2Dfp32 BoxOffset = (StartMinVal + BoundRect.m_Max) * 0.5f - StartMinVal;
 	while(BoxOffset.LengthSqr() > Sqr(0.5f))
 	{
-		CVec2Dfp4 StartMin = StartMinVal + BoxOffset * 0.5f;
-		CVec2Dfp4 StartMax = StartMin + BoxOffset;
+		CVec2Dfp32 StartMin = StartMinVal + BoxOffset * 0.5f;
+		CVec2Dfp32 StartMax = StartMin + BoxOffset;
 		aStartCenters[0]	= StartMin;
-		aStartCenters[1]	= CVec2Dfp4(StartMax.k[0], StartMin.k[1]);
-		aStartCenters[2]	= CVec2Dfp4(StartMin.k[0], StartMax.k[1]);
-		aStartCenters[3]	= CVec2Dfp4(StartMax.k[0], StartMax.k[1]);
+		aStartCenters[1]	= CVec2Dfp32(StartMax.k[0], StartMin.k[1]);
+		aStartCenters[2]	= CVec2Dfp32(StartMin.k[0], StartMax.k[1]);
+		aStartCenters[3]	= CVec2Dfp32(StartMax.k[0], StartMax.k[1]);
 
-		CVec2Dfp4 StopMin = StopMinVal + BoxOffset * 0.5f;
-		CVec2Dfp4 StopMax = StopMin + BoxOffset;
+		CVec2Dfp32 StopMin = StopMinVal + BoxOffset * 0.5f;
+		CVec2Dfp32 StopMax = StopMin + BoxOffset;
 		aStopCenters[0]	= StopMin;
-		aStopCenters[1]	= CVec2Dfp4(StopMax.k[0], StopMin.k[1]);
-		aStopCenters[2]	= CVec2Dfp4(StopMin.k[0], StopMax.k[1]);
-		aStopCenters[3]	= CVec2Dfp4(StopMax.k[0], StopMax.k[1]);
+		aStopCenters[1]	= CVec2Dfp32(StopMax.k[0], StopMin.k[1]);
+		aStopCenters[2]	= CVec2Dfp32(StopMin.k[0], StopMax.k[1]);
+		aStopCenters[3]	= CVec2Dfp32(StopMax.k[0], StopMax.k[1]);
 
 		int iBestStart = 0, iBestStop = 0;
-		fp4 fBestError = GetCTXError1(aStartCenters[0], aStopCenters[0], aColors);
+		fp32 fBestError = GetCTXError1(aStartCenters[0], aStopCenters[0], aColors);
 
 		for(int i = 0; i < 4; i++)
 		{
 			for(int j = 0; j < 4; j++)
 			{
-				fp4 fError = GetCTXError1(aStartCenters[i], aStopCenters[j], aColors);
+				fp32 fError = GetCTXError1(aStartCenters[i], aStopCenters[j], aColors);
 				if(fError < fBestError)
 				{
 					fBestError	= fError;
@@ -246,11 +246,11 @@ static void CTXQuantizer( uint16* _pFinalCodebook, uint16* _pColors, uint32 _Src
 		nIterations++;
 	}
 
-	CVec2Dfp4 StartCenter = StartMinVal + BoxOffset;
-	CVec2Dfp4 StopCenter = StopMinVal + BoxOffset;
+	CVec2Dfp32 StartCenter = StartMinVal + BoxOffset;
+	CVec2Dfp32 StopCenter = StopMinVal + BoxOffset;
 
-	fp4 fError1 = GetCTXError1(StartCenter, StopCenter, aColors);
-	fp4 fError2 = GetCTXError2(StartCenter, StopCenter, aColors);
+	fp32 fError1 = GetCTXError1(StartCenter, StopCenter, aColors);
+	fp32 fError2 = GetCTXError2(StartCenter, StopCenter, aColors);
 
 	if(fError1 < fError2)
 	{
@@ -307,20 +307,20 @@ static void ATICTX_EncodeBlock(uint16* _pSrcColors, uint8* _pDestBlock, uint32 _
 	uint16 aCodebook[4];
 	CTXQuantizer( aCodebook, _pSrcColors, _SrcModulo );
 
-	CVec2Dfp4 aCodebookColors[4];
+	CVec2Dfp32 aCodebookColors[4];
 	if(aCodebook[0] > aCodebook[1])
 	{
-		aCodebookColors[0]	= CVec2Dfp4(aCodebook[0] & 0xff, (aCodebook[0] >> 8 ) & 0xff);
-		aCodebookColors[1]	= CVec2Dfp4(aCodebook[1] & 0xff, (aCodebook[1] >> 8 ) & 0xff);
+		aCodebookColors[0]	= CVec2Dfp32(aCodebook[0] & 0xff, (aCodebook[0] >> 8 ) & 0xff);
+		aCodebookColors[1]	= CVec2Dfp32(aCodebook[1] & 0xff, (aCodebook[1] >> 8 ) & 0xff);
 		aCodebookColors[0].Combine(aCodebookColors[1], 1.0f / 3.0f, aCodebookColors[2]);
 		aCodebookColors[0].Combine(aCodebookColors[1], 2.0f / 3.0f, aCodebookColors[3]);
 	}
 	else
 	{
-		aCodebookColors[0]	= CVec2Dfp4(aCodebook[0] & 0xff, (aCodebook[0] >> 8 ) & 0xff);
-		aCodebookColors[1]	= CVec2Dfp4(aCodebook[1] & 0xff, (aCodebook[1] >> 8 ) & 0xff);
+		aCodebookColors[0]	= CVec2Dfp32(aCodebook[0] & 0xff, (aCodebook[0] >> 8 ) & 0xff);
+		aCodebookColors[1]	= CVec2Dfp32(aCodebook[1] & 0xff, (aCodebook[1] >> 8 ) & 0xff);
 		aCodebookColors[0].Combine(aCodebookColors[1], 0.5f, aCodebookColors[2]);
-		aCodebookColors[3]	= CVec2Dfp4(0);
+		aCodebookColors[3]	= CVec2Dfp32(0);
 	}
 
 	((uint16*)_pDestBlock)[0]	= aCodebook[0];
@@ -497,7 +497,7 @@ static void ATICTX_Decompress(CImage* _pSrc, uint8* _pDest, int _DestModulo)
 
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-void CImage::Compress_CTX(fp4 _Quality, CImage* _pDestImage)
+void CImage::Compress_CTX(fp32 _Quality, CImage* _pDestImage)
 {
 #ifndef IMAGE_IO_CTX
 	Error("Compress_CTX", "CTX support disabled in this build.");

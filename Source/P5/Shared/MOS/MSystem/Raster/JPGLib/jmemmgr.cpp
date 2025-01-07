@@ -1103,7 +1103,7 @@ jinit_memory_mgr (j_common_ptr cinfo)
    * this feature.
    */
 #ifndef NO_GETENV
-#ifndef PLATFORM_XENON
+#ifndef PLATFORM_CONSOLE
   { char * memenv;
 
     if ((memenv = getenv("JPEGMEM")) != NULL) {

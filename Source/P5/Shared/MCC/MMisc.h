@@ -28,33 +28,33 @@
 /*class CTypeDesc
 {
 public:
-	virtual fp8 GetMin() { return 0; };
-	virtual fp8 GetMax() { return 0; };
-	virtual fp8 GetEpsilon() { return 0; };
+	virtual fp64 GetMin() { return 0; };
+	virtual fp64 GetMax() { return 0; };
+	virtual fp64 GetEpsilon() { return 0; };
 };
 
-class CTypeDesc_fp4
+class CTypeDesc_fp32
 {
 public:
-	static const fp4 ms_cMin;
-	static const fp4 ms_cMax;
-	static const fp4 ms_cEpsilon;
+	static const fp32 ms_cMin;
+	static const fp32 ms_cMax;
+	static const fp32 ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
-class CTypeDesc_fp8
+class CTypeDesc_fp64
 {
 public:
-	static const fp8 ms_cMin;
-	static const fp8 ms_cMax;
-	static const fp8 ms_cEpsilon;
+	static const fp64 ms_cMin;
+	static const fp64 ms_cMax;
+	static const fp64 ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_int8
@@ -64,9 +64,9 @@ public:
 	static const int ms_cMax;
 	static const int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_int16
@@ -76,9 +76,9 @@ public:
 	static const int ms_cMax;
 	static const int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_int32
@@ -88,9 +88,9 @@ public:
 	static const int ms_cMax;
 	static const int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_uint8
@@ -100,9 +100,9 @@ public:
 	static const unsigned int ms_cMax;
 	static const unsigned int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_uint16
@@ -112,9 +112,9 @@ public:
 	static const unsigned int ms_cMax;
 	static const unsigned int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_uint32
@@ -124,9 +124,9 @@ public:
 	static const unsigned int ms_cMax;
 	static const unsigned int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 
 class CTypeDesc_int
@@ -136,9 +136,9 @@ public:
 	static const int ms_cMax;
 	static const int ms_cEpsilon;
 
-//	virtual fp8 GetMin() { return ms_cMin; };
-//	virtual fp8 GetMax() { return ms_cMax; };
-//	virtual fp8 GetEpsilon() { return ms_cEpsilon; };
+//	virtual fp64 GetMin() { return ms_cMin; };
+//	virtual fp64 GetMax() { return ms_cMax; };
+//	virtual fp64 GetEpsilon() { return ms_cEpsilon; };
 };
 */
 
@@ -155,20 +155,20 @@ struct TNumericProperties
 };
 
 template<>
-struct TNumericProperties<fp4>
+struct TNumericProperties<fp32>
 {
-	M_FORCEINLINE static fp4 Min() { return _FP4_MIN; }
-	M_FORCEINLINE static fp4 Max() { return _FP4_MAX; }
-	M_FORCEINLINE static fp4 Epsilon() { return _FP4_EPSILON; }
-	M_FORCEINLINE static fp4 Zero() { return 0.0f; }
-	M_FORCEINLINE static fp4 One() { return 1.0f; }
-	M_FORCEINLINE static fp4 QuietNaN() 
+	M_FORCEINLINE static fp32 Min() { return _FP32_MIN; }
+	M_FORCEINLINE static fp32 Max() { return _FP32_MAX; }
+	M_FORCEINLINE static fp32 Epsilon() { return _FP32_EPSILON; }
+	M_FORCEINLINE static fp32 Zero() { return 0.0f; }
+	M_FORCEINLINE static fp32 One() { return 1.0f; }
+	M_FORCEINLINE static fp32 QuietNaN() 
 	{
 		uint32 nan = 0x7fc00000;
 		return *( float* )&nan;
 	}
 
-	M_FORCEINLINE static fp4 NaN() 
+	M_FORCEINLINE static fp32 NaN() 
 	{
 		uint32 nan = 0x7fc00001;
 		return *( float* )&nan;
@@ -176,27 +176,27 @@ struct TNumericProperties<fp4>
 };
 
 template<>
-struct TNumericProperties<fp8>
+struct TNumericProperties<fp64>
 {
-	M_FORCEINLINE static fp8 Min() { return _FP8_MIN; }
-	M_FORCEINLINE static fp8 Max() { return _FP8_MAX; }
-	M_FORCEINLINE static fp8 Epsilon() { return _FP8_EPSILON; }
-	M_FORCEINLINE static fp8 Zero() { return 0.0; }
-	M_FORCEINLINE static fp8 One() { return 1.0; }
-	M_FORCEINLINE static fp8 QuietNaN() 
+	M_FORCEINLINE static fp64 Min() { return _FP64_MIN; }
+	M_FORCEINLINE static fp64 Max() { return _FP64_MAX; }
+	M_FORCEINLINE static fp64 Epsilon() { return _FP64_EPSILON; }
+	M_FORCEINLINE static fp64 Zero() { return 0.0; }
+	M_FORCEINLINE static fp64 One() { return 1.0; }
+	M_FORCEINLINE static fp64 QuietNaN() 
 	{ 
 		uint64 nan = 0x7ff8000000000000LL;
-		return *(fp8 *) &nan;		
+		return *(fp64 *) &nan;		
 	}
-	M_FORCEINLINE static fp8 NaN() 
+	M_FORCEINLINE static fp64 NaN() 
 	{ 
 		uint64 nan = 0x7ff8000100000000LL;
-		return *(fp8 *) &nan;		
+		return *(fp64 *) &nan;		
 	}	
 };
 
-typedef int CTypeDesc_fp4;
-typedef int CTypeDesc_fp8;
+typedef int CTypeDesc_fp32;
+typedef int CTypeDesc_fp64;
 typedef int CTypeDesc_int8;
 typedef int CTypeDesc_int16;
 typedef int CTypeDesc_int32;
@@ -252,8 +252,8 @@ inline void MCCDLLEXPORT MemMove(void* _pDest, const void* _pSrc, int _Count)
 template <class T>
 inline T Sqr(T a) { T tmp(a); return tmp*tmp; }
 
-//#define Random (((fp4)rand())*(1.0f/((fp4)RAND_MAX)))
-#define Random MRTC_GetRand()->GenRand1Inclusive_fp4()
+//#define Random (((fp32)rand())*(1.0f/((fp32)RAND_MAX)))
+#define Random MRTC_GetRand()->GenRand1Inclusive_fp32()
 
 // --- Min/Max ---
 //#ifdef COMPILER_CODEWARRIOR
@@ -449,6 +449,30 @@ inline void ByteSwap_int32(int32& _Value)
 	}; 
 }
 
+inline void ByteSwap_int64(int64& _Value)
+{
+	int64 Val = _Value;
+	int32 Val0 = (int32)(Val >> 32);
+	int32 Val1 = (int32)Val;
+
+	ByteSwap_int32(Val0);
+	ByteSwap_int32(Val1);
+
+	_Value = ((int64)Val1 << 32) | (int64)Val0;
+}
+
+inline void ByteSwap_uint64(uint64& _Value)
+{
+	uint64 Val = _Value;
+	uint32 Val0 = (uint32)(Val >> 32);
+	uint32 Val1 = (uint32)Val;
+
+	ByteSwap_uint32(Val0);
+	ByteSwap_uint32(Val1);
+
+	_Value = ((uint64)Val1 << 32) | (uint64)Val0;
+}
+
 // -------------------------------------------------------------------
 #elif defined(PLATFORM_DOLPHIN)
 inline void Swap_uint16(register uint16& _Value)
@@ -521,6 +545,17 @@ inline void ByteSwap_int32(int32& _Value)
 	_Value = _byteswap_ulong(Temp);
 }
 
+inline void ByteSwap_uint64(uint64& _Value)
+{
+	uint64 Temp = _Value;
+	_Value = _byteswap_uint64(Temp);
+}
+
+inline void ByteSwap_int64(int64& _Value)
+{
+	uint64 Temp = _Value;
+	_Value = _byteswap_uint64(Temp);
+}
 #else
 
 //inline void Swap_uint16(uint16& _Value) { Swap(((int8*)&_Value)[0], ((int8*)&_Value)[1]); };
@@ -530,65 +565,62 @@ inline void ByteSwap_int32(int32& _Value)
 
 inline void Swap_uint16(uint16& _Value)
 {
-	_Value = ((_Value << 8) & 0xff00) | ((_Value >> 8) & 0x00ff);
+	uint16 Val = _Value;
+	_Value = ((Val & 0xff) << 8) | ((Val >> 8) & 0xff);
 }
 
 inline void Swap_int16(int16& _Value)
 {
-	_Value = ((_Value << 8) & 0xff00) | ((_Value >> 8) & 0x00ff);
+	int16 Val = _Value;
+	_Value = ((Val & 0xff) << 8) | ((Val >> 8) & 0xff);
 }
 
-inline void Swap_whcar(wchar& _Value)
+inline void Swap_wchar(wchar& _Value)
 {
-	_Value = ((_Value << 8) & 0xff00) | ((_Value >> 8) & 0x00ff);
+	wchar Val = _Value;
+	_Value = ((Val & 0xff) << 8) | ((Val >> 8) & 0xff);
 }
 
 inline void ByteSwap_uint32(uint32& _Value) 
 {
-	_Value = ((_Value << 24) & 0xff000000) | ((_Value << 8) & 0x00ff0000) | ((_Value >> 8) & 0x0000ff00) | ((_Value >> 24) & 0x000000ff);
+	uint32 Val = _Value;
+	_Value = ((Val & 0xff) << 24) | ((Val & 0xff00) << 8) | ((Val >> 8) & 0xff00) | ((Val >> 24) & 0xff);
 }
 inline void ByteSwap_int32(int32& _Value) 
 {
-	_Value = ((_Value << 24) & 0xff000000) | ((_Value << 8) & 0x00ff0000) | ((_Value >> 8) & 0x0000ff00) | ((_Value >> 24) & 0x000000ff);
-}
-
-#endif
-
-#if defined(PLATFORM_XENON)
-inline void ByteSwap_uint64(uint64& _Value)
-{
-	uint64 Temp = _Value;
-	_Value = _byteswap_uint64(Temp);
+	int32 Val = _Value;
+	_Value = ((Val & 0xff) << 24) | ((Val & 0xff00) << 8) | ((Val >> 8) & 0xff00) | ((Val >> 24) & 0xff);
 }
 
 inline void ByteSwap_int64(int64& _Value)
 {
-	uint64 Temp = _Value;
-	_Value = _byteswap_uint64(Temp);
-}
-#else
+	int64 Val = _Value;
+	int32 Val0 = (int32)(Val >> 32);
+	int32 Val1 = (int32)Val;
 
-// -------------------------------------------------------------------
+	ByteSwap_int32(Val0);
+	ByteSwap_int32(Val1);
+
+	_Value = ((int64)Val1 << 32) | (int64)Val0;
+}
+
 inline void ByteSwap_uint64(uint64& _Value)
 {
-	uint32* pVal = (uint32*) &_Value;
-	Swap(pVal[0], pVal[1]);
-	ByteSwap_uint32(pVal[0]);
-	ByteSwap_uint32(pVal[1]);
+	uint64 Val = _Value;
+	uint32 Val0 = (uint32)(Val >> 32);
+	uint32 Val1 = (uint32)Val;
+
+	ByteSwap_uint32(Val0);
+	ByteSwap_uint32(Val1);
+
+	_Value = ((uint64)Val1 << 32) | (uint64)Val0;
 }
 
-inline void ByteSwap_int64(int64& _Value)
-{
-	uint32* pVal = (uint32*) &_Value;
-	Swap(pVal[0], pVal[1]);
-	ByteSwap_uint32(pVal[0]);
-	ByteSwap_uint32(pVal[1]);
-}
 #endif
 
 
-inline void ByteSwap_fp4(fp4& _Value) { ByteSwap_uint32(*(uint32*)&_Value); }
-inline void ByteSwap_fp8(fp8& _Value) { ByteSwap_uint64(*(uint64*)&_Value); }
+inline void ByteSwap_fp32(fp32& _Value) { ByteSwap_uint32(*(uint32*)&_Value); }
+inline void ByteSwap_fp64(fp64& _Value) { ByteSwap_uint64(*(uint64*)&_Value); }
 
 // -------------------------------------------------------------------
 #ifdef CPU_LITTLEENDIAN
@@ -601,8 +633,8 @@ static M_INLINE void SwapLE(uint32& _Var) {};
 static M_INLINE void SwapLE(int32& _Var) {};
 static M_INLINE void SwapLE(uint64& _Var) {};
 static M_INLINE void SwapLE(int64& _Var) {};
-static M_INLINE void SwapLE(fp4& _Var) {};
-static M_INLINE void SwapLE(fp8& _Var) {};
+static M_INLINE void SwapLE(fp32& _Var) {};
+static M_INLINE void SwapLE(fp64& _Var) {};
 
 #ifdef	PLATFORM_PS2
 M_INLINE void SwapLE(wchar& _Var) {};
@@ -618,8 +650,8 @@ static M_INLINE void SwapLE(uint32& _Var) { ByteSwap_uint32(_Var); };
 static M_INLINE void SwapLE(int32& _Var) { ByteSwap_int32(_Var); };
 static M_INLINE void SwapLE(uint64& _Var) { ByteSwap_uint64(_Var); };
 static M_INLINE void SwapLE(int64& _Var) { ByteSwap_int64(_Var); };
-static M_INLINE void SwapLE(fp4& _Var) { ByteSwap_fp4(_Var); };
-static M_INLINE void SwapLE(fp8& _Var) { ByteSwap_fp8(_Var); };
+static M_INLINE void SwapLE(fp32& _Var) { ByteSwap_fp32(_Var); };
+static M_INLINE void SwapLE(fp64& _Var) { ByteSwap_fp64(_Var); };
 
 #endif
 
@@ -658,22 +690,22 @@ MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_int16, int16, Swap_int16)
 MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_uint16, uint16, Swap_uint16)
 MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_int32, int32, ByteSwap_int32)
 MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_uint32, uint32, ByteSwap_uint32)
-MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_fp4, fp4, ByteSwap_fp4)
-MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_fp8, fp8, ByteSwap_fp8)
+MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_fp32, fp32, ByteSwap_fp32)
+MACRO_MAKE_SWITCH_LE_FUNC(SwitchArrayLE_fp64, fp64, ByteSwap_fp64)
 
 MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_int16, int16, Swap_int16)
 MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_uint16, uint16, Swap_uint16)
 MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_int32, int32, ByteSwap_int32)
 MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_uint32, uint32, ByteSwap_uint32)
-MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_fp4, fp4, ByteSwap_fp4)
-MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_fp8, fp8, ByteSwap_fp8)
+MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_fp32, fp32, ByteSwap_fp32)
+MACRO_MAKE_SWITCH_BE_FUNC(SwitchArrayBE_fp64, fp64, ByteSwap_fp64)
 
 
 // -------------------------------------------------------------------
 //  Math acceleration funtions.
 // -------------------------------------------------------------------
-//static M_INLINE fp4 M_Sqrt(fp4 _Val);
-//static M_INLINE fp4 M_InvSqrt(fp4 _Val);
+//static M_INLINE fp32 M_Sqrt(fp32 _Val);
+//static M_INLINE fp32 M_InvSqrt(fp32 _Val);
 /*
 #define CONST_INVERSEMAX 1024
 
@@ -683,45 +715,35 @@ class MCCDLLEXPORT CMathAccel : public CReferenceCount
 {
 public:
 	int* m_pIntInverseTab;
-	fp4* m_pFp4InverseTab;
+	fp32* m_pFp32InverseTab;
 	short m_sqrttab[0x100];
 
 	CMathAccel();
-	void InitInverseTable_fp4();
+	void InitInverseTable_fp32();
 	void InitInverseTable_Fixed16();
 	void InitSqrtTable();
 
 #if defined(PLATFORM_DOLPHIN) || defined(PLATFORM_PS3)
-	static inline fp4 fsqrt(fp4 _Val)    { return M_Sqrt(_Val); }
-	static inline fp4 finvsqrt(fp4 _Val) { return M_InvSqrt(_Val); }
+	static inline fp32 fsqrt(fp32 _Val)    { return M_Sqrt(_Val); }
+	static inline fp32 finvsqrt(fp32 _Val) { return M_InvSqrt(_Val); }
 #else
-	       fp4 fsqrt(fp4 _Val) const;
-	inline fp4 finvsqrt(fp4 _Val) const { return 1.0f / fsqrt(_Val); }
+	       fp32 fsqrt(fp32 _Val) const;
+	inline fp32 finvsqrt(fp32 _Val) const { return 1.0f / fsqrt(_Val); }
 #endif
 
 	int FastDivInt(int taljare, int namnare);
 	int FastMulDiv64(int factor1, int factor2, int namnare);
-	int FastDivFp4Int(fp4 taljare, int namnare);
+	int FastDivFp32Int(fp32 taljare, int namnare);
 
 	~CMathAccel()
 	{
 		if (m_pIntInverseTab) { delete[] m_pIntInverseTab; m_pIntInverseTab = NULL; }
-		if (m_pFp4InverseTab) { delete[] m_pFp4InverseTab; m_pFp4InverseTab = NULL; }
+		if (m_pFp32InverseTab) { delete[] m_pFp32InverseTab; m_pFp32InverseTab = NULL; }
 	};
 };
 
 extern CMathAccel* GetMathAccel();
 */
-template<class T, class T2, class T3>
-T Clamp(T _Value, T2 _Min, T3 _Max)
-{
-	if(_Value > _Max)
-		return _Max;
-	if(_Value < _Min)
-		return _Min;
-
-	return _Value;
-}
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -796,7 +818,7 @@ M_INLINE void RadixSort(T* _pBuf, int _nItems, T* _pTempBuf = NULL)
 | Macro for easy iterating of an TArray/TThinArray.
 | Example usage:
 |
-| foreach (CVec3Dfp4, v, m_lVertices)
+| foreach (CVec3Dfp32, v, m_lVertices)
 |     v.k[2] += 1.0f;
 |
 | The generated code (with optimizations enabled) is equal to doing the iteration manually

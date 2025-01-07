@@ -107,275 +107,643 @@ void TStaticHeap<T>::Delete(T* _pElem)
      Description  : 
   -----------------------------------------------*/
 
-class MCCDLLEXPORT CDA_Poolable;
 
-#ifdef MRTC_MULTITHREADED
 
-#define MDA_PoolLock(x) M_LOCK(x->m_Lock)
+namespace NIds
+{
+	namespace NMem
+	{		
 
-#define MDA_PoolParamList 0, NULL, NULL, 0
+		class CPoolType_Growing
+		{
+		public:
 
+			template <typename t_CAllocator>
+			class TCBlock
+			{
+			public:
+				DIdsListLinkAllocatorSA_Link(TCBlock, m_FreeLink, t_CAllocator);
+			};
+
+			template <typename t_CAllocator, mint t_DataSize, mint t_GrowSize, mint t_Alignment>
+			class TCChunk
+			{
+			public:
+				typedef TCChunk CChunk;
+				typedef typename t_CAllocator::CPtrHolder CPtrHolder;
+				DIdsListLinkAllocatorS_Link(CChunk, m_Link, t_CAllocator);
+
+				enum 
+				{
+					EDataSizeRaw = t_DataSize < sizeof(TCBlock<t_CAllocator>) ? sizeof(TCBlock<t_CAllocator>) : t_DataSize,
+					EDataSize = ((EDataSizeRaw + t_Alignment - 1) / t_Alignment) * t_Alignment
+				};
+
+				DIdsPInlineL TCChunk(DIdsListLinkAllocatorSA_ListNoLastPtr_FromTemplate(TCBlock<t_CAllocator>, m_FreeLink, t_CAllocator) &_Blocks, mint _Size)
+				{
+					mint ThisSize = t_CAllocator::Size(this);
+					if (!ThisSize)
+						ThisSize = _Size;
+
+					uint8 *_pEndBlock = AlignUp((uint8 *)(this + 1), t_Alignment);
+					uint8 *_pCurrentBlock = (_pEndBlock + (((((uint8 *)(this) + ThisSize) - _pEndBlock) / EDataSize) * EDataSize)) - EDataSize;
+					
+					while (_pCurrentBlock >= _pEndBlock)
+					{
+						TCBlock<t_CAllocator> *pToInsert = (TCBlock<t_CAllocator> *)_pCurrentBlock;
+						_Blocks.UnsafeInsertHead(pToInsert);
+						_pCurrentBlock -= EDataSize;
+					}
+				}
+
+				~TCChunk()
+				{
+				}
+         	};
+
+
+			template <typename t_CAllocator, mint t_GrowSize, mint t_DataSize, mint t_Alignment>
+			class TCPoolImp
+			{
+			public:
+				typedef TCChunk<t_CAllocator, t_DataSize, t_GrowSize, t_Alignment> CChunk;
+				typedef typename t_CAllocator::CPtrHolder CPtrHolder;
+
+				DIdsListLinkAllocatorSA_ListNoLastPtr_FromTemplate(CChunk, m_Link, t_CAllocator) m_Chunks;
+				DIdsListLinkAllocatorSA_ListNoLastPtr_FromTemplate(TCBlock<t_CAllocator>, m_FreeLink, t_CAllocator) m_FreeBlocks;
+#				ifdef DIdsTreeCheckRemove
+					aint m_NumUsed;
+#				endif
+				
+				enum 
+				{
+					EDataSizeRaw = t_DataSize < sizeof(TCBlock<t_CAllocator>) ? sizeof(TCBlock<t_CAllocator>) : t_DataSize,
+					EDataSize = ((EDataSizeRaw + t_Alignment - 1) / t_Alignment) * t_Alignment
+				};
+
+				void Construct()
+				{
+					m_Chunks.Construct();
+					m_FreeBlocks.Construct();
+#					ifdef DIdsTreeCheckRemove
+						m_NumUsed = 0;
+#					endif
+				}
+
+				void Destruct()
+				{
+#					ifdef DIdsTreeCheckRemove
+						DIdsAssert(m_NumUsed == 0, "Memory leak in pool!");
+#					endif
+					// Make Freeblocks delete faster
+					m_FreeBlocks.m_Data.GetFirst().m_pNext = DNP;
+					m_FreeBlocks.m_Data.SetLast(DNP);
+					m_FreeBlocks.Destruct();
+
+					CChunk *pChunkToDelete = m_Chunks.Pop();
+					while (pChunkToDelete )
+					{
+						pChunkToDelete->~CChunk();
+						t_CAllocator::Free(pChunkToDelete);						
+						pChunkToDelete = m_Chunks.Pop();
+					}
+					m_Chunks.Destruct();
+				}
+
+				void AddChunk(void *_pMem, mint _Size)
+				{
+					CChunk *pNewChunk = new(_pMem) CChunk(m_FreeBlocks, _Size);
+					m_Chunks.Insert(pNewChunk);
+				}
+				
+				void *GetBlock()
+				{
+					TCBlock<t_CAllocator> * pBlock = m_FreeBlocks.Pop();
+					
+					if (pBlock)
+					{
+#						ifdef DIdsTreeCheckRemove
+							++m_NumUsed;
+#						endif
+						return pBlock;
+					}
+					else
+					{
+	
+						mint Size = ((((sizeof(CChunk) + t_GrowSize * EDataSize) - 1) / t_CAllocator::GranularityAlloc()) + 1) * t_CAllocator::GranularityAlloc();
+						void *pMem = t_CAllocator::AllocAlign(Size, t_Alignment);
+
+						if (pMem)
+						{	
+							AddChunk(pMem, Size);
+							pBlock = m_FreeBlocks.Pop();
+							DIdsAssert(pBlock, "Must succed");
+#							ifdef DIdsTreeCheckRemove
+								++m_NumUsed;
+#							endif
+							return pBlock;
+						}
+						else
+						{
+							return DNP;
+						}
+					}
+				}
+				
+				bint BlockIsAllocated(void *_pBlock)
+				{
+					M_BREAKPOINT; // Not supported for this pool type
+					return true;
+				}
+				void ReturnBlock(void *_pBlock)
+				{
+					TCBlock<t_CAllocator> *pBlock = (TCBlock<t_CAllocator> *)_pBlock;
+					// We are adding to a full block
+					m_FreeBlocks.Push(pBlock);
+#					ifdef DIdsTreeCheckRemove
+						--m_NumUsed;
+#					endif
+				}
+
+			};			
+
+		};
+
+		class CPoolType_Freeable
+		{
+		public:
+
+			class CPool;
+
+			template <typename t_CAllocator>
+			class TCBlock
+			{
+			public:
+				DIdsListLinkS_Trans(TCBlock, m_FreeLink);
+				union
+				{
+					void *m_pChunk;
+					DIdsListLinkAllocatorSA_Member(m_FreeLink, t_CAllocator);
+				};
+#ifdef M_Profile
+				uint32 m_bAllocated;
+#endif
+			};
+
+			template <typename t_CAllocator, mint t_DataSize, mint t_GrowSize, mint t_Alignment>
+			class TCChunk
+			{
+			public:
+				typedef TCChunk CChunk;
+				typedef typename t_CAllocator::CPtrHolder CPtrHolder;
+				DIdsListLinkAllocatorD_Link(CChunk, m_Link, t_CAllocator);
+				DIdsListLinkAllocatorS_ListNoLastPtr_FromTemplate(TCBlock<t_CAllocator>, m_FreeLink, t_CAllocator) m_FreeBlocks;
+				aint m_NumUsed;
+
+				enum
+				{
+					EDataSizeRaw = sizeof(TCBlock<t_CAllocator>) + t_DataSize,
+					EDataSize = ((EDataSizeRaw + t_Alignment - 1) / t_Alignment) * t_Alignment
+				};
+
+				DIdsPInlineL TCChunk(mint _Size)
+				{
+					mint ThisSize = t_CAllocator::Size(this);
+					if (!ThisSize)
+						ThisSize = _Size;
+
+					uint8 *_pEndBlock = AlignUp((uint8 *)(this + 1), t_Alignment);
+					uint8 *_pCurrentBlock = (_pEndBlock + (((((uint8 *)(this) + ThisSize) - _pEndBlock) / EDataSize) * EDataSize)) - EDataSize;
+
+					m_NumUsed = 0;					
+					
+					while (_pCurrentBlock >= _pEndBlock)
+					{
+						TCBlock<t_CAllocator> *pToInsert = (TCBlock<t_CAllocator> *)_pCurrentBlock;
+#ifdef M_Profile
+						pToInsert->m_bAllocated = false;
+#endif
+						m_FreeBlocks.UnsafeInsertHead(pToInsert);
+						_pCurrentBlock -= EDataSize;
+					}
+
+				}
+
+				~TCChunk()
+				{
+					DIdsAssert(m_NumUsed == 0, "Memory leak in pool!");
+				}
+			};
+
+
+			template <typename t_CAllocator, mint t_GrowSize, mint t_DataSize, mint t_Alignment>
+			class TCPoolImp
+			{
+			public:
+				typedef TCChunk<t_CAllocator, t_DataSize, t_GrowSize, t_Alignment> CChunk;
+				typedef typename t_CAllocator::CPtrHolder CPtrHolder;
+				DIdsListLinkAllocatorDA_List_FromTemplate(CChunk, m_Link, t_CAllocator) m_Chunks;
+				DIdsListLinkAllocatorDA_List_FromTemplate(CChunk, m_Link, t_CAllocator) m_FreeChunks;
+				DIdsListLinkAllocatorDA_List_FromTemplate(CChunk, m_Link, t_CAllocator) m_EmptyChunks;
+				
+				enum
+				{
+					EDataSizeRaw = sizeof(TCBlock<t_CAllocator>) + t_DataSize,
+					EDataSize = ((EDataSizeRaw + t_Alignment - 1) / t_Alignment) * t_Alignment
+				};
+
+				void Construct()
+				{
+					m_Chunks.Construct();
+					m_FreeChunks.Construct();
+					m_EmptyChunks.Construct();
+				}
+
+				void Destruct()
+				{
+					DIdsAssert(m_Chunks.IsEmpty(), "Memory leak");
+					DIdsAssert(m_FreeChunks.IsEmpty(), "Memory leak");
+
+					CChunk *pChunkToDelete = m_Chunks.Pop();
+					while (pChunkToDelete)
+					{
+						pChunkToDelete->~CChunk();
+						t_CAllocator::Free(pChunkToDelete);
+						pChunkToDelete = m_Chunks.Pop();
+					}
+					pChunkToDelete = m_FreeChunks.Pop();
+					while (pChunkToDelete)
+					{
+						pChunkToDelete->~CChunk();
+						t_CAllocator::Free(pChunkToDelete);
+						pChunkToDelete = m_FreeChunks.Pop();
+					}
+					pChunkToDelete = m_EmptyChunks.Pop();
+					while (pChunkToDelete)
+					{
+						pChunkToDelete->~CChunk();
+						t_CAllocator::Free(pChunkToDelete);
+						pChunkToDelete = m_EmptyChunks.Pop();
+					}
+					m_Chunks.Destruct();
+					m_FreeChunks.Destruct();
+					m_EmptyChunks.Destruct();
+				}
+
+				bint ContainsBlock(void *_pBlock)
+				{
+					DIdsListLinkAllocatorDA_List_FromTemplate(CChunk, m_Link, t_CAllocator) *lLists[] = {&m_Chunks, &m_FreeChunks, &m_EmptyChunks};
+
+					for (mint i = 0; i < sizeof(lLists) / sizeof(DIdsListLinkAllocatorDA_List_FromTemplate(CChunk, m_Link, t_CAllocator) *); ++i)
+					{
+						DIdsListLinkAllocatorD_Iter_FromTemplate(CChunk, m_Link, t_CAllocator) Iter = *lLists[i];
+						while (Iter)
+						{
+							if ((mint)_pBlock >= (mint)(CChunk *)Iter && (mint)_pBlock < (mint)(CChunk *)Iter + t_CAllocator::Size((CChunk *)Iter))
+								return true;
+							++Iter;
+						}
+					}
+
+					return false;				
+				}
+				
+				void *GetBlock()
+				{
+					DIdsAssert(t_GrowSize > 1, "GrowSize must be larger that 1, or the logic does not work");
+//					DIdsListLinkD_Iter(TCChunk<>, m_Link) Iter = m_FreeChunks;
+
+					CChunk *pChunk = m_FreeChunks.GetFirst();
+					
+					TCBlock<t_CAllocator> * pBlock = DNP;
+					
+					if (pChunk)
+					{
+						pBlock = pChunk->m_FreeBlocks.Pop();
+					}
+
+					if (!pBlock)
+					{
+						pChunk = m_EmptyChunks.GetFirst();
+						if (pChunk)
+						{
+							pBlock = pChunk->m_FreeBlocks.Pop();
+						}
+					}
+					
+					
+					if (pBlock)
+					{
+						if (pChunk->m_FreeBlocks.IsEmpty())
+						{
+							// Full block
+							m_Chunks.Insert(pChunk);
+						}
+						else if (pChunk->m_NumUsed == 0)
+						{
+							m_FreeChunks.Insert(pChunk);
+						}
+						++pChunk->m_NumUsed;
+						pBlock->m_pChunk = pChunk;
+#ifdef M_Profile
+						pBlock->m_bAllocated = true;
+#endif
+						return ((uint8*)(pBlock + 1));
+					}
+					else
+					{
+						mint Size = ((((sizeof(CChunk) + t_GrowSize * EDataSize) - 1) / t_CAllocator::GranularityAlloc()) + 1) * t_CAllocator::GranularityAlloc();
+						void *pMem = t_CAllocator::AllocAlign(Size, t_Alignment);
+
+						if (pMem)
+						{	
+							CChunk *pNewChunk = new(pMem) CChunk(Size);
+
+							pBlock = pNewChunk->m_FreeBlocks.Pop();
+							DIdsAssert(pBlock, "Must succed");
+							m_FreeChunks.Insert(pNewChunk);
+							
+							++pNewChunk->m_NumUsed;
+							pBlock->m_pChunk = pNewChunk;
+#ifdef M_Profile
+							pBlock->m_bAllocated = true;
+#endif
+							return ((uint8*)(pBlock + 1));
+						}
+						else
+						{
+							return DNP;
+						}
+					}
+				}
+
+				bint BlockIsAllocated(void *_pBlock)
+				{
+#ifdef M_Profile
+					TCBlock<t_CAllocator> *pBlock = (TCBlock<t_CAllocator> *)((uint8 *)_pBlock - (sizeof(TCBlock<t_CAllocator>)));
+					return pBlock->m_bAllocated;
 #else
-
-#define MDA_PoolLock(x)
-
-#define MDA_PoolParamList 0, NULL, NULL,0 
-
+					M_BREAKPOINT; // Not supported
+					return true;				
 #endif
+				}
 
-#define MDA_StaticPool(Name, ElementSize, AllocationSize) CDA_Pool_Static Name = {ElementSize, AllocationSize, MDA_PoolParamList};
-
-class MCCDLLEXPORT CDA_Pool_Static
-{
-public:
-	class CElement
-	{
-	public:
-		class CElement *Next;
-	};
-
-	class CAllocation
-	{
-	public:
-		class CAllocation *Next;
-#ifdef CPU_QWORD_ALIGNMENT
-		uint8 _paddata[4];
+				void ReturnBlock(void *_pBlock)
+				{
+#ifdef _DEBUG
+					DIdsAssert(ContainsBlock(_pBlock), "Must be part of pool");
 #endif
-	};
-
-
-	uint32 m_ElementSize;
-	uint32 m_AllocationSize;
-	int m_UsedElements;
-
-	CElement *m_pFirstFreeElement;
-	CAllocation *m_pFirstAllocation;
-	int m_NumAllocations;
-
-#ifdef MRTC_MULTITHREADED
-	NThread::CMutualAggregate m_Lock;
+					TCBlock<t_CAllocator> *pBlock = (TCBlock<t_CAllocator> *)((uint8 *)_pBlock - (sizeof(TCBlock<t_CAllocator>)));
+#ifdef M_Profile
+					pBlock->m_bAllocated = false;
 #endif
+					CChunk *pChunk = ((CChunk *)(pBlock->m_pChunk));
+					if (pChunk->m_FreeBlocks.IsEmpty())
+					{
+						// We are adding to a full block
+						pChunk->m_FreeBlocks.Push(pBlock);
+						--pChunk->m_NumUsed;
+						m_FreeChunks.InsertHead(pChunk);
+					}
+					else
+					{						
+						pChunk->m_FreeBlocks.Push(pBlock);
+						--pChunk->m_NumUsed;
+						
+						if (pChunk->m_NumUsed == 0)
+						{
+							if (!m_EmptyChunks.IsEmpty())
+							{
+								// Remove the excess chunk
+								CChunk *pChunkToDelete = m_EmptyChunks.Pop();
+								pChunkToDelete->~CChunk();
+								t_CAllocator::Free(pChunkToDelete);
+							}
+							m_EmptyChunks.Insert(pChunk);
+						}
+					}
+				}
 
-	void Init(uint32 _ElementSize, uint32 _AllocationSize);
-	
-	void FlushUnused();
+			};			
 
-	void *New();
-	void Delete(void *_pToDelete);
-	
+		};
+
+		class CAggregateData
+		{
+		public:
+
+			mint m_bDoneInit;
+
+			DIdsPInlineS void InitDone()
+			{
+				m_bDoneInit = true;
+
+			}
+
+			DIdsPInlineS bint ShouldInit()
+			{
+				if (m_bDoneInit)
+					return false;
+				else
+					return true;
+			}
+		};
+
+		template <typename t_CData, aint t_GrowSize = 128, typename t_CLockType = NThread::CLock, typename t_CPoolType = CPoolType_Freeable, typename t_CAllocator = CAllocator_Virtual, typename t_CAggregateData = CAggregateData>
+		class TCPoolAggregate
+		{
+		public:
+			t_CAggregateData m_AggregateData;
+			t_CLockType m_Lock;
+			typename t_CPoolType::template TCPoolImp<t_CAllocator, t_GrowSize, sizeof(t_CData), M_ALIGNMENTOF(t_CData)> m_Pool;
+
+			void Construct()
+			{
+				m_Pool.Construct();
+				m_Lock.Construct();
+			}
+
+			void Destruct()
+			{
+				if (!m_AggregateData.ShouldInit())
+				{
+					m_Pool.Destruct();
+					m_Lock.Destruct();
+				}
+			}
+
+			DIdsPInlineS void Delete(t_CData *_pToDelete)
+			{
+				_pToDelete->~t_CData();
+//				delete _pToDelete;
+				DLockTyped_FromTemplate(t_CLockType, m_Lock);
+				ReturnBlock(_pToDelete);
+			}
+
+
+			t_CData *New()
+			{
+				void *pMem;
+				{
+					DLockTyped_FromTemplate(t_CLockType, m_Lock);
+					pMem = GetBlock();
+				}
+				t_CData *pObject = new(pMem) t_CData;
+				return pObject;
+			}
+
+			template <typename t_CParam0>
+			t_CData *New(t_CParam0 &_Param0)
+			{
+				void *pMem;
+				{
+					DLockTyped_FromTemplate(t_CLockType, m_Lock);
+					pMem = GetBlock();
+				}
+				t_CData *pObject = new(pMem) t_CData(_Param0);
+				return pObject;
+			}
+
+			template <typename t_CParam0, typename t_CParam1>
+			t_CData *New(t_CParam0 &_Param0, t_CParam1 &_Param1)
+			{
+				void *pMem;
+				{
+					DLockTyped_FromTemplate(t_CLockType, m_Lock);
+					pMem = GetBlock();
+				}
+				t_CData *pObject = new(pMem) t_CData(_Param0, _Param1);
+				return pObject;
+			}
+
+			template <typename t_CParam0, typename t_CParam1, typename t_CParam2>
+			t_CData *New(t_CParam0 &_Param0, t_CParam1 &_Param1, t_CParam2 &_Param2)
+			{
+				void *pMem;
+				{
+					DLockTyped_FromTemplate(t_CLockType, m_Lock);
+					pMem = GetBlock();
+				}
+				t_CData *pObject = new(pMem) t_CData(_Param0, _Param1, _Param2);
+				return pObject;
+			}
+
+			template <typename t_CParam0, typename t_CParam1, typename t_CParam2, typename t_CParam3>
+			t_CData *New(t_CParam0 &_Param0, t_CParam1 &_Param1, t_CParam2 &_Param2, t_CParam3 &_Param3)
+			{
+				void *pMem;
+				{
+					DLockTyped_FromTemplate(t_CLockType, m_Lock);
+					pMem = GetBlock();
+				}
+				t_CData *pObject = new(pMem) t_CData(_Param0, _Param1, _Param2, _Param3);
+				return pObject;
+			}
+
+			DIdsPInlineM void *GetBlock()
+			{
+				if (m_AggregateData.ShouldInit())
+				{
+					m_Pool.Construct();
+					m_AggregateData.InitDone();
+				}
+
+				void *pBlock = m_Pool.GetBlock();
+
+				DIdsAssert(pBlock, "Memory error ??");
+
+				return pBlock;
+			}
+
+			DIdsPInlineS void ReturnBlock(void * _pBlock)
+			{
+				m_Pool.ReturnBlock(_pBlock);
+			}
+
+			DIdsPInlineS bint BlockIsAllocated(t_CData *_pBlock)
+			{
+				return m_Pool.BlockIsAllocated(_pBlock);
+			}
+
+		};
+
+#		define DIdsMemPoolStaticImpl(_PoolType, _PoolName) _PoolType _PoolName = {0};
+
+#		ifndef DIdsPNoShortCuts
+#			define DPoolStaticImpl(_PoolType, _PoolName) DIdsMemPoolStaticImpl(_PoolType, _PoolName)
+#		endif
+
+		class CNoAggregateData
+		{
+		public:
+			DIdsPInlineS static void InitDone()
+			{
+			}
+
+			DIdsPInlineS static bint ShouldInit()
+			{
+				return false;
+			}
+		};
+
+		template <typename t_CData, mint t_GrowSize = 128, typename t_CLockType = NThread::CLock, typename t_CPoolType = CPoolType_Freeable, typename t_CAllocator = DIdsDefaultAllocator>
+		class TCPool : public TCPoolAggregate<t_CData, t_GrowSize, t_CLockType, t_CPoolType, t_CAllocator, CNoAggregateData>
+		{
+		public:
+			TCPool()
+			{
+				TCPoolAggregate<t_CData, t_GrowSize, t_CLockType, t_CPoolType, t_CAllocator, CNoAggregateData>::Construct();
+			}			
+			~TCPool()
+			{
+				TCPoolAggregate<t_CData, t_GrowSize, t_CLockType, t_CPoolType, t_CAllocator, CNoAggregateData>::Destruct();
+			}			
+		};
+
+		
+		/*»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»*\
+		|	TemplateClass:		Base class for enabling pooling functionality			|
+		|																				|
+		|	Parameters:																	|
+		|		t_CData:		The class that is inheriting from this class			|
+		|																				|
+		|	Comments:			Make sure that you inherit from this class				|
+		|						first, otherwise the delete wont work					|
+		\*_____________________________________________________________________________*/
+		template <typename t_CPool>
+		class TBCPool
+		{
+		public:
+			void * operator new(mint _NumBytes, const t_CPool &_Pool)
+			{
+				return _Pool.GetBlock(_NumBytes);
+			}
+
+#			if (DIdsPCompilerNeedsOperatorDelete != 0)
+				void operator delete(void *_pToDelete, const t_CPool &_Pool)
+				{
+					_Pool.ReturnBlock(_pToDelete);
+				}
+#			endif // (DIdsPCompilerNeedsOperatorDelete != 0)
+
+			void operator delete(void *_pToDelete)
+			{
+				// We do nothing here, as we dont know the pool
+			}
+
+		};
+
+	};	
 };
 
-class MCCDLLEXPORT CDA_Pool : public CDA_Pool_Static
-{
-public:
+using namespace NIds::NMem;
 
-
-/*	CDA_Pool(uint32 _ElementSize, uint32 _AllocationSize);*/
-	CDA_Pool();
-#ifndef DA__GLOBAL_ALLOC
-	~CDA_Pool();
-#endif
-	
-};
-
-template <class _tcPoolable>
-class TDA_Pool : public CDA_Pool
-{
-public:
-
-	TDA_Pool(int _GrowSize = 4096)
-	{
-		Init(sizeof(_tcPoolable), _GrowSize);
-	}
-
-	_tcPoolable *New()
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable;
-	}
-
-	template <typename t_CType0>
-	_tcPoolable *New(t_CType0 &_Param0)
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable(_Param0);
-	}
-
-	template <typename t_CType0, typename t_CType1>
-	_tcPoolable *New(t_CType0 & _Param0, t_CType1 & _Param1)
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable(_Param0, _Param1);
-	}
-
-	template <typename t_CType0, typename t_CType1, typename t_CType2>
-	_tcPoolable *New(t_CType0 & _Param0, t_CType1 & _Param1, t_CType2 & _Param2)
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable(_Param0, _Param1, _Param2);
-	}
-
-	template <typename t_CType0, typename t_CType1, typename t_CType2, typename t_CType3>
-	_tcPoolable *New(t_CType0 & _Param0, t_CType1 & _Param1, t_CType2 & _Param2, t_CType3 & _Param3)
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable(_Param0, _Param1, _Param2, _Param3);
-	}
-
-	template <typename t_CType0, typename t_CType1, typename t_CType2, typename t_CType3, typename t_CType4>
-	_tcPoolable *New(t_CType0 & _Param0, t_CType1 & _Param1, t_CType2 & _Param2, t_CType3 & _Param3, t_CType4 & _Param4)
-	{
-
-		return new(CDA_Pool_Static::New()) _tcPoolable(_Param0, _Param1, _Param2, _Param3, _Param4);
-	}
-
-
-	void Delete(_tcPoolable *_pToDelete)
-	{
-		_pToDelete->~_tcPoolable();
-
-		CDA_Pool_Static::Delete(_pToDelete);
-	}
-};
-
-#define newP(Class, Pool) new(Pool) Class
-//#define deleteP(Pointer, Pool) {void *Temp = (void *)Pointer;delete Pointer; CDA_Poolable::operator delete(Temp, Pool);}
-#define deleteP(Pointer, Pool) {void *Temp = (void *)Pointer;delete Pointer; CDA_Poolable::PoolDelete(Temp, Pool);}
-
-
-class MCCDLLEXPORT CDA_PoolableCompatibleDelete
-{
-public:
-	CDA_Pool_Static *m_pPool;	
-
-/*	void* COMPILER_ARGLISTCALL operator new(mint _Size)
-	{
-		// Not supported
-	//	M_BREAKPOINT;
-		return NULL;
-	}*/
-
-	void operator delete(void *Block);
-
-/*	void* COMPILER_ARGLISTCALL operator new [] (mint _Size)
-	{
-		// Not supported
-		M_BREAKPOINT;
-		return NULL;
-	}
-	void COMPILER_ARGLISTCALL operator delete [] (void *Block)
-	{
-		// Not supported
-		M_BREAKPOINT;
-	}*/
-
-
-
-	void* operator new(mint _Size, CDA_Pool_Static *Pool);
-	void* operator new(mint _Size, CDA_Pool_Static &Pool);
-	void operator delete(void * pMem, CDA_Pool_Static *Pool) { operator delete(pMem);}
-	void operator delete(void * pMem, CDA_Pool_Static &Pool) { operator delete(pMem);}
-
-};
-
-class MCCDLLEXPORT CDA_PoolableCompatibleDeleteVirtual : public CDA_PoolableCompatibleDelete
-{
-public:
-	~CDA_PoolableCompatibleDeleteVirtual()
-	{
-		M_ASSERT(m_pPool != NULL, "you have inherited in the wrong order");
-	}
-
-};
-
-
-class MCCDLLEXPORT CDA_PoolableCompatibleDeleteCompatibleCRef: public CReferenceCount
-{
-public:
-	CDA_Pool_Static *m_pPool;	
-
-/*	void* COMPILER_ARGLISTCALL operator new(mint _Size)
-	{
-		// Not supported
-	//	M_BREAKPOINT;
-		return NULL;
-	}*/
-
-	void operator delete(void *Block);
-
-/*	void* COMPILER_ARGLISTCALL operator new [] (mint _Size)
-	{
-		// Not supported
-		M_BREAKPOINT;
-		return NULL;
-	}
-	void COMPILER_ARGLISTCALL operator delete [] (void *Block)
-	{
-		// Not supported
-		M_BREAKPOINT;
-	}*/
-
-
-
-	void* operator new(mint _Size, CDA_Pool_Static *Pool);
-	void* operator new(mint _Size, CDA_Pool_Static &Pool);
-	void operator delete(void * pMem, CDA_Pool_Static *Pool) { operator delete(pMem);}
-	void operator delete(void * pMem, CDA_Pool_Static &Pool) { operator delete(pMem);}
-
-	virtual void MRTC_Delete();
-
-};
-
-
-class MCCDLLEXPORT CDA_Poolable
-{
-public:
-	
-
-/*	void* COMPILER_ARGLISTCALL operator new(mint _Size)
-	{
-		// Not supported
-	//	M_BREAKPOINT;
-		return NULL;
-	}*/
-
-	void operator delete(void *Block)
-	{
-
-	}
-
-/*	void* COMPILER_ARGLISTCALL operator new [] (mint _Size)
-	{
-		// Not supported
-		M_BREAKPOINT;
-		return NULL;
-	}
-	void COMPILER_ARGLISTCALL operator delete [] (void *Block)
-	{
-		// Not supported
-		M_BREAKPOINT;
-	}*/
-
-
-
-	void* operator new(mint _Size, class CDA_Pool_Static *Pool);
-	void* operator new(mint _Size, class CDA_Pool_Static &Pool);
-	void operator delete(void * pMem, CDA_Pool_Static *Pool) { operator delete(pMem);}
-	void operator delete(void * pMem, CDA_Pool_Static &Pool) { operator delete(pMem);}
-	static void* PoolNew(mint _Size, class CDA_Pool_Static *Pool);
-	static void* PoolNew(mint _Size, class CDA_Pool_Static &Pool);
-	static void PoolDelete(void *Block, class CDA_Pool_Static *Pool);
-	static void PoolDelete(void *Block, class CDA_Pool_Static &Pool);
-
-//oid Delete(CDA_Pool *Pool);
-
-};
 
 class MRTC_ThreadContext
 {
 public:
 	NThread::CMutual m_EventMember_Lock;
-	TDA_Pool<NThread::CEventAutoResetReportableAggregate::CReportListMember> m_EventMember_Pool;
+	TCPool<NThread::CEventAutoResetReportableAggregate::CReportListMember> m_EventMember_Pool;
 };
 
 #endif // __INC_MMEMMGRPOOL

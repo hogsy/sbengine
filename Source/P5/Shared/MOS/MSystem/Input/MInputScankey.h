@@ -324,7 +324,7 @@ class SYSTEMDLLEXPORT CScanKey : public CObj
 public:
 	int m_ScanKey32;
 	int m_Data[2];
-	fp8 m_Time;				// Seconds
+	fp64 m_Time;				// Seconds
 	wchar m_Char;
 	uint16 m_iDevice;
 

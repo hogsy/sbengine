@@ -30,8 +30,8 @@ int64 MRTC_CallGraphEntry::AccumalateClockWaste_r()
 void MRTC_CallGraphEntry::Write_r(CCFile* _pFile, int _Depth)
 {
 	CFStr Indent = CFStr(' ', _Depth*4);
-	const fp8 CR = MGetCPUFrequencyRecp();
-	_pFile->Writeln(CStrF("%s%s, %f (%f - %f)", Indent.Str(), m_pName, (m_Clocks - m_ClocksWasted) * CR, m_Clocks * CR, m_ClocksWasted * CR));
+	const fp64 CR = MGetCPUFrequencyRecp();
+	_pFile->Writeln(CStrF("%s%s, %f (%f - %f)", Indent.Str(), m_Name.Str(), (m_Clocks - m_ClocksWasted) * CR, m_Clocks * CR, m_ClocksWasted * CR));
 
 	CChildIterator Iter = m_Children;
 	while(Iter)
@@ -51,9 +51,9 @@ void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClo
 		strcpy(&Indent.GetStr()[i*4], "   .");
 
 	LogFile(CStrF("%6.2f  %s%6.2f   %s (%d, %.2f)", 
-		fp8(100.0) * fp8((m_Clocks - m_ClocksWasted)) / fp8(_TotalClocks), Indent.Str(), 
-		fp8(100.0) * fp8((m_Clocks - m_ClocksWasted)) / fp8(_ParentClocks),
-		m_pName, m_nCalls, m_ClocksWasted / m_Clocks));
+		fp64(100.0) * fp64((m_Clocks - m_ClocksWasted)) / fp64(_TotalClocks), Indent.Str(), 
+		fp64(100.0) * fp64((m_Clocks - m_ClocksWasted)) / fp64(_ParentClocks),
+		m_Name.Str(), m_nCalls, m_ClocksWasted / m_Clocks));
 
 	CChildIterator Iter = m_Children;
 	int64 ChildClocks = 0;
@@ -70,17 +70,17 @@ void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClo
 	{
 		int64 Other = m_Clocks - ChildClocks;
 		int64 OtherW = m_ClocksWasted - ChildClocksW;
-		if (fp8(Other)  > (0.01 * fp8(_ParentClocks)) )
+		if (fp64(Other)  > (0.01 * fp64(_ParentClocks)) )
 		{
 			LogFile(CStrF("%6.2f     .%s%6.2f   %s (%.2f)", 
-				fp8(100 * (Other - OtherW)) / fp8(_TotalClocks), Indent.Str(), 
-				fp8(100 * (Other - OtherW)) / fp8(m_Clocks - m_ClocksWasted), "Other", fp8(OtherW) / fp8(Other)));
+				fp64(100 * (Other - OtherW)) / fp64(_TotalClocks), Indent.Str(), 
+				fp64(100 * (Other - OtherW)) / fp64(m_Clocks - m_ClocksWasted), "Other", fp64(OtherW) / fp64(Other)));
 		}
 	}
 }
 
 
-void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TList_Vector<CStr> &_StrList)
+void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TArray<CStr> &_StrList)
 {
 	if (!m_Clocks)
 		return;
@@ -93,12 +93,12 @@ void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClo
 
 	_StrList.Add(CStrF("#%.2i %6.2f  %s%6.2f   %s (%d, %.2f (%.2f) ms, %d (%d) cyc)", 
 		_Depth,
-		fp8(100 * (m_Clocks - m_ClocksWasted)) / fp8(_TotalClocks), Indent.Str(), 
-		fp8(100 * (m_Clocks - m_ClocksWasted)) / fp8(_ParentClocks),
-		m_pName, 
+		fp64(100 * (m_Clocks - m_ClocksWasted)) / fp64(_TotalClocks), Indent.Str(), 
+		fp64(100 * (m_Clocks - m_ClocksWasted)) / fp64(_ParentClocks),
+		m_Name.Str(), 
 		m_nCalls, 
-		(fp8((m_Clocks - m_ClocksWasted) / m_nCalls) / MGetCPUFrequencyFp()) * 1000.0, 
-		(fp8(m_Clocks - m_ClocksWasted) / MGetCPUFrequencyFp()) * 1000.0, 
+		(fp64((m_Clocks - m_ClocksWasted) / m_nCalls) / MGetCPUFrequencyFp()) * 1000.0, 
+		(fp64(m_Clocks - m_ClocksWasted) / MGetCPUFrequencyFp()) * 1000.0, 
 		(int)((((int64)m_Clocks - (int64)m_ClocksWasted)) / m_nCalls),
 		(int)(((int64)m_Clocks - (int64)m_ClocksWasted))
 		)
@@ -123,20 +123,20 @@ void MRTC_CallGraphEntry::Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClo
 		{
 			_StrList.Add(CStrF("#%.2i %6.2f     .%s%6.2f   %s (%.2f, %d cyc)", 
 				_Depth + 1,
-				fp8(100 * (Other - OtherW)) / fp8(_TotalClocks), Indent.Str(), 
-				fp8(100 * (Other - OtherW)) / fp8(m_Clocks - m_ClocksWasted), "Other", 
-				((fp8(Other - OtherW) / MGetCPUFrequencyFp()) * 1000.0), 
+				fp64(100 * (Other - OtherW)) / fp64(_TotalClocks), Indent.Str(), 
+				fp64(100 * (Other - OtherW)) / fp64(m_Clocks - m_ClocksWasted), "Other", 
+				((fp64(Other - OtherW) / MGetCPUFrequencyFp()) * 1000.0), 
 				(int)((int64)Other - (int64)OtherW)));
 		}
 	}
 }
 
 
-void MRTC_CallGraphEntry::Log2_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TList_Vector<CStr> &_StrList)
+void MRTC_CallGraphEntry::Log2_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TArray<CStr> &_StrList)
 {
 	if (!m_Clocks)
 		return;
-	const char* pName = m_pName;
+	const char* pName = m_Name.Str();
 	_StrList.Add(CStrF("#%.2i %s %ld %d", 
 		_Depth,
 		pName[0] ? pName : "-", 
@@ -227,7 +227,7 @@ void MRTC_CallGraph_ThreadLocalData::Clear()
 
 	m_pCurrent = m_pRoot;
 	m_ThreadName = CStrF("Thread:0x%08x", (int32)(mint)MRTC_SystemInfo::OS_GetThreadID());
-	m_pCurrent->m_pName = m_ThreadName;
+	m_pCurrent->m_Name = m_ThreadName;
 }
 
 
@@ -266,12 +266,12 @@ MRTC_CallGraph::~MRTC_CallGraph()
 }
 
 
-void MRTC_CallGraph::Start(const fp8 _dTime, bool _bLog)
+void MRTC_CallGraph::Start(const fp64 _dTime, bool _bLog)
 {
 	M_TRACEALWAYS("Starting performance log for %d seconds\n", _dTime);
 	BlockUntilNoThreadsRunning();
 	m_bLogOnFinish = _bLog;
-	m_EndTime = (int64)(_dTime * (fp8)MGetCPUFrequencyFp()) + MGetCPUClock();
+	m_EndTime = (int64)(_dTime * (fp64)MGetCPUFrequencyFp()) + MGetCPUClock();
 
 	CThreadDataIter Iter = m_ThreadLocalList;
 
@@ -344,7 +344,7 @@ void MRTC_CallGraph::Enable()
 
 void MRTC_CallGraph::LogTimes()
 {
-	TList_Vector<CStr> CallGraphStrings;
+	TArray<CStr> CallGraphStrings;
 	GetStrList(CallGraphStrings);
 
 	for (int i = 0; i < CallGraphStrings.Len(); ++i)
@@ -356,7 +356,7 @@ void MRTC_CallGraph::LogTimes()
 
 void MRTC_CallGraph::TraceTimes()
 {
-	TList_Vector<CStr> CallGraphStrings;
+	TArray<CStr> CallGraphStrings;
 	GetStrList(CallGraphStrings);
 
 	for (int i = 0; i < CallGraphStrings.Len(); ++i)
@@ -405,7 +405,7 @@ void MRTC_CallGraph_ThreadLocalData::Push(const char* _pFunction)
 		MRTC_CallGraphEntry *pE = m_EntryPool.New();//new (MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_CallGraphEntry)]) MRTC_CallGraphEntry;
 		pE->m_pThreadLocal = this;
 
-		pE->m_pName = _pFunction;
+		pE->m_Name = _pFunction;
 		pE->m_pParent = m_pCurrent;
 		m_pCurrent->m_Children.f_Insert(pE);
 		m_pCurrent = pE;
@@ -423,7 +423,7 @@ void MRTC_CallGraph::BlockUntilNoThreadsRunning()
 	}
 }
 
-void MRTC_CallGraph::GetStrList(TList_Vector<CStr> &_StrList)
+void MRTC_CallGraph::GetStrList(TArray<CStr> &_StrList)
 {
 	BlockUntilNoThreadsRunning();
 
@@ -441,7 +441,7 @@ void MRTC_CallGraph::GetStrList(TList_Vector<CStr> &_StrList)
 }
 
 
-void MRTC_CallGraph::GetStrList2(TList_Vector<CStr> &_StrList)
+void MRTC_CallGraph::GetStrList2(TArray<CStr> &_StrList)
 {
 	BlockUntilNoThreadsRunning();
 

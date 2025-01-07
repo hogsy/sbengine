@@ -14,7 +14,7 @@
 	#include <cell/keyboard/error.h>
 	#include <cell/pad/error.h>
 #else
-
+/*
 #define	CellPadData	CellUsbPadData
 
 #define	cellPadInit cellUsbPadInit
@@ -39,7 +39,7 @@
 #define CELL_KB_CODETYPE_ASCII CELL_USBKB_CODETYPE_ASCII
 
 #define	CELL_PAD_OK CELL_USBPAD_OK
-
+*/
 #endif
 
 // -------------------------------------------------------------------
@@ -151,8 +151,8 @@ bool CPS3_Device_Joystick::Create(CInputContext_PS3* _pInput, int _PortNumber, i
 
 int CPS3_Device_Joystick::OnTranslateAxis(int _iAxis, int _Data)
 {
-	fp4 fAxis = (fp4(_Data) / 65535.0f) * 2.0f - 1.0f;
-	fp4 AxisSign = Sign(fAxis);
+	fp32 fAxis = (fp32(_Data) / 65535.0f) * 2.0f - 1.0f;
+	fp32 AxisSign = Sign(fAxis);
 	fAxis = M_Fabs(fAxis);
 
 	// Deadzone
@@ -161,17 +161,44 @@ int CPS3_Device_Joystick::OnTranslateAxis(int _iAxis, int _Data)
 	// Power
 	if (fAxis > 0.0f) fAxis = exp(log(fAxis) * INPS3_JOY_AXISPOWER);
 
-	// Scale
-	fAxis *= INPS3_JOY_AXISMAXVALUE;
-
-	// Restore sign
-	fAxis *= AxisSign;
-
-//	ConOut(CStrF("(CDI_Device_Joystick::OnTranslateAxis) iAxis %d, Data %d => %f", _iAxis, _Data, fAxis));
-
-	return RoundToInt(fAxis);
+	return RoundToInt(fAxis * AxisSign * INPS3_JOY_AXISMAXVALUE);
 }
 
+CVec2Dint32 CPS3_Device_Joystick::OnTranslateAxis2D(int _x, int _y)
+{
+	int32 ix, iy;
+	fp32 fx = (fp32(_x) / 65535.0f) * 2.0f - 1.0f;
+	fp32 fy = (fp32(_y) / 65535.0f) * 2.0f - 1.0f;
+	fx = Sign(fx) * Max(0.0f, (M_Fabs(fx) - INPS3_JOY_AXISDEADZONE1D)) / (1.0f - INPS3_JOY_AXISDEADZONE1D);
+	fy = Sign(fy) * Max(0.0f, (M_Fabs(fy) - INPS3_JOY_AXISDEADZONE1D)) / (1.0f - INPS3_JOY_AXISDEADZONE1D);
+	fp32 len = Length2(fx, fy);
+
+	fp32 lendeadzone = Max(0.0f, (len - INPS3_JOY_AXISDEADZONE)) / (1.0f - INPS3_JOY_AXISDEADZONE);
+	if (lendeadzone > 0.0f)
+	{
+		fp32 lenrcp = 1.0f / len;
+
+		lendeadzone = Clamp01(lendeadzone);
+		if (INPS3_JOY_AXISPOWER != 1.0f)
+			lendeadzone = exp(log(lendeadzone) * INPS3_JOY_AXISPOWER);
+
+		fp32 mulcollapse = lenrcp * lendeadzone * INPS3_JOY_AXISMAXVALUE;
+
+		ix = RoundToInt(fx * mulcollapse);
+		iy = RoundToInt(fy * mulcollapse);
+	}
+	else
+	{
+		ix = 0;
+		iy = 0;
+	}
+/*	M_TRACEALWAYS("OnTranslateAxis2D (%d, %d) => %f, %f\n", _x-32768, _y-32768, fx, fy);
+
+	CFStr Event = CFStrF("Ctrl %.3f, %.3f", fx, fy);
+	M_NAMEDEVENT(Event.GetStr(), 0xffffffff);
+*/
+	return CVec2Dint32(ix, iy);
+}
 
 void CPS3_Device_Joystick::OnAxisData(int _iAxis, int _Data)
 {
@@ -182,7 +209,7 @@ void CPS3_Device_Joystick::OnAxisData(int _iAxis, int _Data)
 	{
 		m_pInput->UpKey(INPS3_JOY_AXISSCAN + i*2, 0, 0, 0, m_JoystickNr);
 		Vec = -Vec;
-		if (Vec > 128.0f)
+		if (Vec > 128)
 			m_pInput->DownKey(INPS3_JOY_AXISSCAN + i*2+1, 0, 0, 1, Vec, 0, m_JoystickNr);
 		else
 			m_pInput->UpKey(INPS3_JOY_AXISSCAN + i*2+1, 0, Vec, 0, m_JoystickNr);
@@ -190,12 +217,58 @@ void CPS3_Device_Joystick::OnAxisData(int _iAxis, int _Data)
 	else
 	{
 		m_pInput->UpKey(INPS3_JOY_AXISSCAN + i*2+1, 0, 0, 0, m_JoystickNr);
-		if (Vec > 128.0f)
+		if (Vec > 128)
 			m_pInput->DownKey(INPS3_JOY_AXISSCAN + i*2, 0, 0, 1, Vec, 0, m_JoystickNr);
 		else
 			m_pInput->UpKey(INPS3_JOY_AXISSCAN + i*2, 0, Vec, 0, m_JoystickNr);
 	}
 	
+}
+
+void CPS3_Device_Joystick::OnAxisData2D(int _iAxis0, int _iAxis1, int _Data0, int _Data1)
+{
+	CVec2Dint32 Vec = OnTranslateAxis2D(_Data0, _Data1);
+
+	int xvec = Vec[0];
+	int yvec = Vec[1];
+
+//	M_TRACEALWAYS("OnAxisData2D: %d, %d, %d, %d -> %d, %d\r\n", _iAxis0, _iAxis1, _Data0, _Data1, xvec, yvec);
+
+	if (xvec < 0)
+	{
+		m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis0*2, 0, 0, 0, m_JoystickNr);
+		xvec = -xvec;
+		if (xvec > 128)
+			m_pInput->DownKey(INPS3_JOY_AXISSCAN + _iAxis0*2+1, 0, 0, 1, xvec, 0, m_JoystickNr);
+		else
+			m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis0*2+1, 0, xvec, 0, m_JoystickNr);
+	}
+	else
+	{
+		m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis0*2+1, 0, 0, 0, m_JoystickNr);
+		if (xvec > 128)
+			m_pInput->DownKey(INPS3_JOY_AXISSCAN + _iAxis0*2, 0, 0, 1, xvec, 0, m_JoystickNr);
+		else
+			m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis0*2, 0, xvec, 0, m_JoystickNr);
+	}
+
+	if (yvec < 0)
+	{
+		m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis1*2, 0, 0, 0, m_JoystickNr);
+		yvec = -yvec;
+		if (yvec > 128)
+			m_pInput->DownKey(INPS3_JOY_AXISSCAN + _iAxis1*2+1, 0, 0, 1, yvec, 0, m_JoystickNr);
+		else
+			m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis1*2+1, 0, yvec, 0, m_JoystickNr);
+	}
+	else
+	{
+		m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis1*2+1, 0, 0, 0, m_JoystickNr);
+		if (yvec > 128)
+			m_pInput->DownKey(INPS3_JOY_AXISSCAN + _iAxis1*2, 0, 0, 1, yvec, 0, m_JoystickNr);
+		else
+			m_pInput->UpKey(INPS3_JOY_AXISSCAN + _iAxis1*2, 0, yvec, 0, m_JoystickNr);
+	}
 }
 
 void CPS3_Device_Joystick::OnClearAxes()
@@ -259,6 +332,11 @@ void CPS3_Device_Joystick::OnRefresh()
 	{
 		if(PadData.len > 0)
 		{
+			if((PadData.button[6] != m_State.m_lButtons[6]) || (PadData.button[7] != m_State.m_lButtons[7]))
+				OnAxisData2D(0, 1, (PadData.button[6] << 8) | PadData.button[6], 65535 - ((PadData.button[7] << 8) | PadData.button[7]));
+			if((PadData.button[4] != m_State.m_lButtons[4]) || (PadData.button[5] != m_State.m_lButtons[5]))
+				OnAxisData2D(2, 3, (PadData.button[4] << 8) | PadData.button[4], ((PadData.button[5] << 8) | PadData.button[5]));
+/*
 			if(PadData.button[4] != m_State.m_lButtons[4])
 				OnAxisData(2, (PadData.button[4] << 8) | PadData.button[4]);
 			if(PadData.button[5] != m_State.m_lButtons[5])
@@ -268,7 +346,7 @@ void CPS3_Device_Joystick::OnRefresh()
 				OnAxisData(0, (PadData.button[6] << 8) | PadData.button[6]);
 			if(PadData.button[7] != m_State.m_lButtons[7])
 				OnAxisData(1, 65535 - (PadData.button[7] << 8) | PadData.button[7]);
-
+*/
 			if((PadData.button[2] ^ m_State.m_lButtons[2]) & 0xf0)
 				OnPOVData(0, (PadData.button[2] & 0xf0), (m_State.m_lButtons[2] & 0xf0));
 
@@ -289,7 +367,7 @@ void CPS3_Device_Joystick::OnRefresh()
 					OnButtonData(i + 8, (PadData.button[2] & Mask) ? 255 : 0);
 			}
 
-			memcpy(m_State.m_lButtons, PadData.button, 8);
+			memcpy(m_State.m_lButtons, PadData.button, sizeof(uint16) * CELL_PAD_MAX_CODES);
 		}
 	}
 #if 0
@@ -355,12 +433,12 @@ CPS3_Device_KeyBoard::CPS3_Device_KeyBoard() : m_KBDNr(-1), m_LastModifier(0)
 }
 
 #if 0
-int g_ScanToVirtual[] = 
+static int g_ScanToVirtual[] = 
 {
 //		0							1							2							3							4							5							
 //		6							7							8							9							a							b
 //		c							d							e							f
-/*0*/	0							,CELLKEYC_ESCAPE		,CELLKEYC_1				,CELLKEYC_2				,CELLKEYC_3				,CELLKEYC_4				
+/*0*/	0							,CELLKEYC_ESCAPE		,CELLKEYC_1				,CELLKEYC_2				,CELLKEYC_3				,CELLKEYC_4
 		,CELLKEYC_5				,CELLKEYC_6				,CELLKEYC_7				,CELLKEYC_8				,CELLKEYC_9				,CELLKEYC_0				
 		,CELLKEYC_MINUS			,/*VK_OEM_PLUS*/			,CELLKEYC_BS			,CELLKEYC_TAB
 /*1*/	,CELLKEYC_Q				,CELLKEYC_W				,CELLKEYC_E				,CELLKEYC_R				,CELLKEYC_T				,CELLKEYC_Y				
@@ -411,10 +489,10 @@ int g_ScanToVirtual[] =
 };
  // Fix this later
 #else 
-int g_ScanToVirtual[256] = {0};
+static int g_ScanToVirtual[256] = {0};
 #endif
 
-int g_KeyToScan[256] = {
+static int g_KeyToScan[256] = {
 
 //00
 	0, 0, 0, 0, 0, 0, 0, 0, SKEY_BACKSPACE, SKEY_TAB, SKEY_RETURN, 0, 0, 0, 0, 0,
@@ -451,7 +529,8 @@ int g_KeyToScan[256] = {
 
 };
 
-int g_VirtualToScan[256];
+static int g_VirtualToScan[256];
+static uint g_PS3KeyboardDebug = 0;
 
 bool CPS3_Device_KeyBoard::Create(CInputContext_PS3* _pInput, int _PortNumber, int _iDevice)
 {
@@ -487,7 +566,8 @@ void CPS3_Device_KeyBoard::OnRefresh()
 		if (KBData.len == 0)
 			break;
 
-		M_TRACEALWAYS("Led 0x%08x MKey 0x%08x\n", KBData.led, KBData.mkey);
+		if(g_PS3KeyboardDebug)
+			M_TRACEALWAYS("Led 0x%08x MKey 0x%08x\n", KBData.led, KBData.mkey);
 /*
 		int Modifier = KBData.mkey;
 		if(m_LastModifier != Modifier)
@@ -521,7 +601,8 @@ void CPS3_Device_KeyBoard::OnRefresh()
 		for (int i = 0; i < KBData.len; ++i)
 		{
 			int KeyCode = KBData.keycode[i];
-			M_TRACEALWAYS("KeyData 0x%04x\n", KeyCode);
+			if(g_PS3KeyboardDebug)
+				M_TRACEALWAYS("KeyData 0x%04x\n", KeyCode);
 			if(KeyCode > 0 && KeyCode < 256)
 			{
 				int ScanCode = g_KeyToScan[KeyCode] + Modifier;
@@ -533,6 +614,7 @@ void CPS3_Device_KeyBoard::OnRefresh()
 				int ScanCode = -1;
 				switch(KeyCode)
 				{
+				case 0x8029: ScanCode = SKEY_ESC; break;
 				case 0x803a: ScanCode = SKEY_F1; break;
 				case 0x803b: ScanCode = SKEY_F2; break;
 				case 0x803c: ScanCode = SKEY_F3; break;
@@ -651,7 +733,6 @@ void CInputContext_PS3::PS3_CreateDevices()
 						else
 						{
 							ConOutL(CStrF("(CInputContext_PS3::PS3_CreateDevices) Created joystick device %d", iDev));
-							M_TRACEALWAYS("(CInputContext_PS3::PS3_CreateDevices) Created joystick device %d", iDev);
 							bChanged = true;
 						}
 					}
@@ -699,8 +780,7 @@ void CInputContext_PS3::PS3_CreateDevices()
 								ConOutL(CStrF("§cf80WARNING: (CInputContext_PS3::PS3_CreateDevices) Unable to create keyboard device %d", iDev));
 							else
 							{
-								ConOutL(CStrF("(CInputContext_PS3::PS3_CreateDevices) Created keybroad keyboard %d", iDev));
-								M_TRACEALWAYS("(CInputContext_PS3::PS3_CreateDevices) Created keybroad keyboard %d", iDev);
+								ConOutL(CStrF("(CInputContext_PS3::PS3_CreateDevices) Created keyboard keyboard %d", iDev));
 								bChanged = true;
 							}
 						}
@@ -838,22 +918,24 @@ void CInputContext_PS3::Create(const char* _pParams)
 
     for (int i = 0; i < INPS3_MAXKEYBOARDS; i++) 
 	{
-        if ((cellKbSetRepeat (i, 30, 2)) != CELL_KB_OK) 
+/*
+		if ((cellKbSetRepeat (i, 30, 2)) != CELL_KB_OK) 
 		{
-	        Error("Create", "Failed to initialize USB Keyboard Library attrib");
-        }
-        if ((cellKbSetArrangement (i, CELL_KB_ARRANGEMENT_101))!= CELL_KB_OK) 
+			Error("Create", "Failed to initialize USB Keyboard Library attrib");
+		}
+		if ((cellKbSetArrangement (i, CELL_KB_ARRANGEMENT_101))!= CELL_KB_OK) 
 		{
-	        Error("Create", "Failed to initialize USB Keyboard Library attrib");
-        }
-        if ((cellKbSetReadMode (i, CELL_KB_RMODE_INPUTCHAR))!= CELL_KB_OK) 
+			Error("Create", "Failed to initialize USB Keyboard Library attrib");
+		}
+ */
+		if ((cellKbSetReadMode (i, CELL_KB_RMODE_INPUTCHAR))!= CELL_KB_OK) 
 		{
-	        Error("Create", "Failed to initialize USB Keyboard Library attrib");
-        }
-        if ((cellKbSetCodeType (i, CELL_KB_CODETYPE_ASCII))!= CELL_KB_OK) 
+			Error("Create", "Failed to initialize USB Keyboard Library attrib");
+		}
+		if ((cellKbSetCodeType (i, CELL_KB_CODETYPE_ASCII))!= CELL_KB_OK) 
 		{
-	        Error("Create", "Failed to initialize USB Keyboard Library attrib");
-        }
+			Error("Create", "Failed to initialize USB Keyboard Library attrib");
+		}
     }
 
 
@@ -865,6 +947,7 @@ void CInputContext_PS3::Create(const char* _pParams)
 // -------------------------------------------------------------------
 void CInputContext_PS3::Update()
 {
+	M_LOCK(m_InputLock);
 	// Any device changes?
 	PS3_CreateDevices();
 
@@ -900,16 +983,6 @@ bool CInputContext_PS3::IsGamepadValid(int _iPad)
 aint CInputContext_PS3::OnMessage(const CSS_Msg& _Msg)
 {
 	return 0;
-}
- 
-void CInputContext_PS3::OnRefresh(int _Context)
-{
-	Update();
-}
-
-void CInputContext_PS3::OnBusy(int _Context)
-{
-	Update();
 }
 
 #endif // PLATFORM_PS3

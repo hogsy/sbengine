@@ -4,7 +4,6 @@
 # include <io.h>
 # include <direct.h>
 
-
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 | System stuff
@@ -29,10 +28,10 @@ DIdsPInlineS static bint IsGoodStackPtr(void *_pAddr, mint _Len, mint _StackStar
 //#define M_FINDNASTYACCESSESTODELETEDMEMORY
 #ifdef PLATFORM_XBOX
 #include <xtl.h>
-#ifdef M_Profile
+//#ifdef M_Profile
 #		include <XbDm.h>
 #		pragma comment(lib, "XbDm.lib")
-#endif
+//#endif
 #endif
 
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
@@ -53,6 +52,8 @@ DIdsPInlineS static bint IsGoodStackPtr(void *_pAddr, mint _Len, mint _StackStar
 #endif
 
 #ifdef PLATFORM_WIN_PC
+#include <mmsystem.h>
+
 #define ENABLE_STACKTRACING
 
 #include <tlhelp32.h>
@@ -296,7 +297,7 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 			}
 
 			DIdsTreeAVLAligned_Link(CLocalStackTraceInfo, m_AvlLink, mint, CAVLCompare_CLocalStackTraceInfo);
-			CDA_Link m_UnusedList;
+			DLinkDS_Link(CLocalStackTraceInfo, m_UnusedLink);
 			mint m_Address;
 			mint m_RefCount;
 		};
@@ -316,8 +317,8 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 		};
 
 		DIdsTreeAVLAligned_Tree(CLocalStackTraceInfo, m_AvlLink, mint, CAVLCompare_CLocalStackTraceInfo) m_TraceInfoTree;
-		CDA_LinkedList_Small m_Unused;
-		typedef TCDA_LinkedListIterator_Small<CLocalStackTraceInfo> CInfoIter;
+		DLinkDS_List(CLocalStackTraceInfo, m_UnusedLink) m_Unused;
+		typedef DLinkDS_Iter(CLocalStackTraceInfo, m_UnusedLink) CInfoIter;
 
 		MRTC_CriticalSection m_Lock;
 
@@ -440,9 +441,9 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 			}			
 
 			CStr Strings;
-			if (CDiskUtil::DirectoryExists("Z:\\Common\\Programming\\Symbols"))
+			if (CDiskUtil::DirectoryExists("Z:\\Files\\Symbols"))
 			{
-				Strings = "symsrv*symsrv.dll*Z:\\Common\\Programming\\Symbols*http://msdl.microsoft.com/download/symbols";
+				Strings = "symsrv*symsrv.dll*Z:\\Files\\Symbols*http://msdl.microsoft.com/download/symbols";
 			}
 			else
 			{
@@ -525,7 +526,7 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 			{
 				if ((++pLocalInfo->m_RefCount) == 1)
 				{
-					pLocalInfo->m_UnusedList.Unlink();
+					pLocalInfo->m_UnusedLink.Unlink();
 				}
 				return pLocalInfo;
 			}
@@ -579,7 +580,7 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 			while (Iter)
 			{		
 				CLocalStackTraceInfo *pInfo = Iter;
-				pInfo->m_UnusedList.Unlink();
+				pInfo->m_UnusedLink.Unlink();
 
 				m_TraceInfoTree.f_Remove(pInfo);
 
@@ -604,7 +605,7 @@ void *WindowFileHelper(const char *_pFileName, bool _bRead, bool _bWrite, bool _
 			DIdsAssert(m_bInitialized, "If we are here we should be initialized");
 
 			if ((--(pInfo)->m_RefCount) == 0)
-				pInfo->m_UnusedList.Link(m_Unused, pInfo);
+				m_Unused.Insert(pInfo);
 
 //			if (m_Timer.GetTime() > 10.0)
 //			{
@@ -678,6 +679,7 @@ public:
 		return m_pStackTraceContext;
 	}
 #endif
+	CStr m_LogFileName;
 
 #ifdef PLATFORM_WIN_PC
 	class CThreadTrackingContext
@@ -887,7 +889,7 @@ public:
 
 		DIdsTreeAVLAligned_Tree(CLoadedDll, m_AvlLink, mint, CLoadedDll::CCompare) m_LoadedDlls;
 
-		TDA_Pool<CLoadedDll> m_Pool;
+		TCPool<CLoadedDll> m_Pool;
 		
 		MRTC_MutualWriteManyRead m_Lock;
 
@@ -951,15 +953,19 @@ public:
 			// Look for header information
 
 			uint32 *pSearch = (uint32 *)_Addr;
-			for (int i = 0; i < _Size; i += 4)
+//			if (!IsBadReadPtr(pSearch, _Size))
+			if (!IsBadReadPtr(pSearch, 4096))
 			{
-				uint32 Find1 = '\0EP\0';
-				if (*pSearch == Find1)
+				for (int i = 0; i < 4096; i += 4)
 				{
-					pHeader = (IMAGE_NT_HEADERS *)pSearch;
-					break;
-				}			
-				++pSearch;
+					uint32 Find1 = '\0EP\0';
+					if (*pSearch == Find1)
+					{
+						pHeader = (IMAGE_NT_HEADERS *)pSearch;
+						break;
+					}			
+					++pSearch;
+				}
 			}
 
 			if (!pHeader)
@@ -1069,6 +1075,11 @@ public:
 			}
 			else
 			{	
+				if (MemoryInfo.Type != MEM_IMAGE)
+				{
+					AddDll("Dummy Dll", (mint)MemoryInfo.AllocationBase, (mint)MemoryInfo.RegionSize);
+					return;
+				}
 				mint Base = (mint)MemoryInfo.AllocationBase;
 				IMAGE_NT_HEADERS *pHeader = NULL;
 				// Look for header information
@@ -1217,7 +1228,7 @@ public:
 
 		};
 
-		TDA_Pool<CSizeClass> m_SizeClassPool;
+		TCPool<CSizeClass, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_SizeClassPool;
 
 		DIdsTreeAVLAligned_Tree(CSizeClass, m_Link, uint32, CSizeClass::CCompare) m_SizeClasses;
 
@@ -1506,8 +1517,9 @@ public:
 #endif
 
 #ifdef ENABLE_STACKTRACING
-	static LPTOP_LEVEL_EXCEPTION_FILTER m_pPrevExceptionFilter;
+	LPTOP_LEVEL_EXCEPTION_FILTER m_pThisExceptionFilter;
 	static bool ms_bHandleException;
+	static bool ms_bAutoCoredump;
 	static LONG WINAPI UnhandledException(struct _EXCEPTION_POINTERS *_pExceptionInfo);
 #endif
 
@@ -1631,7 +1643,7 @@ public:
 				CloseHandle(m_SocketEvent);
 #endif
 
-				if (m_pSocket && !(m_State & DBit(31)))
+				if (m_pSocket && !(m_State & M_Bit(31)))
 					closesocket((SOCKET)m_pSocket);
 			}
 
@@ -1656,7 +1668,7 @@ public:
 						select(0, &Read, &Write, NULL, &TimeOut);
 
 						{
-							DIdsLockTyped(NThread::CMutual, m_Lock);
+							DLockTyped(NThread::CMutual, m_Lock);
 
 							uint32 LastState = m_State;
 
@@ -1867,7 +1879,7 @@ public:
 			pReturn->m_pReportTo = _pReportTo;
 			pReturn->m_pSocket = (void *)Sock;
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -1945,7 +1957,7 @@ public:
 			pReturn->m_pReportTo = _pReportTo;
 			pReturn->m_pSocket = (void *)Sock;
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -1999,7 +2011,7 @@ public:
 			pReturn->m_pReportTo = _pReportTo;
 			pReturn->m_pSocket = (void *)Sock;
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -2061,7 +2073,7 @@ public:
 			pReturn->m_pReportTo = _pReportTo;
 			pReturn->m_pSocket = (void *)Sock;
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -2086,7 +2098,7 @@ public:
 		void f_SetReportTo(CTCPSocket *_pSocket, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 				_pSocket->m_pReportTo = _pReportTo;
 
 				// Signal once so the new report to gets to update
@@ -2120,12 +2132,12 @@ public:
 #endif
 
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
-				_pSocket->m_State |= DBit(31);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				_pSocket->m_State |= M_Bit(31);
 			}
 
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 			if (pReturn->m_pReportTo)
@@ -2138,13 +2150,13 @@ public:
 		bint f_Close(CTCPSocket *_pSocket)
 		{
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Remove(_pSocket);
 			}
 
 			// Make sure that the report thread isn't using our socket
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 			}
 
 			delete _pSocket;
@@ -2154,7 +2166,7 @@ public:
 
 		uint32 f_GetState(CTCPSocket *_pSocket)
 		{
-			DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+			DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 			uint32 State = _pSocket->m_State & DBitRange(0, 30);
 			_pSocket->m_State &= ~DBitRange(0, 30);
 			return State;
@@ -2348,15 +2360,15 @@ public:
 
 					CTCPSocket *pSocket;
 					{
-						DIdsLockTyped(NThread::CMutual, m_Lock);
+						DLockTyped(NThread::CMutual, m_Lock);
 						pSocket = m_SocketTree.FindEqual(hSocket);
 
 						if (pSocket)
 						{
-							DIdsLockTyped(NThread::CMutual, pSocket->m_Lock);
+							DLockTyped(NThread::CMutual, pSocket->m_Lock);
 							{
 
-								DIdsUnlockTyped(NThread::CMutual, m_Lock);
+								DUnlockTyped(NThread::CMutual, m_Lock);
 //									mint Error = WSAGETSELECTERROR(Message.lParam);
 								mint Event = WSAGETSELECTEVENT(Message.lParam);
 
@@ -2417,11 +2429,13 @@ ExitThread:
 	}
 	MRTC_SystemInfoInternal()
 	{
+
 #ifdef M_STATIC
 		MRTC_ObjectManager::m_pSystemInfo->m_pInternalData = this;
 #endif
 
 #ifdef ENABLE_STACKTRACING
+		m_pThisExceptionFilter = NULL;
 		m_pStackTraceContext = NULL;
 #endif
 #ifdef PLATFORM_WIN_PC
@@ -2587,25 +2601,36 @@ BOOL WINAPI DllMain(HINSTANCE _hInstDLL, DWORD _fdwReason, LPVOID _pvReserved)
 #endif
 
 #ifdef ENABLE_STACKTRACING
-LPTOP_LEVEL_EXCEPTION_FILTER MRTC_SystemInfoInternal::m_pPrevExceptionFilter = NULL;
+
 bool MRTC_SystemInfoInternal::ms_bHandleException = true;
+bool MRTC_SystemInfoInternal::ms_bAutoCoredump = false;
+
+void gf_ResetUnhandeledExceptionFilter()
+{
+	if (MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pThisExceptionFilter)
+	{
+		LPTOP_LEVEL_EXCEPTION_FILTER pOld = SetUnhandledExceptionFilter(MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pThisExceptionFilter);
+		if (pOld != MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pThisExceptionFilter)
+		{
+			M_TRACEALWAYS("Reset unhandled exception filter old = 0x%08x\n", pOld);
+		}
+	}
+}
 
 class CSetUnhandledExceptionFilter
 {
 public:
 	CSetUnhandledExceptionFilter()
 	{
-//		if (!MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pPrevExceptionFilter)
-			MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pPrevExceptionFilter = SetUnhandledExceptionFilter(&MRTC_SystemInfoInternal::UnhandledException);
+		if (!MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pThisExceptionFilter)
+			MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_pThisExceptionFilter = &MRTC_SystemInfoInternal::UnhandledException;
+		gf_ResetUnhandeledExceptionFilter();
 //		else
 //			SetUnhandledExceptionFilter(&MRTC_SystemInfoInternal::UnhandledException);
 	}
 };
 
 CSetUnhandledExceptionFilter gs_CSetUnhandledExceptionFilter;
-void gf_ResetUnhandeledExceptionFilter()
-{
-	SetUnhandledExceptionFilter(&MRTC_SystemInfoInternal::UnhandledException);}
 
 #endif
 
@@ -3200,18 +3225,18 @@ void MRTC_SystemInfo::RD_ClientInit(void *_pPacket, mint &_Size)
 		int Err = GetLastError();
 	}
 
-	gf_RDSendRegisterPhysicalHeap(0, "Main");
-	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pMemoryManager, "Main");
+	gf_RDSendRegisterPhysicalHeap(0, "Main", 0, 0);
+	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pMemoryManager, "Main", 0, 0);
 #ifdef PLATFORM_XBOX
-	gf_RDSendRegisterPhysicalHeap(1, "Contiguous");
+	gf_RDSendRegisterPhysicalHeap(1, "Contiguous", 0, 0);
 #endif
 #ifdef PLATFORM_XBOX1
-	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pGraphicsHeap, "Graphics");
+	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pGraphicsHeap, "Graphics", 0, 0);
 #ifndef M_Profile
-	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pGraphicsHeapCached, "Graphics Cached");
+	gf_RDSendRegisterHeap((mint)g_ObjectManagerContainer.m_pGraphicsHeapCached, "Graphics Cached", 0, 0);
 #endif
 #endif
-	gf_RDSendRegisterPhysicalHeap(4, "Total Stats");
+	gf_RDSendRegisterPhysicalHeap(4, "Total Stats", 0, 0);
 
 	{
 		DRDCategory("Available");
@@ -3340,12 +3365,12 @@ uint64 MRTC_SystemInfo::OS_ClockFrequencyInt() const
 	return m_OSFrequencyu;
 }
 
-fp4 MRTC_SystemInfo::OS_ClockFrequencyFloat() const
+fp32 MRTC_SystemInfo::OS_ClockFrequencyFloat() const
 {
 	return m_OSFrequencyfp;
 }
 
-fp4 MRTC_SystemInfo::OS_ClockFrequencyRecp() const
+fp32 MRTC_SystemInfo::OS_ClockFrequencyRecp() const
 {
 	return m_OSFrequencyRecp;
 }
@@ -3379,16 +3404,37 @@ uint64 MRTC_SystemInfo::CPU_ClockFrequencyInt() const
 	return m_CPUFrequencyu;
 }
 
-fp4 MRTC_SystemInfo::CPU_ClockFrequencyFloat() const
+fp32 MRTC_SystemInfo::CPU_ClockFrequencyFloat() const
 {
 	return m_CPUFrequencyfp;
 }
-fp4 MRTC_SystemInfo::CPU_ClockFrequencyRecp() const
+fp32 MRTC_SystemInfo::CPU_ClockFrequencyRecp() const
 {
 	return m_CPUFrequencyRecp;
 }
 
+// -------------------------------------------------------------------
+#if defined(PLATFORM_XENON) && defined(USE_PIX)
+void MRTC_SystemInfo::OS_NamedEvent_Begin(const char* _pName, uint32 _Color)
+{
+	PIXBeginNamedEvent(_Color, _pName);
+}
+void MRTC_SystemInfo::OS_NamedEvent_End()
+{
+	PIXEndNamedEvent();
+}
 
+#else
+void MRTC_SystemInfo::OS_NamedEvent_Begin(const char* _pName, uint32 _Color)
+{
+}
+void MRTC_SystemInfo::OS_NamedEvent_End()
+{
+}
+
+#endif
+
+// -------------------------------------------------------------------
 void MRTC_SystemInfo::CPU_Detect()
 {
 #ifdef PLATFORM_XENON
@@ -3522,10 +3568,10 @@ NoPentium:
 }
 
 
-fp8 MRTC_SystemInfo::CPU_MeasureFrequencyOnce()
+fp64 MRTC_SystemInfo::CPU_MeasureFrequencyOnce()
 {
 	// -------------------------------------------------------------------
-	fp8 Freq = 1000000.0;
+	fp64 Freq = 1000000.0;
 	M_TRY
 	{
 		CMTime_Generic<CMTimerFuncs_CPU> t;
@@ -3565,10 +3611,10 @@ fp8 MRTC_SystemInfo::CPU_MeasureFrequencyOnce()
 
 		//This doesn't compile. Might be vc++ version difference or something...
 		//uint64 Elapse = TimeStop.QuadPart - TimeStart.QuadPart;				
-		fp8 Elapse = TimeStop.QuadPart - TimeStart.QuadPart;				
+		fp64 Elapse = TimeStop.QuadPart - TimeStart.QuadPart;				
 
-//				fp8 f = ((fp8)t*1000.0/(fp4)10.0*1.0);
-		Freq = (fp8)t.GetCycles() / (Elapse / (fp8)TimerFreq.QuadPart);
+//				fp64 f = ((fp64)t*1000.0/(fp32)10.0*1.0);
+		Freq = (fp64)t.GetCycles() / (Elapse / (fp64)TimerFreq.QuadPart);
 //			g_pOS->pCon->Write(CStrF("Clocks:  %d   Freq2: %.0f", t, f));
 //				Freq = Max(f, 1000000.0);
 
@@ -3585,7 +3631,7 @@ fp8 MRTC_SystemInfo::CPU_MeasureFrequencyOnce()
 void MRTC_SystemInfo::CPU_MeasureFrequency()
 {
 	const int nTests = 11;
-	fp8 FreqTab[nTests];
+	fp64 FreqTab[nTests];
 	int i,j;
 	for (i = 0; i < nTests; i++) 
 		FreqTab[i] = CPU_MeasureFrequencyOnce();
@@ -3595,7 +3641,7 @@ void MRTC_SystemInfo::CPU_MeasureFrequency()
 		for (j = i+1; j < nTests; j++)
 			if (FreqTab[i] > FreqTab[j]) Swap(FreqTab[i], FreqTab[j]);
 
-	fp4 Freq = FreqTab[nTests >> 1];// * 10.0;
+	fp32 Freq = FreqTab[nTests >> 1];// * 10.0;
 	m_CPUFrequencyfp = Freq;
 	m_CPUFrequencyu = Freq;
 
@@ -3606,7 +3652,7 @@ void MRTC_SystemInfo::CPU_MeasureFrequency()
 
 	m_OSFrequencyu = TimerFreq.QuadPart;
 	m_OSFrequencyfp = m_OSFrequencyu;
-	m_OSFrequencyRecp = 1.0 / (fp8)m_OSFrequencyu;
+	m_OSFrequencyRecp = 1.0 / (fp64)m_OSFrequencyu;
 
 	M_TRACE("OS frequency %f MHz\n", m_OSFrequencyfp / 1000000.0);
 	M_TRACE("CPU frequency %f MHz\n", m_CPUFrequencyfp / 1000000.0);
@@ -3620,7 +3666,7 @@ void MRTC_SystemInfo::OS_ClockFrequencyUpdate()
 
 	m_OSFrequencyu = TimerFreq.QuadPart;
 	m_OSFrequencyfp = m_OSFrequencyu;
-	m_OSFrequencyRecp = 1.0 / (fp8)m_OSFrequencyu;
+	m_OSFrequencyRecp = 1.0 / (fp64)m_OSFrequencyu;
 }
 
 void MRTC_SystemInfo::CPU_CreateNames()
@@ -3663,13 +3709,13 @@ void MRTC_SystemInfo::CPU_CreateNames()
 }
 
 /*
-fp8 MRTC_SystemInfo::CPU_GetTime()
+fp64 MRTC_SystemInfo::CPU_GetTime()
 {
 #ifdef CONSTANT_FRAME_RATE
-	extern fp8 g_SimulatedTime;
+	extern fp64 g_SimulatedTime;
 	return g_SimulatedTime;
 #else
-	return fp8(CPU_GetClock()) * MRTC_GetObjectManager()->m_SystemInfo.m_CPUFrequencyRecp;
+	return fp64(CPU_GetClock()) * MRTC_GetObjectManager()->m_SystemInfo.m_CPUFrequencyRecp;
 #endif
 }
 */
@@ -3709,7 +3755,7 @@ void MRTC_SystemInfo::OS_Sleep(int _Milliseconds)
 
 // -------------------------------------------------------------------
 
-void* MRTC_SystemInfo::OS_ThreadCreate(uint32(M_STDCALL*_pfnEntryPoint)(void*), int _StackSize, void* _pContext, int _Priority)
+void* MRTC_SystemInfo::OS_ThreadCreate(uint32(M_STDCALL*_pfnEntryPoint)(void*), int _StackSize, void* _pContext, int _Priority, const char* _pName)
 {
 	DWORD Prio;
 	if (_Priority < MRTC_THREAD_PRIO_LOW)
@@ -3881,8 +3927,9 @@ void MRTC_SystemInfo::OS_Assert(const char* _pMsg, const char* _pFile, int _Line
 	}
 	else
 	{
-		LogFile(CFStrF("ERROR: Assert failed - %s  (%s:%d)", _pMsg, _pFile, _Line).Str());
-		OS_Trace("ERROR: Assert failed - %s  (%s:%d)\n", _pMsg, _pFile, _Line);
+//	LogFile i assert är precis skitdåligt om den assertar i filsystemet. /mh
+//		LogFile(CFStrF("ERROR: Assert failed - %s  (%s:%d)", _pMsg, _pFile, _Line).Str());
+		OS_Trace("%s(%d) : ERROR: Assert failed - %s\n", _pFile, _Line, _pMsg);
 #ifndef PLATFORM_CONSOLE
 		if (MRTC_GetObjectManager()->m_bBreakOnAssert)
 		{
@@ -3946,26 +3993,26 @@ void M_ARGLISTCALL MRTC_SystemInfo::OS_Trace(const char * _pStr, ...)
 }
 
 
-class CWin32File
-{
-public:
-	MRTC_CriticalSection m_Lock;
-	CDA_LinkedList_Small m_Requests;
-	CDA_Link m_CloseLink;
-	void *m_pFileHandle;
-	DWORD m_OpenAttribs;
-	int m_iDrive;
-	int m_bDeferClose;
-};
 
-DA_LLSI(CWin32File);
-
-class MRTC_Win32AsyncInstance : public CDA_Poolable
+class CWin32File;
+class MRTC_Win32AsyncInstance
 {
+	void operator delete(void *)
+	{
+		M_BREAKPOINT;
+	}
+	void *operator new(mint _Size)
+	{
+		M_BREAKPOINT;
+	}
 public:
+	void *operator new(mint _Size, void *_pPtr)
+	{
+		return _pPtr;
+	}
 	OVERLAPPED m_Overlapped;
-	CDA_Link m_LinkReadQueue;
-	CDA_Link m_FileLink;
+	DLinkDS_Link(MRTC_Win32AsyncInstance, m_LinkReadQueue);
+	DLinkDS_Link(MRTC_Win32AsyncInstance, m_FileLink);
 	CWin32File *m_pW32File;
 	void *m_pFilen;
 	void *m_pData;
@@ -3979,11 +4026,7 @@ public:
 	uint32 m_ErrorCode;
 #endif
 
-	~MRTC_Win32AsyncInstance()
-	{
-		M_LOCK(m_pW32File->m_Lock);
-		m_FileLink.Unlink();
-	}
+	~MRTC_Win32AsyncInstance();
 
 	bool IsCompleted()
 	{
@@ -3994,14 +4037,18 @@ public:
 			return false;
 
 		if (m_bCompleted)
+		{
 			return true;
+		}
 
 #ifdef PLATFORM_XBOX
-		m_bCompleted = m_Overlapped.hEvent == NULL;
+		m_bCompleted = Volatile(m_Overlapped.hEvent) == NULL;
 #else
-		m_bCompleted = HasOverlappedIoCompleted(&m_Overlapped);
+		if (HasOverlappedIoCompleted(&m_Overlapped))
+		{
+			m_bCompleted = true;
+		}
 #endif
-
 		return m_bCompleted != 0;
 	}
 
@@ -4081,80 +4128,32 @@ public:
 	}
 };
 
-DA_LLSI(MRTC_Win32AsyncInstance);
+class CWin32File
+{
+public:
+	void *m_pFileHandle;
+	MRTC_CriticalSection m_Lock;
+	DLinkDS_List(MRTC_Win32AsyncInstance, m_FileLink) m_Requests;
+	DLinkDS_Link(CWin32File, m_CloseLink);
+	DWORD m_OpenAttribs;
+	int m_iDrive;
+	int m_bDeferClose;
+};
+
+MRTC_Win32AsyncInstance::~MRTC_Win32AsyncInstance()
+{
+	M_LOCK(m_pW32File->m_Lock);
+	m_FileLink.Unlink();
+}
+
 
 #ifdef PLATFORM_WIN_PC
-
-	class CFWin98File: public MRTC_Thread_Core
-	{
-	public:
-		CDA_Link m_Link;
-		MRTC_Event m_Event;
-		MRTC_CriticalSection m_Lock;
-		void *m_pFile;
-
-		class CInstance
-		{
-		public:
-			MRTC_CriticalSection m_Lock;
-			CDA_Link m_Link;
-			void * m_pBuffer;
-			volatile uint32 m_Operation; // 0 = read 1 = write
-			volatile int32 m_BytesRead;
-			volatile uint32 m_StartByte;
-			volatile uint32 m_BytesToRead;
-		};
-		DA_LLSI(CInstance);
-		CDA_LinkedList_Small m_InstanceQueue;
-
-		CFWin98File()
-		{
-			Thread_Create(NULL, 32768, MRTC_THREAD_PRIO_ABOVENORMAL);
-		}
-
-		~CFWin98File()
-		{
-			m_Event.Signal();
-			m_Event.Signal();
-			Thread_Destroy();
-		}
-
-		void Close();
-
-		int Thread_Main();
-	};
-
-	DA_LLSI(CFWin98File);
-
-	class CFWin98FileManager
-	{
-	public:
-		
-		CDA_LinkedList_Small m_PooledInstances;
-		MRTC_CriticalSection m_Lock;
-		TDA_Pool<CFWin98File::CInstance> m_InstancesPool;
-
-		~CFWin98FileManager()
-		{
-			SICFWin98File Iter = m_PooledInstances;
-			while (Iter)
-			{
-				delete Iter;			
-				Iter = m_PooledInstances;
-			}
-		}
-
-	};
 
 	class COSInfoClass
 	{
 	public:
 		int m_bHasInit;
 		OSVERSIONINFO m_OSInfo;	
-
-		#ifdef PLATFORM_WIN_PC
-			class CFWin98FileManager *m_pWin98FileManager;
-		#endif
 
 		M_INLINE void Init()
 		{
@@ -4165,11 +4164,8 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 				m_bHasInit = true;
 				if (!IsNT())
 				{
-					m_pWin98FileManager = DNew(CFWin98FileManager) CFWin98FileManager;
-				}
-				else
-				{
-					m_pWin98FileManager = NULL;
+					MessageBox(NULL, "WinME or lower is not supported", "Error", MB_OK|MB_ICONERROR);
+					ExitProcess(0);
 				}
 			}
 		}
@@ -4180,49 +4176,9 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 			return (m_OSInfo.dwPlatformId == VER_PLATFORM_WIN32_NT);
 		}
 
-		CFWin98File *GetInstance()
-		{
-			M_LOCK(m_pWin98FileManager->m_Lock);
-			SICFWin98File Iter = m_pWin98FileManager->m_PooledInstances;
-			CFWin98File *pInstance = Iter;
-			if (pInstance)
-			{
-				pInstance->m_Link.Unlink();
-			}
-			else
-			{
-				pInstance = DNew(CFWin98File) CFWin98File;
-			}
-
-			return pInstance;
-		}
-
-		void ReturnInstance(CFWin98File *pInstance)
-		{
-			pInstance->Close();
-			M_LOCK(m_pWin98FileManager->m_Lock);
-			pInstance->m_Link.Link(m_pWin98FileManager->m_PooledInstances, pInstance);
-		}
-
 
 	};
 	static COSInfoClass g_OsInfo = {0};
-
-	void CFWin98File::Close()
-	{
-		M_LOCK(m_Lock);
-		CFWin98File::SICInstance Iter = m_InstanceQueue;
-		while (Iter)
-		{
-			g_OsInfo.m_pWin98FileManager->m_InstancesPool.Delete(Iter);
-			Iter = m_InstanceQueue;
-		}
-
-		if (m_pFile)
-			CloseHandle(m_pFile);
-		m_pFile = NULL;
-	}
-
 
 #elif defined(PLATFORM_XBOX)
 	//
@@ -4251,7 +4207,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 				Thread_Destroy();
 			}
 
-			CDA_LinkedList_Small m_QueuedReadRequests;
+			DLinkDS_List(MRTC_Win32AsyncInstance, m_LinkReadQueue) m_QueuedReadRequests;
 			MRTC_CriticalSection m_Lock;
 			MRTC_Event m_Event;
 
@@ -4262,7 +4218,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 				MRTC_Win32AsyncInstance *pRequest = (MRTC_Win32AsyncInstance *)lpOverlapped->hEvent;
 				pRequest->m_BytesTransfered = dwNumberOfBytesTransfered;
 				pRequest->m_ErrorCode = dwErrorCode;
-				pRequest->m_Overlapped.hEvent = NULL;
+				Volatile(pRequest->m_Overlapped.hEvent) = NULL;
 #ifdef PLATFORM_XENON
 				if (dwErrorCode)
 					M_TRACEALWAYS("Error retured from FileIOCompletionRoutine: %d\n", dwErrorCode);
@@ -4293,7 +4249,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 						M_LOCK(m_Lock);
 						while (!m_QueuedReadRequests.IsEmpty())
 						{
-							SIMRTC_Win32AsyncInstance Iter = m_QueuedReadRequests;
+							DLinkDS_Iter(MRTC_Win32AsyncInstance, m_LinkReadQueue) Iter = m_QueuedReadRequests;
 							MRTC_Win32AsyncInstance *pRequest = Iter;
 							pRequest->m_LinkReadQueue.Unlink();
 							{
@@ -4356,7 +4312,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 
 				{
 					M_LOCK(m_Lock);
-					_AsyncQueue->m_LinkReadQueue.Link(m_QueuedReadRequests, _AsyncQueue);
+					m_QueuedReadRequests.Insert(_AsyncQueue);
 				}
 
 				m_Event.Signal();
@@ -4389,14 +4345,14 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 
 			}
 
-			CDA_LinkedList_Small m_FilesForClose;
+			DLinkDS_List(CWin32File, m_CloseLink) m_FilesForClose;
 			MRTC_CriticalSection m_Lock;
 			MRTC_Event m_Event;
 
 			void UpdateDelete()
 			{
 				M_LOCK(m_Lock);
-				SICWin32File Iter = m_FilesForClose;
+				DLinkDS_Iter(CWin32File, m_CloseLink) Iter = m_FilesForClose;
 				while (Iter)
 				{
 					CWin32File *pFile = Iter;
@@ -4404,7 +4360,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 					{
 						M_UNLOCK(m_Lock);	
 						{
-							bool IsEmpty;
+							bint IsEmpty;
 							{
 								M_LOCK(pFile->m_Lock);
 								IsEmpty = pFile->m_Requests.IsEmpty();
@@ -4455,7 +4411,7 @@ DA_LLSI(MRTC_Win32AsyncInstance);
 				
 				{
 					M_LOCK(m_Lock);
-					_pFile->m_CloseLink.Link(m_FilesForClose, _pFile);
+					m_FilesForClose.Insert(_pFile);
 				}
 
 				m_Event.Signal();
@@ -4602,25 +4558,6 @@ void *MRTC_SystemInfo::OS_FileOpen(const char *_pFileName, bool _bRead, bool _bW
 		pFile->m_OpenAttribs = Access;
 		pFile->m_bDeferClose = _bDeferClose && !(Access & GENERIC_WRITE);
 	}
-	else
-	{
-		#ifdef PLATFORM_XBOX
-			return NULL;
-		#else
-			CFWin98File *pW98File = g_OsInfo.GetInstance();
-			pW98File->m_pFile = CreateFileA(_pFileName, Access, FILE_SHARE_READ, NULL, Dispo, 0, NULL);
-
-			if (pW98File->m_pFile == INVALID_HANDLE_VALUE)
-			{
-				g_OsInfo.ReturnInstance(pW98File);
-				return NULL;
-			}
-			else
-			{
-				return pW98File;
-			}
-		#endif
-	}
 #endif
 
 	if (pFile->m_pFileHandle == INVALID_HANDLE_VALUE)
@@ -4664,13 +4601,6 @@ void MRTC_SystemInfo::OS_FileClose(void *_pFile)
 		CloseHandle(pFile->m_pFileHandle);
 		delete pFile;
 	}
-	else
-	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File *pW98File = (CFWin98File *)_pFile;
-			g_OsInfo.ReturnInstance(pW98File);
-		#endif
-	}
 #endif
 }
 
@@ -4691,21 +4621,7 @@ fint MRTC_SystemInfo::OS_FileSize(void *_pFile)
 	}
 	else
 	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File *pW98File = (CFWin98File *)_pFile;
-
-			LARGE_INTEGER LG;
-			LG.LowPart = GetFileSize(pW98File->m_pFile, (DWORD *)&LG.HighPart);
-
-			if (LG.LowPart == -1 && GetLastError() != NO_ERROR)
-			{
-				FileError_static("MRTC_SystemInfo::OS_FileSize", "Could not get filesize for file", 0);
-			}
-
-			return LG.QuadPart;
-		#else
 			return 0;
-		#endif
 	}
 }
 
@@ -4765,86 +4681,13 @@ bool MRTC_SystemInfo::OS_FileExists(const char *_pPath)
 
 //#define errorchance 511
 #ifndef PLATFORM_XBOX
-int CFWin98File::Thread_Main()
-{
-	return 0;
-	MRTC_SystemInfo::Thread_SetName("MRTC File manager");
-	/*
-	while(!Thread_IsTerminating())
-	{
-		m_Event.WaitTimeout(0.150f);
-		{
-			M_LOCK(m_Lock);
-			{
-				CFWin98File::SICInstance Iter = m_InstanceQueue;
-
-				while (Iter)
-				{
-					CFWin98File::CInstance *pInst = Iter;
-					pInst->m_Link.Unlink();
-					{
-						M_UNLOCK(m_Lock);
-						if (pInst->m_Operation)
-						{
-							// Write
-
-							SetFilePointer(m_pFile, pInst->m_StartByte, NULL, FILE_BEGIN);
-							DWORD NumBytesRead;
-							if (!WriteFile(m_pFile, pInst->m_pBuffer, pInst->m_BytesToRead, &NumBytesRead, NULL))
-							{
-								// Failed
-								pInst->m_BytesRead = -1;
-							}
-							else
-							{
-								pInst->m_BytesRead = SetFilePointer(m_pFile, 0, NULL, FILE_CURRENT) - pInst->m_StartByte;
-							}
-
-							{
-								// Tell that we are finished
-								M_LOCK(pInst->m_Lock);
-								pInst->m_Operation = 3;
-							}
-						}
-						else
-						{
-							// Read
-
-							SetFilePointer(m_pFile, pInst->m_StartByte, NULL, FILE_BEGIN);
-							DWORD NumBytesRead;
-							if (!ReadFile(m_pFile, pInst->m_pBuffer, pInst->m_BytesToRead, &NumBytesRead, NULL))
-							{
-								// Failed
-								pInst->m_BytesRead = -1;
-							}
-							else
-							{								
-								pInst->m_BytesRead = pInst->m_BytesToRead;
-							}
-
-							{
-								// Tell that we are finished
-								M_LOCK(pInst->m_Lock);
-								pInst->m_Operation = 3;
-							}
-						}
-					}
-					Iter = m_InstanceQueue;
-				}
-
-			}
-		}
-	}
-
-	return 0;*/
-}
 
 #endif
 
 
 
-
-MDA_StaticPool(g_AsyncRequestPool, sizeof(MRTC_Win32AsyncInstance), 4096);
+typedef TCPoolAggregate<MRTC_Win32AsyncInstance, 128, NThread::CMutualAggregate> CAsyncRequestPool;
+DPoolStaticImpl(CAsyncRequestPool, g_AsyncRequestPool);
 
 
 fint MRTC_SystemInfo::OS_FileAsyncBytesProcessed(void *_pAsyncIntance)
@@ -4855,22 +4698,7 @@ fint MRTC_SystemInfo::OS_FileAsyncBytesProcessed(void *_pAsyncIntance)
 	}
 	else
 	{
-		#ifndef PLATFORM_XBOX
-		CFWin98File::CInstance * pInst = (CFWin98File::CInstance *)_pAsyncIntance;
-		{
-			M_LOCK(pInst->m_Lock);
-			M_ASSERT(pInst->m_Operation == 3, "Make sure the operation has finished");
-			if (pInst->m_BytesRead < 0)
-			{
-				// We failed
-				FileError_static("ReadFile", "Failed to read from file", 0);
-			}
-			return pInst->m_BytesRead;
-		}
-		#else
-			return 0;
-		#endif
-
+		return 0;
 	}
 }
 void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSize, fint _FileOffset)
@@ -4880,7 +4708,7 @@ void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSi
 #ifdef PLATFORM_XBOX
 
 	
-		MRTC_Win32AsyncInstance *pNewInstance = new(g_AsyncRequestPool) MRTC_Win32AsyncInstance;
+		MRTC_Win32AsyncInstance *pNewInstance = g_AsyncRequestPool.New();
 	
 
 		LARGE_INTEGER LG;
@@ -4899,7 +4727,7 @@ void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSi
 		pNewInstance->m_bWrite = false;
 		{
 			M_LOCK(pFile->m_Lock);
-			pNewInstance->m_FileLink.Link(pFile->m_Requests, pNewInstance);
+			pFile->m_Requests.Insert(pNewInstance);
 		}
 
 		g_OsInfo.QueueRequest(pNewInstance, _DataSize, _pData);
@@ -4911,7 +4739,7 @@ void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSi
 	if (g_OsInfo.IsNT())
 	{
 	
-		MRTC_Win32AsyncInstance *pNewInstance = new(g_AsyncRequestPool) MRTC_Win32AsyncInstance;
+		MRTC_Win32AsyncInstance *pNewInstance = g_AsyncRequestPool.New();
 	
 
 		LARGE_INTEGER LG;
@@ -4952,7 +4780,7 @@ void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSi
 				}
 				break;
 			default:
-				delete pNewInstance;
+				g_AsyncRequestPool.Delete(pNewInstance);
 				FileError_static("MRTC_SystemInfo::OS_FileAsyncRead", "File Read Failed", 0);
 				return NULL;
 			}
@@ -4966,29 +4794,7 @@ void *MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSi
 	}
 	else
 	{
-		#ifndef PLATFORM_XBOX
-
-			CFWin98File *pFile = (CFWin98File *)_pFile;
-			CFWin98File::CInstance *pInst = g_OsInfo.m_pWin98FileManager->m_InstancesPool.New();
-
-			// Set file specific data
-			pInst->m_pBuffer = _pData;
-			pInst->m_BytesToRead = _DataSize;
-			pInst->m_Operation = 0;
-			pInst->m_StartByte = _FileOffset;
-			{
-				// Add the instance to the queue
-				M_LOCK(pFile->m_Lock);
-				pInst->m_Link.LinkLast(pFile->m_InstanceQueue, pInst);
-			}
-			// Signal the thread to wakeup
-			pFile->m_Event.Signal();
-			pFile->m_Event.Signal();
-			return pInst;
-
-		#else
-			return NULL;
-		#endif
+		return NULL;
 	}
 #endif
 }
@@ -4998,7 +4804,7 @@ void *MRTC_SystemInfo::OS_FileAsyncWrite(void *_pFile, const void *_pData, fint 
 #ifdef PLATFORM_XBOX
 
 	
-		MRTC_Win32AsyncInstance *pNewInstance = new(g_AsyncRequestPool) MRTC_Win32AsyncInstance;
+		MRTC_Win32AsyncInstance *pNewInstance = g_AsyncRequestPool.New();
 	
 
 		LARGE_INTEGER LG;
@@ -5017,7 +4823,7 @@ void *MRTC_SystemInfo::OS_FileAsyncWrite(void *_pFile, const void *_pData, fint 
 		pNewInstance->m_bWrite = true;
 		{
 			M_LOCK(pFile->m_Lock);
-			pNewInstance->m_FileLink.Link(pFile->m_Requests, pNewInstance);
+			pFile->m_Requests.Insert(pNewInstance);
 		}
 
 		g_OsInfo.QueueRequest(pNewInstance, _DataSize, (void *)_pData);	
@@ -5028,7 +4834,7 @@ void *MRTC_SystemInfo::OS_FileAsyncWrite(void *_pFile, const void *_pData, fint 
 	M_ASSERT(_DataSize <= 0xffffffff, "Cannot read more that 4 gigs, but we don't have that much memory space anyways");
 
 	
-	MRTC_Win32AsyncInstance *pNewInstance = new(g_AsyncRequestPool) MRTC_Win32AsyncInstance;
+	MRTC_Win32AsyncInstance *pNewInstance = g_AsyncRequestPool.New();
 	
 
 	if (g_OsInfo.IsNT())
@@ -5070,7 +4876,7 @@ void *MRTC_SystemInfo::OS_FileAsyncWrite(void *_pFile, const void *_pData, fint 
 				}
 				break;
 			default:
-				delete pNewInstance;
+				g_AsyncRequestPool.Delete(pNewInstance);
 				FileError_static("MRTC_SystemInfo::OS_FileAsyncWrite", "File Write Failed", 0);
 				return NULL;
 			}
@@ -5084,27 +4890,7 @@ void *MRTC_SystemInfo::OS_FileAsyncWrite(void *_pFile, const void *_pData, fint 
 	}
 	else
 	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File *pFile = (CFWin98File *)_pFile;
-			CFWin98File::CInstance *pInst = g_OsInfo.m_pWin98FileManager->m_InstancesPool.New();
-
-			// Set file specific data
-			pInst->m_pBuffer = (void *)_pData;
-			pInst->m_BytesToRead = _DataSize;
-			pInst->m_Operation = 1;
-			pInst->m_StartByte = _FileOffset;
-			{
-				// Add the instance to the queue
-				M_LOCK(pFile->m_Lock);
-				pInst->m_Link.LinkLast(pFile->m_InstanceQueue, pInst);
-			}
-			// Signal the thread to wakeup
-			pFile->m_Event.Signal();
-			pFile->m_Event.Signal();
-			return pInst;
-		#else
-			return NULL;
-		#endif
+		return NULL;
 	}
 #endif
 }
@@ -5118,40 +4904,13 @@ void MRTC_SystemInfo::OS_FileAsyncClose(void *_pAsyncInstance)
 			OS_Sleep(1);
 		}
 
-		deleteP(((MRTC_Win32AsyncInstance*)_pAsyncInstance), g_AsyncRequestPool);
-	}
-	else
-	{
-		while (!OS_FileAsyncIsFinished(_pAsyncInstance))
-		{
-			OS_Sleep(1);
-		}
-
-		#ifndef PLATFORM_XBOX
-			CFWin98File::CInstance * pInst = (CFWin98File::CInstance *)_pAsyncInstance;
-			g_OsInfo.m_pWin98FileManager->m_InstancesPool.Delete(pInst);
-		#endif
+		g_AsyncRequestPool.Delete((MRTC_Win32AsyncInstance*)_pAsyncInstance);
 	}
 }
 
 bool MRTC_SystemInfo::OS_FileAsyncIsFinished(void *_pAsyncInstance)
 {
-	if (g_OsInfo.IsNT())
-	{
-		return ((MRTC_Win32AsyncInstance*)_pAsyncInstance)->IsCompleted();
-	}
-	else
-	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File::CInstance * pInst = (CFWin98File::CInstance *)_pAsyncInstance;
-			{
-				M_LOCK(pInst->m_Lock);
-				return pInst->m_Operation == 3;
-			}
-		#else
-			return false;
-		#endif
-	}
+	return ((MRTC_Win32AsyncInstance*)_pAsyncInstance)->IsCompleted();
 }
 
 bool MRTC_SystemInfo::OS_FileSetFileSize(const char *_pFileName, fint _FileSize)
@@ -5279,60 +5038,25 @@ void MRTC_ReferenceSymbol(...)
 
 bool MRTC_SystemInfo::OS_FileGetTime(void *_pFile, int64& _TimeCreate, int64& _TimeAccess, int64& _TimeWrite)
 {
-	if (g_OsInfo.IsNT())
-	{
-		CWin32File *pFile = (CWin32File *)_pFile;
+	CWin32File *pFile = (CWin32File *)_pFile;
 
-		int Result = GetFileTime(pFile->m_pFileHandle, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
-		if (!Result)
-		{
-			FileError_static("MRTC_SystemInfo::OS_FileGetTime", "Could not get file time", 0);
-		}
-		return Result != 0;
-	}
-	else
+	int Result = GetFileTime(pFile->m_pFileHandle, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
+	if (!Result)
 	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File *pW98File = (CFWin98File *)_pFile;
-			int Result = GetFileTime(pW98File->m_pFile, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
-			if (!Result)
-			{
-				FileError_static("MRTC_SystemInfo::OS_FileGetTime", "Could not get file time", 0);
-			}
-			return Result != 0;
-		#else
-			return false;
-		#endif
+		FileError_static("MRTC_SystemInfo::OS_FileGetTime", "Could not get file time", 0);
 	}
+	return Result != 0;
 }
 
 bool MRTC_SystemInfo::OS_FileSetTime(void *_pFile, const int64& _TimeCreate, const int64& _TimeAccess, const int64& _TimeWrite)
 {
-	if (g_OsInfo.IsNT())
+	CWin32File *pFile = (CWin32File *)_pFile;
+	int Result = SetFileTime(pFile->m_pFileHandle, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
+	if (!Result)
 	{
-		CWin32File *pFile = (CWin32File *)_pFile;
-		int Result = SetFileTime(pFile->m_pFileHandle, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
-		if (!Result)
-		{
-			FileError_static("MRTC_SystemInfo::OS_FileSetTime", "Could not set file time", 0);
-		}
-		return Result != 0;
+		FileError_static("MRTC_SystemInfo::OS_FileSetTime", "Could not set file time", 0);
 	}
-	else
-	{
-		#ifndef PLATFORM_XBOX
-			CFWin98File *pW98File = (CFWin98File *)_pFile;
-			int Result = SetFileTime(pW98File->m_pFile, (LPFILETIME)&_TimeCreate, (LPFILETIME)&_TimeAccess, (LPFILETIME)&_TimeWrite);
-			if (!Result)
-			{
-				FileError_static("MRTC_SystemInfo::OS_FileSetTime", "Could not set file time", 0);
-			}
-			return Result != 0;
-		#else
-			return false;
-		#endif
-	}
-
+	return Result != 0;
 }
 
 void MRTC_SystemInfo::OS_FileGetDrive(const char *_pFileName, char *_pDriveName)
@@ -5528,7 +5252,7 @@ void MRTC_SystemInfo::Semaphore_Wait(void * _pSemaphore)
     WaitForSingleObject(_pSemaphore, INFINITE);
 }
 
-bint MRTC_SystemInfo::Semaphore_WaitTimeout(void * _pSemaphore, fp8 _Timeout)
+bint MRTC_SystemInfo::Semaphore_WaitTimeout(void * _pSemaphore, fp64 _Timeout)
 {
 //	M_TRACE("SEMA(%x): Wait timeout %x timeout: %f\n", GetCurrentThreadId(), _pSemaphore, _Timeout);
 	if (_Timeout < 0)
@@ -5569,7 +5293,7 @@ void MRTC_SystemInfo::Event_Wait(void * _pEvent)
 	WaitForSingleObject(_pEvent, INFINITE);
 }
 
-bint MRTC_SystemInfo::Event_WaitTimeout(void * _pEvent, fp8 _Timeout)
+bint MRTC_SystemInfo::Event_WaitTimeout(void * _pEvent, fp64 _Timeout)
 {
 	if (_Timeout < 0)
 	{
@@ -5597,98 +5321,79 @@ extern "C" LONG __cdecl _InterlockedExchange(IN OUT LONG volatile *Addend, IN LO
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedExchange)
 
+
+#if !defined(M_RTM) || defined(M_RtmDebug) || defined(M_Profile)
+	#ifdef PLATFORM_XENON
+		# define CHECK_ADDRESS(_Ptr) if (((mint)_Ptr & 3) || ((mint)_Ptr < 65536)) M_BREAKPOINT_FATAL
+	#else
+		# define CHECK_ADDRESS(_Ptr) if (((mint)_Ptr & 3) || ((mint)_Ptr < 65536)) M_BREAKPOINT
+	#endif
+#else
+# define CHECK_ADDRESS(_Ptr)
+#endif
+
 #ifdef M_SEPARATETYPE_smint
 
 #if defined(PLATFORM_WIN64)
 
 smint MRTC_SystemInfo::Atomic_Increase(volatile smint *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return InterlockedExchangeAdd64((volatile LONG64 *)_pDest, 1);
 }
 
 smint MRTC_SystemInfo::Atomic_Decrease(volatile smint *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return InterlockedExchangeAdd64((volatile LONG64 *)_pDest, -1);
 }
 
 smint MRTC_SystemInfo::Atomic_Add(volatile smint *_pDest, smint _Add)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return InterlockedExchangeAdd64((volatile LONG64 *)_pDest, _Add);
 }
 
 smint MRTC_SystemInfo::Atomic_Exchange(volatile smint *_pDest, smint _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return InterlockedExchange64((volatile LONG64 *)_pDest, _SetTo);
 }
 
 smint MRTC_SystemInfo::Atomic_IfEqualExchange(volatile smint *_pDest, smint _CompareTo, smint _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return InterlockedCompareExchange64((volatile LONG64 *)_pDest, _SetTo, _CompareTo);
 }
 #else
 
 smint MRTC_SystemInfo::Atomic_Increase(volatile smint *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd((volatile LONG *)_pDest, 1);
 }
 
 smint MRTC_SystemInfo::Atomic_Decrease(volatile smint *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd((volatile LONG *)_pDest, -1);
 }
 
 smint MRTC_SystemInfo::Atomic_Add(volatile smint *_pDest, smint _Add)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd((volatile LONG *)_pDest, _Add);
 }
 
 smint MRTC_SystemInfo::Atomic_Exchange(volatile smint *_pDest, smint _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchange((volatile LONG *)_pDest, _SetTo);
 }
 
 smint MRTC_SystemInfo::Atomic_IfEqualExchange(volatile smint *_pDest, smint _CompareTo, smint _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedCompareExchange((volatile LONG *)_pDest, _SetTo, _CompareTo);
 }
 
@@ -5700,46 +5405,31 @@ smint MRTC_SystemInfo::Atomic_IfEqualExchange(volatile smint *_pDest, smint _Com
 
 int32 MRTC_SystemInfo::Atomic_Increase(volatile int32 *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd(_pDest, 1);
 }
 
 int32 MRTC_SystemInfo::Atomic_Decrease(volatile int32 *_pDest)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd(_pDest, -1);
 }
 
 int32 MRTC_SystemInfo::Atomic_Add(volatile int32 *_pDest, int32 _Add)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchangeAdd(_pDest, _Add);
 }
 
 int32 MRTC_SystemInfo::Atomic_Exchange(volatile int32 *_pDest, int32 _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedExchange(_pDest, _SetTo);
 }
 
 int32 MRTC_SystemInfo::Atomic_IfEqualExchange(volatile int32 *_pDest, int32 _CompareTo, int32 _SetTo)
 {
-#if !defined(M_RTM) || defined(M_RtmDebug)
-	if ((mint)_pDest & 3)
-		M_BREAKPOINT;
-#endif
+	CHECK_ADDRESS(_pDest);
 	return _InterlockedCompareExchange(_pDest, _SetTo, _CompareTo);
 }
 
@@ -5764,6 +5454,12 @@ typedef struct tagTHREADNAME_INFO {
 
 void MRTC_SystemInfo::Thread_SetName(const char *_pName)
 {
+#ifdef M_Profile
+
+#ifdef PLATFORM_XENON
+	if (!DmIsDebuggerPresent())
+		return;
+#endif
     THREADNAME_INFO info;
 	
     info.dwType = 0x1000;
@@ -5778,6 +5474,22 @@ void MRTC_SystemInfo::Thread_SetName(const char *_pName)
     __except( EXCEPTION_CONTINUE_EXECUTION )
     {
     }
+#endif
+}
+
+
+void MRTC_SystemInfo::Thread_SetProcessor(uint32 _ThreadID, uint32 _Processor)
+{
+#ifdef PLATFORM_XENON
+	HANDLE hThread = OpenThread(0, 0, _ThreadID);
+	XSetThreadProcessor(hThread, _Processor);
+	CloseHandle(hThread);
+#endif
+}
+
+uint32 MRTC_SystemInfo::Thread_GetCurrentID()
+{
+	return GetCurrentThreadId();
 }
 
 void MRTC_SystemInfo::Thread_SetProcessor(uint32 _Processor)
@@ -5977,7 +5689,8 @@ uint32 MRTC_SystemInfo::OS_PhysicalMemoryLowestFree()
 void* MRTC_SystemInfo::OS_AllocGPU(uint32 _Size, bool _bCached)
 {
 #ifdef PLATFORM_XENON
-	int Flags = PAGE_READWRITE | MEM_LARGE_PAGES;
+	return M_ALLOCDEBUGALIGN(_Size, 128, __FILE__, __LINE__);
+/*	int Flags = PAGE_READWRITE | MEM_LARGE_PAGES;
 	Flags |= MEM_LARGE_PAGES;
 	if (!_bCached)
 		Flags |= PAGE_WRITECOMBINE;
@@ -5995,25 +5708,349 @@ void* MRTC_SystemInfo::OS_AllocGPU(uint32 _Size, bool _bCached)
 	}
 #endif
 
-	return pData;
+	return pData;*/
 #else
-//	return OS_Alloc(_Size, false);
-	return M_ALLOC(_Size);
+	return OS_Alloc(_Size, 128);
+//	return M_ALLOC(_Size);
 #endif
 }
 
 void MRTC_SystemInfo::OS_FreeGPU(void *_pMem)
 {
 #ifdef PLATFORM_XENON
-	XPhysicalFree(_pMem);
+	return MRTC_GetMemoryManager()->Free(_pMem);
+//	XPhysicalFree(_pMem);
 #else
-//	OS_Free(_pMem);
-	MRTC_GetMemoryManager()->Free(_pMem);
+	OS_Free(_pMem);
+//	MRTC_GetMemoryManager()->Free(_pMem);
 #endif
 }
 
-void* MRTC_SystemInfo::OS_Alloc(uint32 _Size, bool _bCommit)
+
+//extern "C" void MmQueryAdressProtect(void *);
+#ifdef PLATFORM_XENON
+#define TOTAL_SAVE_EXTRA  0
+//#define TOTAL_SAVE_EXTRA 8*1024*1024
+
+#define TOTAL_SAVE_XENONPUSHBUFFER 8*1024*1024
+#define TOTAL_SAVE_SAFETY 1*1024*1024
+
+class CPhysicalMemoryContext
 {
+public:
+
+	bint m_bInit;
+	NThread::CMutual m_Lock;
+
+	class CAllocator : public CAllocator_Virtual
+	{
+	public:
+		static mint ms_Pos;
+		static mint ms_Data[(24*1024) / sizeof(mint)];
+		DIdsPInlineS static void *Alloc(mint _Size, mint _Location = 0)
+		{
+			mint Size = sizeof(ms_Data);
+			mint Left = Size - ms_Pos;
+			if (_Size > Left)
+				M_BREAKPOINT; // Out of memory
+			mint Ret = (mint)ms_Data + ms_Pos;
+			ms_Pos += _Size;
+			return (void *)Ret;
+		}
+
+		DIdsPInlineS static void *AllocAlignDebug(mint _Size, mint _Align, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+		{
+			return Alloc(_Size);
+		}
+
+		DIdsPInlineS static void *AllocAlign(mint _Size, mint _Align, mint _Location = 0)
+		{
+			return Alloc(_Size);
+		}
+		DIdsPInlineS static void *AllocNoCommit(mint _Size, mint _Location = 0)
+		{
+			return Alloc(_Size);
+		}
+		DIdsPInlineS static void Free(void *_pBlock, mint _Size = 0, mint _Location = 0)
+		{
+		}
+		DIdsPInlineS static mint Size(void *_pBlock)
+		{
+			return 0;
+		}
+	};
+
+	typedef TCSimpleBlockManager<CAllocator, CPoolType_Growing> CBlockManager;
+	CBlockManager m_BlockManagers[4];
+	mint m_ValidBuffers;
+
+	void Init()
+	{
+		if (!m_bInit)
+		{
+			new(this) CPhysicalMemoryContext;
+
+			MEMORYSTATUS MemoryStatus;
+			MemoryStatus.dwLength = sizeof(MEMORYSTATUS);
+			GlobalMemoryStatus(&MemoryStatus);
+
+			mint SaveMemory = TOTAL_SAVE_SAFETY + TOTAL_SAVE_XENONPUSHBUFFER + TOTAL_SAVE_EXTRA;
+
+			int64 Alloc16M = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 16*1024*1024);
+			Alloc16M = MaxMT(0, Alloc16M);
+
+			mint pData = NULL;
+			while (Alloc16M > 0)
+			{
+				pData = (mint)XPhysicalAlloc(Alloc16M, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_16MB_PAGES);//MEM_16MB_PAGES);
+				if (pData)
+					break;
+				Alloc16M -= 16*1024*1024;
+			}			
+
+			GlobalMemoryStatus(&MemoryStatus);
+
+			int64 Alloc64K = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 64*1024);
+			Alloc64K = MaxMT(0, Alloc64K);
+
+			mint pData2 = NULL;
+			while (Alloc64K > 0)
+			{
+				pData2 = (mint)XPhysicalAlloc(Alloc64K, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+				if (pData2)
+					break;
+				Alloc64K -= 64*1024;
+			}
+
+			GlobalMemoryStatus(&MemoryStatus);
+
+
+			M_TRACEALWAYS("Found %f MiB of physical memory\n", fp32(Alloc16M+Alloc64K) / (1024.0 * 1024.0));
+
+#ifdef M_Profile
+			DM_MEMORY_STATISTICS Stats;
+			ZeroMemory(&Stats, sizeof(Stats));
+			Stats.cbSize = sizeof(Stats);
+			if (DmQueryMemoryStatistics(&Stats))
+			{
+				M_TRACEALWAYS("Memory Stats:\n");
+				
+				mint Total = Stats.AvailablePages + Stats.ContiguousPages + Stats.VirtualMappedPages + Stats.ImagePages + Stats.DebuggerPages + Stats.FileCachePages
+					+ Stats.StackPages + Stats.VirtualPageTablePages + Stats.SystemPageTablePages + Stats.PoolPages;
+
+				M_TRACEALWAYS("Available           : %f KiB\n", fp32(Stats.AvailablePages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Physical            : %f KiB\n", fp32(Stats.ContiguousPages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Virtual Mapped      : %f KiB\n", fp32(Stats.VirtualMappedPages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Image               : %f KiB\n", fp32(Stats.ImagePages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Debugger            : %f KiB\n", fp32(Stats.DebuggerPages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("File Cache          : %f KiB\n", fp32(Stats.FileCachePages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Stack               : %f KiB\n", fp32(Stats.StackPages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Virtual Page Tables : %f KiB\n", fp32(Stats.VirtualPageTablePages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("System Page Tables  : %f KiB\n", fp32(Stats.SystemPageTablePages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Pool                : %f KiB\n", fp32(Stats.PoolPages * 4 * 1024) / (1024.0));
+				M_TRACEALWAYS("Total               : %f KiB\n", fp32(Total * 4 * 1024) / (1024.0));
+			}
+#endif
+			m_BlockManagers[0].Create("Physical 0", pData, Alloc16M, 128);
+			m_BlockManagers[1].Create("Physical 1", pData2, Alloc64K, 128);
+			m_ValidBuffers = 2;
+			m_bInit = true;
+		}
+	}
+
+	void Init2()
+	{
+		DLock(m_Lock);
+
+		MEMORYSTATUS MemoryStatus;
+		MemoryStatus.dwLength = sizeof(MEMORYSTATUS);
+		GlobalMemoryStatus(&MemoryStatus);
+
+		mint SaveMemory = TOTAL_SAVE_SAFETY + TOTAL_SAVE_EXTRA;
+
+		int64 Alloc64K = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 64*1024);
+		Alloc64K = MaxMT(0, Alloc64K);
+		mint pData2 = NULL;
+		while (Alloc64K > 0)
+		{
+			pData2 = (mint)XPhysicalAlloc(Alloc64K, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+			if (pData2)
+				break;
+			Alloc64K -= 64*1024;
+		}
+
+		GlobalMemoryStatus(&MemoryStatus);
+
+		int64 Alloc64K2 = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 64*1024);
+		Alloc64K2 = MaxMT(0, Alloc64K2);
+
+		mint pData3 = NULL;
+		while (Alloc64K2 > 0)
+		{
+			pData3 = (mint)XPhysicalAlloc(Alloc64K2, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+			if (pData3)
+				break;
+			Alloc64K2 -= 64*1024;
+		}
+
+		GlobalMemoryStatus(&MemoryStatus);
+
+		M_TRACEALWAYS("Found %f MiB of physical memory\n", fp32(Alloc64K+Alloc64K2) / (1024.0 * 1024.0));
+
+#ifdef M_Profile
+		DM_MEMORY_STATISTICS Stats;
+		ZeroMemory(&Stats, sizeof(Stats));
+		Stats.cbSize = sizeof(Stats);
+		if (DmQueryMemoryStatistics(&Stats))
+		{
+			M_TRACEALWAYS("Memory Stats:\n");
+			
+			mint Total = Stats.AvailablePages + Stats.ContiguousPages + Stats.VirtualMappedPages + Stats.ImagePages + Stats.DebuggerPages + Stats.FileCachePages
+				+ Stats.StackPages + Stats.VirtualPageTablePages + Stats.SystemPageTablePages + Stats.PoolPages;
+
+			M_TRACEALWAYS("Available           : %f KiB\n", fp32(Stats.AvailablePages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Physical            : %f KiB\n", fp32(Stats.ContiguousPages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Virtual Mapped      : %f KiB\n", fp32(Stats.VirtualMappedPages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Image               : %f KiB\n", fp32(Stats.ImagePages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Debugger            : %f KiB\n", fp32(Stats.DebuggerPages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("File Cache          : %f KiB\n", fp32(Stats.FileCachePages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Stack               : %f KiB\n", fp32(Stats.StackPages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Virtual Page Tables : %f KiB\n", fp32(Stats.VirtualPageTablePages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("System Page Tables  : %f KiB\n", fp32(Stats.SystemPageTablePages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Pool                : %f KiB\n", fp32(Stats.PoolPages * 4 * 1024) / (1024.0));
+			M_TRACEALWAYS("Total               : %f KiB\n", fp32(Total * 4 * 1024) / (1024.0));
+		}
+#endif
+		m_BlockManagers[2].Create("Physical 2", pData2, Alloc64K, 128);
+		m_BlockManagers[3].Create("Physical 3", pData3, Alloc64K2, 128);
+		m_ValidBuffers = 4;
+	}
+
+	void *Alloc(mint _Size, mint _Alignment)
+	{
+		Init();
+		DLock(m_Lock);
+		for (mint i = m_ValidBuffers-1; i >= 0; --i)
+		{
+			CBlockManager::CBlock *pBlock = m_BlockManagers[i].Alloc(_Size, _Alignment);
+			if (pBlock)
+				return (void *)(mint)pBlock->GetMemory();
+		}
+		M_BREAKPOINT; // Out of memory
+		return NULL;
+	}
+	void Free(void *_pMemory)
+	{
+		DLock(m_Lock);
+		for (mint i = 0; i < m_ValidBuffers; ++i)
+		{
+			mint Memory = (mint)_pMemory;
+			if (Memory >= m_BlockManagers[i].m_pBlockStart && Memory < m_BlockManagers[i].m_pBlockEnd)
+			{
+				CBlockManager::CBlock *pBlock = m_BlockManagers[i].GetBlockFromAddress(Memory);
+				m_BlockManagers[i].Free(pBlock);
+				return;
+			}
+		}
+
+		M_BREAKPOINT; // Memory not found
+	}
+	mint Size(void *_pMemory)
+	{
+		DLock(m_Lock);
+		for (mint i = 0; i < m_ValidBuffers; ++i)
+		{
+			mint Memory = (mint)_pMemory;
+			if (Memory >= m_BlockManagers[i].m_pBlockStart && Memory < m_BlockManagers[i].m_pBlockEnd)
+			{
+				CBlockManager::CBlock *pBlock = m_BlockManagers[i].GetBlockFromAddress(Memory);
+				return m_BlockManagers[i].GetBlockSize(pBlock);
+			}
+		}
+		M_BREAKPOINT; // Memory not found
+		return 0;
+	}
+};
+mint g_PhysicalMemoryContext[(sizeof(CPhysicalMemoryContext) + sizeof(mint) - 1) / sizeof(mint)] = {0};
+mint CPhysicalMemoryContext::CAllocator::ms_Data[(24*1024) / sizeof(mint)];
+mint CPhysicalMemoryContext::CAllocator::ms_Pos = 0;
+
+mint gf_GetFreePhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	DLock(pContext->m_Lock);
+
+	mint FreeMem = 0;
+	for (mint i = 0; i < pContext->m_ValidBuffers; ++i)
+	{
+		FreeMem += pContext->m_BlockManagers[i].GetFreeMemory();
+	}
+	return FreeMem;
+}
+
+mint gf_GetLargestBlockPhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	DLock(pContext->m_Lock);
+	mint FreeMem = 0;
+	for (mint i = 0; i < pContext->m_ValidBuffers; ++i)
+	{
+		FreeMem = MaxMT(FreeMem, pContext->m_BlockManagers[i].GetLargestFreeBlock());
+	}
+	return FreeMem;
+}
+
+void gf_GetExtraPhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init2();
+
+	// Alloc more to memory manager
+	
+	CDA_MemoryManager *pMemMan = MRTC_GetMemoryManager();
+
+	mint ToSave = 128*1024;
+	mint FreeMem = gf_GetFreePhysicalMemory();
+	while (FreeMem > ToSave)
+	{
+		mint ToAlloc = AlignDown(gf_GetLargestBlockPhysicalMemory()-4096, 4096);
+		ToAlloc = Min(ToAlloc, FreeMem - ToSave);
+		pMemMan->InitStatic(ToAlloc);
+		FreeMem = gf_GetFreePhysicalMemory();
+	}
+	
+}
+
+
+#endif
+
+mint MRTC_SystemInfo::OS_MemSize(void *_pBlock)
+{
+#ifdef PLATFORM_XENON
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	return pContext->Size(_pBlock);
+#else
+	MEMORY_BASIC_INFORMATION MemoryInfo;
+	int Size = sizeof(MemoryInfo);
+	memset(&MemoryInfo, 0, Size);
+	int nBytes = VirtualQuery((void *)_pBlock, &MemoryInfo, Size);
+	if (nBytes != sizeof(MemoryInfo))
+		ThrowError("VirtualQuery failed");
+
+	return MemoryInfo.RegionSize;
+#endif
+}
+
+void* MRTC_SystemInfo::OS_Alloc(uint32 _Size, uint32 _Alignment)
+{
+#ifdef PLATFORM_XENON
+
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	return pContext->Alloc(_Size, _Alignment);
+#else
 	/*
 #if defined(PLATFORM_XENON) && defined(M_Profile) && 0
 	void *pData = DmAllocatePool(_Size);
@@ -6028,27 +6065,73 @@ void* MRTC_SystemInfo::OS_Alloc(uint32 _Size, bool _bCommit)
 
 	int Flags = 0;
 #ifdef PLATFORM_XENON
-	Flags |= MEM_LARGE_PAGES;
-#endif
-	void *pData = VirtualAlloc(NULL, _Size, MEM_TOP_DOWN | (_bCommit ? MEM_COMMIT : MEM_RESERVE) | Flags, PAGE_READWRITE);
-	if (pData)
+	if (_Size > 16*1024*1024)
 	{
-		gf_RDSendPhysicalAlloc(pData, _Size, 0, gf_RDGetSequence(), 0);
-	}
-	UpdateLowestFree();
+		void *pData = XPhysicalAlloc(_Size, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+//		MmQueryAdressProtect(pData);
+
+		if (pData)
+		{
+			gf_RDSendPhysicalAlloc(pData, _Size, 0, gf_RDGetSequence(), 0);
+		}
+		UpdateLowestFree();
 #ifdef PLATFORM_XENON
-	if (!pData) 
+		if (!pData) 
+		{
+			OS_TraceRaw("Out of memory\n");
+			M_BREAKPOINT; // Out of memory
+		}
+	#endif
+		return pData;
+	}
+	else
 	{
-		OS_TraceRaw("Out of memory\n");
-		M_BREAKPOINT; // Out of memory
+		void *pData = XPhysicalAlloc(_Size, MAXULONG_PTR, 0, PAGE_READWRITE);
+		if (pData)
+		{
+			gf_RDSendPhysicalAlloc(pData, _Size, 0, gf_RDGetSequence(), 0);
+		}
+		UpdateLowestFree();
+#ifdef PLATFORM_XENON
+		if (!pData) 
+		{
+			OS_TraceRaw("Out of memory\n");
+			M_BREAKPOINT; // Out of memory
+		}
+	#endif
+		return pData;
+	}
+#else
+	{
+#ifdef PLATFORM_XENON
+		Flags |= MEM_LARGE_PAGES;
+#endif
+		void *pData = VirtualAlloc(NULL, _Size, MEM_TOP_DOWN | MEM_COMMIT | Flags, PAGE_READWRITE);
+		if (pData)
+		{
+			gf_RDSendPhysicalAlloc(pData, _Size, 0, gf_RDGetSequence(), 0);
+		}
+		UpdateLowestFree();
+#ifdef PLATFORM_XENON
+		if (!pData) 
+		{
+			OS_TraceRaw("Out of memory\n");
+			M_BREAKPOINT; // Out of memory
+		}
+	#endif
+		return pData;
 	}
 #endif
-	return pData;
+#endif
 //#endif
 }
 
 void MRTC_SystemInfo::OS_Free(void* _pMem)
 {
+#ifdef PLATFORM_XENON
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	return pContext->Free(_pMem);
+#else
 	/*
 #if defined(PLATFORM_XENON) && defined(M_Profile) && 0
 	if (_pMem)
@@ -6061,7 +6144,12 @@ void MRTC_SystemInfo::OS_Free(void* _pMem)
 	{
 		gf_RDSendPhysicalFree(_pMem, gf_RDGetSequence(), 0);
 	}
+#ifdef PLATFORM_XENON
+	XPhysicalFree(_pMem);
+#else
 	VirtualFree(_pMem, 0, MEM_RELEASE);
+#endif
+#endif
 //#endif
 }
 
@@ -6297,7 +6385,9 @@ static void* AlignedHeapAlloc(mint _Size, mint _Align)
 	else if (!(_Size & 0x07))
 		Align = 8;
 
-	uint32 AlignSize = (_Size+4+Align-4) & ~(Align-1);
+	Align = Max(Align, (int)_Align);
+	M_ASSERT(Align < 256, "!");
+	uint32 AlignSize = _Size + Max(4, Align);
 
 	void *pMem = HeapAlloc(GetProcessHeap(), 0, AlignSize);
 	if (!pMem) 
@@ -6315,7 +6405,7 @@ static void* AlignedHeapAlloc(mint _Size, mint _Align)
 	mint pAddr = (mint) pMem;
 	mint pAddrAligned = (pAddr+4+Align-1) & ~(Align-1);
 	uint32 AlignDelta = uint32(pAddrAligned - pAddr);
-	M_ASSERT(AlignDelta <= 16, "!");
+	M_ASSERT(AlignDelta <= AlignSize, "!");
 	M_ASSERT(pAddrAligned+_Size <= pAddr+AlignSize , "!");
 
 	uint32* pDelta = (uint32*)(pAddrAligned-4);
@@ -6440,6 +6530,11 @@ void* MRTC_SystemInfo::OS_HeapAllocAlign(uint32 _Size, uint32 _Align)
 	M_LOCK(GetDefaultManager()->m_Lock);
 	return dlmemalign(_Align, _Size);
 #else
+#ifdef PLATFORM_WIN
+	// Well, well, well... orka
+	if (_Align > 16)
+		_Align = 16;
+#endif
 	M_ASSERT(_Align <= 16, "!");
 
 #ifdef MRTC_ALIGNEDHEAPALLOC
@@ -6599,6 +6694,15 @@ uint32 MRTC_SystemInfo::OS_PhysicalMemoryLargestFree()
 
 #endif
 
+#ifdef PLATFORM_WIN_PC
+void gf_SetLogFileName(CStr _FileName)
+{
+	MRTC_SystemInfoInternal *pLocalSys = MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData;
+	if (pLocalSys->m_LogFileName == "")
+		pLocalSys->m_LogFileName = _FileName;
+}
+#endif
+
 ///////////////////////////////////////////////////////
 /**
  * @file   excep.cpp
@@ -6713,7 +6817,7 @@ class CEnumSymbolsContext
 {
 public:
 	CStr m_String;
-	TList_Vector<mint> m_Addresses;
+	TArray<mint> m_Addresses;
 };
 
 BOOL CALLBACK EnumModulesCallback(PSTR ModuleName,DWORD64 ModuleBase,ULONG ModuleSize,PVOID UserContext)
@@ -6805,13 +6909,518 @@ BOOL CALLBACK EnumModulesCallback(PSTR ModuleName,DWORD64 ModuleBase,ULONG Modul
 	return true;
 }
 
+
+class CCrashDialog : public MRTC_Thread
+{
+public:
+
+	static CCrashDialog *ms_pThis;
+	CCrashDialog()
+	{
+		ms_pThis = this;
+	}
+
+	CStr m_Message;
+	CStr m_Title;
+
+	HFONT f_CreatePointFontIndirect(const LOGFONTW* lpLogFont)
+	{
+		HDC hDC;
+		hDC = ::GetDC(NULL);
+
+		// convert nPointSize to logical units based on pDC
+		LOGFONTW logFont = *lpLogFont;
+		POINT pt;
+		pt.y = ::GetDeviceCaps(hDC, LOGPIXELSY) * logFont.lfHeight;
+		pt.y /= 720;    // 72 points/inch, 10 decipoints/point
+		pt.x = 0;
+		::DPtoLP(hDC, &pt, 1);
+		POINT ptOrg = { 0, 0 };
+		::DPtoLP(hDC, &ptOrg, 1);
+		logFont.lfHeight = -Abs(pt.y - ptOrg.y);
+
+		ReleaseDC(NULL, hDC);
+
+		return CreateFontIndirectW(&logFont);
+	}
+
+	HFONT f_CreatePointFont(int nPointSize, const wchar_t *lpszFaceName)
+	{
+
+		LOGFONTW logFont;
+		memset(&logFont, 0, sizeof(LOGFONT));
+		logFont.lfCharSet = DEFAULT_CHARSET;
+		logFont.lfHeight = nPointSize;
+		NStr::StrCopy(logFont.lfFaceName, lpszFaceName);
+
+		return f_CreatePointFontIndirect(&logFont);
+	}
+
+	enum
+	{
+#undef ID_TEXT
+#undef ID_EDIT
+#undef IDB_Yes
+#undef IDB_No
+		ID_TEXT = 200,
+		ID_EDIT = 201,
+		IDB_Yes,
+		IDB_No,
+	};
+
+	HFONT m_NormalFont;
+
+	static INT_PTR CALLBACK msp_HandleMessages(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch(uMsg)
+		{
+		case WM_SYSCOMMAND:
+			{
+				switch (wParam)
+				{
+				case SC_CLOSE:
+
+					HWND hTmp = GetDlgItem(hwndDlg, ID_EDIT);
+					GetWindowText(hTmp, ms_pThis->m_EditData.GetBuffer(8192), 8192);
+					EndDialog(hwndDlg, 0);
+					return 1;
+				};
+			}
+			break;
+		case WM_TIMER:
+			{
+				return 1;
+			}
+			break;
+		case WM_INITDIALOG:
+			{
+
+				ms_pThis->m_hWnd = hwndDlg;
+				
+				POINT Pnt;
+				GetCursorPos(&Pnt);
+				HMONITOR hMon = MonitorFromPoint(Pnt, MONITOR_DEFAULTTONEAREST);
+				MONITORINFO MonInfo;
+				memset(&MonInfo, 0, sizeof(MonInfo));
+				MonInfo.cbSize = sizeof(MonInfo);
+				GetMonitorInfo(hMon, &MonInfo);
+
+				RECT Rect;
+				GetWindowRect(hwndDlg, &Rect);
+
+				int Width = Rect.right - Rect.left;
+				int Height = Rect.bottom - Rect.top;
+				int MonWidth = MonInfo.rcWork.right - MonInfo.rcWork.left;
+				int MonHeight = MonInfo.rcWork.bottom - MonInfo.rcWork.top;
+
+				SendMessage(hwndDlg, WM_SETFONT, (WPARAM)ms_pThis->m_NormalFont, 0);
+				HWND hTmp;
+
+				hTmp = GetDlgItem(hwndDlg, ID_TEXT);
+				SendMessage(hTmp, WM_SETFONT, (WPARAM)ms_pThis->m_NormalFont, 0);
+
+				if (!ms_pThis->m_bOnlyMessage)
+				{
+					hTmp = GetDlgItem(hwndDlg, IDB_Yes);
+					SendMessage(hTmp, WM_SETFONT, (WPARAM)ms_pThis->m_NormalFont, 0);
+					hTmp = GetDlgItem(hwndDlg, IDB_No);
+					SendMessage(hTmp, WM_SETFONT, (WPARAM)ms_pThis->m_NormalFont, 0);
+					hTmp = GetDlgItem(hwndDlg, ID_EDIT);
+					SendMessage(hTmp, WM_SETFONT, (WPARAM)ms_pThis->m_NormalFont, 0);
+				}
+				
+//					SendDlgItemMessage(hwndDlg, IDB_Yes, BM_SETSTYLE, BS_PUSHBUTTON, (LONG)TRUE);
+//					SendDlgItemMessage(hwndDlg, IDB_No, BM_SETSTYLE, BS_DEFPUSHBUTTON, (LONG)TRUE);
+				if (!ms_pThis->m_bOnlyMessage)
+				{
+					SendMessage(hwndDlg, DM_SETDEFID, IDB_Yes,0L);
+				}
+
+				SetWindowPos(hwndDlg, NULL, MonInfo.rcWork.left + MonWidth / 2 - Width / 2, MonInfo.rcWork.top + MonHeight / 2 - Height / 2, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+
+				SetTimer(hwndDlg, 0, 100, DNP);
+				BringWindowToTop(hwndDlg);
+				return 1;
+			}
+			break;
+		case WM_CLOSE:
+			{
+				if (!ms_pThis->m_bOnlyMessage)
+				{
+					HWND hTmp = GetDlgItem(hwndDlg, ID_EDIT);
+					GetWindowText(hTmp, ms_pThis->m_EditData.GetBuffer(8192), 8192);
+				}
+				EndDialog(hwndDlg, 0);
+				return 1;
+			}
+			break;
+		case WM_COMMAND:
+			{
+				int Control = LOWORD(wParam);
+				int Message = HIWORD(wParam);
+//					HWND Window = (HWND)lParam;
+				if (Message == BN_CLICKED)
+				{
+					if (Control == IDB_Yes)
+					{
+						if (!ms_pThis->m_bOnlyMessage)
+						{
+							HWND hTmp = GetDlgItem(hwndDlg, ID_EDIT);
+							GetWindowText(hTmp, ms_pThis->m_EditData.GetBuffer(8192), 8192);
+						}
+						EndDialog(hwndDlg, 1);
+						return 1;
+					}
+					else if (Control == IDB_No)
+					{
+						if (!ms_pThis->m_bOnlyMessage)
+						{
+							HWND hTmp = GetDlgItem(hwndDlg, ID_EDIT);
+							GetWindowText(hTmp, ms_pThis->m_EditData.GetBuffer(8192), 8192);
+						}
+						EndDialog(hwndDlg, 0);
+						return 1;
+					}
+				}
+
+			}
+			break;
+
+		}
+		return 0;
+	}
+
+
+	LRESULT DisplayMyMessage(HINSTANCE hinst, HWND hwndOwner, 
+		LPCSTR lpszMessage, LPCSTR lpszTitle, bint _bMessageOnly)
+	{
+//		Sleep (20000);
+		HGLOBAL hgbl;
+		LPDLGTEMPLATE lpdt;
+		LPDLGITEMTEMPLATE lpdit;
+		LPWORD lpw;
+		LPWSTR lpwsz;
+		LRESULT ret;
+
+		hgbl = GlobalAlloc(GMEM_ZEROINIT, 2048);
+		if (!hgbl)
+			return -1;
+	 
+		lpdt = (LPDLGTEMPLATE)GlobalLock(hgbl);
+	 
+		// Define a dialog box.
+		int StaticY = 30;
+		int EditY = 50;
+		int Width = 250;
+		if (_bMessageOnly)
+			EditY = 0;
+		int yPos = StaticY + EditY;
+	 
+		lpdt->style = WS_POPUP | WS_BORDER | WS_SYSMENU
+					   | DS_MODALFRAME | WS_CAPTION;
+		if (_bMessageOnly)
+			lpdt->cdit = 1;  // number of controls
+		else
+			lpdt->cdit = 4;  // number of controls
+		lpdt->x  = 10;  lpdt->y  = 10;
+		lpdt->cx = Width; 
+		lpdt->cy = 75 + yPos;
+
+		lpw = (LPWORD) (lpdt + 1);
+		*lpw++ = 0;   // no menu
+		*lpw++ = 0;   // predefined dialog box class (by default)
+
+		lpwsz = (LPWSTR) lpw;
+		lpw = (LPWORD)NStr::StrCopy((wchar_t *)lpw, lpszTitle);
+		++lpw;
+
+		if (!_bMessageOnly)
+		{
+			//-----------------------
+			// Define an Yes button.
+			//-----------------------
+			lpw = AlignUp (lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
+			lpdit = (LPDLGITEMTEMPLATE) lpw;
+			lpdit->x  = 65+25; lpdit->y  = 55 + yPos;
+			lpdit->cx = 35; lpdit->cy = 12;
+			lpdit->id = IDB_Yes;  // OK button identifier
+			lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
+
+			lpw = (LPWORD) (lpdit + 1);
+			*lpw++ = 0xFFFF;
+			*lpw++ = 0x0080;    // button class
+
+			lpwsz = (LPWSTR) lpw;
+			lpw = (LPWORD)NStr::StrCopy((wchar_t *)lpw, "Yes");
+			++lpw;
+			*lpw++ = 0x0000; // Creation Data
+
+			//-----------------------
+			// Define an No button.
+			//-----------------------
+			lpw = AlignUp (lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
+			lpdit = (LPDLGITEMTEMPLATE) lpw;
+			lpdit->x  = 105+25; lpdit->y  = 55 + yPos;
+			lpdit->cx = 35; lpdit->cy = 12;
+			lpdit->id = IDB_No;  // OK button identifier
+			lpdit->style = WS_CHILD | WS_VISIBLE;
+
+			lpw = (LPWORD) (lpdit + 1);
+			*lpw++ = 0xFFFF;
+			*lpw++ = 0x0080;    // button class
+
+			lpwsz = (LPWSTR) lpw;
+			lpw = (LPWORD)NStr::StrCopy((wchar_t *)lpw, "No");
+			++lpw;
+			*lpw++ = 0x0000; // Creation Data
+		}
+
+		//-----------------------
+		// Define a static text control.
+		//-----------------------
+		lpw = AlignUp (lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
+		lpdit = (LPDLGITEMTEMPLATE) lpw;
+		lpdit->x  = 7; lpdit->y  = 7;
+		lpdit->cx = Width - 20; lpdit->cy = 45 + StaticY;
+		lpdit->id = ID_TEXT;  // text identifier
+		lpdit->style = WS_CHILD | WS_VISIBLE | SS_LEFT;
+
+		lpw = (LPWORD) (lpdit + 1);
+		*lpw++ = 0xFFFF;
+		*lpw++ = 0x0082;                         // static class
+
+		lpw = (LPWORD)NStr::StrCopy((wchar_t *)lpw, lpszMessage);
+		++lpw;
+		*lpw++ = 0x0000; // Creation Data
+
+		if (!_bMessageOnly)
+		{
+			//-----------------------
+			// Define a edit control.
+			//-----------------------
+			lpw = AlignUp (lpw, 4); // align DLGITEMTEMPLATE on DWORD boundary
+			lpdit = (LPDLGITEMTEMPLATE) lpw;
+			lpdit->x  = 7; lpdit->y  = 55 + StaticY;
+			lpdit->cx = Width - 15; lpdit->cy = EditY - 10;
+			lpdit->id = ID_EDIT;  // text identifier
+			lpdit->style = WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | WS_BORDER | ES_WANTRETURN;
+	//		lpdit->style = WS_CHILD | WS_VISIBLE | SS_LEFT;
+
+			lpw = (LPWORD) (lpdit + 1);
+			*lpw++ = 0xFFFF;
+			*lpw++ = 0x0081;                         // edit class
+
+			lpw = (LPWORD)NStr::StrCopy((wchar_t *)lpw, "Write comments for bugreport here. Please describe what you were doing when the program crashed.");
+			++lpw;
+			*lpw++ = 0x0000; // Creation Data
+		}
+
+		GlobalUnlock(hgbl);
+
+		m_NormalFont = f_CreatePointFont(80, L"MS Sans Serif");
+		ret = DialogBoxIndirectW(hinst, (LPDLGTEMPLATE) hgbl, hwndOwner, (DLGPROC) msp_HandleMessages);
+		DeleteObject(m_NormalFont);
+
+		GlobalFree(hgbl);
+
+		return ret; 
+	}
+
+	DIdsPNoInline bint DisplayMessage(CStr _Title, CStr _Message, bint _bOnlyMessage)
+	{
+		int Return = DisplayMyMessage((HINSTANCE)NULL, NULL, _Message, _Title, _bOnlyMessage);
+
+		if (Return == -1)
+		{
+		}
+
+		if (Return == 1)
+			return 1;
+		else
+			return 0;
+	}
+
+	bint m_bOnlyMessage;
+	bint m_bRet;
+	CStr m_EditData;
+	HWND m_hWnd;
+
+	void StartInfoDisplay(CStr _Info)
+	{
+		m_Message = _Info;
+		m_bOnlyMessage = true;
+		Thread_Create();
+	}
+
+	void DisplayInfo(CStr _Info)
+	{
+		HWND hTmp = GetDlgItem(m_hWnd, ID_TEXT);
+		::SetWindowText(hTmp, _Info.Str());
+	}
+
+	void StopInfoDisplay(bint _bClose)
+	{
+		if (_bClose)
+			SendMessage(m_hWnd, WM_CLOSE, 0, 0);
+
+		Thread_Destroy();
+	}
+
+	int Thread_Main()
+	{
+		m_bRet = DisplayMessage(m_Title, m_Message, m_bOnlyMessage);
+		M_EXPORTBARRIER;
+		return 0;
+	}
+
+	bint DoMessage()
+	{
+		m_bOnlyMessage = false;
+		Thread_Create();
+		Thread_Destroy();
+		M_IMPORTBARRIER;
+		return m_bRet;
+	}
+};
+
+CCrashDialog *CCrashDialog::ms_pThis = NULL;
+
+#include <mapi.h>
+
+class CSendFileTo
+{
+public:
+    bool SendMail(CStr _To, CStr _ToEmail, CStr _Subject, CStr _Body, CStr _Attach, CStr _Attach1, CStr _Attach0Desc, CStr _Attach1Desc)
+    {
+
+        HINSTANCE hMAPI = ::LoadLibraryA("MAPI32.DLL");
+        if (!hMAPI)
+            return false;
+
+        // Grab the exported entry point for the MAPISendMail function
+        ULONG (PASCAL *SendMail)(ULONG, ULONG_PTR, MapiMessage*, FLAGS, ULONG);
+        (FARPROC&)SendMail = GetProcAddress(hMAPI, "MAPISendMail");
+        if (!SendMail)
+            return false;
+
+		MapiRecipDesc Recipient;
+        ::ZeroMemory(&Recipient, sizeof(Recipient));
+		CStr To = CStrF("%s<%s>", _To.Str(), _ToEmail.Str());
+		Recipient.lpszName = To;
+//		Recipient.lpszAddress = _ToEmail;
+		Recipient.ulRecipClass = MAPI_TO;
+				
+        MapiFileDesc fileDesc[2];
+        ::ZeroMemory(&fileDesc, sizeof(fileDesc));
+        fileDesc[0].nPosition = (ULONG)-1;
+        fileDesc[0].lpszPathName = _Attach;
+        fileDesc[0].lpszFileName = _Attach0Desc;
+        fileDesc[1].nPosition = (ULONG)-1;
+        fileDesc[1].lpszPathName = _Attach1;
+        fileDesc[1].lpszFileName = _Attach1Desc;
+
+        MapiMessage message;
+        ::ZeroMemory(&message, sizeof(message));
+        message.lpszSubject = _Subject;
+		message.lpszNoteText = _Body;
+		message.lpRecips = &Recipient;
+		message.nRecipCount = 1;
+
+		if (!_Attach.IsEmpty() && CDiskUtil::FileExists(_Attach))
+		{
+			++message.nFileCount;
+			message.lpFiles = fileDesc;
+		}
+		if (!_Attach1.IsEmpty() && CDiskUtil::FileExists(_Attach1))
+		{
+			++message.nFileCount;
+			if (message.nFileCount == 2)
+				message.lpFiles = fileDesc;
+			else
+				message.lpFiles = fileDesc + 1;
+		}
+
+        // Ok to send
+        int nError = SendMail(0, NULL, &message, MAPI_LOGON_UI|MAPI_DIALOG, 0);
+
+        if (nError != SUCCESS_SUCCESS)
+              return false;
+
+        return true;
+    }
+};
+
+static CStr EncodeEmail(CStr _In)
+{
+	const uint8 *pParse = (const uint8 *)_In.Str();
+	mint Len = _In.Len();
+	mint nEncode = 0;
+	while (*pParse)
+	{
+		if (*pParse < 32)
+			++nEncode;
+		++pParse;
+	}
+	CStr Ret;
+	pParse = (const uint8 *)_In.Str();
+	uint8 *pStr = (uint8 *)Ret.GetBuffer(Len + nEncode*2+1);
+	while (*pParse)
+	{
+		if (*pParse < 32)
+		{
+			CFStr Temp = CFStrF("%%%02x", *pParse);
+			*(pStr++) = Temp[0];
+			*(pStr++) = Temp[1];
+			*(pStr++) = Temp[2];
+		}
+		else
+		{
+			*pStr = *pParse;
+			++pStr;
+		}
+		++pParse;
+	}
+	*pStr = NULL;
+	return Ret;
+}
 LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTERS *_pExceptionInfo)
 {
+
+	CCrashDialog CrashDialog;
+
 	if(!MRTC_SystemInfoInternal::ms_bHandleException)
 	{
 		// If exception handling isn't wanted, just keel over and die
 		ExitProcess(0);
 	}
+
+	MRTC_SystemInfoInternal *pLocalSys = MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData;
+	CStackTraceContext *pStackTracer = pLocalSys->GetStackTraceContext();
+
+	CStr FileName;
+	CStr FileNameDumpMini;
+	CStr FileNameLog;
+	CStr FileNameDump;
+
+
+	typedef enum _MINIDUMP_TYPE {
+			MiniDumpNormal                         = 0x00000000,
+			MiniDumpWithDataSegs                   = 0x00000001,
+			MiniDumpWithFullMemory                 = 0x00000002,
+			MiniDumpWithHandleData                 = 0x00000004,
+			MiniDumpFilterMemory                   = 0x00000008,
+			MiniDumpScanMemory                     = 0x00000010,
+			MiniDumpWithUnloadedModules            = 0x00000020,
+			MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
+			MiniDumpFilterModulePaths              = 0x00000080,
+			MiniDumpWithProcessThreadData          = 0x00000100,
+			MiniDumpWithPrivateReadWriteMemory     = 0x00000200,
+			MiniDumpWithoutOptionalData            = 0x00000400,
+			MiniDumpWithFullMemoryInfo             = 0x00000800,
+			MiniDumpWithThreadInfo                 = 0x00001000,
+			MiniDumpWithCodeSegs                   = 0x00002000,
+			MiniDumpWithoutManagedState            = 0x00004000,
+		} MINIDUMP_TYPE;
 
 	CStr ExceptionInfo;
 	ExceptionInfo += "Unhandeled excepion"NL NL;
@@ -6869,19 +7478,104 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 		}
 	}
 	CStr CrashStr;
-	CrashStr = CStr() + "Game has crashed with an unhandeled exception."NL NL + Code + NL NL "Do you want to create a more detailed crashlog?";
+	CrashStr = CStr() + "Program has crashed with an unhandeled exception."NL NL + Code + NL NL "Do you want to create bug report?";
 
-	if (MessageBox(NULL, CrashStr, "Crash", MB_YESNO | MB_ICONERROR) == IDNO)
-		ExitProcess(0);
+	CStr CommentText;
+	if(ms_bAutoCoredump == false)
+	{
+		CrashDialog.m_Message = CrashStr;
+		CrashDialog.m_Title = "Crash";
 
-	ExceptionInfo += "Exception type: " + Code + NL NL;
+		if (!CrashDialog.DoMessage())
+			ExitProcess(0);
+		else
+		{
+			CommentText = CrashDialog.m_EditData;
+			ExceptionInfo += CStr("") + NL NL + "Comments: " NL NL + CommentText + "" NL NL;
+		}
+	}
+
+	CStr InfoDisplayText = "Please wait while a crash log is beeing generated" NL NL;
+	if (!ms_bAutoCoredump)
+		CrashDialog.StartInfoDisplay(InfoDisplayText + "Writing mini crash dump");
+
+	pStackTracer->Init();
+	CStr ComputerName;
+	CStr ProgramName;
+	{
+		CStr CompName;
+		CCFile File;
+		SYSTEMTIME DateTime;
+		GetLocalTime(&DateTime);
+
+		uint32 Sizee = 1024;
+		GetComputerName(CompName.GetBuffer(1024), &Sizee);
+		ComputerName = CompName;
+
+		ProgramName = gf_GetProgramPath().GetFilenameNoExt();
+		CompName = CompName + "_" + ProgramName;
+		
+		CStr Temp;
+
+		Temp = FormatStr("\\%s_%d-%02d-%02d_%02d.%02d.%02d.%03d", CompName.Str(), DateTime.wYear, DateTime.wMonth, DateTime.wDay, DateTime.wHour, DateTime.wMinute, DateTime.wSecond, DateTime.wMilliseconds);
+
+		CStr CommonCrashDumps;
+		CommonCrashDumps = "Z:\\Files\\CrashDumps";
+		
+		if (CDiskUtil::DirectoryExists(CommonCrashDumps))
+		{
+			Temp = CommonCrashDumps + Temp;
+		}
+		else
+		{
+			Temp = gf_GetProgramDirectory() + Temp;
+		}
+		
+		FileName = Temp + ".crashlog.txt";
+		FileNameDump = Temp + ".full.dmp";
+		FileNameDumpMini = Temp + ".mini.dmp";
+		FileNameLog = Temp + ".log.txt";
+
+		if (pStackTracer->MiniDumpWriteDump)
+		{
+			MINIDUMP_EXCEPTION_INFORMATION Info;
+			Info.ClientPointers = false;
+			Info.ExceptionPointers = _pExceptionInfo;
+			Info.ThreadId = GetCurrentThreadId();
+
+//			if (MessageBox(NULL, "Do you want to create a minidump?", "Crash", MB_YESNO | MB_ICONERROR) == IDYES)
+			if (1)
+			{
+				void *pFile = WindowFileHelper(FileNameDumpMini, false, true, true, true, false);
+				if (pFile)
+				{
+					::MINIDUMP_TYPE DumpType = (::MINIDUMP_TYPE )(MiniDumpWithHandleData | MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
+					if (!pStackTracer->MiniDumpWriteDump(pStackTracer->m_hProcess, GetCurrentProcessId(), pFile, DumpType, &Info, NULL, NULL))
+					{
+						MessageBox(NULL, "Failed to mini dump program", "Error", MB_OK);
+					}
+					CloseHandle(pFile);
+				}
+				else 
+					FileNameDumpMini = "";
+			}
+			else 
+				FileNameDumpMini = "";
+		}
+	}
+
+	if (CDiskUtil::FileExists(pLocalSys->m_LogFileName))
+		CopyFileA(pLocalSys->m_LogFileName, FileNameLog, false);
+	if (!ms_bAutoCoredump)
+		CrashDialog.DisplayInfo(InfoDisplayText + "Doing stack trace");
+
+	CStr MiniExceptionInfo;
+	MiniExceptionInfo += "Exception type: " + Code + NL NL;
 
 	bool bCanContinue = !(_pExceptionInfo->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE) && _pExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT;
 //		if (!bCanContinue)
-//			ExceptionInfo += "Exception is noncontinuable"NL;
+//			MiniExceptionInfo += "Exception is noncontinuable"NL;
 
-	MRTC_SystemInfoInternal *pLocalSys = MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData;
-	CStackTraceContext *pStackTracer = pLocalSys->GetStackTraceContext();
 
 	//
 	// Exception address
@@ -6890,15 +7584,16 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 
 	if (pAddressInfo)
 	{
-		ExceptionInfo += FormatStr("Exception address: 0x%0"CPU_FORMATHEX"x (%s!%s)"NL NL, (mint)_pExceptionInfo->ExceptionRecord->ExceptionAddress
+		MiniExceptionInfo += FormatStr("Exception address: 0x%0"CPU_FORMATHEX"x (%s!%s)", (mint)_pExceptionInfo->ExceptionRecord->ExceptionAddress
 			, pAddressInfo->m_pModuleName, pAddressInfo->m_pFunctionName);
 		pStackTracer->Debug_ReleaseStackTraceInfo(pAddressInfo);
 	}
 	else
 	{
-		ExceptionInfo += FormatStr("Exception address: 0x%0"CPU_FORMATHEX"x"NL NL, (mint)_pExceptionInfo->ExceptionRecord->ExceptionAddress);
+		MiniExceptionInfo += FormatStr("Exception address: 0x%0"CPU_FORMATHEX"x", (mint)_pExceptionInfo->ExceptionRecord->ExceptionAddress);
 	}		
 
+	ExceptionInfo += MiniExceptionInfo + NL NL;
 	//
 	// Stack trace
 	//
@@ -6931,6 +7626,7 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 	Platform = IMAGE_FILE_MACHINE_AMD64;
 #endif
 
+	CStr StackTrace;
 	CStackTraceContext::STACKFRAME64 StackFrame;
 	memset(&StackFrame, 0, sizeof(StackFrame));
 #ifdef CPU_X86
@@ -6959,7 +7655,7 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 
 		if (pAddressInfo)
 		{
-			ExceptionInfo += FormatStr("0x%0"CPU_FORMATHEX"x %s!%s"NL"%s:%d" NL, (mint)CodePtr
+			StackTrace += FormatStr("0x%0"CPU_FORMATHEX"x %s!%s"NL"%s:%d" NL, (mint)CodePtr
 				, pAddressInfo->m_pModuleName, pAddressInfo->m_pFunctionName
 				, pAddressInfo->m_pSourceFileName, pAddressInfo->m_SourceLine
 				);
@@ -6967,10 +7663,10 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 		}
 		else
 		{
-			ExceptionInfo += FormatStr("0x%0"CPU_FORMATHEX"x" NL, (mint)CodePtr);
+			StackTrace += FormatStr("0x%0"CPU_FORMATHEX"x" NL, (mint)CodePtr);
 		}		
-		ExceptionInfo += FormatStr("StackFrame: 0x%0"CPU_FORMATHEX"x" NL, (mint)StackFrame.AddrFrame.Offset);
-		ExceptionInfo += "" NL;
+		StackTrace += FormatStr("StackFrame: 0x%0"CPU_FORMATHEX"x" NL, (mint)StackFrame.AddrFrame.Offset);
+		StackTrace += "" NL;
 
 //			LastCode = CodePtr;
 
@@ -6998,7 +7694,7 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 
 			if (pAddressInfo)
 			{
-				ExceptionInfo += FormatStr("0x%0"CPU_FORMATHEX"x %s!%s"NL"%s:%d" NL, (mint)LastCode
+				StackTrace += FormatStr("0x%0"CPU_FORMATHEX"x %s!%s"NL"%s:%d" NL, (mint)LastCode
 					, pAddressInfo->m_pModuleName, pAddressInfo->m_pFunctionName
 					, pAddressInfo->m_pSourceFileName, pAddressInfo->m_SourceLine
 					);
@@ -7006,10 +7702,10 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 			}
 			else
 			{
-				ExceptionInfo += FormatStr("0x%0"CPU_FORMATHEX"x" NL, (mint)LastCode);
+				StackTrace += FormatStr("0x%0"CPU_FORMATHEX"x" NL, (mint)LastCode);
 			}		
-			ExceptionInfo += FormatStr("StackFrame: 0x%0"CPU_FORMATHEX"x" NL, (mint)StackFrame);
-			ExceptionInfo += "" NL;
+			StackTrace += FormatStr("StackFrame: 0x%0"CPU_FORMATHEX"x" NL, (mint)StackFrame);
+			StackTrace += "" NL;
 
 			LastCode = CodePtr;
 
@@ -7021,6 +7717,8 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 	{
 	}
 #endif
+
+	ExceptionInfo += StackTrace;
 	//
 	// Register information
 	//
@@ -7215,46 +7913,16 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 	ExceptionInfo += Stack;
 
 
-	CStr FileName;
-	CStr FileNameDumpMini;
-	CStr FileNameDump;
-
 	{
+
 		CCFile File;
-		SYSTEMTIME DateTime;
-		GetLocalTime(&DateTime);
-
-		CStr CompName;
-		uint32 Sizee = 1024;
-		GetComputerName(CompName.GetBuffer(1024), &Sizee);
-
-		CompName = CompName + "_" + gf_GetProgramPath().GetFilenameNoExt();
-		
-		CStr Temp;
-
-		Temp = FormatStr("\\%s_%d-%02d-%02d_%02d.%02d.%02d.%03d", CompName.Str(), DateTime.wYear, DateTime.wMonth, DateTime.wDay, DateTime.wHour, DateTime.wMinute, DateTime.wSecond, DateTime.wMilliseconds);
-
-		CStr CommonCrashDumps;
-		CommonCrashDumps = "Z:\\Common\\Programming\\CrashDumps";
-		
-		if (CDiskUtil::DirectoryExists(CommonCrashDumps))
-		{
-			Temp = CommonCrashDumps + Temp;
-		}
-		else
-		{
-			Temp = gf_GetProgramDirectory() + Temp;
-		}
-		
-		FileName = Temp + ".crashlog.txt";
-		FileNameDump = Temp + ".full.dmp";
-		FileNameDumpMini = Temp + ".mini.dmp";
-		
 		File.Open(FileName, CFILE_WRITE | CFILE_BINARY | CFILE_TRUNC);
 		File.Write(ExceptionInfo.Str(), ExceptionInfo.Len());
 		File.Close();
 	}
 
+	if (!ms_bAutoCoredump)
+		CrashDialog.DisplayInfo(InfoDisplayText + "Writing full dump");
 	// Mini dump
 	{
 //#ifdef M_Profile
@@ -7265,46 +7933,7 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 			Info.ExceptionPointers = _pExceptionInfo;
 			Info.ThreadId = GetCurrentThreadId();
 
-
-			typedef enum _MINIDUMP_TYPE {
-					MiniDumpNormal                         = 0x00000000,
-					MiniDumpWithDataSegs                   = 0x00000001,
-					MiniDumpWithFullMemory                 = 0x00000002,
-					MiniDumpWithHandleData                 = 0x00000004,
-					MiniDumpFilterMemory                   = 0x00000008,
-					MiniDumpScanMemory                     = 0x00000010,
-					MiniDumpWithUnloadedModules            = 0x00000020,
-					MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
-					MiniDumpFilterModulePaths              = 0x00000080,
-					MiniDumpWithProcessThreadData          = 0x00000100,
-					MiniDumpWithPrivateReadWriteMemory     = 0x00000200,
-					MiniDumpWithoutOptionalData            = 0x00000400,
-					MiniDumpWithFullMemoryInfo             = 0x00000800,
-					MiniDumpWithThreadInfo                 = 0x00001000,
-					MiniDumpWithCodeSegs                   = 0x00002000,
-					MiniDumpWithoutManagedState            = 0x00004000,
-				} MINIDUMP_TYPE;
-
-//			if (MessageBox(NULL, "Do you want to create a minidump?", "Crash", MB_YESNO | MB_ICONERROR) == IDYES)
-			if (1)
-			{
-				void *pFile = WindowFileHelper(FileNameDumpMini, false, true, true, true, false);
-				if (pFile)
-				{
-					::MINIDUMP_TYPE DumpType = (::MINIDUMP_TYPE )(MiniDumpWithHandleData | MiniDumpWithPrivateReadWriteMemory | MiniDumpWithDataSegs | MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
-					if (!pStackTracer->MiniDumpWriteDump(pStackTracer->m_hProcess, GetCurrentProcessId(), pFile, DumpType, &Info, NULL, NULL))
-					{
-						MessageBox(NULL, "Failed to mini dump program", "Error", MB_OK);
-					}
-					CloseHandle(pFile);
-				}
-				else 
-					FileNameDumpMini = "";
-			}
-			else 
-				FileNameDumpMini = "";
-//			if (MessageBox(NULL, "Do you want to create a dump?", "Crash", MB_YESNO | MB_ICONERROR) == IDYES)
-			if (1)
+			if (1)// || MessageBox(NULL, "Do you want to create a full dump?", "Crash", MB_YESNO | MB_ICONERROR) == IDYES)
 			{
 				void *pFile = WindowFileHelper(FileNameDump, false, true, true, true, false);
 				if (pFile)
@@ -7330,15 +7959,66 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 	//
 	// Message box
 	//
-	const ch8 *pProgramName = NULL;
+	const ch8 *pProgramName = ProgramName;
 	if (!pProgramName)
 		pProgramName = "The program";
 
 	bint bContinue = false;
+	if (!ms_bAutoCoredump)
 	{
-		if (bCanContinue)
+		CrashDialog.DisplayInfo(InfoDisplayText + "Waiting for user to send email");
+
+//		MailTo += StackTrace;
+#if 1
+		CStr Body = CommentText + NL NL + MiniExceptionInfo + NL NL +"Crash logs have been generated: " NL NL
+		+ "file://" + FileName + "" NL
+		+ "file://" + FileNameDumpMini + NL
+		+ "file://" + FileNameDump + NL 
+		+ "file://" + FileNameLog + NL
+		NL + "Programmer Help:" NL
+		"MODPATH=symsrv*symsrv.dll*c:\\Symbols*z:\\Files\\Symbols*http://msdl.microsoft.com/download/symbols"+ NL
+		"http://tiger.starbreeze.com/wiki/index.php/Using_crash_dumps";
+		
+		Body += NL NL"Call stack:" NL NL;
+
+		Body += StackTrace;
+
+		CSendFileTo SendTo;
+		bint bMailSent = SendTo.SendMail("Programmerare", "programmerare@starbreeze.com", CStrF("Crash report for %s running on %s", ProgramName.Str(), ComputerName.Str()), Body, FileName, FileNameLog, "CrashLog.txt", "Log.txt");
+#else
+		CStr MailTo;
+		MailTo = CStrF("mailto:Programmers<programmerare@starbreeze.com>?subject=%s&attachment=\"%s\"&body=", CStrF("Crash report for %s running on %s", ProgramName.Str(), ComputerName.Str()).Str(),
+			FileName.Str());
+		MessageBox(NULL, MailTo.Str(), "", MB_OK);
+//&attachment="\\myhost\myfolder\myfile.lis"
+		MailTo += CommentText + NL NL + MiniExceptionInfo + NL NL +"Crash logs have been generated: " NL NL +
+			
+		"file://" + FileName + NL +
+		"file://" + FileNameDumpMini + NL +
+		"file://" + FileNameLog + NL +
+		"file://" + FileNameDump + NL
+		;
+
+		CStr EncodedEmail = EncodeEmail(MailTo);
+		EncodedEmail = EncodedEmail.Unicode();
+		ShellExecuteW(NULL, L"open", (LPCWSTR)EncodedEmail.StrW(), NULL, NULL, SW_SHOWNORMAL);
+#endif
+
+		CStr SentMail = bMailSent?"A bug report mail was sent":"No bug report mail was sent";
+
+
+		CStr Message = "Crash dumps have been generated: " NL NL +
+			FileName + NL +
+			FileNameDumpMini + NL +
+			FileNameDump + NL +
+			FileNameLog + NL +
+			NL + SentMail + NL NL "You can now close this window.";
+
+		CrashDialog.DisplayInfo(Message);
+
+/*		if (bCanContinue)
 			bContinue = MessageBoxA(NULL, 
-			CStr(pProgramName) + " has encountered an unhandled exception. Crash log files has been generated: " NL NL +
+			CStr(pProgramName) + " has encountered an unhandled exception. Crash logs have been generated: " NL NL +
 			FileName + "" NL
 //#ifdef M_Profile
 			+ FileNameDumpMini + "" NL +
@@ -7348,14 +8028,18 @@ LONG WINAPI MRTC_SystemInfoInternal::UnhandledException(struct _EXCEPTION_POINTE
 			, "Exception", MB_YESNO | MB_ICONERROR) == IDYES;
 		else
 			MessageBoxA(NULL, 
-			CStr(pProgramName) + " has encountered an unhandled exception. Crash log files has been generated: " NL NL +
+			CStr(pProgramName) + " has encountered an unhandled exception. Crash logs have been generated: " NL NL +
 			FileName + "" NL
 //#ifdef M_Profile
 			+ FileNameDumpMini + "" NL +
 			FileNameDump
 //#endif
-			, "Exception", MB_OK | MB_ICONERROR);
+			, "Exception", MB_OK | MB_ICONERROR);*/
+
 	}
+
+	if (!ms_bAutoCoredump)
+		CrashDialog.StopInfoDisplay(false);
 
 	if (bContinue)
 	{
@@ -7381,6 +8065,12 @@ void MRTC_SystemInfo::OS_EnableUnhandledException(bool _bEnable)
 {
 	MRTC_SystemInfoInternal::ms_bHandleException	= _bEnable;
 }
+
+void MRTC_SystemInfo::OS_EnableAutoCoredumpOnException(bool _bEnabled)
+{
+	MRTC_SystemInfoInternal::ms_bAutoCoredump = _bEnabled;
+}
+
 #endif
 
 #endif	// PLATFORM_WIN_PC

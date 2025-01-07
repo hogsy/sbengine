@@ -208,7 +208,7 @@ void* CImagePalette::GetAcceleratorTable(int _SrcFmt, int _DestFmt, int _TableFm
 
 							for(int sh = 0; sh < PAL_ACCEL_NSTEPS; sh++)
 							{
-			/*					fp4 s = (fp4) sh / (fp4) PAL_ACCEL_NSTEPS;
+			/*					fp32 s = (fp32) sh / (fp32) PAL_ACCEL_NSTEPS;
 								for(int x = 0; x < 256; x++)
 									mpP8_P8_Shade[sh*256 + x] = 
 										_pDestPal->GetIndex(mpPal[x] * s);*/
@@ -216,14 +216,14 @@ void* CImagePalette::GetAcceleratorTable(int _SrcFmt, int _DestFmt, int _TableFm
 								int h = PAL_ACCEL_NSTEPS >> 1;
 								if (sh <= h)
 								{
-									fp4 s = (fp4)sh / (fp4)h;
+									fp32 s = (fp32)sh / (fp32)h;
 									for (int x = 0; x < mnColors; x++)
 										mpP8_P8_Shade[sh*256 + x] = 
 											_pDestPal->GetIndex(mpPal[x] * s);
 								}
 								else
 								{
-									int add = 255.0f*fp4(sh - h) / (fp4)h / 2.0f;
+									int add = 255.0f*fp32(sh - h) / (fp32)h / 2.0f;
 									for (int x = 0; x < mnColors; x++)
 										mpP8_P8_Shade[sh*256 + x] = 
 											_pDestPal->GetIndex(CPixel32(mpPal[x].GetR()+add, mpPal[x].GetG()+add, mpPal[x].GetB()+add));
@@ -271,13 +271,13 @@ void* CImagePalette::GetAcceleratorTable(int _SrcFmt, int _DestFmt, int _TableFm
 								int h = PAL_ACCEL_NSTEPS >> 1;
 								if (sh <= h)
 								{
-									fp4 s = (fp4)sh / (fp4)h;
+									fp32 s = (fp32)sh / (fp32)h;
 									for (int x = 0; x < mnColors; x++)
 										mpP8_565_Shade[sh*256 + x] = (mpPal[x] * s).operator CPixel565();
 								}
 								else
 								{
-									int add = 255.0f*fp4(sh - h) / (fp4)h / 2.0f;
+									int add = 255.0f*fp32(sh - h) / (fp32)h / 2.0f;
 									for (int x = 0; x < mnColors; x++)
 										mpP8_565_Shade[sh*256 + x] = 
 											CPixel32(mpPal[x].GetR()+add, mpPal[x].GetG()+add, mpPal[x].GetB()+add).operator CPixel565();

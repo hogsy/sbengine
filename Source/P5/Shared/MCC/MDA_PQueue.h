@@ -17,8 +17,7 @@
 #ifndef _INC_MPQUEUE
 #define _INC_MPQUEUE
 
-#include "MCC.h"
-
+//#include "MCC.h"
 
 
 // -------------------------------------------------------------------
@@ -27,8 +26,8 @@
 // A priority-queue based on a binary heap.
 // No memory allocation except on creation.
 
-template<class T>
-class TPriorityQueue2
+template<class TTYPE, typename TCONTAINER>
+class TPriorityQueue2Base
 {
 	// The class T must implement: int GetPriority() const
 protected:
@@ -40,54 +39,58 @@ protected:
 	bool m_bIsAscendingHeap;
 	int m_CurrentSize;
 	int m_MaxElem;
-	TArray<T*> m_lpElem;
-	T** m_ppElem;
+	TCONTAINER m_lpElem;
+	TTYPE** m_ppElem;
 
 public:
-	TPriorityQueue2();
+	TPriorityQueue2Base();
 	void Create(bool _bAscending, int _MaxElements);
 	bool IsFull() const;
 	bool IsEmpty() const;
 
-	bool Push(T* _pElem);
-	T* Pop();
+	bool Push(TTYPE* _pElem);
+	TTYPE* Pop();
 };
+
+#ifndef PLATFORM_VPU
+	template<class T> class TPriorityQueue2 : public TPriorityQueue2Base<T, TArray<T*> > {};
+#endif
 
 // -------------------------------------------------------------------
 //  TPriorityQueue2, Implementation
 // -------------------------------------------------------------------
-template<class T>
-TPriorityQueue2<T>::TPriorityQueue2()
+template<class TTYPE, typename TCONTAINER>
+TPriorityQueue2Base<TTYPE,TCONTAINER>::TPriorityQueue2Base()
 {
 	m_bIsAscendingHeap = true;
 	m_CurrentSize = 0;
 }
 
-template<class T>
-void TPriorityQueue2<T>::Create(bool _bAscending, int _MaxElem)
+template<class TTYPE, typename TCONTAINER>
+void TPriorityQueue2Base<TTYPE,TCONTAINER>::Create(bool _bAscending, int _MaxElem)
 {
 	m_MaxElem = _MaxElem;
 	m_bIsAscendingHeap = _bAscending;
 	m_lpElem.SetLen(_MaxElem + 1); // +1 because the first push doesn't seem to use index 0 - JA
 	m_ppElem = m_lpElem.GetBasePtr();
-	FillChar(m_lpElem.GetBasePtr(), m_lpElem.ListSize(), 0);	// Not necessary, but we don't like to have random data around.
+	//FillChar(m_lpElem.GetBasePtr(), m_lpElem.ListSize(), 0);	// Not necessary, but we don't like to have random data around.
 	m_CurrentSize = 0;
 }
 
-template<class T>
-bool TPriorityQueue2<T>::IsFull() const
+template<class TTYPE, typename TCONTAINER>
+bool TPriorityQueue2Base<TTYPE,TCONTAINER>::IsFull() const
 {
 	return (m_CurrentSize == m_MaxElem) ? true : false;
 }
 
-template<class T>
-bool TPriorityQueue2<T>::IsEmpty() const
+template<class TTYPE, typename TCONTAINER>
+bool TPriorityQueue2Base<TTYPE,TCONTAINER>::IsEmpty() const
 {
 	return (m_CurrentSize) ? false : true;
 }
 
-template<class T>
-bool TPriorityQueue2<T>::Push(T* _pElem)
+template<class TTYPE, typename TCONTAINER>
+bool TPriorityQueue2Base<TTYPE,TCONTAINER>::Push(TTYPE* _pElem)
 {
 	if(IsFull())
 	{
@@ -96,7 +99,7 @@ bool TPriorityQueue2<T>::Push(T* _pElem)
 	else
 	{
 		// Allocate and store element.
-		T* pElem = _pElem;
+		TTYPE* pElem = _pElem;
 
 		m_CurrentSize++;
 		int i = m_CurrentSize;
@@ -128,8 +131,8 @@ bool TPriorityQueue2<T>::Push(T* _pElem)
 	}
 }
 
-template<class T>
-T* TPriorityQueue2<T>::Pop()
+template<class TTYPE, typename TCONTAINER>
+TTYPE* TPriorityQueue2Base<TTYPE,TCONTAINER>::Pop()
 {
 	int i;
 
@@ -141,8 +144,8 @@ T* TPriorityQueue2<T>::Pop()
 		return NULL;
 	}
 
-	T* pMaxElem = m_ppElem[IndexRoot()];
-	T* pLastElem = m_ppElem[m_CurrentSize--];
+	TTYPE* pMaxElem = m_ppElem[IndexRoot()];
+	TTYPE* pLastElem = m_ppElem[m_CurrentSize--];
 
 	if(m_bIsAscendingHeap)
 	{

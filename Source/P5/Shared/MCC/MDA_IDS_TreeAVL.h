@@ -16,6 +16,7 @@
 
 #ifndef DIds_Inc_Mda_Ids_TreeAVL_h
 #define DIds_Inc_Mda_Ids_TreeAVL_h
+
 #define DIdsAssert M_ASSERT
 #define DIdsPInlineS M_INLINE
 #define DIdsPInlineM M_INLINE
@@ -23,6 +24,7 @@
 #define DIdsPNoInline
 #define DIdsPInlineXL
 #define DIdsDefaultAllocator NIds::NMem::CAllocator_Heap<0> 
+
 #define DIdsPDebugBreak M_BREAKPOINT
 
 #if defined(_DEBUG)
@@ -33,91 +35,85 @@
 #define DIdsTreeCheckRemove
 #endif
 
-typedef int bint;
 //typedef unsigned int mint;
 typedef char ch8;
 #define DNP 0
 
+class CDefaultPointerHolder
+{
+public:
+	union
+	{
+		void *m_pData;
+		const char *m_pCharPointerData;
+	};
+
+	DIdsPInlineS void * Get() const
+	{
+		return m_pData;
+	}
+
+	DIdsPInlineS void Set(void *_pAddress)
+	{
+		m_pData = _pAddress;
+	}
+
+	DIdsPInlineS void Set(CDefaultPointerHolder &_Address)
+	{
+		m_pData = _Address.m_pData;
+	}        
+};
+
+template <typename t_CPointer, typename t_CTyped>
+class TCDynamicPtr
+{
+public:
+    t_CPointer m_PtrData;
+
+	// We cannot have consturtors, that would make us non aggregate
+/*
+	DIdsPInlineS TCDynamicPtr()
+	{
+	}
+
+	DIdsPInlineS TCDynamicPtr(t_CTyped *_pSetTo)
+	{
+		m_PtrData.Set((void *)_pSetTo);
+	}
+	*/
+
+	DIdsPInlineS TCDynamicPtr &operator = (t_CTyped *_pSetTo)
+	{
+		m_PtrData.Set((void *)_pSetTo);
+		return *this;
+	}
+
+	DIdsPInlineS bint operator == (t_CTyped *_pCompareTo)
+	{
+		return (t_CTyped *)m_PtrData.Get() == _pCompareTo;
+	}
+    
+	/*const TCDynamicPtr &operator = (const t_CTyped *_pSetTo)
+	{
+		m_PtrData = (void *)_pSetTo;
+		return *this;
+	}*/
+
+	DIdsPInlineS operator t_CTyped * () const
+	{			
+		return (t_CTyped *)m_PtrData.Get();
+	}
+
+	DIdsPInlineS t_CTyped * operator -> () const
+	{
+		return (t_CTyped *)m_PtrData.Get();
+	}
+    
+};
+
 namespace NIds
 {
 
-	class CDefaultPointerHolder
-	{
-	public:
-		union
-		{
-			void *m_pData;
-			const char *m_pCharPointerData;
-		};
-
-		DIdsPInlineS void * Get() const
-		{
-			return m_pData;
-		}
-
-		DIdsPInlineS void Set(void *_pAddress)
-		{
-			m_pData = _pAddress;
-		}
-
-		DIdsPInlineS void Set(CDefaultPointerHolder &_Address)
-		{
-			m_pData = _Address.m_pData;
-		}        
-	};
-
-	template <typename t_CPointer, typename t_CTyped>
-		class TCDynamicPtr
-	{
-	public:
-#ifdef _DEBUG
-		union
-		{
-			t_CPointer m_PtrData;
-			t_CTyped *m_pDebugData;
-		};
-#else
-        t_CPointer m_PtrData;
-#endif
-
-/*		DIdsPInlineS TCDynamicPtr()
-		{
-		}
-
-		DIdsPInlineS TCDynamicPtr(t_CTyped *_pSetTo)
-		{
-			m_PtrData = (void *)_pSetTo;
-			return *this;
-		}*/
-
-		DIdsPInlineS TCDynamicPtr &operator = (t_CTyped *_pSetTo)
-		{
-			m_PtrData.Set((void *)_pSetTo);
-			return *this;
-		}
-
-		DIdsPInlineS bint operator == (t_CTyped *_pCompareTo)
-		{
-			return (t_CTyped *)m_PtrData.Get() == _pCompareTo;
-		}
-        
-		/*const TCDynamicPtr &operator = (const t_CTyped *_pSetTo)
-		{
-			m_PtrData = (void *)_pSetTo;
-			return *this;
-		}*/
-
-		DIdsPInlineS operator t_CTyped * () const
-		{			
-			return (t_CTyped *)m_PtrData.Get();
-		}
-
-		DIdsPInlineS t_CTyped * operator -> () const
-		{
-			return (t_CTyped *)m_PtrData.Get();
-		}
-        
-	};
 
 	namespace NMem
 	{
@@ -150,7 +146,184 @@ namespace NIds
 
 			DIdsPInlineS static mint Size(void *_pBlock)
 			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
 				return MRTC_MemSize(_pBlock);
+#endif
+			}
+
+			DIdsPInlineS static bint CanCommit()
+			{
+				return false;
+			}
+
+			DIdsPInlineS static bint CanProtect()
+			{
+				return false;
+			}
+
+			DIdsPInlineS static bint CanFail()
+			{
+				return false;
+			}
+
+			DIdsPInlineS static void Protect(void *_pMem, mint _Size, auint _Protect)
+			{
+
+			}
+
+			DIdsPInlineS static void *AllocDebug(mint _Size, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+
+#else
+				return M_ALLOCDEBUG(_Size, _pFile, _Line);
+#endif
+			}
+
+			DIdsPInlineS static void *Alloc(mint _Size, mint _Location = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_ALLOC(_Size);
+#endif
+			}
+
+			DIdsPInlineS static void *AllocAlignDebug(mint _Size, mint _Align, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_ALLOCDEBUGALIGN(_Size, _Align, _pFile, _Line);
+#endif
+			}
+
+			DIdsPInlineS static void *AllocAlign(mint _Size, mint _Align, mint _Location = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_ALLOCALIGN(_Size, _Align);
+#endif
+			}
+
+			DIdsPInlineS static void *Realloc(void *_pMem, mint _Size, mint _Location = 0, mint _OldSize = 0, mint _OldLocation = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_REALLOC(_pMem, _Size);
+#endif
+			}
+
+			DIdsPInlineS static void *ReallocDebug(void *_pMem, mint _Size, mint _Location, mint _OldSize, mint _OldLocation, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_REALLOCDEBUG(_pMem, _Size, _pFile, _Line);
+#endif
+			}
+
+			DIdsPInlineS static void *Resize(void *_pMem, mint _Size, mint _Location = 0, mint _OldSize = 0, mint _OldLocation = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_REALLOC(_pMem, _Size);
+#endif
+			}
+
+			DIdsPInlineS static void *ResizeDebug(void *_pMem, mint _Size, mint _Location, mint _OldSize, mint _OldLocation, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_REALLOCDEBUG(_pMem, _Size, _pFile, _Line);
+#endif
+			}
+
+			DIdsPInlineS static void *AllocNoCommit(mint _Size, mint _Location = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return M_ALLOC(_Size);
+#endif
+			}
+
+			DIdsPInlineS static void Commit(void *_pMem, mint _Size)
+			{
+			}
+
+			DIdsPInlineS static void Decommit(void *_pMem, mint _Size)
+			{
+			}
+
+			DIdsPInlineS static void Free(void *_pBlock, mint _Size = 0, mint _Location = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+#else
+				MRTC_MemFree(_pBlock);
+#endif
+			}
+		};	
+
+		class CAllocator_Virtual
+		{
+		public:
+
+			DIdsPInlineS static mint StaticAddresses()
+			{
+				return 0;
+			}
+
+			typedef CDefaultPointerHolder CPtrHolder;
+			
+			DIdsPInlineS static mint GranularityAlloc()
+			{
+#ifdef PLATFORM_XENON
+				return 128;
+#elif defined(PLATFORM_PS3)
+				return 128;
+#else
+				return 4096;
+#endif
+			}
+
+			DIdsPInlineS static mint GranularityCommit()
+			{
+				return 4096;
+			}
+
+			DIdsPInlineS static mint GranularityProtect()
+			{
+				return 4096;
+			}
+
+			DIdsPInlineS static mint Size(void *_pBlock)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+
+#else
+				return MRTC_SystemInfo::OS_MemSize(_pBlock);
+#endif
 			}
 
 			DIdsPInlineS static bint CanCommit()
@@ -170,37 +343,77 @@ namespace NIds
 
 			DIdsPInlineS static void *AllocDebug(mint _Size, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
 			{
-				return M_ALLOCDEBUG(_Size, _pFile, _Line);
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+
+#else
+				return MRTC_SystemInfo::OS_Alloc(_Size, 1);
+#endif
 			}
 
 			DIdsPInlineS static void *Alloc(mint _Size, mint _Location = 0)
 			{
-				return M_ALLOC(_Size);
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return MRTC_SystemInfo::OS_Alloc(_Size, 1);
+#endif
+			}
+
+			DIdsPInlineS static void *AllocAlignDebug(mint _Size, mint _Align, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return MRTC_SystemInfo::OS_Alloc(_Size, _Align);
+#endif
+			}
+
+			DIdsPInlineS static void *AllocAlign(mint _Size, mint _Align, mint _Location = 0)
+			{
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return MRTC_SystemInfo::OS_Alloc(_Size, _Align);
+#endif
 			}
 
 			DIdsPInlineS static void *Realloc(void *_pMem, mint _Size, mint _Location = 0, mint _OldSize = 0, mint _OldLocation = 0)
 			{
-				return M_REALLOC(_pMem, _Size);
+				M_BREAKPOINT; // Should not be called
+				return 0;
 			}
 
 			DIdsPInlineS static void *ReallocDebug(void *_pMem, mint _Size, mint _Location, mint _OldSize, mint _OldLocation, const ch8 *_pFile, aint _Line, aint _Flags = 0)
 			{
-				return M_REALLOCDEBUG(_pMem, _Size, _pFile, _Line);
+				M_BREAKPOINT; // Should not be called
+				return 0;
 			}
 
 			DIdsPInlineS static void *Resize(void *_pMem, mint _Size, mint _Location = 0, mint _OldSize = 0, mint _OldLocation = 0)
 			{
-				return M_REALLOC(_pMem, _Size);
+				M_BREAKPOINT; // Should not be called
+				return 0;
 			}
 
 			DIdsPInlineS static void *ResizeDebug(void *_pMem, mint _Size, mint _Location, mint _OldSize, mint _OldLocation, const ch8 *_pFile, aint _Line, aint _Flags = 0)
 			{
-				return M_REALLOCDEBUG(_pMem, _Size, _pFile, _Line);
+				M_BREAKPOINT; // Should not be called
+				return 0;
 			}
 
 			DIdsPInlineS static void *AllocNoCommit(mint _Size, mint _Location = 0)
 			{
-				return M_ALLOC(_Size);
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+				return 0;
+#else
+				return MRTC_SystemInfo::OS_Alloc(_Size, 1);
+#endif
 			}
 
 			DIdsPInlineS static void Commit(void *_pMem, mint _Size)
@@ -213,15 +426,18 @@ namespace NIds
 
 			DIdsPInlineS static void Free(void *_pBlock, mint _Size = 0, mint _Location = 0)
 			{
-				MRTC_MemFree(_pBlock);
+#ifdef M_COMPILING_ON_VPU
+				M_BREAKPOINT; // Should not be called
+#else
+				return MRTC_SystemInfo::OS_Free(_pBlock);
+#endif
 			}
 		};	
 	}
 
+
 	namespace NTree
 	{
-
-
 
 		template <typename t_CData, typename t_CKey>
 		class CTreeCompare_Default
@@ -1364,45 +1580,6 @@ namespace NIds
 			template <typename t_CContext>
 			DIdsPInlineM static void fp_Insert(CLinkCData &_pObject, CLinkData *_pObjectToInsert, t_CContext _Context)
 			{
-#if 0
-				class CStackObj
-				{
-					mint m_pStack;
-				public:
-					DIdsPInlineS void SetAll(CLinkCData *_pPtr, mint _Larger)
-					{
-						m_pStack = ((mint)_pPtr | _Larger);
-					}
-					DIdsPInlineS CLinkCData *GetStack() const
-					{
-						return (CLinkCData *)(m_pStack & (~mint(1)));
-					}
-					DIdsPInlineS mint GetCompare() const
-					{
-						return m_pStack & mint(1);
-					}
-				};
-#else
-				class CStackObj
-				{
-					CLinkCData * m_pStack;
-					aint m_Compare;
-				public:
-					DIdsPInlineS void SetAll(CLinkCData *_pPtr, aint _Larger)
-					{
-						m_pStack = _pPtr;
-						m_Compare = _Larger;
-					}
-					DIdsPInlineS CLinkCData *GetStack() const
-					{
-						return m_pStack;
-					}
-					DIdsPInlineS aint GetCompare() const
-					{
-						return m_Compare;
-					}
-				};
-#endif
 
 				const int Size = ((sizeof(void *) * 8) - TCountBits<sizeof(CLinkData)>::ENumBits + 1) * 2;
 				CStackObj Stack[Size]; // Depth of perfect tree * 2
@@ -1470,7 +1647,7 @@ namespace NIds
 				((CLinkType *)pToInsert)->SetTree(this);
 				DIdsAssert(pToInsert->GetSkew() == CLinkData::EAVLTreeSkew_NotInTree, "Must not be in tree already");
 				
-				fp_InsertLowStack(m_Root, pToInsert, _Context);
+				fp_Insert(m_Root, pToInsert, _Context);
 			}
 
 			template <typename t_CContext>
@@ -2428,7 +2605,8 @@ namespace NIds
 				{
 					CData *pData = GetRoot();
 					f_Remove(pData, _Context);
-					delete pData;
+					pData->~CData();
+					CAllocator::Free(pData);
 				}
 			}
 
@@ -2693,7 +2871,7 @@ namespace NIds
 				public:\
 					DIdsPInlineS static aint GetOffset()\
 					{\
-						const static _Class *pPtr = 0;\
+						const _Class *pPtr = 0;\
 						return (aint)(void *)(&((pPtr)->_Member));\
 					}\
 				};\
@@ -2703,7 +2881,7 @@ namespace NIds
         | Pointer holder is void *																			|
         |___________________________________________________________________________________________________|
         \***************************************************************************************************/
-#		define DIdsTreeAVL_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<NIds::CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVL_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVL_Member(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVL_LinkType(_cClass, _Member, _cKey, _cCompare) _Member;
 
 #		define DIdsTreeAVL_Link(_cClass, _Member, _cKey, _cCompare) \
@@ -2711,7 +2889,7 @@ namespace NIds
 					DIdsTreeAVL_Member(_cClass, _Member, _cKey, _cCompare)
 
 
-#		define DIdsTreeAVLAligned_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<NIds::CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLAligned_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLAligned_Member(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLAligned_LinkType(_cClass, _Member, _cKey, _cCompare) _Member;
 
 #		define DIdsTreeAVLAligned_Link(_cClass, _Member, _cKey, _cCompare) \
@@ -2719,14 +2897,14 @@ namespace NIds
 					DIdsTreeAVLAligned_Member(_cClass, _Member, _cKey, _cCompare)
 					
 					
-#		define DIdsTreeAVLA_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<NIds::CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLA_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLA_Member(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLA_LinkType(_cClass, _Member, _cKey, _cCompare) _Member;
 
 #		define DIdsTreeAVLA_Link(_cClass, _Member, _cKey, _cCompare) \
 					DIdsTreeAVL_Trans(_cClass, _Member) \
 					DIdsTreeAVLA_Member(_cClass, _Member, _cKey, _cCompare)
 
-#		define DIdsTreeAVLAlignedA_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<NIds::CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLAlignedA_LinkType(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<CDefaultPointerHolder>, _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLAlignedA_Member(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLAlignedA_LinkType(_cClass, _Member, _cKey, _cCompare) _Member;
 					
 #		define DIdsTreeAVLAlignedA_Link(_cClass, _Member, _cKey, _cCompare) \
@@ -2734,7 +2912,7 @@ namespace NIds
 					DIdsTreeAVLAlignedA_Member(_cClass, _Member, _cKey, _cCompare)
 					
 					
-#		define DIdsTreeAVL_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<NIds::CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVL_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVL_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVL_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) _Member;
 					
 #		define DIdsTreeAVL_Link_FromTemplate(_cClass, _Member, _cKey, _cCompare) \
@@ -2742,7 +2920,7 @@ namespace NIds
 					DIdsTreeAVL_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare)
 					
 					
-#		define DIdsTreeAVLAligned_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<NIds::CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLAligned_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLink< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLAligned_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLAligned_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) _Member;
 					
 #		define DIdsTreeAVLAligned_Link_FromTemplate(_cClass, _Member, _cKey, _cCompare) \
@@ -2750,14 +2928,14 @@ namespace NIds
 					DIdsTreeAVLAligned_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare)
 					
 					
-#		define DIdsTreeAVLA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<NIds::CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkData<CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLA_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) _Member;
 					
 #		define DIdsTreeAVLA_Link_FromTemplate(_cClass, _Member, _cKey, _cCompare) \
 					DIdsTreeAVL_Trans(_cClass, _Member) \
 					DIdsTreeAVLA_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare)
 					
-#		define DIdsTreeAVLAlignedA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<NIds::CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
+#		define DIdsTreeAVLAlignedA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) NIds::NTree::TCAVLLinkAggregate< NIds::NTree::TCAVLTreeParams<_cClass, _cKey, NIds::NTree::TCAVLLinkAlignedData<CDefaultPointerHolder>, typename _cClass::CAVLTree_Translator##_Member, _cCompare, DIdsDefaultAllocator > >
 #		define DIdsTreeAVLAlignedA_Member_FromTemplate(_cClass, _Member, _cKey, _cCompare) DIdsTreeAVLAlignedA_LinkType_FromTemplate(_cClass, _Member, _cKey, _cCompare) _Member;
 					
 #		define DIdsTreeAVLAlignedA_Link_FromTemplate(_cClass, _Member, _cKey, _cCompare) \
@@ -2929,12 +3107,15 @@ namespace NIds
 
 			DIdsPInlineXL void Link(TCDLinkAggregateListNoPrevPtr *_pLinkAfter)
 			{
-				if (GetNext())
-				{	// We unlink first in case we already are in a list
-					UnlinkInternal();
-				}
+				if (_pLinkAfter != this)
+				{
+					if (GetNext())
+					{	// We unlink first in case we already are in a list
+						UnlinkInternal();
+					}
 
-				LinkNoUnlink(_pLinkAfter);
+					LinkNoUnlink(_pLinkAfter);
+				}
 			}
 
 			DIdsPInlineS void LinkNoUnlink(TCDLinkAggregateListNoPrevPtr *_pLinkAfter)
@@ -3123,23 +3304,28 @@ namespace NIds
 
 			DIdsPInlineXL void Link(TCDLinkAggregate *_pLinkAfter)
 			{
-				if (GetNext())
-				{	// We unlink first in case we already are in a list
-					GetNext()->SetPrev(GetPrev());
-					GetPrev()->SetNext(GetNext());
+				if (_pLinkAfter != this)
+				{
+					if (GetNext())
+					{	// We unlink first in case we already are in a list
+						GetNext()->SetPrev(GetPrev());
+						GetPrev()->SetNext(GetNext());
+					}
+					TCDLinkAggregate *pNext = _pLinkAfter->GetNext();
+					SetPrevInit(_pLinkAfter);
+					SetNext(pNext);
+					pNext->SetPrev(this);
+					_pLinkAfter->SetNext(this);
 				}
-				SetPrevInit(_pLinkAfter);
-				SetNext(_pLinkAfter->GetNext());
-				GetNext()->SetPrev(this);
-				GetPrev()->SetNext(this);
 			}
 
 			DIdsPInlineS void LinkNoUnlink(TCDLinkAggregate *_pLinkAfter)
 			{
+				TCDLinkAggregate *pNext = _pLinkAfter->GetNext();
 				SetPrevInit(_pLinkAfter);
-				SetNext(_pLinkAfter->GetNext());
-				GetNext()->SetPrev(this);
-				GetPrev()->SetNext(this);
+				SetNext(pNext);
+				pNext->SetPrev(this);
+				_pLinkAfter->SetNext(this);
 			}
 
 			DIdsPInlineXL void Unlink()
@@ -3226,9 +3412,9 @@ namespace NIds
 			DIdsPInlineS void TransferList(TCDLinkAggregate *_pFirst, TCDLinkAggregate *_pLast)
 			{
 				SetNextInitListLink(_pFirst);
-				GetNext()->SetPrev(this);
+				if (GetNext()) GetNext()->SetPrev(this);
                 SetPrevInitListLink(_pLast);
-				GetPrev()->SetNext(this);
+				if (GetPrev()) GetPrev()->SetNext(this);
 			}
 
 			DIdsPInlineS bint IsInList()
@@ -3425,7 +3611,7 @@ namespace NIds
 			DIdsPInlineS static t_CData *GetNext(t_CData *_pCurrent)
 			{					
 				t_CLink *pNext = TCDLinkListAggregate::LinkFromMember(_pCurrent)->GetNext();
-				if (pNext)
+				if (pNext && !pNext->IsListLink())
 					return TCDLinkListAggregate::MemberFromLink(pNext);
 				else
 					return DNP;
@@ -3434,7 +3620,7 @@ namespace NIds
 			DIdsPInlineS static t_CData *GetPrev(t_CData *_pCurrent)
 			{					
 				t_CLink *pPrev = TCDLinkListAggregate::LinkFromMember(_pCurrent)->GetPrev();
-				if (pPrev)
+				if (pPrev && !pPrev->IsListLink())
 					return TCDLinkListAggregate::MemberFromLink(pPrev);
 				else
 					return DNP;
@@ -3460,7 +3646,8 @@ namespace NIds
 			{
 				while(t_CData *pCurrent = GetLast())
 				{
-					delete pCurrent;
+					pCurrent->~t_CData();
+					t_CAllocator::Free(pCurrent);
 				}
 			}
 
@@ -4084,7 +4271,7 @@ namespace NIds
 				t_CLink *pCurrent = GetLink();
 				t_CLink *pPrev = pCurrent;
 				pCurrent = pCurrent->GetNext();
-				while (pCurrent)
+				while (!pCurrent->IsListLink())
 				{
 					if (pCurrent->GetPrev() != pPrev)
 					{
@@ -4098,7 +4285,7 @@ namespace NIds
 				pCurrent = GetLink();
 				pPrev = pCurrent;
 				pCurrent = pCurrent->GetPrev();
-				while (pCurrent)
+				while (!pCurrent->IsListLink())
 				{
 					if (pCurrent->GetNext() != pPrev)
 					{
@@ -4355,7 +4542,9 @@ namespace NIds
 				{
 					t_CData *pCurrent = GetCurrent();
 					++(*this);
-					delete pCurrent;
+
+					pCurrent->~t_CData();
+					t_CAllocator::Free(pCurrent);
 				}
 
 				void Remove()
@@ -4614,7 +4803,7 @@ namespace NIds
 				public:\
 					DIdsPInlineS static aint GetOffset()\
 					{\
-						const static _Class *pPtr = 0;\
+						const _Class *pPtr = 0;\
 						return (aint)(void *)(&((pPtr)->_Member));\
 					}\
 				};
@@ -4831,7 +5020,7 @@ namespace NIds
 
 			DIdsPInlineS void Construct()
 			{
-#				ifdef _DEBUG
+#				ifdef M_Profile
 					m_pNext = DNP;
 #				endif
 			}
@@ -4852,7 +5041,7 @@ namespace NIds
 			{
 				DIdsAssert(_pPrev, "You better know what you are doing");
 				_pPrev->m_pNext = m_pNext;
-#				ifdef _DEBUG
+#				ifdef M_Profile
 					m_pNext = DNP;
 #				endif
 			}
@@ -4866,7 +5055,7 @@ namespace NIds
 			DIdsPInlineS void UnsafeUnlink(TCSLinkAggr *_pPrev)
 			{
 				_pPrev->m_pNext = m_pNext;
-#				ifdef _DEBUG
+#				ifdef M_Profile
 					m_pNext = DNP;
 #				endif
 			}
@@ -5017,7 +5206,9 @@ namespace NIds
 				{			
 					t_CData *pToDelete = MemberFromLink(m_Data.GetFirst().m_pNext);
 					m_Data.GetFirst().m_pNext->Unlink(&m_Data.GetFirst());
-					delete pToDelete;
+
+					pToDelete->~t_CData();
+					t_CAllocator::Free(pToDelete);
 				}
 
 				if (m_Data.HasLast())
@@ -5083,7 +5274,9 @@ namespace NIds
 			void Delete(t_CData *_pToDelete)
 			{
 				Remove(_pToDelete);
-				delete _pToDelete;
+
+				_pToDelete->~t_CData();
+				t_CAllocator::Free(_pToDelete);
 			}
 
 			DIdsPInlineS t_CData *GetFirst()
@@ -5927,7 +6120,7 @@ namespace NIds
 				public:\
 					DIdsPInlineS static aint GetOffset()\
 					{\
-						const static _Class *pPtr = 0;\
+						const _Class *pPtr = 0;\
 						return (aint)(void *)(&((pPtr)->_Member));\
 					}\
 				};\

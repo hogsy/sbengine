@@ -1,0 +1,199 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_MCC", "Shared\MCC\Lib_MCC.vcproj", "{FE981AE8-F6D5-4657-BB64-098285914E56}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_MSystem", "Shared\MOS\MSystem\Lib_MSystem.vcproj", "{6E50C018-B112-4558-8DF8-8FD51036E234}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_XR", "Shared\MOS\XR\Lib_XR.vcproj", "{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_XRClasses", "Shared\MOS\Libs\XRClasses\Lib_XRClasses.vcproj", "{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameClassesMain", "Projects\Main\GameClasses\Lib_GameClassesMain.vcproj", "{1FF5273B-E257-4781-922D-295501A20BE9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameWorld", "Projects\Main\GameWorld\Lib_GameWorld.vcproj", "{391E0574-83D5-4F51-81EB-5591AAF56EF3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exe_Main_PS3", "Projects\Main\Exe_PS3\Exe_Main_PS3.vcproj", "{FFD3010D-F6C1-42E4-A66C-C399B2200F93}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8} = {E1993900-5D3F-4118-B2E9-685EC0B43BF8}
+		{6E50C018-B112-4558-8DF8-8FD51036E234} = {6E50C018-B112-4558-8DF8-8FD51036E234}
+		{877B791A-47E4-40DD-90D5-70A14203699C} = {877B791A-47E4-40DD-90D5-70A14203699C}
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6} = {A9D77F25-F48B-44CA-AEE9-CF4856780AF6}
+		{1FF5273B-E257-4781-922D-295501A20BE9} = {1FF5273B-E257-4781-922D-295501A20BE9}
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5} = {58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3} = {391E0574-83D5-4F51-81EB-5591AAF56EF3}
+		{1CE00D93-4D57-4051-9464-1778D979D6C2} = {1CE00D93-4D57-4051-9464-1778D979D6C2}
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62} = {014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}
+		{FE981AE8-F6D5-4657-BB64-098285914E56} = {FE981AE8-F6D5-4657-BB64-098285914E56}
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403} = {28B6E7FA-F1C0-4739-941C-26D17CBA7403}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameClassesObjChar", "Projects\Main\GameClasses\Lib_GameClassesObjChar.vcproj", "{28B6E7FA-F1C0-4739-941C-26D17CBA7403}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameClassesObjMisc", "Projects\Main\GameClasses\Lib_GameClassesObjMisc.vcproj", "{877B791A-47E4-40DD-90D5-70A14203699C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameClassesModelsAI", "Projects\Main\GameClasses\Lib_GameClassesModelsAI.vcproj", "{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_GameClassesOther", "Projects\Main\GameClasses\Lib_GameClassesOther.vcproj", "{1CE00D93-4D57-4051-9464-1778D979D6C2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exe_Main_PS3Build", "Projects\Main\Exe_PS3\Exe_Main_PS3Build.vcproj", "{06C03759-D6D3-4F43-940B-417D98B7FF74}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib_RenderPS3GCM", "Shared\MOS\RenderContexts\PS3GCM\Lib_RenderPS3GCM.vcproj", "{E1993900-5D3F-4118-B2E9-685EC0B43BF8}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 14
+		SccProjectName0 = Perforce\u0020Project
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Perforce\u0020SCM
+		CanCheckoutShared = true
+		SccProjectUniqueName1 = Shared\\MCC\\Lib_MCC.vcproj
+		SccLocalPath1 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection1 = Shared\\MCC\\
+		SccProjectUniqueName2 = Shared\\MOS\\MSystem\\Lib_MSystem.vcproj
+		SccLocalPath2 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection2 = Shared\\MOS\\MSystem\\
+		SccProjectUniqueName3 = Shared\\MOS\\XR\\Lib_XR.vcproj
+		SccLocalPath3 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection3 = Shared\\MOS\\XR\\
+		SccProjectUniqueName4 = Shared\\MOS\\Libs\\XRClasses\\Lib_XRClasses.vcproj
+		SccLocalPath4 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection4 = Shared\\MOS\\Libs\\XRClasses\\
+		SccProjectUniqueName5 = Projects\\Main\\GameClasses\\Lib_GameClassesMain.vcproj
+		SccLocalPath5 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection5 = Projects\\Main\\GameClasses\\
+		SccProjectUniqueName6 = Projects\\Main\\GameWorld\\Lib_GameWorld.vcproj
+		SccLocalPath6 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection6 = Projects\\Main\\GameWorld\\
+		SccProjectUniqueName7 = Projects\\Main\\Exe_PS3\\Exe_Main_PS3.vcproj
+		SccLocalPath7 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection7 = Projects\\Main\\Exe_PS3\\
+		SccProjectUniqueName8 = Projects\\Main\\GameClasses\\Lib_GameClassesObjChar.vcproj
+		SccLocalPath8 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection8 = Projects\\Main\\GameClasses\\
+		SccProjectUniqueName9 = Projects\\Main\\GameClasses\\Lib_GameClassesObjMisc.vcproj
+		SccLocalPath9 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection9 = Projects\\Main\\GameClasses\\
+		SccProjectUniqueName10 = Projects\\Main\\GameClasses\\Lib_GameClassesModelsAI.vcproj
+		SccLocalPath10 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection10 = Projects\\Main\\GameClasses\\
+		SccProjectUniqueName11 = Projects\\Main\\GameClasses\\Lib_GameClassesOther.vcproj
+		SccLocalPath11 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection11 = Projects\\Main\\GameClasses\\
+		SccProjectUniqueName12 = Projects\\Main\\Exe_PS3\\Exe_Main_PS3Build.vcproj
+		SccLocalPath12 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection12 = Projects\\Main\\Exe_PS3\\
+		SccProjectUniqueName13 = Shared\\MOS\\RenderContexts\\PS3GCM\\Lib_RenderPS3GCM.vcproj
+		SccLocalPath13 = .
+		CanCheckoutShared = true
+		SccProjectFilePathRelativizedFromConnection13 = Shared\\MOS\\RenderContexts\\PS3GCM\\
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Game PS3 Debug RTM|Win32 = Game PS3 Debug RTM|Win32
+		Game PS3 Debug|Win32 = Game PS3 Debug|Win32
+		Game PS3 Release|Win32 = Game PS3 Release|Win32
+		Game PS3 RTM|Win32 = Game PS3 RTM|Win32
+		Game PS3 RTMD Profile|Win32 = Game PS3 RTMD Profile|Win32
+		Game PS3 RTMD|Win32 = Game PS3 RTMD|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{FE981AE8-F6D5-4657-BB64-098285914E56}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{6E50C018-B112-4558-8DF8-8FD51036E234}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{A9D77F25-F48B-44CA-AEE9-CF4856780AF6}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{014D1EA1-CDCF-42DA-90AA-C24C92A2CC62}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{1FF5273B-E257-4781-922D-295501A20BE9}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{391E0574-83D5-4F51-81EB-5591AAF56EF3}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{FFD3010D-F6C1-42E4-A66C-C399B2200F93}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{28B6E7FA-F1C0-4739-941C-26D17CBA7403}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{877B791A-47E4-40DD-90D5-70A14203699C}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{58EDAE4C-C98A-4D02-85CB-8F6360A86EF5}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{1CE00D93-4D57-4051-9464-1778D979D6C2}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Debug RTM|Win32.ActiveCfg = Debug_RTM|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Debug RTM|Win32.Build.0 = Debug_RTM|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Debug|Win32.ActiveCfg = Debug|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Debug|Win32.Build.0 = Debug|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Release|Win32.ActiveCfg = Release|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 Release|Win32.Build.0 = Release|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTM|Win32.ActiveCfg = RTM|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTM|Win32.Build.0 = RTM|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTMD Profile|Win32.ActiveCfg = RTMD_Profile|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTMD Profile|Win32.Build.0 = RTMD_Profile|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTMD|Win32.ActiveCfg = RTMD|Win32
+		{06C03759-D6D3-4F43-940B-417D98B7FF74}.Game PS3 RTMD|Win32.Build.0 = RTMD|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 Debug RTM|Win32.ActiveCfg = PS3 Debug RTM|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 RTM|Win32.ActiveCfg = PS3 RTM|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 RTMD Profile|Win32.ActiveCfg = PS3 RTMD Profile|Win32
+		{E1993900-5D3F-4118-B2E9-685EC0B43BF8}.Game PS3 RTMD|Win32.ActiveCfg = PS3 RTMD|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -11,11 +11,47 @@
 #endif
 
 // -------------------------------------------------------------------
+//  CRC_RenderTargetDesc
+// -------------------------------------------------------------------
+void CRC_RenderTargetDesc::Clear()
+{
+	memset(this, 0, sizeof(*this));
+}
+
+void CRC_RenderTargetDesc::SetRenderTarget(int _iBuffer, int _TextureID, const CVec4Dfp32& _ClearColor, uint32 _Format, uint32 _Slice)
+{
+	m_lColorTextureID[_iBuffer] = _TextureID;
+	m_lColorClearColor[_iBuffer] = _ClearColor;
+	m_lTextureFormats[_iBuffer] = _Format;
+	m_lSlice[_iBuffer] = _Slice;
+}
+
+void CRC_RenderTargetDesc::SetClear(int _Buffers, CRct _Rect, fp32 _ClearZ, int _ClearStencil)
+{
+	m_ClearRect = _Rect;
+	m_ClearBuffers = _Buffers;
+	m_ClearValueStencil = _ClearStencil;
+	m_ClearValueZ = _ClearZ;
+}
+
+void CRC_RenderTargetDesc::SetOptions(int _Options)
+{
+	m_Options = _Options;
+}
+
+void CRC_RenderTargetDesc::SetResolveRect(CRct _Rect)
+{
+	m_ResolveRect = _Rect;
+}
+
+
+// -------------------------------------------------------------------
 //  CRC_ClipVolume
 // -------------------------------------------------------------------
 
 IMPLEMENT_OPERATOR_NEW(CRC_ClipVolume);
 
+//#pragma optimize("",off)
 
 CRC_ClipVolume::CRC_ClipVolume()
 {
@@ -23,14 +59,14 @@ CRC_ClipVolume::CRC_ClipVolume()
 	m_nPlanes = 0;
 }
 
-void CRC_ClipVolume::Init(const CVec3Dfp4& _POV)
+void CRC_ClipVolume::Init(const CVec3Dfp32& _POV)
 {
 	MAUTOSTRIP(CRC_ClipVolume_Init, MAUTOSTRIP_VOID);
 	m_nPlanes = 0;
 	m_POV = _POV;
 }
 
-void CRC_ClipVolume::GetVertices(const CVec3Dfp4* _pVertices, int _nVertices, const CVec3Dfp4& _POV, bool _bFlipDirection)
+void CRC_ClipVolume::GetVertices(const CVec3Dfp32* _pVertices, int _nVertices, const CVec3Dfp32& _POV, bool _bFlipDirection)
 {
 	MAUTOSTRIP(CRC_ClipVolume_GetVertices, MAUTOSTRIP_VOID);
 	if (_nVertices < 3) 
@@ -55,17 +91,17 @@ void CRC_ClipVolume::CreateFromVertices()
 	MAUTOSTRIP(CRC_ClipVolume_CreateFromVertices, MAUTOSTRIP_VOID);
 	Error_static("CreateFromVertices", "This should not be used.");
 
-	const fp4 MinLen = 2048.0f*1.4f;
+	const fp32 MinLen = 2048.0f*1.4f;
 /*
 	for(int v = 0; v < m_nPlanes; v++)
 	{
-		fp4 dvx = m_Vertices[v].k[0] - m_POV.k[0];
-		fp4 dvy = m_Vertices[v].k[1] - m_POV.k[1];
-		fp4 dvz = m_Vertices[v].k[2] - m_POV.k[2];
-		fp4 l = sqrt(Sqr(dvx) + Sqr(dvy) + Sqr(dvz)) + 0.01f;
+		fp32 dvx = m_Vertices[v].k[0] - m_POV.k[0];
+		fp32 dvy = m_Vertices[v].k[1] - m_POV.k[1];
+		fp32 dvz = m_Vertices[v].k[2] - m_POV.k[2];
+		fp32 l = sqrt(Sqr(dvx) + Sqr(dvy) + Sqr(dvz)) + 0.01f;
 //		if (l < MinLen)
 		{
-			fp4 Scale = MinLen / l;
+			fp32 Scale = MinLen / l;
 			m_Vertices[v].k[0] = dvx*Scale + m_POV.k[0];
 			m_Vertices[v].k[1] = dvy*Scale + m_POV.k[1];
 			m_Vertices[v].k[2] = dvz*Scale + m_POV.k[2];
@@ -77,40 +113,40 @@ void CRC_ClipVolume::CreateFromVertices()
 
 	m_Planes[m_nPlanes-1].Create(m_POV, m_Vertices[0], m_Vertices[m_nPlanes-1]);*/
 
-	CVec3Dfp4* pV2 = &m_Vertices[0];
-	fp4 l2inv, v2x, v2y, v2z;
+	CVec3Dfp32* pV2 = &m_Vertices[0];
+	fp32 l2inv, v2x, v2y, v2z;
 	{
 		v2x = pV2->k[0] - m_POV.k[0];
 		v2y = pV2->k[1] - m_POV.k[1];
 		v2z = pV2->k[2] - m_POV.k[2];
 
-//		fp4 l2 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
-		fp4 l2 = M_Sqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+//		fp32 l2 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+		fp32 l2 = M_Sqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
 //		if (!l2) l2 += 0.000001f;
 		l2inv = 1.0f / l2;
 	}
-	fp4 v0LenInv = l2inv;
+	fp32 v0LenInv = l2inv;
 
 	for(int v = m_nPlanes-1; v >= 0; v--)
 	{
 //LogFile("1." + m_Planes[v].n.GetString() + CStrF(", %f", m_Planes[v].d));
 
-		CVec3Dfp4* pV1 = &m_Vertices[v];
-		fp4 v1x = pV1->k[0] - m_POV.k[0];
-		fp4 v1y = pV1->k[1] - m_POV.k[1];
-		fp4 v1z = pV1->k[2] - m_POV.k[2];
+		CVec3Dfp32* pV1 = &m_Vertices[v];
+		fp32 v1x = pV1->k[0] - m_POV.k[0];
+		fp32 v1y = pV1->k[1] - m_POV.k[1];
+		fp32 v1z = pV1->k[2] - m_POV.k[2];
 
-//		fp4 l1 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+//		fp32 l1 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
 //		if (!l1) l1 += 0.000001f;
-		fp4 l1inv = (!v) ? v0LenInv : ( M_InvSqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z)) );
+		fp32 l1inv = (!v) ? v0LenInv : ( M_InvSqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z)) );
 
-		fp4 Scale = MinLen * l1inv;
+		fp32 Scale = MinLen * l1inv;
 		pV1->k[0] = v1x*Scale + m_POV.k[0];
 		pV1->k[1] = v1y*Scale + m_POV.k[1];
 		pV1->k[2] = v1z*Scale + m_POV.k[2];
 //ConOut(CStrF("%d, %s", v, (char*) pV1->GetString()));
 
-		fp4 ns = -1.0f * l1inv * l2inv;
+		fp32 ns = -1.0f * l1inv * l2inv;
 		m_Planes[v].n.k[0] = (v1y*v2z - v1z*v2y) * ns;
 		m_Planes[v].n.k[1] = (-v1x*v2z + v1z*v2x) * ns;
 		m_Planes[v].n.k[2] = (v1x*v2y - v1y*v2x) * ns;
@@ -125,45 +161,45 @@ void CRC_ClipVolume::CreateFromVertices()
 	}
 }
 
-void CRC_ClipVolume::CreateFromVertices3(const CPlane3Dfp4& _ProjPlane)
+void CRC_ClipVolume::CreateFromVertices3(const CPlane3Dfp32& _ProjPlane)
 {
 	MAUTOSTRIP(CRC_ClipVolume_CreateFromVertices3, MAUTOSTRIP_VOID);
-	CVec3Dfp4* pV2 = &m_Vertices[0];
-	fp4 l2inv, v2x, v2y, v2z;
+	CVec3Dfp32* pV2 = &m_Vertices[0];
+	fp32 l2inv, v2x, v2y, v2z;
 	{
 		v2x = pV2->k[0] - m_POV.k[0];
 		v2y = pV2->k[1] - m_POV.k[1];
 		v2z = pV2->k[2] - m_POV.k[2];
-//		fp4 l2 = sqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+//		fp32 l2 = sqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
 		l2inv = M_InvSqrt( Sqr(v2x) + Sqr(v2y) + Sqr(v2z) );
 	}
-	fp4 v0LenInv = l2inv;
+	fp32 v0LenInv = l2inv;
 
-	fp4 dot1 = -_ProjPlane.Distance(m_POV);
+	fp32 dot1 = -_ProjPlane.Distance(m_POV);
 
 	for(int v = m_nPlanes-1; v >= 0; v--)
 	{
 //LogFile("1." + m_Planes[v].n.GetString() + CStrF(", %f", m_Planes[v].d));
 
-		CVec3Dfp4* pV1 = &m_Vertices[v];
-		fp4 v1x = pV1->k[0] - m_POV.k[0];
-		fp4 v1y = pV1->k[1] - m_POV.k[1];
-		fp4 v1z = pV1->k[2] - m_POV.k[2];
+		CVec3Dfp32* pV1 = &m_Vertices[v];
+		fp32 v1x = pV1->k[0] - m_POV.k[0];
+		fp32 v1y = pV1->k[1] - m_POV.k[1];
+		fp32 v1z = pV1->k[2] - m_POV.k[2];
 
-//		fp4 l1 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+//		fp32 l1 = FastSqrt32(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
 //		if (!l1) l1 += 0.000001f;
-		fp4 l1inv = (!v) ? v0LenInv : M_InvSqrt( Sqr(v1x) + Sqr(v1y) + Sqr(v1z) );
-//		fp4 l1inv = (!v) ? v0LenInv : (1.0f / sqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z)) );
+		fp32 l1inv = (!v) ? v0LenInv : M_InvSqrt( Sqr(v1x) + Sqr(v1y) + Sqr(v1z) );
+//		fp32 l1inv = (!v) ? v0LenInv : (1.0f / sqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z)) );
 
-		fp4 dot2 = v1x*_ProjPlane.n.k[0] + v1y*_ProjPlane.n.k[1] + v1z*_ProjPlane.n.k[2];
-//		fp4 Scale = dot1 * dot2 * Sqr(l1inv);
-		fp4 Scale = dot1 / dot2;
+		fp32 dot2 = v1x*_ProjPlane.n.k[0] + v1y*_ProjPlane.n.k[1] + v1z*_ProjPlane.n.k[2];
+//		fp32 Scale = dot1 * dot2 * Sqr(l1inv);
+		fp32 Scale = dot1 / dot2;
 		pV1->k[0] = v1x*Scale + m_POV.k[0];
 		pV1->k[1] = v1y*Scale + m_POV.k[1];
 		pV1->k[2] = v1z*Scale + m_POV.k[2];
 //	ConOut(CStrF("%d, %s", v, (char*) pV1->GetString() ));
 
-		fp4 ns = -1.0f * l1inv * l2inv;
+		fp32 ns = -1.0f * l1inv * l2inv;
 		m_Planes[v].n.k[0] = (v1y*v2z - v1z*v2y) * ns;
 		m_Planes[v].n.k[1] = (-v1x*v2z + v1z*v2x) * ns;
 		m_Planes[v].n.k[2] = (v1x*v2y - v1y*v2x) * ns;
@@ -181,22 +217,22 @@ void CRC_ClipVolume::CreateFromVertices3(const CPlane3Dfp4& _ProjPlane)
 void CRC_ClipVolume::CreateFromVertices2()
 {
 	MAUTOSTRIP(CRC_ClipVolume_CreateFromVertices2, MAUTOSTRIP_VOID);
-	CVec3Dfp4* pV2 = &m_Vertices[0];
-	fp4 v2x = pV2->k[0] - m_POV.k[0];
-	fp4 v2y = pV2->k[1] - m_POV.k[1];
-	fp4 v2z = pV2->k[2] - m_POV.k[2];
-	fp4 v0LenInv = M_InvSqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
-	fp4 l2inv = v0LenInv;
+	CVec3Dfp32* pV2 = &m_Vertices[0];
+	fp32 v2x = pV2->k[0] - m_POV.k[0];
+	fp32 v2y = pV2->k[1] - m_POV.k[1];
+	fp32 v2z = pV2->k[2] - m_POV.k[2];
+	fp32 v0LenInv = M_InvSqrt(Sqr(v2x) + Sqr(v2y) + Sqr(v2z));
+	fp32 l2inv = v0LenInv;
 
 	for(int v = m_nPlanes-1; v >= 0; v--)
 	{
-		CVec3Dfp4* pV1 = &m_Vertices[v];
-		fp4 v1x = pV1->k[0] - m_POV.k[0];
-		fp4 v1y = pV1->k[1] - m_POV.k[1];
-		fp4 v1z = pV1->k[2] - m_POV.k[2];
-		fp4 l1inv = (!v) ? v0LenInv : M_InvSqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z));
+		CVec3Dfp32* pV1 = &m_Vertices[v];
+		fp32 v1x = pV1->k[0] - m_POV.k[0];
+		fp32 v1y = pV1->k[1] - m_POV.k[1];
+		fp32 v1z = pV1->k[2] - m_POV.k[2];
+		fp32 l1inv = (!v) ? v0LenInv : M_InvSqrt(Sqr(v1x) + Sqr(v1y) + Sqr(v1z));
 
-		fp4 ns = -l1inv * l2inv;
+		fp32 ns = -l1inv * l2inv;
 		m_Planes[v].n.k[0] = ns * (v1y*v2z - v1z*v2y);
 		m_Planes[v].n.k[1] = ns * (-v1x*v2z + v1z*v2x);
 		m_Planes[v].n.k[2] = ns * (v1x*v2y - v1y*v2x);
@@ -224,7 +260,7 @@ void CRC_ClipVolume::Invert()
 	}
 }
 
-void CRC_ClipVolume::Transform(const CMat43fp4& _Mat)
+void CRC_ClipVolume::Transform(const CMat4Dfp32& _Mat)
 {
 	MAUTOSTRIP(CRC_ClipVolume_Transform, MAUTOSTRIP_VOID);
 	m_POV *= _Mat;
@@ -249,10 +285,10 @@ void CRC_ClipVolume::Copy(const CRC_ClipVolume& _SrcClip)
 }
 
 #define MACRO_ISMIRRORED(Mat)	\
-	((CVec3Dfp4::GetMatrixRow(Mat, 0) / CVec3Dfp4::GetMatrixRow(Mat, 1)) * CVec3Dfp4::GetMatrixRow(Mat, 2) < 0.0f)
+	((CVec3Dfp32::GetMatrixRow(Mat, 0) / CVec3Dfp32::GetMatrixRow(Mat, 1)) * CVec3Dfp32::GetMatrixRow(Mat, 2) < 0.0f)
 
 
-void CRC_ClipVolume::CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat43fp4& _Mat)
+void CRC_ClipVolume::CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat4Dfp32& _Mat)
 {
 	MAUTOSTRIP(CRC_ClipVolume_CopyAndTransform, MAUTOSTRIP_VOID);
 	m_nPlanes = _SrcClip.m_nPlanes;
@@ -263,16 +299,16 @@ void CRC_ClipVolume::CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat
 	if(!_Mat.IsMirrored())
 	{
 
-//	CVec3Dfp4 Hirr = CVec3Dfp4::GetMatrixRow(_Mat, 0) / CVec3Dfp4::GetMatrixRow(_Mat, 1);
-//	fp4 dotp = Hirr * CVec3Dfp4::GetMatrixRow(_Mat, 2);
+//	CVec3Dfp32 Hirr = CVec3Dfp32::GetMatrixRow(_Mat, 0) / CVec3Dfp32::GetMatrixRow(_Mat, 1);
+//	fp32 dotp = Hirr * CVec3Dfp32::GetMatrixRow(_Mat, 2);
 
-//	ConOut(CStrF("IsMirrored %d, %d",((CMat4Dfp4&)_Mat).IsMirrored(), MACRO_ISMIRRORED(_Mat)));
-		CVec3Dfp4::MultiplyMatrix(&_SrcClip.m_Vertices[0], &m_Vertices[0], _Mat, m_nPlanes);
+//	ConOut(CStrF("IsMirrored %d, %d",((CMat4Dfp32&)_Mat).IsMirrored(), MACRO_ISMIRRORED(_Mat)));
+		CVec3Dfp32::MultiplyMatrix(&_SrcClip.m_Vertices[0], &m_Vertices[0], _Mat, m_nPlanes);
 		for(int i = 0; i < m_nPlanes; i++)
 		{
 			m_Planes[i] = _SrcClip.m_Planes[i];
 			m_Planes[i].Transform(_Mat);
-/*			CVec3Dfp4 p = m_Planes[i].GetPointInPlane();
+/*			CVec3Dfp32 p = m_Planes[i].GetPointInPlane();
 			p *= _Mat;
 			m_Planes[i].n.MultiplyMatrix3x3(_Mat);
 			m_Planes[i].d = -(m_Planes[i].n*p);*/
@@ -292,21 +328,21 @@ void CRC_ClipVolume::CopyAndTransform(const CRC_ClipVolume& _SrcClip, const CMat
 	}
 }
 
-int CRC_ClipVolume::BoxInVolume(const CBox3Dfp4& _Box) const
+int CRC_ClipVolume::BoxInVolume(const CBox3Dfp32& _Box) const
 {
 	MAUTOSTRIP(CRC_ClipVolume_BoxInVolume, 0);
-	CVec3Dfp4 Center;
+	CVec3Dfp32 Center;
 	_Box.GetCenter(Center);
 	for (int p = 0; p < m_nPlanes; p++)
 	{
-		fp4 d = m_Planes[p].Distance(Center);
+		fp32 d = m_Planes[p].Distance(Center);
 		if (d > 0.0f)
 			if (m_Planes[p].GetBoxMinDistance(_Box.m_Min, _Box.m_Max) > 0.001f) return 0;
 	}
 	return 1;
 }
 
-int CRC_ClipVolume::SphereInVolume(const CVec3Dfp4& _v, fp4 _r) const
+int CRC_ClipVolume::SphereInVolume(const CVec3Dfp32& _v, fp32 _r) const
 {
 	MAUTOSTRIP(CRC_ClipVolume_SphereInVolume, 0);
 	for(int ip = 0; ip < m_nPlanes; ip++)
@@ -333,7 +369,7 @@ CRC_Viewport::CRC_Viewport()
 	m_AspectRatio = 1.0f;
 	m_xScale = 1.0f;
 	m_yScale = 1.0f;
-	m_PixelAspect = CVec2Dfp4(1,1);
+	m_PixelAspect = CVec2Dfp32(1,1);
 	m_Clip = CRct(CPnt(0,0), CPnt(1,1));
 	m_Rect = CRct(CPnt(0,0), CPnt(1,1));
 	m_bVPChanged = true;
@@ -357,20 +393,20 @@ void CRC_Viewport::Update()
 	if (m_Mode == VP_MODE_FOV)
 	{
 		// Calc xScale and yScale from FOV.
-		fp4 scale = 2.0f * M_InvSqrt(Sqr(1.0f/M_Cos(((2.0f*_PI* 0.5f)*m_FOV)/360.0f)) - 1.0f);
-		if ((fp4)m_Rect.GetWidth()/(fp4)m_Rect.GetHeight() < m_FOVAspect)
-			m_xScale = scale * m_FOVAspect / ( (fp4)m_Rect.GetWidth()/(fp4)m_Rect.GetHeight() );
+		fp32 scale = 2.0f * M_InvSqrt(Sqr(1.0f/M_Cos(((2.0f*_PI* 0.5f)*m_FOV)/360.0f)) - 1.0f);
+		if ((fp32)m_Rect.GetWidth()/(fp32)m_Rect.GetHeight() < m_FOVAspect)
+			m_xScale = scale * m_FOVAspect / ( (fp32)m_Rect.GetWidth()/(fp32)m_Rect.GetHeight() );
 		else
-			m_xScale = scale * m_FOVAspect / ( (fp4)m_Rect.GetWidth()/(fp4)m_Rect.GetHeight() );
+			m_xScale = scale * m_FOVAspect / ( (fp32)m_Rect.GetWidth()/(fp32)m_Rect.GetHeight() );
 
 		m_Scale = m_xScale;
-		m_xScale *= fp4(m_Rect.GetWidth())*0.5f;
+		m_xScale *= fp32(m_Rect.GetWidth())*0.5f;
 	}
 	else if (m_Mode == VP_MODE_SCALE)
 	{
 		// Explicit scale
 		m_xScale = m_Scale;
-		m_xScale *= fp4(m_Rect.GetWidth())*0.5f;
+		m_xScale *= fp32(m_Rect.GetWidth())*0.5f;
 	}
 	else
 		Error_static("CRC_Viewport::Update", "Invalid mode.");
@@ -383,14 +419,14 @@ void CRC_Viewport::Update()
 
 	// Calc projection matrix...
 	{
-		fp4 Near = m_FrontPlane;
-		fp4 Far = m_BackPlane;
+		fp32 Near = m_FrontPlane;
+		fp32 Far = m_BackPlane;
 
 		// Calc 2D-translation
 		CRct crect(m_Rect);
 		crect.Bound(m_Clip.clip);
-		fp4 ox = (m_Rect.GetWidth() - crect.GetWidth());
-		fp4 oy = -(m_Rect.GetHeight() - crect.GetHeight());
+		fp32 ox = (m_Rect.GetWidth() - crect.GetWidth());
+		fp32 oy = -(m_Rect.GetHeight() - crect.GetHeight());
 //		if ((m_Rect.p0.x - crect.p0.x) < 0) ox = -ox;
 //		if ((m_Rect.p0.y - crect.p0.y) < 0) oy = -oy;
 		if ((m_Rect.p0.x - crect.p0.x) < 0) ox += 2*(m_Rect.p0.x - crect.p0.x);
@@ -409,8 +445,8 @@ void CRC_Viewport::Update()
 	}
 
 	{
-//		fp4 w = m_Rect.GetWidth();
-//		fp4 h = m_Rect.GetHeight();
+//		fp32 w = m_Rect.GetWidth();
+//		fp32 h = m_Rect.GetHeight();
 
 		// Viewport volume by planes, in view-space
 		{
@@ -433,18 +469,18 @@ void CRC_Viewport::Update()
 			r.p1 += r.p1;
 			r.p0 -= CPnt(w,h);
 			r.p1 -= CPnt(w,h);*/
-			CVec2Dfp4 p0(fp4(r.p0.x) / m_xScale, fp4(r.p0.y) / m_yScale);
-			CVec2Dfp4 p1(fp4(r.p1.x) / m_xScale, fp4(r.p1.y) / m_yScale);
-			m_VViewPlanes[0].CreateNV((CVec3Dfp4(p0.k[0], 0, 1) / CVec3Dfp4(0,1,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[1].CreateNV((CVec3Dfp4(p1.k[0], 0, 1) / CVec3Dfp4(0,-1,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[2].CreateNV((CVec3Dfp4(0, p0.k[1], 1) / CVec3Dfp4(-1,0,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[3].CreateNV((CVec3Dfp4(0, p1.k[1], 1) / CVec3Dfp4(1,0,0)).Normalize(), CVec3Dfp4(0));
+			CVec2Dfp32 p0(fp32(r.p0.x) / m_xScale, fp32(r.p0.y) / m_yScale);
+			CVec2Dfp32 p1(fp32(r.p1.x) / m_xScale, fp32(r.p1.y) / m_yScale);
+			m_VViewPlanes[0].CreateNV((CVec3Dfp32(p0.k[0], 0, 1) / CVec3Dfp32(0,1,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[1].CreateNV((CVec3Dfp32(p1.k[0], 0, 1) / CVec3Dfp32(0,-1,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[2].CreateNV((CVec3Dfp32(0, p0.k[1], 1) / CVec3Dfp32(-1,0,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[3].CreateNV((CVec3Dfp32(0, p1.k[1], 1) / CVec3Dfp32(1,0,0)).Normalize(), CVec3Dfp32(0));
 		}
 /*		{
-			m_VViewPlanes[0].Create((CVec3Dfp4(-w, 0, m_xScale) / CVec3Dfp4(0,1,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[1].Create((CVec3Dfp4(w, 0, m_xScale) / CVec3Dfp4(0,-1,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[2].Create((CVec3Dfp4(0, -h, m_yScale) / CVec3Dfp4(-1,0,0)).Normalize(), CVec3Dfp4(0));
-			m_VViewPlanes[3].Create((CVec3Dfp4(0, h, m_yScale) / CVec3Dfp4(1,0,0)).Normalize(), CVec3Dfp4(0));
+			m_VViewPlanes[0].Create((CVec3Dfp32(-w, 0, m_xScale) / CVec3Dfp32(0,1,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[1].Create((CVec3Dfp32(w, 0, m_xScale) / CVec3Dfp32(0,-1,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[2].Create((CVec3Dfp32(0, -h, m_yScale) / CVec3Dfp32(-1,0,0)).Normalize(), CVec3Dfp32(0));
+			m_VViewPlanes[3].Create((CVec3Dfp32(0, h, m_yScale) / CVec3Dfp32(1,0,0)).Normalize(), CVec3Dfp32(0));
 		}*/
 
 		// Viewport volume by vertices, in view-space
@@ -452,12 +488,12 @@ void CRC_Viewport::Update()
 			m_nViewVertices = 5;
 			m_VViewVertices[0] = 0;		// Eye is assumed to be vertex #0.
 
-/*			fp4 xcomp = m_BackPlane*w / m_xScale;
-			fp4 ycomp = m_BackPlane*h / m_yScale;
-			m_VViewVertices[1] = CVec3Dfp4(xcomp, ycomp, m_BackPlane);
-			m_VViewVertices[2] = CVec3Dfp4(-xcomp, ycomp, m_BackPlane);
-			m_VViewVertices[3] = CVec3Dfp4(-xcomp, -ycomp, m_BackPlane);
-			m_VViewVertices[4] = CVec3Dfp4(xcomp, -ycomp, m_BackPlane);
+/*			fp32 xcomp = m_BackPlane*w / m_xScale;
+			fp32 ycomp = m_BackPlane*h / m_yScale;
+			m_VViewVertices[1] = CVec3Dfp32(xcomp, ycomp, m_BackPlane);
+			m_VViewVertices[2] = CVec3Dfp32(-xcomp, ycomp, m_BackPlane);
+			m_VViewVertices[3] = CVec3Dfp32(-xcomp, -ycomp, m_BackPlane);
+			m_VViewVertices[4] = CVec3Dfp32(xcomp, -ycomp, m_BackPlane);
 */
 			CRct r(CPnt(0, 0), m_Rect.p1 - m_Rect.p0);
 //			r = m_Rect;
@@ -477,21 +513,21 @@ void CRC_Viewport::Update()
 			r.p1 += r.p1;
 			r.p0 -= CPnt(w,h);
 			r.p1 -= CPnt(w,h);*/
-			fp4 bp = m_BackPlane - 100;
-			fp4 x0 = bp*fp4(r.p0.x) / m_xScale;
-			fp4 x1 = bp*fp4(r.p1.x) / m_xScale;
-			fp4 y0 = bp*fp4(r.p0.y) / m_yScale;
-			fp4 y1 = bp*fp4(r.p1.y) / m_yScale;
-			m_VViewVertices[1] = CVec3Dfp4(x1, y1, bp);
-			m_VViewVertices[2] = CVec3Dfp4(x0, y1, bp);
-			m_VViewVertices[3] = CVec3Dfp4(x0, y0, bp);
-			m_VViewVertices[4] = CVec3Dfp4(x1, y0, bp);
+			fp32 bp = m_BackPlane - 100;
+			fp32 x0 = bp*fp32(r.p0.x) / m_xScale;
+			fp32 x1 = bp*fp32(r.p1.x) / m_xScale;
+			fp32 y0 = bp*fp32(r.p0.y) / m_yScale;
+			fp32 y1 = bp*fp32(r.p1.y) / m_yScale;
+			m_VViewVertices[1] = CVec3Dfp32(x1, y1, bp);
+			m_VViewVertices[2] = CVec3Dfp32(x0, y1, bp);
+			m_VViewVertices[3] = CVec3Dfp32(x0, y0, bp);
+			m_VViewVertices[4] = CVec3Dfp32(x1, y0, bp);
 		}
 	}
 
 }
 
-void CRC_Viewport::SetFOV(fp4 _FOV)
+void CRC_Viewport::SetFOV(fp32 _FOV)
 {
 	MAUTOSTRIP(CRC_Viewport_SetFOV, MAUTOSTRIP_VOID);
 	m_FOV = _FOV;
@@ -499,14 +535,14 @@ void CRC_Viewport::SetFOV(fp4 _FOV)
 	m_bVPChanged = true;
 }
 
-void CRC_Viewport::SetFOVAspect(fp4 _Aspect)
+void CRC_Viewport::SetFOVAspect(fp32 _Aspect)
 {
 	MAUTOSTRIP(CRC_Viewport_SetFOVAspect, MAUTOSTRIP_VOID);
 	m_FOVAspect = _Aspect;
 	m_bVPChanged = true;
 }
 
-void CRC_Viewport::SetScale(fp4 _Scale)
+void CRC_Viewport::SetScale(fp32 _Scale)
 {
 	MAUTOSTRIP(CRC_Viewport_SetScale, MAUTOSTRIP_VOID);
 	m_Scale = _Scale;
@@ -514,28 +550,28 @@ void CRC_Viewport::SetScale(fp4 _Scale)
 	m_bVPChanged = true;
 }
 
-void CRC_Viewport::SetAspectRatio(fp4 _Aspect)
+void CRC_Viewport::SetAspectRatio(fp32 _Aspect)
 {
 	MAUTOSTRIP(CRC_Viewport_SetAspectRatio, MAUTOSTRIP_VOID);
 	m_AspectRatio = _Aspect;
 	m_bVPChanged = true;
 }
 
-void CRC_Viewport::SetPixelAspect(fp4 _AspectX, fp4 _AspectY)
+void CRC_Viewport::SetPixelAspect(fp32 _AspectX, fp32 _AspectY)
 {
-	m_PixelAspect = CVec2Dfp4(_AspectX, _AspectY);
+	m_PixelAspect = CVec2Dfp32(_AspectX, _AspectY);
 	m_bVPChanged = true;
 }
 
 
-void CRC_Viewport::SetFrontPlane(fp4 _FrontPlane)
+void CRC_Viewport::SetFrontPlane(fp32 _FrontPlane)
 {
 	MAUTOSTRIP(CRC_Viewport_SetFrontPlane, MAUTOSTRIP_VOID);
 	m_FrontPlane = _FrontPlane;
 	m_bVPChanged = true;
 }
 
-void CRC_Viewport::SetBackPlane(fp4 _BackPlane)
+void CRC_Viewport::SetBackPlane(fp32 _BackPlane)
 { 
 	MAUTOSTRIP(CRC_Viewport_SetBackPlane, MAUTOSTRIP_VOID);
 
@@ -563,20 +599,20 @@ void CRC_Viewport::SetView(CImage* _pImg)
 	SetView(_pImg->GetClipRect(), _pImg->GetClipRect().clip);
 }
 
-const CMat4Dfp4& CRC_Viewport::GetProjectionMatrix()
+const CMat4Dfp32& CRC_Viewport::GetProjectionMatrix()
 {
 	MAUTOSTRIP(CRC_Viewport_GetProjectionMatrix, *((void*)NULL));
 	Update();
 	return m_PMat;
 };
 
-void CRC_Viewport::GetClipVolume(CRC_ClipVolume& _Clip, const CMat43fp4* _pMat)
+void CRC_Viewport::GetClipVolume(CRC_ClipVolume& _Clip, const CMat4Dfp32* _pMat)
 {
 	MAUTOSTRIP(CRC_Viewport_GetClipVolume, MAUTOSTRIP_VOID);
 	Update();
 
-	_Clip.GetVertices(&m_VViewVertices[1], 4, CVec3Dfp4(0), false);
-	CPlane3Dfp4 BPlane(CVec3Dfp4(0,0,1), -m_BackPlane);
+	_Clip.GetVertices(&m_VViewVertices[1], 4, CVec3Dfp32(0), false);
+	CPlane3Dfp32 BPlane(CVec3Dfp32(0,0,1), -m_BackPlane);
 	_Clip.CreateFromVertices3(BPlane);
 	if (_pMat)
 		_Clip.Transform(*_pMat);
@@ -589,14 +625,14 @@ int CRC_Viewport::GetNumViewVertices()
 	return m_nViewVertices;
 }
 
-const CVec3Dfp4* CRC_Viewport::GetViewVertices()
+const CVec3Dfp32* CRC_Viewport::GetViewVertices()
 {
 	MAUTOSTRIP(CRC_Viewport_GetViewVertices, NULL);
 	Update();
 	return m_VViewVertices;
 }
 
-const CPlane3Dfp4* CRC_Viewport::GetViewPlanes()
+const CPlane3Dfp32* CRC_Viewport::GetViewPlanes()
 {
 	MAUTOSTRIP(CRC_Viewport_GetViewPlanes, NULL);
 	Update();
@@ -611,15 +647,41 @@ CRct CRC_Viewport::GetViewArea() const
 	return r;
 };
 
-void CRC_Viewport::DebugViewControl(CMat4Dfp4& mat, fp4 Ctrl_x, fp4 Ctrl_z, fp4 Ctrl_y, fp4 Ctrl_xaxis, fp4 Ctrl_yaxis, fp4 _apan1)
+void CRC_Viewport::DebugViewControl(CMat4Dfp32& mat, fp32 Ctrl_x, fp32 Ctrl_z, fp32 Ctrl_y, fp32 Ctrl_xaxis, fp32 Ctrl_yaxis, fp32 _apan1)
 {
 	MAUTOSTRIP(CRC_Viewport_DebugViewControl, MAUTOSTRIP_VOID);
-	(CVec3Dfp4(mat.k[0][0], mat.k[0][1], mat.k[0][2])*Ctrl_x).AddMatrixRow(mat, 3);
-	(CVec3Dfp4(mat.k[1][0], mat.k[1][1], mat.k[1][2])*Ctrl_y).AddMatrixRow(mat, 3);
-	(CVec3Dfp4(mat.k[2][0], mat.k[2][1], mat.k[2][2])*Ctrl_z).AddMatrixRow(mat, 3);
+	(CVec3Dfp32(mat.k[0][0], mat.k[0][1], mat.k[0][2])*Ctrl_x).AddMatrixRow(mat, 3);
+	(CVec3Dfp32(mat.k[1][0], mat.k[1][1], mat.k[1][2])*Ctrl_y).AddMatrixRow(mat, 3);
+	(CVec3Dfp32(mat.k[2][0], mat.k[2][1], mat.k[2][2])*Ctrl_z).AddMatrixRow(mat, 3);
 };
 
-int CRC_Viewport::SphereInView(const CVec3Dfp4& _Pos, fp4 _Radius)
+void CRC_Viewport::Get2DMatrix(CMat4Dfp32& _Mat, fp32 _Z)
+{
+	CRct View = GetViewRect();
+	CClipRect Clip = GetViewClip();
+	fp32 w = View.GetWidth();
+	fp32 h = View.GetHeight();
+	fp32 dx = -w;
+	fp32 dy = -h;
+
+	fp32 xScale = GetXScale() * 0.5;
+	fp32 yScale = GetYScale() * 0.5;
+
+	_Mat.Unit();
+	_Mat.k[0][0] = _Z / xScale;
+	_Mat.k[1][1] = _Z / yScale;
+	_Mat.k[3][0] = (_Z * dx * 0.5f) / xScale;
+	_Mat.k[3][1] = (_Z * dy * 0.5f) / yScale;
+	_Mat.k[3][2] = _Z;
+}
+
+void CRC_Viewport::Get2DMatrix_RelBackPlane(CMat4Dfp32& _Mat, fp32 _BackPlaneOfs)
+{
+	const fp32 Z = GetBackPlane() + _BackPlaneOfs;
+	Get2DMatrix(_Mat, Z);
+}
+
+int CRC_Viewport::SphereInView(const CVec3Dfp32& _Pos, fp32 _Radius)
 {
 	MAUTOSTRIP(CRC_Viewport_SphereInView, 0);
 /*
@@ -643,7 +705,7 @@ Returns mask for intersecting planes
 	Update();
 
 	int Mask = 0;
-	fp4 d;
+	fp32 d;
 	if ((_Pos.k[2] + _Radius) < m_FrontPlane) return 0;					// Bakom?
 	if ((_Pos.k[2] - _Radius) < m_FrontPlane) Mask += 1;
 	if ((_Pos.k[2] - _Radius) > m_BackPlane) return 0;			// För långt bort?
@@ -678,7 +740,7 @@ Returns mask for intersecting planes
 
 
 
-void CRC_Viewport::SetBorder(CVec2Dfp4 _Border, bool _bRemove)
+void CRC_Viewport::SetBorder(CVec2Dfp32 _Border, bool _bRemove)
 {
 	MAUTOSTRIP(CRC_Viewport_SetBorder, MAUTOSTRIP_VOID);
 //	if(_Border[0] == 0.f && _Border[1] == 0.f)
@@ -692,8 +754,8 @@ void CRC_Viewport::SetBorder(CVec2Dfp4 _Border, bool _bRemove)
 
 	if(_bRemove)
 	{
-		w = (int)(fp4(_Clip.clip.GetWidth()) / (1.0f - _Border[0]));
-		h = (int)(fp4(_Clip.clip.GetHeight()) / (1.0f - _Border[1]));
+		w = (int)(fp32(_Clip.clip.GetWidth()) / (1.0f - _Border[0]));
+		h = (int)(fp32(_Clip.clip.GetHeight()) / (1.0f - _Border[1]));
 
 		_Clip.clip.p0.x = (int)(_Clip.clip.p0.x - (w * _Border[0] * 0.5f));
 		_Clip.clip.p0.y = (int)(_Clip.clip.p0.y - (h * _Border[1] * 0.5f));
@@ -703,8 +765,8 @@ void CRC_Viewport::SetBorder(CVec2Dfp4 _Border, bool _bRemove)
 	}
 	else
 	{
-		w = (int)(fp4(_Clip.clip.GetWidth()) * (1.0f - _Border[0]));
-		h = (int)(fp4(_Clip.clip.GetHeight()) * (1.0f - _Border[1]));
+		w = (int)(fp32(_Clip.clip.GetWidth()) * (1.0f - _Border[0]));
+		h = (int)(fp32(_Clip.clip.GetHeight()) * (1.0f - _Border[1]));
 		 
 		_Clip.clip.p0.x = (int)(_Clip.clip.GetWidth() * _Border[0] * 0.5f);
 		_Clip.clip.p0.y = (int)(_Clip.clip.GetHeight() * _Border[1] * 0.5f);
@@ -725,26 +787,46 @@ void CRC_Viewport::SetBorder(CVec2Dfp4 _Border, bool _bRemove)
 // -------------------------------------------------------------------
 //  CRC_Attributes
 // -------------------------------------------------------------------
+CRC_Attributes::CAttributeCheck::CAttributeCheck()
+{
+	CRC_Attributes* pA;
+	if (sizeof(pA->m_v128) != sizeof(CRC_Attributes))
+		M_BREAKPOINT;
+}
+
+CRC_Attributes::CAttributeDefaultInit::CAttributeDefaultInit()
+{
+	ms_AttribDefault.SetDefaultReal();
+}
+
 CRC_Attributes::CRC_Attributes()
 {
 	MAUTOSTRIP(CRC_Attributes_ctor, MAUTOSTRIP_VOID);
-	Clear();
+
+	memset(this, 0xff, sizeof(*this));	// Let there be junk!
+//	Clear();
 }
 
 void CRC_Attributes::Clear()
 {
 	MAUTOSTRIP(CRC_Attributes_Clear, MAUTOSTRIP_VOID);
+
+#ifdef _DEBUG
+	if (mint(this) & 15)
+		M_BREAKPOINT;
+#endif
+
 	m_AttribLock = 0;
 	m_AttribLockFlags = 0;
 
 	m_Flags = 0;
-	m_RasterMode = 0;
+//	m_RasterMode = 0;
 	m_SourceBlend = 0;
 	m_DestBlend = 0;
 	m_ZCompare = 0;
 	m_AlphaCompare = 0;
 	m_AlphaRef = 0;
-	m_FogColor = 0;
+	m_FogColor = CPixel32(0);
 	m_FogStart = 0;
 	m_FogEnd = 0;
 	m_FogDensity = 0;
@@ -765,8 +847,9 @@ void CRC_Attributes::Clear()
 	m_StencilBackOpZFail = 0;
 	m_StencilBackOpZPass = 0;
 
-	m_Scissor.m_Min = 0;
-	m_Scissor.m_Max = 0xffff;
+//	m_Scissor.m_Min = 0;
+//	m_Scissor.m_Max = 0xffff;
+	m_Scissor.SetRect(0, 0xffff);
 #endif
 
 	m_PolygonOffsetScale = 0;
@@ -814,18 +897,52 @@ void CRC_Attributes::Clear()
 
 void CRC_Attributes::SetDefault()
 {
+	if((mint(this) & 0xf))
+		M_BREAKPOINT;
+#ifdef _DEBUG
+	if (mint(this) & 15)
+		M_BREAKPOINT;
+#endif
+
+	const CRC_Attributes& Src = ms_AttribDefault;
+	vec128 v0 = Src.m_v128[0];
+	vec128 v1 = Src.m_v128[1];
+	vec128 v2 = Src.m_v128[2];
+	vec128 v3 = Src.m_v128[3];
+	vec128 v4 = Src.m_v128[4];
+	vec128 v5 = Src.m_v128[5];
+	vec128 v6 = Src.m_v128[6];
+	vec128 v7 = Src.m_v128[7];
+	vec128 v8 = Src.m_v128[8];
+	vec128 v9 = Src.m_v128[9];
+	m_v128[0] = v0;
+	m_v128[1] = v1;
+	m_v128[2] = v2;
+	m_v128[3] = v3;
+	m_v128[4] = v4;
+	m_v128[5] = v5;
+	m_v128[6] = v6;
+	m_v128[7] = v7;
+	m_v128[8] = v8;
+	m_v128[9] = v9;
+}
+
+void CRC_Attributes::SetDefaultReal()
+{
 	MAUTOSTRIP(CRC_Attributes_SetDefault, MAUTOSTRIP_VOID);
+
 	m_AttribLock = 0;
 	m_AttribLockFlags = 0;
+	m_TexSamplerMode = 0;
 
 	Attrib_Default();
-	m_RasterMode =		CRC_RASTERMODE_NONE;
+//	m_RasterMode =		CRC_RASTERMODE_NONE;
 	m_SourceBlend =		CRC_BLEND_ONE;
 	m_DestBlend =		CRC_BLEND_ZERO;
 	m_ZCompare =		CRC_COMPARE_LESSEQUAL;
 	m_AlphaCompare =	CRC_COMPARE_ALWAYS;
 	m_AlphaRef = 128;
-	m_FogColor = 0;
+	m_FogColor = CPixel32(0);
 	m_FogStart = 0.0f;
 	m_FogEnd = 2048.0f;
 	m_FogDensity = 1.0f;
@@ -845,8 +962,9 @@ void CRC_Attributes::SetDefault()
 	m_StencilBackOpZFail = 0;
 	m_StencilBackOpZPass = CRC_STENCILOP_REPLACE;
 
-	m_Scissor.m_Min = 0;
-	m_Scissor.m_Max = 0xffff;
+//	m_Scissor.m_Min = 0;
+//	m_Scissor.m_Max = 0xffff;
+	m_Scissor.SetRect(0, 0xffff);
 #endif	// PLATFORM_PS2
 
 	m_PolygonOffsetScale = 0;
@@ -891,6 +1009,32 @@ void CRC_Attributes::SetDefault()
 	m_pTexEnvColors = NULL;
 	m_pTexGenAttr = NULL;
 }
+
+/*
+const CRC_Attributes& CRC_Attributes::operator= (const CRC_Attributes& _Src)
+{
+	vec128 v0 = _Src.m_v128[0];
+	vec128 v1 = _Src.m_v128[1];
+	vec128 v2 = _Src.m_v128[2];
+	vec128 v3 = _Src.m_v128[3];
+	vec128 v4 = _Src.m_v128[4];
+	vec128 v5 = _Src.m_v128[5];
+	vec128 v6 = _Src.m_v128[6];
+	vec128 v7 = _Src.m_v128[7];
+	vec128 v8 = _Src.m_v128[8];
+	vec128 v9 = _Src.m_v128[9];
+	m_v128[0] = v0;
+	m_v128[1] = v1;
+	m_v128[2] = v2;
+	m_v128[3] = v3;
+	m_v128[4] = v4;
+	m_v128[5] = v5;
+	m_v128[6] = v6;
+	m_v128[7] = v7;
+	m_v128[8] = v8;
+	m_v128[9] = v9;
+	return *this;
+}*/
 
 void CRC_Attributes::ClearRasterModeSettings()
 {
@@ -1006,8 +1150,8 @@ EndIt:
 	if (m_AttribLock < _Attr.m_AttribLock) return -1;
 	if (m_AttribLockFlags > _Attr.m_AttribLockFlags) return 1;
 	if (m_AttribLockFlags < _Attr.m_AttribLockFlags) return -1;
-	if (m_RasterMode > _Attr.m_RasterMode) return 1;
-	if (m_RasterMode < _Attr.m_RasterMode) return -1;
+//	if (m_RasterMode > _Attr.m_RasterMode) return 1;
+//	if (m_RasterMode < _Attr.m_RasterMode) return -1;
 	if (m_SourceBlend > _Attr.m_SourceBlend) return 1;
 	if (m_SourceBlend < _Attr.m_SourceBlend) return -1;
 	if (m_DestBlend > _Attr.m_DestBlend) return 1;
@@ -1022,19 +1166,34 @@ EndIt:
 	if (m_AlphaRef < _Attr.m_AlphaRef) return -1;
 
 #ifndef	PLATFORM_PS2
-	if (m_PolygonOffsetScale > _Attr.m_PolygonOffsetScale) return 1;
-	if (m_PolygonOffsetScale < _Attr.m_PolygonOffsetScale) return -1;
-	if (m_PolygonOffsetUnits > _Attr.m_PolygonOffsetUnits) return 1;
-	if (m_PolygonOffsetUnits < _Attr.m_PolygonOffsetUnits) return -1;
+	if ((int32 &)m_PolygonOffsetScale > (int32 &)_Attr.m_PolygonOffsetScale) return 1;
+	if ((int32 &)m_PolygonOffsetScale < (int32 &)_Attr.m_PolygonOffsetScale) return -1;
+	if ((int32 &)m_PolygonOffsetUnits > (int32 &)_Attr.m_PolygonOffsetUnits) return 1;
+	if ((int32 &)m_PolygonOffsetUnits < (int32 &)_Attr.m_PolygonOffsetUnits) return -1;
 
-	if (m_Scissor.m_Min[0] > _Attr.m_Scissor.m_Min[0]) return 1;
-	if (m_Scissor.m_Min[0] < _Attr.m_Scissor.m_Min[0]) return -1;
-	if (m_Scissor.m_Min[1] > _Attr.m_Scissor.m_Min[1]) return 1;
-	if (m_Scissor.m_Min[1] < _Attr.m_Scissor.m_Min[1]) return -1;
-	if (m_Scissor.m_Max[0] > _Attr.m_Scissor.m_Max[0]) return 1;
-	if (m_Scissor.m_Max[0] < _Attr.m_Scissor.m_Max[0]) return -1;
-	if (m_Scissor.m_Max[1] > _Attr.m_Scissor.m_Max[1]) return 1;
-	if (m_Scissor.m_Max[1] < _Attr.m_Scissor.m_Max[1]) return -1;
+	{
+		uint32 MinX0, MinY0, MaxX0, MaxY0;
+		uint32 MinX1, MinY1, MaxX1, MaxY1;
+		m_Scissor.GetRect(MinX0, MinY0, MaxX0, MaxY0);
+		_Attr.m_Scissor.GetRect(MinX1, MinY1, MaxX1, MaxY1);
+
+		if(MinX0 > MinX1) return 1;
+		if(MinX0 < MinX1) return -1;
+		if(MinY0 > MinY1) return 1;
+		if(MinY0 < MinY1) return -1;
+		if(MaxX0 > MaxX1) return 1;
+		if(MaxX0 < MaxX1) return -1;
+		if(MaxY0 > MaxY1) return 1;
+		if(MaxY0 < MaxY1) return -1;
+	}
+//	if (m_Scissor.m_Min[0] > _Attr.m_Scissor.m_Min[0]) return 1;
+//	if (m_Scissor.m_Min[0] < _Attr.m_Scissor.m_Min[0]) return -1;
+//	if (m_Scissor.m_Min[1] > _Attr.m_Scissor.m_Min[1]) return 1;
+//	if (m_Scissor.m_Min[1] < _Attr.m_Scissor.m_Min[1]) return -1;
+//	if (m_Scissor.m_Max[0] > _Attr.m_Scissor.m_Max[0]) return 1;
+//	if (m_Scissor.m_Max[0] < _Attr.m_Scissor.m_Max[0]) return -1;
+//	if (m_Scissor.m_Max[1] > _Attr.m_Scissor.m_Max[1]) return 1;
+//	if (m_Scissor.m_Max[1] < _Attr.m_Scissor.m_Max[1]) return -1;
 
 	if (m_StencilDWord1 > _Attr.m_StencilDWord1) return 1;
 	if (m_StencilDWord1 < _Attr.m_StencilDWord1) return -1;
@@ -1080,10 +1239,17 @@ int CRC_Attributes::GetTexGenModeAttribSize(int _TexGenMode, int _TexGenComp)
 	case CRC_TEXGENMODE_BOXNHF :
 		return 10*4;
 
+	case CRC_TEXGENMODE_LIGHTFIELD :
+		return 6*4;
+
 	case CRC_TEXGENMODE_TSREFLECTION :
 	case CRC_TEXGENMODE_LIGHTING :
+	case CRC_TEXGENMODE_LIGHTING_NONORMAL :
 	case CRC_TEXGENMODE_DEPTHOFFSET :
 		return 8;
+
+	case CRC_TEXGENMODE_DECALTSTRANSFORM :
+		return 12;
 
 	case CRC_TEXGENMODE_TSLV :
 	case CRC_TEXGENMODE_CONSTANT :
@@ -1099,20 +1265,84 @@ int CRC_Attributes::GetTexGenModeAttribSize(int _TexGenMode, int _TexGenComp)
 	};
 }
 
+CRC_Attributes::CRasterModeBlend CRC_Attributes::ms_lRasterModeBlend[] =
+{
+	{ CRC_BLEND_ONE, CRC_BLEND_ZERO },				//CRC_RASTERMODE_NONE				= 0,		//  D = S,
+	{ CRC_BLEND_SRCALPHA, CRC_BLEND_INVSRCALPHA },	//CRC_RASTERMODE_ALPHABLEND		= 1,		//  D = D*S.InvAlpha + S*S.Alpha,
+	{ CRC_BLEND_ZERO, CRC_BLEND_INVSRCCOLOR },		//CRC_RASTERMODE_LIGHTMAPBLEND	= 2,		//  D = D*S, or  D*S.InvAlpha + S*SrcAlpha,
+	{ CRC_BLEND_DESTCOLOR, CRC_BLEND_ZERO },		//CRC_RASTERMODE_MULTIPLY			= 3,		//  D = D*S,
+	{ CRC_BLEND_ONE, CRC_BLEND_ONE },				//CRC_RASTERMODE_ADD				= 4,		//  D = D + S,
+	{ CRC_BLEND_SRCALPHA, CRC_BLEND_ONE },			//CRC_RASTERMODE_ALPHAADD			= 5,		//  D = D + S*S.Alpha,
+	{ CRC_BLEND_DESTCOLOR, CRC_BLEND_INVSRCALPHA },	//CRC_RASTERMODE_ALPHAMULTIPLY	= 6,		//  D = D*S.InvAlpha + S*D,
+	{ CRC_BLEND_DESTCOLOR, CRC_BLEND_SRCCOLOR },	//CRC_RASTERMODE_MULTIPLY2		= 7,		//  D = D*S + S*D,
+	{ CRC_BLEND_DESTCOLOR, CRC_BLEND_ONE },			//CRC_RASTERMODE_MULADD			= 8,		//  D = D + S*D,
+	{ CRC_BLEND_ONE, CRC_BLEND_SRCALPHA },			//CRC_RASTERMODE_ONE_ALPHA		= 9,		//  D = S + D*S.Alpha,
+	{ CRC_BLEND_ONE, CRC_BLEND_INVSRCALPHA },		//CRC_RASTERMODE_ONE_INVALPHA		= 10,		//  D = S + D*S.InvAlpha,
+	{ CRC_BLEND_DESTALPHA, CRC_BLEND_INVDESTALPHA },//CRC_RASTERMODE_DESTALPHABLEND	= 11,		//  D = D*D.InvAlpha + S*D.Alpha,
+	{ CRC_BLEND_DESTCOLOR, CRC_BLEND_SRCALPHA },	//CRC_RASTERMODE_DESTADD			= 12,		//  D = D + D*S.Alpha
+	{ CRC_BLEND_DESTALPHA, CRC_BLEND_ONE },			//CRC_RASTERMODE_MULADD_DESTALPHA = 13,		//  D = D + S*D.Alpha
+};
+
+#ifndef PLATFORM_CONSOLE
+void CRC_Attributes::Attrib_RasterMode(uint _Mode)
+{
+	m_SourceDestBlend = MAKE_SOURCEDEST_BLEND(ms_lRasterModeBlend[_Mode].m_SrcBlend, ms_lRasterModeBlend[_Mode].m_DstBlend);
+	m_Flags |= CRC_FLAGS_BLEND;
+}
+
+uint CRC_Attributes::GetSourceDestBlend(uint _RasterMode)
+{ 
+	return MAKE_SOURCEDEST_BLEND(ms_lRasterModeBlend[_RasterMode].m_SrcBlend, ms_lRasterModeBlend[_RasterMode].m_DstBlend);
+}
+
+#endif
+
 // -------------------------------------------------------------------
 //  CRC_ClipStackEntry
 // -------------------------------------------------------------------
 uint8 CRC_VertexFormat::ms_lVRegFormatSizes[CRC_VREGFMT_MAX] = 
 {
-	0, 4,8,12,16, 2,4,6,8, 2,4,6,8, 6,4,4, 4,4,4, //16,4,
+	0, 4,8,12,16, 2,4,6,8, 2,4,6,8, 6,4,4, 4,4,4, 4, 2,4,8,  2,4,6,8, //16,4,
 };
 
 uint8 CRC_VertexFormat::ms_lVRegFormatComp[CRC_VREGFMT_MAX] = 
 {
-	0, 1,2,3,4, 1,2,3,4, 1,2,3,4, 3,3,3, 4,4,4, //4,4,
+	0, 1,2,3,4, 1,2,3,4, 1,2,3,4, 3,3,3, 4,4,4, 3, 1,2,4, 1,2,3,4, //4,4,
 };
 
-	
+const char* CRC_VertexFormat::ms_lVRegFormatName[CRC_VREGFMT_MAX] = 
+{
+	"CRC_VREGFMT_VOID",
+	"CRC_VREGFMT_V1_F32",
+	"CRC_VREGFMT_V2_F32",
+	"CRC_VREGFMT_V3_F32",
+	"CRC_VREGFMT_V4_F32",
+	"CRC_VREGFMT_V1_I16",
+	"CRC_VREGFMT_V2_I16",
+	"CRC_VREGFMT_V3_I16",
+	"CRC_VREGFMT_V4_I16",
+	"CRC_VREGFMT_V1_U16",
+	"CRC_VREGFMT_V2_U16",
+	"CRC_VREGFMT_V3_U16",
+	"CRC_VREGFMT_V4_U16",
+	"CRC_VREGFMT_NS3_I16",
+	"CRC_VREGFMT_NS3_P32",
+	"CRC_VREGFMT_NU3_P32",
+	"CRC_VREGFMT_N4_UI8_P32_NORM",
+	"CRC_VREGFMT_N4_UI8_P32",
+	"CRC_VREGFMT_N4_COL",
+
+	"CRC_VREGFMT_U3_P32",
+
+	"CRC_VREGFMT_NS1_I16",
+	"CRC_VREGFMT_NS2_I16",
+	"CRC_VREGFMT_NS4_I16",
+
+	"CRC_VREGFMT_NU1_I16",
+	"CRC_VREGFMT_NU2_I16",
+	"CRC_VREGFMT_NU3_I16",
+	"CRC_VREGFMT_NU4_I16"
+};
 
 
 int CRC_VertexFormat::GetRegisterSize(uint32 _Format)
@@ -1129,6 +1359,13 @@ int CRC_VertexFormat::GetRegisterComponents(uint32 _Format)
 	return ms_lVRegFormatComp[_Format];
 }
 
+const char* CRC_VertexFormat::GetRegisterName(uint32 _Format)
+{
+	MAUTOSTRIP(CRC_VertexFormat_GetRegisterName, 0);
+	M_ASSERT(_Format < CRC_VREGFMT_MAX, "!");
+	return ms_lVRegFormatName[_Format];
+}
+
 int CRC_VertexFormat::GetStride() const
 {
 	MAUTOSTRIP(CRC_VertexFormat_GetStride, 0);
@@ -1137,6 +1374,39 @@ int CRC_VertexFormat::GetStride() const
 		Stride += GetRegisterSize(m_lVRegFormats[i]);
 
 	return Stride;
+}
+
+template <class tData>
+static void UnalignedWrite(void*& _pDst, const tData& _Data)
+{
+	union
+	{
+		tData m_Input;
+		uint8 m_Output[sizeof(tData)];
+	} uWrite;
+
+	uWrite.m_Input = _Data;
+	uint8* pDst = (uint8*)_pDst;
+	if(sizeof(tData) == 1)
+		pDst[0] = uWrite.m_Output[0];
+	else if(sizeof(tData) == 2)
+	{
+		pDst[1] = uWrite.m_Output[1];
+		pDst[0] = uWrite.m_Output[0];
+	}
+	else if(sizeof(tData) == 4)
+	{
+		pDst[3] = uWrite.m_Output[3];
+		pDst[2] = uWrite.m_Output[2];
+		pDst[1] = uWrite.m_Output[1];
+		pDst[0] = uWrite.m_Output[0];
+	}
+	else
+		M_BREAKPOINT;
+
+	pDst += sizeof(tData);
+
+	_pDst = pDst;
 }
 
 void CRC_VertexFormat::ConvertRegisterFormat(
@@ -1152,7 +1422,7 @@ void CRC_VertexFormat::ConvertRegisterFormat(
 	void* pSrcEnd = (uint8*)_pSrc + _SrcStride * _nV;
 	void* pDstEnd = (uint8*)_pDst + _DstStride * _nV;
 #endif
-	CVec4Dfp4 DstScaleRecp;
+	CVec4Dfp32 DstScaleRecp;
 	if (_pDstScale)
 	{
 		DstScaleRecp[0] = 1.0f / _pDstScale->m_Scale[0];
@@ -1163,26 +1433,26 @@ void CRC_VertexFormat::ConvertRegisterFormat(
 
 	for(int iV = 0; iV < _nV; iV++)
 	{
-		CVec4Dfp4 V(0,0,0,1);
+		CVec4Dfp32 V(0,0,0,1);
 		switch(_SrcFmt)
 		{
 		case CRC_VREGFMT_V1_F32 :
-			V[0] = *((fp4*&)_pSrc)++;
+			V[0] = *((fp32*&)_pSrc)++;
 			break;
 		case CRC_VREGFMT_V2_F32 :
-			V[0] = *((fp4*&)_pSrc)++;
-			V[1] = *((fp4*&)_pSrc)++;
+			V[0] = *((fp32*&)_pSrc)++;
+			V[1] = *((fp32*&)_pSrc)++;
 			break;
 		case CRC_VREGFMT_V3_F32 :
-			V[0] = *((fp4*&)_pSrc)++;
-			V[1] = *((fp4*&)_pSrc)++;
-			V[2] = *((fp4*&)_pSrc)++;
+			V[0] = *((fp32*&)_pSrc)++;
+			V[1] = *((fp32*&)_pSrc)++;
+			V[2] = *((fp32*&)_pSrc)++;
 			break;
 		case CRC_VREGFMT_V4_F32 :
-			V[0] = *((fp4*&)_pSrc)++;
-			V[1] = *((fp4*&)_pSrc)++;
-			V[2] = *((fp4*&)_pSrc)++;
-			V[3] = *((fp4*&)_pSrc)++;
+			V[0] = *((fp32*&)_pSrc)++;
+			V[1] = *((fp32*&)_pSrc)++;
+			V[2] = *((fp32*&)_pSrc)++;
+			V[3] = *((fp32*&)_pSrc)++;
 			break;
 		case CRC_VREGFMT_V1_I16 :
 			V[0] = *((int16*&)_pSrc)++;
@@ -1220,44 +1490,62 @@ void CRC_VertexFormat::ConvertRegisterFormat(
 			V[2] = *((uint16*&)_pSrc)++;
 			V[3] = *((uint16*&)_pSrc)++;
 			break;
+		case CRC_VREGFMT_NS2_I16 :
+			V[0] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[1] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			break;
 		case CRC_VREGFMT_NS3_I16 :
-			V[0] = fp4(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
-			V[1] = fp4(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
-			V[2] = fp4(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[0] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[1] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[2] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			break;
+		case CRC_VREGFMT_NS4_I16 :
+			V[0] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[1] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[2] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
+			V[3] = fp32(*((int16*&)_pSrc)++) * (1.0f / 32768.0f);
 			break;
 
 		case CRC_VREGFMT_NU3_P32 :
 			{
 				uint32 Packed = *((uint32*&)_pSrc)++;
-				V[0] = fp4((Packed >> 0) & 0x7ff) / 2047.0f;
-				V[1] = fp4((Packed >> 11) & 0x7ff) / 2047.0f;
-				V[2] = fp4((Packed >> 22) & 0x3ff) / 1023.0f;
+				V[0] = fp32((Packed >> 0) & 0x7ff) / 2047.0f;
+				V[1] = fp32((Packed >> 11) & 0x7ff) / 2047.0f;
+				V[2] = fp32((Packed >> 22) & 0x3ff) / 1023.0f;
+			}
+			break;
+		case CRC_VREGFMT_U3_P32 :
+			{
+				uint32 Packed = *((uint32*&)_pSrc)++;
+				V[0] = fp32((Packed >> 0) & 0x7ff);
+				V[1] = fp32((Packed >> 11) & 0x7ff);
+				V[2] = fp32((Packed >> 22) & 0x3ff);
 			}
 			break;
 		case CRC_VREGFMT_NS3_P32 :
 			{
 				uint32 Packed = *((uint32*&)_pSrc)++;
-				V[0] = fp4((Packed >> 0) & 0x7ff) / 1023.0f;
-				V[1] = fp4((Packed >> 11) & 0x7ff) / 1023.0f;
-				V[2] = fp4((Packed >> 22) & 0x3ff) / 511.0f;
+				V[0] = fp32((Packed >> 0) & 0x7ff) / 1023.0f;
+				V[1] = fp32((Packed >> 11) & 0x7ff) / 1023.0f;
+				V[2] = fp32((Packed >> 22) & 0x3ff) / 511.0f;
 			}
 			break;
 		case CRC_VREGFMT_N4_UI8_P32 :
 			{
 				uint32 Packed = *((uint32*&)_pSrc)++;
-				V[0] = fp4((Packed >> 0)&0xff);
-				V[1] = fp4((Packed >> 8)&0xff);
-				V[2] = fp4((Packed >> 16)&0xff);
-				V[3] = fp4((Packed >> 24)&0xff);
+				V[0] = fp32((Packed >> 0)&0xff);
+				V[1] = fp32((Packed >> 8)&0xff);
+				V[2] = fp32((Packed >> 16)&0xff);
+				V[3] = fp32((Packed >> 24)&0xff);
 			}
 			break;
 		case CRC_VREGFMT_N4_UI8_P32_NORM :
 			{
 				uint32 Packed = *((uint32*&)_pSrc)++;
-				V[0] = fp4((Packed >> 0)&0xff) * (1.0f / 255.0f);
-				V[1] = fp4((Packed >> 8)&0xff) * (1.0f / 255.0f);
-				V[2] = fp4((Packed >> 16)&0xff) * (1.0f / 255.0f);
-				V[3] = fp4((Packed >> 24)&0xff) * (1.0f / 255.0f);
+				V[0] = fp32((Packed >> 0)&0xff) * (1.0f / 255.0f);
+				V[1] = fp32((Packed >> 8)&0xff) * (1.0f / 255.0f);
+				V[2] = fp32((Packed >> 16)&0xff) * (1.0f / 255.0f);
+				V[3] = fp32((Packed >> 24)&0xff) * (1.0f / 255.0f);
 			}
 			break;
 			
@@ -1265,17 +1553,17 @@ void CRC_VertexFormat::ConvertRegisterFormat(
 #if 1 // Is this type
 			{
 				uint32 Packed = *((uint32*&)_pSrc)++;
-				V[2] = fp4((Packed >> 0)&0xff) * (1.0f / 255.0f);
-				V[1] = fp4((Packed >> 8)&0xff) * (1.0f / 255.0f);
-				V[0] = fp4((Packed >> 16)&0xff) * (1.0f / 255.0f);
-				V[3] = fp4((Packed >> 24)&0xff) * (1.0f / 255.0f);
+				V[2] = fp32((Packed >> 0)&0xff) * (1.0f / 255.0f);
+				V[1] = fp32((Packed >> 8)&0xff) * (1.0f / 255.0f);
+				V[0] = fp32((Packed >> 16)&0xff) * (1.0f / 255.0f);
+				V[3] = fp32((Packed >> 24)&0xff) * (1.0f / 255.0f);
 			}
 #else
 
-			V[2] = fp4(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
-			V[1] = fp4(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
-			V[0] = fp4(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
-			V[3] = fp4(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
+			V[2] = fp32(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
+			V[1] = fp32(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
+			V[0] = fp32(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
+			V[3] = fp32(*((uint8*&)_pSrc)++) * (1.0f / 255.0f);
 #endif
 			break;
 		default:
@@ -1300,117 +1588,217 @@ void CRC_VertexFormat::ConvertRegisterFormat(
 		switch(_DstFmt)
 		{
 		case CRC_VREGFMT_V1_F32 :
-			*(((fp4*&)_pDst)++) = V[0];
+//			*(((fp32*&)_pDst)++) = V[0];
+			UnalignedWrite(_pDst, V[0]);
 			break;
 		case CRC_VREGFMT_V2_F32 :
-			*(((fp4*&)_pDst)++) = V[0];
-			*(((fp4*&)_pDst)++) = V[1];
+//			*(((fp32*&)_pDst)++) = V[0];
+//			*(((fp32*&)_pDst)++) = V[1];
+			UnalignedWrite(_pDst, V[0]);
+			UnalignedWrite(_pDst, V[1]);
 			break;
 		case CRC_VREGFMT_V3_F32 :
-			*(((fp4*&)_pDst)++) = V[0];
-			*(((fp4*&)_pDst)++) = V[1];
-			*(((fp4*&)_pDst)++) = V[2];
+//			*(((fp32*&)_pDst)++) = V[0];
+//			*(((fp32*&)_pDst)++) = V[1];
+//			*(((fp32*&)_pDst)++) = V[2];
+			UnalignedWrite(_pDst, V[0]);
+			UnalignedWrite(_pDst, V[1]);
+			UnalignedWrite(_pDst, V[2]);
 			break;
 		case CRC_VREGFMT_V4_F32 :
-			*(((fp4*&)_pDst)++) = V[0];
-			*(((fp4*&)_pDst)++) = V[1];
-			*(((fp4*&)_pDst)++) = V[2];
-			*(((fp4*&)_pDst)++) = V[3];
+//			*(((fp32*&)_pDst)++) = V[0];
+//			*(((fp32*&)_pDst)++) = V[1];
+//			*(((fp32*&)_pDst)++) = V[2];
+//			*(((fp32*&)_pDst)++) = V[3];
+			UnalignedWrite(_pDst, V[0]);
+			UnalignedWrite(_pDst, V[1]);
+			UnalignedWrite(_pDst, V[2]);
+			UnalignedWrite(_pDst, V[3]);
 			break;
 		case CRC_VREGFMT_V1_I16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[0]), -32768, 32767));
 			break;
 		case CRC_VREGFMT_V2_I16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[0]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[1]), -32768, 32767));
 			break;
 		case CRC_VREGFMT_V3_I16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[0]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[1]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[2]), -32768, 32767));
 			break;
 		case CRC_VREGFMT_V4_I16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3]), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[0]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[1]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[2]), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt(V[3]), -32768, 32767));
 			break;
 		case CRC_VREGFMT_V1_U16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
+//			*(((uint16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0]), 0, 65535));
 			break;
 		case CRC_VREGFMT_V2_U16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1]), 0, 65535));
 			break;
 		case CRC_VREGFMT_V3_U16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[2]), 0, 65535));
 			break;
 		case CRC_VREGFMT_V4_U16:
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), 0, 65535);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3]), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[2]), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[3]), 0, 65535));
+			break;
+		case CRC_VREGFMT_NS1_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]*32767.0f), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[0] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			break;
+		case CRC_VREGFMT_NS2_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]*32767.0f), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[0] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[1] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
 			break;
 		case CRC_VREGFMT_NS3_I16 :
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]*32767.0f), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]*32767.0f), -32768, 32767);
-			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]*32767.0f), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[0] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[1] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[2] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			break;
+		case CRC_VREGFMT_NS4_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2]*32767.0f), -32768, 32767);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3]*32767.0f), -32768, 32767);
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[0] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[1] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[2] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			UnalignedWrite(_pDst, (int16)Clamp(RoundToInt((V[3] * 0.5f + 0.5f)*65535.0f - 32768.0f), -32768, 32767));
+			break;
+		case CRC_VREGFMT_NU1_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535));
+			break;
+		case CRC_VREGFMT_NU2_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535));
+			break;
+		case CRC_VREGFMT_NU3_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2] * 65535.0f), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[2] * 65535.0f), 0, 65535));
+			break;
+		case CRC_VREGFMT_NU4_I16 :
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[2] * 65535.0f), 0, 65535);
+//			*(((int16*&)_pDst)++) = Clamp(RoundToInt(V[3] * 65535.0f), 0, 65535);
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[0] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[1] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[2] * 65535.0f), 0, 65535));
+			UnalignedWrite(_pDst, (uint16)Clamp(RoundToInt(V[3] * 65535.0f), 0, 65535));
 			break;
 		case CRC_VREGFMT_NS3_P32 :
 			{
+//				uint32 Packed =
+//					(((Clamp(RoundToInt((V[0]) * 1023.0f), -1024, 1023)) & 0x7ff) << 0) +
+//					(((Clamp(RoundToInt((V[1]) * 1023.0f), -1024, 1023)) & 0x7ff) << 11) +
+//					(((Clamp(RoundToInt((V[2]) * 511.0f), -512, 511)) & 0x3ff) << 22);
+//				*(((uint32*&)_pDst)++) = Packed;
 				uint32 Packed =
-					(((Clamp(RoundToInt((V[0])*1023.0f),-1024,1023)) & 0x7ff) << 0) +
-					(((Clamp(RoundToInt((V[1])*1023.0f),-1024,1023)) & 0x7ff) << 11) +
-					(((Clamp(RoundToInt((V[2])*511.0f),-512,511)) & 0x3ff) << 22);
-				*(((uint32*&)_pDst)++) = Packed;
+					(((Clamp(RoundToInt(((V[0]) * 0.5f + 0.5f) * 2047.0f - 1024.0f), -1024, 1023)) & 0x7ff) << 0) +
+					(((Clamp(RoundToInt(((V[1]) * 0.5f + 0.5f) * 2047.0f - 1024.0f), -1024, 1023)) & 0x7ff) << 11) +
+					(((Clamp(RoundToInt(((V[2]) * 0.5f + 0.5f) * 1023.0f - 512.0f), -512, 511)) & 0x3ff) << 22);
+				UnalignedWrite(_pDst, Packed);
 			}
 			break;
 		case CRC_VREGFMT_NU3_P32 :
 			{
 				uint32 Packed =
-					(((uint32)Clamp((int32)RoundToInt((V[0])*2047.0f),0,0x7ff)) << 0) +
-					(((uint32)Clamp((int32)RoundToInt((V[1])*2047.0f),0,0x7ff)) << 11) +
-					(((uint32)Clamp((int32)RoundToInt((V[2])*1023.0f),0,0x3ff)) << 22);
-				*(((uint32*&)_pDst)++) = Packed;
+					(((uint32)Clamp((int32)RoundToInt((V[0]) * 2047.0f), 0, 0x7ff)) << 0) +
+					(((uint32)Clamp((int32)RoundToInt((V[1]) * 2047.0f), 0, 0x7ff)) << 11) +
+					(((uint32)Clamp((int32)RoundToInt((V[2]) * 1023.0f), 0, 0x3ff)) << 22);
+//				*(((uint32*&)_pDst)++) = Packed;
+				UnalignedWrite(_pDst, Packed);
+			}
+			break;
+		case CRC_VREGFMT_U3_P32 :
+			{
+				uint32 Packed =
+					(((uint32)Clamp(RoundToInt(V[0]), 0, 0x7ff)) << 0) +
+					(((uint32)Clamp(RoundToInt(V[1]), 0, 0x7ff)) << 11) +
+					(((uint32)Clamp(RoundToInt(V[2]), 0, 0x3ff)) << 22);
+//				*(((uint32*&)_pDst)++) = Packed;
+				UnalignedWrite(_pDst, Packed);
 			}
 			break;
 		case CRC_VREGFMT_N4_UI8_P32 :
 			{
 				uint32 Packed =
-					(((uint32)Clamp((int32)RoundToInt((V[0])),0,0xff)) << 0) +
-					(((uint32)Clamp((int32)RoundToInt((V[1])),0,0xff)) << 8) +
-					(((uint32)Clamp((int32)RoundToInt((V[2])),0,0xff)) << 16) + 
-					(((uint32)Clamp((int32)RoundToInt((V[3])),0,0xff)) << 24);
-				*(((uint32*&)_pDst)++) = Packed;
+					(((uint32)Clamp((int32)RoundToInt((V[0])), 0, 0xff)) << 0) +
+					(((uint32)Clamp((int32)RoundToInt((V[1])), 0, 0xff)) << 8) +
+					(((uint32)Clamp((int32)RoundToInt((V[2])), 0, 0xff)) << 16) + 
+					(((uint32)Clamp((int32)RoundToInt((V[3])), 0, 0xff)) << 24);
+//				*(((uint32*&)_pDst)++) = Packed;
+				UnalignedWrite(_pDst, Packed);
 			}
 			break;
 		case CRC_VREGFMT_N4_UI8_P32_NORM :
 			{
 				uint32 Packed =
-					(((uint32)Clamp((int32)RoundToInt((V[0])*255.0f),0,0xff)) << 0) +
-					(((uint32)Clamp((int32)RoundToInt((V[1])*255.0f),0,0xff)) << 8) +
-					(((uint32)Clamp((int32)RoundToInt((V[2])*255.0f),0,0xff)) << 16) + 
-					(((uint32)Clamp((int32)RoundToInt((V[3])*255.0f),0,0xff)) << 24);
-				*(((uint32*&)_pDst)++) = Packed;
+					(((uint32)Clamp((int32)RoundToInt((V[0]) * 255.0f), 0, 0xff)) << 0) +
+					(((uint32)Clamp((int32)RoundToInt((V[1]) * 255.0f), 0, 0xff)) << 8) +
+					(((uint32)Clamp((int32)RoundToInt((V[2]) * 255.0f), 0, 0xff)) << 16) + 
+					(((uint32)Clamp((int32)RoundToInt((V[3]) * 255.0f), 0, 0xff)) << 24);
+//				*(((uint32*&)_pDst)++) = Packed;
+				UnalignedWrite(_pDst, Packed);
 			}
 			break;
 		case CRC_VREGFMT_N4_COL :
 #if 1
 			{
 				uint32 Packed =
-					(((uint32)Clamp((int32)RoundToInt((V[2])*255.0f),0,0xff)) << 0) +
-					(((uint32)Clamp((int32)RoundToInt((V[1])*255.0f),0,0xff)) << 8) +
-					(((uint32)Clamp((int32)RoundToInt((V[0])*255.0f),0,0xff)) << 16) + 
-					(((uint32)Clamp((int32)RoundToInt((V[3])*255.0f),0,0xff)) << 24);
-				*(((uint32*&)_pDst)++) = Packed;
+					(((uint32)Clamp((int32)RoundToInt((V[2]) * 255.0f), 0, 0xff)) << 0) +
+					(((uint32)Clamp((int32)RoundToInt((V[1]) * 255.0f), 0, 0xff)) << 8) +
+					(((uint32)Clamp((int32)RoundToInt((V[0]) * 255.0f), 0, 0xff)) << 16) + 
+					(((uint32)Clamp((int32)RoundToInt((V[3]) * 255.0f), 0, 0xff)) << 24);
+//				*(((uint32*&)_pDst)++) = Packed;
+				UnalignedWrite(_pDst, Packed);
 			}
 #else
-			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[2]*255.0f), 0, 255);
-			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[1]*255.0f), 0, 255);
-			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[0]*255.0f), 0, 255);
-			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[3]*255.0f), 0, 255);
+			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[2] * 255.0f), 0, 255);
+			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[1] * 255.0f), 0, 255);
+			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[0] * 255.0f), 0, 255);
+			*(((uint8*&)_pDst)++) = Clamp(RoundToInt(V[3] * 255.0f), 0, 255);
 #endif
 			break;
 		default:
@@ -1446,7 +1834,7 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 {
 	mint Stride = 0;
 	if (m_Format.GetFormat(CRC_VREG_POS))
-		Stride += sizeof(fp4) * 3;
+		Stride += sizeof(fp32) * 3;
 
 	for (int i = 0; i < CRC_MAXTEXCOORDS; ++i)
 	{
@@ -1455,12 +1843,12 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_V1_F32:
 		case CRC_VREGFMT_V1_I16:
 		case CRC_VREGFMT_V1_U16:
-			Stride += sizeof(fp4);
+			Stride += sizeof(fp32);
 			break;
 		case CRC_VREGFMT_V2_F32:
 		case CRC_VREGFMT_V2_I16:
 		case CRC_VREGFMT_V2_U16:
-			Stride += sizeof(fp4) * 2;
+			Stride += sizeof(fp32) * 2;
 			break;
 		case CRC_VREGFMT_V3_F32:
 		case CRC_VREGFMT_V3_I16:
@@ -1468,7 +1856,8 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_NS3_I16:
 		case CRC_VREGFMT_NS3_P32:
 		case CRC_VREGFMT_NU3_P32:
-			Stride += sizeof(fp4) * 3;
+		case CRC_VREGFMT_U3_P32:
+			Stride += sizeof(fp32) * 3;
 			break;
 		case CRC_VREGFMT_V4_F32:
 		case CRC_VREGFMT_V4_I16:
@@ -1476,13 +1865,13 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_N4_UI8_P32_NORM:
 		case CRC_VREGFMT_N4_UI8_P32:
 		case CRC_VREGFMT_N4_COL:
-			Stride += sizeof(fp4) * 4;
+			Stride += sizeof(fp32) * 4;
 			break;
 		}
 	}
 
 	if (m_Format.GetFormat(CRC_VREG_NORMAL))
-		Stride += sizeof(fp4) * 3;
+		Stride += sizeof(fp32) * 3;
 	if (m_Format.GetFormat(CRC_VREG_COLOR))
 		Stride += sizeof(uint32);
 	if (m_Format.GetFormat(CRC_VREG_SPECULAR))
@@ -1497,12 +1886,12 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_V1_F32:
 		case CRC_VREGFMT_V1_I16:
 		case CRC_VREGFMT_V1_U16:
-			Stride += sizeof(fp4);
+			Stride += sizeof(fp32);
 			break;
 		case CRC_VREGFMT_V2_F32:
 		case CRC_VREGFMT_V2_I16:
 		case CRC_VREGFMT_V2_U16:
-			Stride += sizeof(fp4) * 2;
+			Stride += sizeof(fp32) * 2;
 			break;
 		case CRC_VREGFMT_V3_F32:
 		case CRC_VREGFMT_V3_I16:
@@ -1510,7 +1899,8 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_NS3_I16:
 		case CRC_VREGFMT_NS3_P32:
 		case CRC_VREGFMT_NU3_P32:
-			Stride += sizeof(fp4) * 3;
+		case CRC_VREGFMT_U3_P32:
+			Stride += sizeof(fp32) * 3;
 			break;
 		case CRC_VREGFMT_V4_F32:
 		case CRC_VREGFMT_V4_I16:
@@ -1518,12 +1908,40 @@ mint CRC_BuildVertexBuffer::CRC_VertexBuffer_GetSize() const
 		case CRC_VREGFMT_N4_UI8_P32_NORM:
 		case CRC_VREGFMT_N4_UI8_P32:
 		case CRC_VREGFMT_N4_COL:
-			Stride += sizeof(fp4) * 4;
+			Stride += sizeof(fp32) * 4;
 			break;
 	}
 
-	if (m_Format.GetFormat(CRC_VREG_MW1))
-		Stride += sizeof(fp4) * 4; // Only support extra 4 weights
+	switch (m_Format.GetFormat(CRC_VREG_MW1))
+	{
+		case CRC_VREGFMT_V1_F32:
+		case CRC_VREGFMT_V1_I16:
+		case CRC_VREGFMT_V1_U16:
+			Stride += sizeof(fp32);
+			break;
+		case CRC_VREGFMT_V2_F32:
+		case CRC_VREGFMT_V2_I16:
+		case CRC_VREGFMT_V2_U16:
+			Stride += sizeof(fp32) * 2;
+			break;
+		case CRC_VREGFMT_V3_F32:
+		case CRC_VREGFMT_V3_I16:
+		case CRC_VREGFMT_V3_U16:
+		case CRC_VREGFMT_NS3_I16:
+		case CRC_VREGFMT_NS3_P32:
+		case CRC_VREGFMT_NU3_P32:
+		case CRC_VREGFMT_U3_P32:
+			Stride += sizeof(fp32) * 3;
+			break;
+		case CRC_VREGFMT_V4_F32:
+		case CRC_VREGFMT_V4_I16:
+		case CRC_VREGFMT_V4_U16:
+		case CRC_VREGFMT_N4_UI8_P32_NORM:
+		case CRC_VREGFMT_N4_UI8_P32:
+		case CRC_VREGFMT_N4_COL:
+			Stride += sizeof(fp32) * 4;
+			break;
+	}
 
 	return Stride * m_nV;
 }
@@ -1542,9 +1960,9 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 	{
 		int SrcFmt = m_Format.GetFormat(iVReg);
 		const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-		CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp4)*3, NULL, m_nV);
-		_DstBuffer.m_pV = (CVec3Dfp4*)pDst;
-		pDst += sizeof(fp4) * 3 * m_nV;
+		CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp32)*3, NULL, m_nV);
+		_DstBuffer.m_pV = (CVec3Dfp32*)pDst;
+		pDst += sizeof(fp32) * 3 * m_nV;
 	}
 
 	for (int i = 0; i < CRC_MAXTEXCOORDS; ++i)
@@ -1558,10 +1976,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 			{
 				int SrcFmt = m_Format.GetFormat(iVReg);
 				const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V1_F32, sizeof(fp4)*1, NULL, m_nV);
-				_DstBuffer.m_pTV[i] = (fp4*)pDst;
+				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V1_F32, sizeof(fp32)*1, NULL, m_nV);
+				_DstBuffer.m_pTV[i] = (fp32*)pDst;
 				_DstBuffer.m_nTVComp[i] = 1;
-				pDst += sizeof(fp4) * 1 * m_nV;
+				pDst += sizeof(fp32) * 1 * m_nV;
 			}
 			break;
 		case CRC_VREGFMT_V2_F32:
@@ -1570,10 +1988,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 			{
 				int SrcFmt = m_Format.GetFormat(iVReg);
 				const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V2_F32, sizeof(fp4)*2, NULL, m_nV);
-				_DstBuffer.m_pTV[i] = (fp4*)pDst;
+				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V2_F32, sizeof(fp32)*2, NULL, m_nV);
+				_DstBuffer.m_pTV[i] = (fp32*)pDst;
 				_DstBuffer.m_nTVComp[i] = 2;
-				pDst += sizeof(fp4) * 2 * m_nV;
+				pDst += sizeof(fp32) * 2 * m_nV;
 			}
 			break;
 		case CRC_VREGFMT_V3_F32:
@@ -1582,13 +2000,14 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 		case CRC_VREGFMT_NS3_I16:
 		case CRC_VREGFMT_NS3_P32:
 		case CRC_VREGFMT_NU3_P32:
+		case CRC_VREGFMT_U3_P32:
 			{
 				int SrcFmt = m_Format.GetFormat(iVReg);
 				const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp4)*3, NULL, m_nV);
-				_DstBuffer.m_pTV[i] = (fp4*)pDst;
+				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp32)*3, NULL, m_nV);
+				_DstBuffer.m_pTV[i] = (fp32*)pDst;
 				_DstBuffer.m_nTVComp[i] = 3;
-				pDst += sizeof(fp4) * 3 * m_nV;
+				pDst += sizeof(fp32) * 3 * m_nV;
 			}
 			break;
 		case CRC_VREGFMT_V4_F32:
@@ -1600,10 +2019,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 			{
 				int SrcFmt = m_Format.GetFormat(iVReg);
 				const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp4)*4, NULL, m_nV);
-				_DstBuffer.m_pTV[i] = (fp4*)pDst;
+				CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp32)*4, NULL, m_nV);
+				_DstBuffer.m_pTV[i] = (fp32*)pDst;
 				_DstBuffer.m_nTVComp[i] = 4;
-				pDst += sizeof(fp4) * 4 * m_nV;
+				pDst += sizeof(fp32) * 4 * m_nV;
 			}
 			break;
 		}
@@ -1614,9 +2033,9 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 	{
 		int SrcFmt = m_Format.GetFormat(iVReg);
 		const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-		CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp4)*3, NULL, m_nV);
-		_DstBuffer.m_pN = (CVec3Dfp4*)pDst;
-		pDst += sizeof(fp4) * 3 * m_nV;
+		CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp32)*3, NULL, m_nV);
+		_DstBuffer.m_pN = (CVec3Dfp32*)pDst;
+		pDst += sizeof(fp32) * 3 * m_nV;
 	}
 
 
@@ -1668,7 +2087,6 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 	}
 
 	iVReg = CRC_VREG_MW0;
-	bint bEnbale8 = (m_Format.GetFormat(CRC_VREG_MW1) != 0);
 	switch (m_Format.GetFormat(iVReg))
 	{
 	case CRC_VREGFMT_V1_F32:
@@ -1677,10 +2095,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 		{
 			int SrcFmt = m_Format.GetFormat(iVReg);
 			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V1_F32, sizeof(fp4)*1, NULL, m_nV);
-			_DstBuffer.m_pMW = (fp4*)pDst;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V1_F32, sizeof(fp32)*1, NULL, m_nV);
+			_DstBuffer.m_pMW = (fp32*)pDst;
 			_DstBuffer.m_nMWComp = 1;
-			pDst += sizeof(fp4) * 1 * m_nV;
+			pDst += sizeof(fp32) * 1 * m_nV;
 		}
 		break;
 	case CRC_VREGFMT_V2_F32:
@@ -1689,10 +2107,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 		{
 			int SrcFmt = m_Format.GetFormat(iVReg);
 			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V2_F32, sizeof(fp4)*2, NULL, m_nV);
-			_DstBuffer.m_pMW = (fp4*)pDst;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V2_F32, sizeof(fp32)*2, NULL, m_nV);
+			_DstBuffer.m_pMW = (fp32*)pDst;
 			_DstBuffer.m_nMWComp = 2;
-			pDst += sizeof(fp4) * 2 * m_nV;
+			pDst += sizeof(fp32) * 2 * m_nV;
 		}
 		break;
 	case CRC_VREGFMT_V3_F32:
@@ -1701,13 +2119,14 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 	case CRC_VREGFMT_NS3_I16:
 	case CRC_VREGFMT_NS3_P32:
 	case CRC_VREGFMT_NU3_P32:
+	case CRC_VREGFMT_U3_P32:
 		{
 			int SrcFmt = m_Format.GetFormat(iVReg);
 			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp4)*3, NULL, m_nV);
-			_DstBuffer.m_pMW = (fp4*)pDst;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp32)*3, NULL, m_nV);
+			_DstBuffer.m_pMW = (fp32*)pDst;
 			_DstBuffer.m_nMWComp = 3;
-			pDst += sizeof(fp4) * 3 * m_nV;
+			pDst += sizeof(fp32) * 3 * m_nV;
 		}
 		break;
 	case CRC_VREGFMT_V4_F32:
@@ -1719,10 +2138,10 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 		{
 			int SrcFmt = m_Format.GetFormat(iVReg);
 			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp4)*(4), NULL, m_nV);
-			_DstBuffer.m_pMW = (fp4*)pDst;
-			_DstBuffer.m_nMWComp = 4 + bEnbale8 * 4;
-			pDst += sizeof(fp4) * (4 + bEnbale8 * 4) * m_nV;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp32)*(4), NULL, m_nV);
+			_DstBuffer.m_pMW = (fp32*)pDst;
+			_DstBuffer.m_nMWComp = 4;
+			pDst += sizeof(fp32) * 4 * m_nV;
 		}
 		break;
 /*	case CRC_VREGFMT_V8_F32:
@@ -1730,20 +2149,79 @@ void CRC_BuildVertexBuffer::CRC_VertexBuffer_ConvertTo(void* _pDst, CRC_VertexBu
 		{
 			int SrcFmt = m_Format.GetFormat(iVReg);
 			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp4)*4, NULL, m_nV * 2);
-			_DstBuffer.m_pMW = (fp4*)pDst;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp32)*4, NULL, m_nV * 2);
+			_DstBuffer.m_pMW = (fp32*)pDst;
 			_DstBuffer.m_nMWComp = 8;
-			pDst += sizeof(fp4) * 8 * m_nV;
+			pDst += sizeof(fp32) * 8 * m_nV;
 		}
 		break;*/
 	}
 
 	iVReg = CRC_VREG_MW1;
-	if (m_Format.GetFormat(iVReg))
+	switch (m_Format.GetFormat(iVReg))
 	{
-		int SrcFmt = m_Format.GetFormat(iVReg);
-		const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
-		CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, _DstBuffer.m_pMW + 4 * m_nV, CRC_VREGFMT_V4_F32, sizeof(fp4)*4, NULL, m_nV);
+	case CRC_VREGFMT_V1_F32:
+	case CRC_VREGFMT_V1_I16:
+	case CRC_VREGFMT_V1_U16:
+		{
+			int SrcFmt = m_Format.GetFormat(iVReg);
+			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V1_F32, sizeof(fp32)*1, NULL, m_nV);
+			_DstBuffer.m_nMWComp += 1;
+			pDst += sizeof(fp32) * 1 * m_nV;
+		}
+		break;
+	case CRC_VREGFMT_V2_F32:
+	case CRC_VREGFMT_V2_I16:
+	case CRC_VREGFMT_V2_U16:
+		{
+			int SrcFmt = m_Format.GetFormat(iVReg);
+			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V2_F32, sizeof(fp32)*2, NULL, m_nV);
+			_DstBuffer.m_nMWComp += 2;
+			pDst += sizeof(fp32) * 2 * m_nV;
+		}
+		break;
+	case CRC_VREGFMT_V3_F32:
+	case CRC_VREGFMT_V3_I16:
+	case CRC_VREGFMT_V3_U16:
+	case CRC_VREGFMT_NS3_I16:
+	case CRC_VREGFMT_NS3_P32:
+	case CRC_VREGFMT_NU3_P32:
+	case CRC_VREGFMT_U3_P32:
+		{
+			int SrcFmt = m_Format.GetFormat(iVReg);
+			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V3_F32, sizeof(fp32)*3, NULL, m_nV);
+			_DstBuffer.m_nMWComp += 3;
+			pDst += sizeof(fp32) * 3 * m_nV;
+		}
+		break;
+	case CRC_VREGFMT_V4_F32:
+	case CRC_VREGFMT_V4_I16:
+	case CRC_VREGFMT_V4_U16:
+	case CRC_VREGFMT_N4_UI8_P32_NORM:
+	case CRC_VREGFMT_N4_UI8_P32:
+	case CRC_VREGFMT_N4_COL:
+		{
+			int SrcFmt = m_Format.GetFormat(iVReg);
+			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp32)*(4), NULL, m_nV);
+			_DstBuffer.m_nMWComp += 4;
+			pDst += sizeof(fp32) * 4 * m_nV;
+		}
+		break;
+/*	case CRC_VREGFMT_V8_F32:
+	case CRC_VREGFMT_N8_UI8_P32_NORM:
+		{
+			int SrcFmt = m_Format.GetFormat(iVReg);
+			const CRC_VRegTransform* pSrcScale = (iVReg < CRC_MAXVERTEXREGSCALE) && (m_TransformEnable & (1 << iVReg)) ? (&(m_lTransform[iVReg])) : NULL;
+			CRC_VertexFormat::ConvertRegisterFormat(m_lpVReg[iVReg], SrcFmt, CRC_VertexFormat::GetRegisterSize(SrcFmt), pSrcScale, pDst, CRC_VREGFMT_V4_F32, sizeof(fp32)*4, NULL, m_nV * 2);
+			_DstBuffer.m_pMW = (fp32*)pDst;
+			_DstBuffer.m_nMWComp = 8;
+			pDst += sizeof(fp32) * 8 * m_nV;
+		}
+		break;*/
 	}
 }
 
@@ -1782,7 +2260,7 @@ CRC_ClipStackEntry::CRC_ClipStackEntry()
 	m_nPlanes = 0;
 }
 
-void CRC_ClipStackEntry::Copy(const CRC_ClipStackEntry& _Src, const CMat4Dfp4* _pTransform)
+void CRC_ClipStackEntry::Copy(const CRC_ClipStackEntry& _Src, const CMat4Dfp32* _pTransform)
 {
 	MAUTOSTRIP(CRC_ClipStackEntry_Copy, MAUTOSTRIP_VOID);
 	m_nPlanes = _Src.m_nPlanes;
@@ -1811,6 +2289,7 @@ CRC_Core::CRC_Core()
 	m_pTC = NULL;
 	m_iMatrixStack = 0;
 	m_iMatrixMode = 0;
+	m_iMatrixModeMask = 1;
 	m_MatrixChanged = -1;
 //	FillChar(&m_MatrixUnit, sizeof(m_MatrixUnit), -1);
 	m_AttribStackDepth = 0;
@@ -1856,6 +2335,7 @@ void CRC_Core::BeginScene(CRC_Viewport* _pVP)
 	m_lMatrixStack[0].Clear();
 	m_iMatrixStack = 0;
 	m_iMatrixMode = 0;
+	m_iMatrixModeMask = 0;
 
 	m_iAttribStack = 0;
 	m_iClipStack = 0;
@@ -1887,7 +2367,7 @@ void CRC_Core::PreEndScene()
 	if (m_bShowGamma)
 	{
 		CPixel32 C[4];
-		CVec3Dfp4 V[4];
+		CVec3Dfp32 V[4];
 		static int lBarColorMask[4] = { 0xffffffff, 0xffff0000, 0xff00ff00, 0xff0000ff };
 		static uint16 lTriPrim[6] = { 0,2,1,1,2,3 };
 
@@ -1898,10 +2378,10 @@ void CRC_Core::PreEndScene()
 			C[1] = 0;
 			C[2] = Col;
 			C[3] = Col;
-			V[0] = CVec3Dfp4(-100, 25 + i*10, 100);
-			V[1] = CVec3Dfp4(-100, 20 + i*10, 100);
-			V[2] = CVec3Dfp4(100, 25 + i*10, 100);
-			V[3] = CVec3Dfp4(100, 20 + i*10, 100);
+			V[0] = CVec3Dfp32(-100, 25 + i*10, 100);
+			V[1] = CVec3Dfp32(-100, 20 + i*10, 100);
+			V[2] = CVec3Dfp32(100, 25 + i*10, 100);
+			V[3] = CVec3Dfp32(100, 20 + i*10, 100);
 
 			DRenderTopClass Geometry_Clear();
 			DRenderTopClass Geometry_VertexArray(V, 4, true);
@@ -2028,11 +2508,11 @@ bint CRC_Core::Attrib_SetRasterMode(CRC_Attributes* _pA, int _RasterMode)
 	return false;
 }
 
-	void CRC_Core::Internal_RenderPolygon(int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN, const CVec4Dfp4* _pCol, const CVec4Dfp4* _pSpec , 
-//const fp4* _pFog = NULL,
-const CVec4Dfp4* _pTV0, const CVec4Dfp4* _pTV1 , const CVec4Dfp4* _pTV2 , const CVec4Dfp4* _pTV3 , int _Color){};
+	void CRC_Core::Internal_RenderPolygon(int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN, const CVec4Dfp32* _pCol, const CVec4Dfp32* _pSpec , 
+//const fp32* _pFog = NULL,
+const CVec4Dfp32* _pTV0, const CVec4Dfp32* _pTV1 , const CVec4Dfp32* _pTV2 , const CVec4Dfp32* _pTV3 , int _Color){};
 	void CRC_Core::Attrib_Set(CRC_Attributes* _pAttrib){};
-	void CRC_Core::Matrix_SetRender(int _iMode, const CMat4Dfp4* _pMatrix){};
+	void CRC_Core::Matrix_SetRender(int _iMode, const CMat4Dfp32* _pMatrix){};
 
 
 void CRC_Core::Viewport_Push()
@@ -2056,7 +2536,7 @@ void CRC_Core::RenderTarget_Copy(CRct _SrcRect, CPnt _Dest, int _CopyType)
 	// nop
 }
 
-void CRC_Core::RenderTarget_CopyToTexture(int _TextureID, CRct _SrcRect, CPnt _Dest, bint _bContinueTiling, uint16 _Slice)
+void CRC_Core::RenderTarget_CopyToTexture(int _TextureID, CRct _SrcRect, CPnt _Dest, bint _bContinueTiling, uint16 _Slice, int _iMRT)
 {
 	// nop
 }
@@ -2112,6 +2592,12 @@ int CRC_Core::Texture_GetPicmipFromGroup(int _iPicmip)
 	MAUTOSTRIP(CRC_Core_Texture_GetPicmipFromGroup, 0);
 	return 0;
 }
+
+void CRC_Core::Texture_Flush(int _TextureID)
+{
+	MAUTOSTRIP(CRC_Core_Texture_Flush, MAUTOSTRIP_VOID);
+}
+
 
 void CRC_Core::Texture_MakeAllDirty(int _iPicMip)
 {
@@ -2208,7 +2694,7 @@ void CRC_Core::Attrib_Set(const CRC_Attributes& _Attrib)
 		// Not extremely efficient, but on the other hand we don't have to flags everything as changed.
 		DRenderTopClass Attrib_Disable(-1);
 		DRenderTopClass Attrib_Enable(_Attrib.m_Flags);
-		DRenderTopClass Attrib_RasterMode(_Attrib.m_RasterMode);
+//		DRenderTopClass Attrib_RasterMode(_Attrib.m_RasterMode);
 		DRenderTopClass Attrib_SourceBlend(_Attrib.m_SourceBlend);
 		DRenderTopClass Attrib_DestBlend(_Attrib.m_DestBlend);
 		DRenderTopClass Attrib_ZCompare(_Attrib.m_ZCompare);
@@ -2222,7 +2708,7 @@ void CRC_Core::Attrib_Set(const CRC_Attributes& _Attrib)
 		DRenderTopClass Attrib_FogStart(_Attrib.m_FogStart);
 		DRenderTopClass Attrib_FogEnd(_Attrib.m_FogEnd);
 		DRenderTopClass Attrib_FogDensity(_Attrib.m_FogDensity);
-		DRenderTopClass Attrib_FogColor(_Attrib.m_FogColor);
+		DRenderTopClass Attrib_FogColor(CPixel32(_Attrib.m_FogColor));
 		DRenderTopClass Attrib_PolygonOffset(_Attrib.m_PolygonOffsetScale, _Attrib.m_PolygonOffsetUnits);
 		DRenderTopClass Attrib_Lights(_Attrib.m_pLights, _Attrib.m_nLights);
 
@@ -2446,14 +2932,15 @@ void CRC_Core::Attrib_StencilBackOp(int _Func, int _OpFail, int _OpZFail, int _O
 void CRC_Core::Attrib_RasterMode(int _RasterMode)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_RasterMode, MAUTOSTRIP_VOID);
-	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_RASTERMODE)
+	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_BLEND)
 		return;
-	if (m_lAttribStack[m_iAttribStack].m_RasterMode == _RasterMode) return;
+//	if (m_lAttribStack[m_iAttribStack].m_RasterMode == _RasterMode) return;
 	CRC_Attributes* pA = &m_lAttribStack[m_iAttribStack];
-	pA->m_RasterMode = _RasterMode;
+	pA->Attrib_RasterMode(_RasterMode);
+//	pA->m_RasterMode = _RasterMode;
 //	pA->ClearRasterModeSettings();
 //	Attrib_SetRasterMode(pA, _RasterMode);
-	m_AttribChanged |= CRC_ATTRCHG_RASTERMODE | CRC_ATTRCHG_BLEND | CRC_ATTRCHG_FLAGS;
+	m_AttribChanged |= CRC_ATTRCHG_BLEND | CRC_ATTRCHG_FLAGS;
 }
 
 void CRC_Core::Attrib_SourceBlend(int _Blend)
@@ -2461,7 +2948,7 @@ void CRC_Core::Attrib_SourceBlend(int _Blend)
 	MAUTOSTRIP(CRC_Core_Attrib_SourceBlend, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_BLEND)
 		return;
-	if (m_lAttribStack[m_iAttribStack].m_RasterMode) return;
+//	if (m_lAttribStack[m_iAttribStack].m_RasterMode) return;
 	if (m_lAttribStack[m_iAttribStack].m_SourceBlend == _Blend) return;
 	m_lAttribStack[m_iAttribStack].m_SourceBlend = _Blend;
 	m_AttribChanged |= CRC_ATTRCHG_BLEND;
@@ -2472,7 +2959,7 @@ void CRC_Core::Attrib_DestBlend(int _Blend)
 	MAUTOSTRIP(CRC_Core_Attrib_DestBlend, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_BLEND)
 		return;
-	if (m_lAttribStack[m_iAttribStack].m_RasterMode) return;
+//	if (m_lAttribStack[m_iAttribStack].m_RasterMode) return;
 	if (m_lAttribStack[m_iAttribStack].m_DestBlend == _Blend) return;
 	m_lAttribStack[m_iAttribStack].m_DestBlend = _Blend;
 	m_AttribChanged |= CRC_ATTRCHG_BLEND;
@@ -2488,7 +2975,7 @@ void CRC_Core::Attrib_FogColor(CPixel32 _FogColor)
 	m_AttribChanged |= CRC_ATTRCHG_FOG;
 }
 
-void CRC_Core::Attrib_FogStart(fp4 _FogStart)
+void CRC_Core::Attrib_FogStart(fp32 _FogStart)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_FogStart, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_FOG)
@@ -2498,7 +2985,7 @@ void CRC_Core::Attrib_FogStart(fp4 _FogStart)
 	m_AttribChanged |= CRC_ATTRCHG_FOG;
 }
 
-void CRC_Core::Attrib_FogEnd(fp4 _FogEnd)
+void CRC_Core::Attrib_FogEnd(fp32 _FogEnd)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_FogEnd, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_FOG)
@@ -2508,7 +2995,7 @@ void CRC_Core::Attrib_FogEnd(fp4 _FogEnd)
 	m_AttribChanged |= CRC_ATTRCHG_FOG;
 }
 
-void CRC_Core::Attrib_FogDensity(fp4 _FogDensity)
+void CRC_Core::Attrib_FogDensity(fp32 _FogDensity)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_FogDensity, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_FOG)
@@ -2518,7 +3005,7 @@ void CRC_Core::Attrib_FogDensity(fp4 _FogDensity)
 	m_AttribChanged |= CRC_ATTRCHG_FOG;
 }
 
-void CRC_Core::Attrib_PolygonOffset(fp4 _Scale, fp4 _Offset)
+void CRC_Core::Attrib_PolygonOffset(fp32 _Scale, fp32 _Offset)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_PolygonOffset, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_POLYGONOFFSET)
@@ -2530,7 +3017,7 @@ void CRC_Core::Attrib_PolygonOffset(fp4 _Scale, fp4 _Offset)
 	m_AttribChanged |= CRC_ATTRCHG_POLYGONOFFSET;
 	DRenderTopClass Attrib_Enable(CRC_FLAGS_POLYGONOFFSET);
 }
-
+/*
 void CRC_Core::Attrib_Scissor(const CRect2Duint16& _Scissor)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_Scissor, MAUTOSTRIP_VOID);
@@ -2539,6 +3026,18 @@ void CRC_Core::Attrib_Scissor(const CRect2Duint16& _Scissor)
 		return;
 	if ((m_lAttribStack[m_iAttribStack].m_Scissor.m_Min == _Scissor.m_Min) &&
 		(m_lAttribStack[m_iAttribStack].m_Scissor.m_Max == _Scissor.m_Max)) return;
+	m_lAttribStack[m_iAttribStack].m_Scissor = _Scissor;
+	m_AttribChanged |= CRC_ATTRCHG_SCISSOR;
+#endif	// PLATFORM_PS2
+}
+*/
+void CRC_Core::Attrib_Scissor(const CScissorRect& _Scissor)
+{
+	MAUTOSTRIP(CRC_Core_Attrib_Scissor, MAUTOSTRIP_VOID);
+#ifndef	PLATFORM_PS2
+	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_SCISSOR)
+		return;
+	if (m_lAttribStack[m_iAttribStack].m_Scissor.IsEqual(_Scissor)) return;
 	m_lAttribStack[m_iAttribStack].m_Scissor = _Scissor;
 	m_AttribChanged |= CRC_ATTRCHG_SCISSOR;
 #endif	// PLATFORM_PS2
@@ -2599,7 +3098,7 @@ void CRC_Core::Attrib_TexGen(int _iTxt, int _TexGenMode, int _Comp)
 	m_AttribChanged |= CRC_ATTRCHG_TEXGEN;
 }
 
-void CRC_Core::Attrib_TexGenAttr(fp4* _pTexGenAttr)
+void CRC_Core::Attrib_TexGenAttr(fp32* _pTexGenAttr)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGen, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2623,7 +3122,7 @@ void CRC_Core::Attrib_VBFlags(uint32 _Flags)
 }
 
 /*
-void CRC_Core::Attrib_TexGen(int _iTxt, int _TexGenMode, fp4* _pParamsU, fp4* _pParamsV, fp4* _pParamsW, fp4* _pParamsQ)
+void CRC_Core::Attrib_TexGen(int _iTxt, int _TexGenMode, fp32* _pParamsU, fp32* _pParamsV, fp32* _pParamsW, fp32* _pParamsQ)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGen, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2642,7 +3141,7 @@ void CRC_Core::Attrib_TexGen(int _iTxt, int _TexGenMode, fp4* _pParamsU, fp4* _p
 	m_AttribChanged |= CRC_ATTRCHG_TEXGEN;
 }
 
-void CRC_Core::Attrib_TexGenU(int _iTxt, int _TexGenMode, fp4* _pParams)
+void CRC_Core::Attrib_TexGenU(int _iTxt, int _TexGenMode, fp32* _pParams)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGenU, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2655,7 +3154,7 @@ void CRC_Core::Attrib_TexGenU(int _iTxt, int _TexGenMode, fp4* _pParams)
 	m_AttribChanged |= CRC_ATTRCHG_TEXGEN;
 }
 
-void CRC_Core::Attrib_TexGenV(int _iTxt, int _TexGenMode, fp4* _pParams)
+void CRC_Core::Attrib_TexGenV(int _iTxt, int _TexGenMode, fp32* _pParams)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGenV, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2668,7 +3167,7 @@ void CRC_Core::Attrib_TexGenV(int _iTxt, int _TexGenMode, fp4* _pParams)
 	m_AttribChanged |= CRC_ATTRCHG_TEXGEN;
 }
 
-void CRC_Core::Attrib_TexGenW(int _iTxt, int _TexGenMode, fp4* _pParams)
+void CRC_Core::Attrib_TexGenW(int _iTxt, int _TexGenMode, fp32* _pParams)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGenW, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2681,7 +3180,7 @@ void CRC_Core::Attrib_TexGenW(int _iTxt, int _TexGenMode, fp4* _pParams)
 	m_AttribChanged |= CRC_ATTRCHG_TEXGEN;
 }
 
-void CRC_Core::Attrib_TexGenQ(int _iTxt, int _TexGenMode, fp4* _pParams)
+void CRC_Core::Attrib_TexGenQ(int _iTxt, int _TexGenMode, fp32* _pParams)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_TexGenQ, MAUTOSTRIP_VOID);
 	if (m_lAttribStack[m_iAttribStack].m_AttribLock & CRC_ATTRCHG_TEXGEN)
@@ -2778,6 +3277,13 @@ void CRC_Core::Attrib_GlobalSetVar(int _Var, int _Value)
 			break;
 		}
 
+	case CRC_GLOBALVAR_GAMMARAMP : 
+		{
+			bUpdate = true;
+			m_Mode.m_iGammaRamp = _Value;
+			break;
+		}
+
 	default : break;
 	}
 
@@ -2788,7 +3294,7 @@ void CRC_Core::Attrib_GlobalSetVar(int _Var, int _Value)
 		DRenderCoreTopClass Attrib_GlobalUpdate();
 }
 
-void CRC_Core::Attrib_GlobalSetVarfv(int _Var, const fp4* _pValues)
+void CRC_Core::Attrib_GlobalSetVarfv(int _Var, const fp32* _pValues)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_GlobalSetVarfv, MAUTOSTRIP_VOID);
 	bool bUpdate = false;
@@ -2856,7 +3362,7 @@ int CRC_Core::Attrib_GlobalGetVar(int _Var)
 	return 0;
 }
 
-int CRC_Core::Attrib_GlobalGetVarfv(int _Var, fp4* _pValues)
+int CRC_Core::Attrib_GlobalGetVarfv(int _Var, fp32* _pValues)
 {
 	MAUTOSTRIP(CRC_Core_Attrib_GlobalGetVarfv, 0);
 	Error("Attrib_GlobalGetVarf", "Not implemented.");
@@ -2871,7 +3377,7 @@ int CRC_Core::Attrib_GlobalGetVarfv(int _Var, fp4* _pValues)
 //  Transform
 // -------------------------------------------------------------------
 #define MACRO_ISMIRRORED(Mat)	\
-	((CVec3Dfp4::GetMatrixRow(Mat, 0) / CVec3Dfp4::GetMatrixRow(Mat, 1)) * CVec3Dfp4::GetMatrixRow(Mat, 2) < 0.0f)
+	((CVec3Dfp32::GetMatrixRow(Mat, 0) / CVec3Dfp32::GetMatrixRow(Mat, 1)) * CVec3Dfp32::GetMatrixRow(Mat, 2) < 0.0f)
 
 CRC_Core::CRC_MatrixState& CRC_Core::Matrix_GetState()
 {
@@ -2879,7 +3385,7 @@ CRC_Core::CRC_MatrixState& CRC_Core::Matrix_GetState()
 	return m_lMatrixStack[m_iMatrixStack];
 }
 
-const CMat4Dfp4& CRC_Core::Matrix_Get()
+const CMat4Dfp32& CRC_Core::Matrix_Get()
 {
 	MAUTOSTRIP(CRC_Core_Matrix_Get, *((void*)NULL));
 	return m_lMatrixStack[m_iMatrixStack].m_lMatrices[m_iMatrixMode];
@@ -2930,11 +3436,11 @@ void CRC_Core::Matrix_Update()
 	// We assume the matrix is orthonormalized.
 	if (m_MatrixChanged & 1)
 	{
-		const CMat4Dfp4& Mat = MS.m_lMatrices[CRC_MATRIX_MODEL];
+		const CMat4Dfp32& Mat = MS.m_lMatrices[CRC_MATRIX_MODEL];
 		if (Clip_IsEnabled())
 		{
 			Mat.InverseOrthogonal(m_ClipCurrentMatrixInv);
-			CVec3Dfp4 VP(0);
+			CVec3Dfp32 VP(0);
 			VP.MultiplyMatrix(m_ClipCurrentMatrixInv);
 			m_ClipCurrentLocalVP = VP;
 			m_bClipCurrentMatrixIsMirrored = MACRO_ISMIRRORED(Mat); //Mat.IsMirrored();
@@ -2944,12 +3450,15 @@ void CRC_Core::Matrix_Update()
 	}
 }
 
-void CRC_Core::Matrix_SetMode(int _iMode)
+void CRC_Core::Matrix_SetMode(int _iMode, uint32 _ModeMask)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_SetMode, MAUTOSTRIP_VOID);
+#ifndef M_RTM
 	if (_iMode < 0 || _iMode >= CRC_MATRIXSTACKS)
 		Error("Matrix_SetMode", CStrF("Invalid matrix mode (%d)", _iMode));
+#endif
 	m_iMatrixMode = _iMode;
+	m_iMatrixModeMask = _ModeMask;
 }
 
 void CRC_Core::Matrix_Push()
@@ -2991,59 +3500,153 @@ void CRC_Core::Matrix_SetUnit()
 {
 	MAUTOSTRIP(CRC_Core_Matrix_SetUnit, MAUTOSTRIP_VOID);
 	CRC_MatrixState& MS = Matrix_GetState();
-	if (MS.m_MatrixUnit & (1 << m_iMatrixMode)) return;
+	uint32 MatrixModeMask = m_iMatrixModeMask;
+	if (MS.m_MatrixUnit & MatrixModeMask)
+		return;
 	MS.m_lMatrices[m_iMatrixMode].Unit();
-	MS.m_MatrixUnit |= 1 << m_iMatrixMode;
-	MS.m_MatrixChanged |= 1 << m_iMatrixMode;
-	m_MatrixChanged |= 1 << m_iMatrixMode;
+	MS.m_MatrixUnit |= MatrixModeMask;
+	MS.m_MatrixChanged |= MatrixModeMask;
+	m_MatrixChanged |= MatrixModeMask;
 	m_AttribChanged |= CRC_ATTRCHG_MATRIX;
 	m_bClipChanged = true;
 }
 
-void CRC_Core::Matrix_Set(const CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_SetUnitInternal(uint _iMode, uint _ModeMask)
 {
+	MAUTOSTRIP(CRC_Core_Matrix_SetUnit, MAUTOSTRIP_VOID);
+	CRC_MatrixState& MS = Matrix_GetState();
+	if (MS.m_MatrixUnit & _ModeMask)
+		return;
+	MS.m_lMatrices[_iMode].Unit();
+	MS.m_MatrixUnit |= _ModeMask;
+	MS.m_MatrixChanged |= _ModeMask;
+	m_MatrixChanged |= _ModeMask;
+	m_AttribChanged |= CRC_ATTRCHG_MATRIX;
+	m_bClipChanged = true;
+}
+
+void CRC_Core::Matrix_Set(const CMat4Dfp32& _Matrix)
+{
+	uint32 MatrixModeMask = m_iMatrixModeMask;
 	MAUTOSTRIP(CRC_Core_Matrix_Set, MAUTOSTRIP_VOID);
 	CRC_MatrixState& MS = Matrix_GetState();
 	MS.m_lMatrices[m_iMatrixMode] = _Matrix;
-	MS.m_MatrixUnit &= ~(1 << m_iMatrixMode);
-	MS.m_MatrixChanged |= 1 << m_iMatrixMode;
-	m_MatrixChanged |= 1 << m_iMatrixMode;
+	MS.m_MatrixUnit &= ~(MatrixModeMask);
+	MS.m_MatrixChanged |= MatrixModeMask;
+	m_MatrixChanged |= MatrixModeMask;
 	m_AttribChanged |= CRC_ATTRCHG_MATRIX;
 	m_bClipChanged = true;
 }
 
-void CRC_Core::Matrix_Get(CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_SetInternal(const CMat4Dfp32& _Matrix, uint _iMode, uint _ModeMask)
+{
+	MAUTOSTRIP(CRC_Core_Matrix_Set, MAUTOSTRIP_VOID);
+	CRC_MatrixState& MS = Matrix_GetState();
+	MS.m_lMatrices[_iMode] = _Matrix;
+	MS.m_MatrixUnit &= ~(_ModeMask);
+	MS.m_MatrixChanged |= _ModeMask;
+	m_MatrixChanged |= _ModeMask;
+	m_AttribChanged |= CRC_ATTRCHG_MATRIX;
+	m_bClipChanged = true;
+}
+
+void CRC_Core::Matrix_SetModelAndTexture(const CMat4Dfp32* _pModel, const CMat4Dfp32** _ppTextures)
+{
+	CRC_MatrixState& MS = Matrix_GetState();
+	uint Changed = MS.m_MatrixChanged;
+	uint UnitMask = MS.m_MatrixUnit;
+	if (_pModel)
+	{
+		MS.m_lMatrices[CRC_MATRIX_MODEL] = *_pModel;
+		Changed |= M_Bit(CRC_MATRIX_MODEL);
+		UnitMask &= ~M_Bit(CRC_MATRIX_MODEL);
+	}
+	else
+	{
+		if (!(MS.m_MatrixUnit & M_Bit(CRC_MATRIX_MODEL)))
+		{
+			MS.m_lMatrices[CRC_MATRIX_MODEL].Unit();
+			UnitMask |= M_Bit(CRC_MATRIX_MODEL);
+			Changed |= M_Bit(CRC_MATRIX_MODEL);
+		}
+	}
+
+	if (_ppTextures)
+	{
+		uint TxtMask = M_Bit(CRC_MATRIX_TEXTURE0);
+		for(int iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++, TxtMask += TxtMask)
+		{
+			const CMat4Dfp32* pMat = _ppTextures[iTxt];
+			if (pMat)
+			{
+				MS.m_lMatrices[CRC_MATRIX_TEXTURE0 + iTxt] = *pMat;
+				Changed |= TxtMask;
+				UnitMask &= ~TxtMask;
+			}
+			else
+			{
+				if (!(UnitMask & TxtMask))
+				{
+					MS.m_lMatrices[CRC_MATRIX_TEXTURE0 + iTxt].Unit();
+					Changed |= TxtMask;
+					UnitMask |= TxtMask;
+				}
+			}
+		}
+	}
+	else
+	{
+		uint TxtMask = M_Bit(CRC_MATRIX_TEXTURE0);
+		for(int iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++, TxtMask += TxtMask)
+		{
+			if (!(UnitMask & TxtMask))
+			{
+				MS.m_lMatrices[CRC_MATRIX_TEXTURE0 + iTxt].Unit();
+				Changed |= TxtMask;
+				UnitMask |= TxtMask;
+			}
+		}
+	}
+
+	MS.m_MatrixChanged = Changed;
+	MS.m_MatrixUnit = UnitMask;
+	m_MatrixChanged = Changed;
+	m_AttribChanged |= CRC_ATTRCHG_MATRIX;
+	m_bClipChanged = true;
+}
+
+void CRC_Core::Matrix_Get(CMat4Dfp32& _Matrix)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_Get_2, MAUTOSTRIP_VOID);
 	CRC_MatrixState& MS = Matrix_GetState();
 	_Matrix = MS.m_lMatrices[m_iMatrixMode];
 }
 
-void CRC_Core::Matrix_Multiply(const CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_Multiply(const CMat4Dfp32& _Matrix)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_Multiply, MAUTOSTRIP_VOID);
-	CMat4Dfp4 TmpMat;
+	CMat4Dfp32 TmpMat;
 	_Matrix.Multiply(Matrix_Get(), TmpMat);
 	DRenderTopClass Matrix_Set(TmpMat);
 }
 
-void CRC_Core::Matrix_MultiplyInverse(const CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_MultiplyInverse(const CMat4Dfp32& _Matrix)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_MultiplyInverse, MAUTOSTRIP_VOID);
-	CMat4Dfp4 TmpMat1, TmpMat2;
+	CMat4Dfp32 TmpMat1, TmpMat2;
 	_Matrix.InverseOrthogonal(TmpMat1);
 	TmpMat1.Multiply(Matrix_Get(), TmpMat2);
 	DRenderTopClass Matrix_Set(TmpMat2);
 }
 
-void CRC_Core::Matrix_PushMultiply(const CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_PushMultiply(const CMat4Dfp32& _Matrix)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_PushMultiply, MAUTOSTRIP_VOID);
 	DRenderTopClass Matrix_Push();
 	DRenderTopClass Matrix_Multiply(_Matrix);
 }
 
-void CRC_Core::Matrix_PushMultiplyInverse(const CMat4Dfp4& _Matrix)
+void CRC_Core::Matrix_PushMultiplyInverse(const CMat4Dfp32& _Matrix)
 {
 	MAUTOSTRIP(CRC_Core_Matrix_PushMultiplyInverse, MAUTOSTRIP_VOID);
 	DRenderTopClass Matrix_Push();
@@ -3066,39 +3669,37 @@ void CRC_Core::Matrix_SetPalette(const CRC_MatrixPalette* _pMatrixPaletteArgs)
 	m_bClipChanged = true;
 }
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-void CRC_Core::Matrix_Set(const CMat43fp4& _Matrix)
+void CRC_Core::Matrix_Set(const CMat43fp32& _Matrix)
 {
 	DRenderTopClass Matrix_Set(_Matrix.Get4x4());
 }
 
-void CRC_Core::Matrix_Multiply(const CMat43fp4& _Matrix)
+void CRC_Core::Matrix_Multiply(const CMat43fp32& _Matrix)
 {
 	DRenderTopClass Matrix_Multiply(_Matrix.Get4x4());
 }
 
-void CRC_Core::Matrix_MultiplyInverse(const CMat43fp4& _Matrix)
+void CRC_Core::Matrix_MultiplyInverse(const CMat43fp32& _Matrix)
 {
 	DRenderTopClass Matrix_MultiplyInverse(_Matrix.Get4x4());
 }
 
-void CRC_Core::Matrix_PushMultiply(const CMat43fp4& _Matrix)
+void CRC_Core::Matrix_PushMultiply(const CMat43fp32& _Matrix)
 {
 	DRenderTopClass Matrix_PushMultiply(_Matrix.Get4x4());
 }
 
-void CRC_Core::Matrix_PushMultiplyInverse(const CMat43fp4& _Matrix)
+void CRC_Core::Matrix_PushMultiplyInverse(const CMat43fp32& _Matrix)
 {
 	DRenderTopClass Matrix_PushMultiplyInverse(_Matrix.Get4x4());
 }
-#endif
 
 // -------------------------------------------------------------------
 //  Clipping
 // -------------------------------------------------------------------
 #define FACECUT2_EPSILON 0.01f
 
-int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _Components, int _bInvertPlanes)
+int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp32* _pPlanes, int _np, int _Components, int _bInvertPlanes)
 {
 	MAUTOSTRIP(CRC_Core_Clip_CutFace, 0);
 	/*
@@ -3111,35 +3712,35 @@ int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _C
 	if (!_nv) return 0;
 	const int MaxVClip = 32;
 
-	CVec3Dfp4 VClip[MaxVClip];
-	CVec3Dfp4 NClip[MaxVClip];
-	CVec4Dfp4 ColClip[MaxVClip];
-	CVec4Dfp4 SpecClip[MaxVClip];
-//	fp4 FogClip[MaxVClip];
-	CVec4Dfp4 TVClip0[MaxVClip];
-	CVec4Dfp4 TVClip1[MaxVClip];
-	CVec4Dfp4 TVClip2[MaxVClip];
-	CVec4Dfp4 TVClip3[MaxVClip];
+	CVec3Dfp32 VClip[MaxVClip];
+	CVec3Dfp32 NClip[MaxVClip];
+	CVec4Dfp32 ColClip[MaxVClip];
+	CVec4Dfp32 SpecClip[MaxVClip];
+//	fp32 FogClip[MaxVClip];
+	CVec4Dfp32 TVClip0[MaxVClip];
+	CVec4Dfp32 TVClip1[MaxVClip];
+	CVec4Dfp32 TVClip2[MaxVClip];
+	CVec4Dfp32 TVClip3[MaxVClip];
 
-	CVec3Dfp4* pVDest = &VClip[0];
-	CVec3Dfp4* pVSrc = m_ClipV;
+	CVec3Dfp32* pVDest = &VClip[0];
+	CVec3Dfp32* pVSrc = m_ClipV;
 
-	CVec3Dfp4* pNDest = (_Components & CRC_CLIPARRAY_NORMAL) ? &NClip[0] : NULL;
-	CVec3Dfp4* pNSrc = (_Components & CRC_CLIPARRAY_NORMAL) ? m_ClipN : NULL;
-	CVec4Dfp4* pColDest0 = (_Components & CRC_CLIPARRAY_COLOR) ? ColClip : NULL;
-	CVec4Dfp4* pColSrc0 = (_Components & CRC_CLIPARRAY_COLOR) ? m_ClipCol: NULL;
-	CVec4Dfp4* pSpecDest0 = (_Components & CRC_CLIPARRAY_SPECULAR) ? SpecClip : NULL;
-	CVec4Dfp4* pSpecSrc0 = (_Components & CRC_CLIPARRAY_SPECULAR) ? m_ClipSpec: NULL;
-//	fp4* pFogDest0 = (_Components & CRC_CLIPARRAY_FOG) ? FogClip : NULL;
-//	fp4* pFogSrc0 = (_Components & CRC_CLIPARRAY_FOG) ? m_ClipFog : NULL;
-	CVec4Dfp4* pTVDest0 = (_Components & CRC_CLIPARRAY_TVERTEX0) ? TVClip0 : NULL;
-	CVec4Dfp4* pTVDest1 = (_Components & CRC_CLIPARRAY_TVERTEX1) ? TVClip1 : NULL;
-	CVec4Dfp4* pTVDest2 = (_Components & CRC_CLIPARRAY_TVERTEX2) ? TVClip2 : NULL;
-	CVec4Dfp4* pTVDest3 = (_Components & CRC_CLIPARRAY_TVERTEX3) ? TVClip3 : NULL;
-	CVec4Dfp4* pTVSrc0 = (_Components & CRC_CLIPARRAY_TVERTEX0) ? m_ClipTV0 : NULL;
-	CVec4Dfp4* pTVSrc1 = (_Components & CRC_CLIPARRAY_TVERTEX1) ? m_ClipTV1 : NULL;
-	CVec4Dfp4* pTVSrc2 = (_Components & CRC_CLIPARRAY_TVERTEX2) ? m_ClipTV2 : NULL;
-	CVec4Dfp4* pTVSrc3 = (_Components & CRC_CLIPARRAY_TVERTEX3) ? m_ClipTV3 : NULL;
+	CVec3Dfp32* pNDest = (_Components & CRC_CLIPARRAY_NORMAL) ? &NClip[0] : NULL;
+	CVec3Dfp32* pNSrc = (_Components & CRC_CLIPARRAY_NORMAL) ? m_ClipN : NULL;
+	CVec4Dfp32* pColDest0 = (_Components & CRC_CLIPARRAY_COLOR) ? ColClip : NULL;
+	CVec4Dfp32* pColSrc0 = (_Components & CRC_CLIPARRAY_COLOR) ? m_ClipCol: NULL;
+	CVec4Dfp32* pSpecDest0 = (_Components & CRC_CLIPARRAY_SPECULAR) ? SpecClip : NULL;
+	CVec4Dfp32* pSpecSrc0 = (_Components & CRC_CLIPARRAY_SPECULAR) ? m_ClipSpec: NULL;
+//	fp32* pFogDest0 = (_Components & CRC_CLIPARRAY_FOG) ? FogClip : NULL;
+//	fp32* pFogSrc0 = (_Components & CRC_CLIPARRAY_FOG) ? m_ClipFog : NULL;
+	CVec4Dfp32* pTVDest0 = (_Components & CRC_CLIPARRAY_TVERTEX0) ? TVClip0 : NULL;
+	CVec4Dfp32* pTVDest1 = (_Components & CRC_CLIPARRAY_TVERTEX1) ? TVClip1 : NULL;
+	CVec4Dfp32* pTVDest2 = (_Components & CRC_CLIPARRAY_TVERTEX2) ? TVClip2 : NULL;
+	CVec4Dfp32* pTVDest3 = (_Components & CRC_CLIPARRAY_TVERTEX3) ? TVClip3 : NULL;
+	CVec4Dfp32* pTVSrc0 = (_Components & CRC_CLIPARRAY_TVERTEX0) ? m_ClipTV0 : NULL;
+	CVec4Dfp32* pTVSrc1 = (_Components & CRC_CLIPARRAY_TVERTEX1) ? m_ClipTV1 : NULL;
+	CVec4Dfp32* pTVSrc2 = (_Components & CRC_CLIPARRAY_TVERTEX2) ? m_ClipTV2 : NULL;
+	CVec4Dfp32* pTVSrc3 = (_Components & CRC_CLIPARRAY_TVERTEX3) ? m_ClipTV3 : NULL;
 
 
 	int PlaneShift = 1;
@@ -3149,8 +3750,8 @@ int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _C
 		PlaneShift <<= 1;
 		if (!(m_ClipMask & Shift)) continue;
 
-		const CPlane3Dfp4* pP = &_pPlanes[iPlane];
-		fp4 VertPDist[32];
+		const CPlane3Dfp32* pP = &_pPlanes[iPlane];
+		fp32 VertPDist[32];
 		bool bBehind = false;
 		bool bFront = false;
 
@@ -3186,15 +3787,15 @@ int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _C
 
 					if ((VertPDist[v2] < -FACECUT2_EPSILON) && (VertPDist[v] > FACECUT2_EPSILON))
 					{
-						fp4 dvx = (pVSrc[v2].k[0] - pVSrc[v].k[0]);
-						fp4 dvy = (pVSrc[v2].k[1] - pVSrc[v].k[1]);
-						fp4 dvz = (pVSrc[v2].k[2] - pVSrc[v].k[2]);
-						fp4 s = dvx*pP->n.k[0] + dvy*pP->n.k[1] + dvz*pP->n.k[2];
+						fp32 dvx = (pVSrc[v2].k[0] - pVSrc[v].k[0]);
+						fp32 dvy = (pVSrc[v2].k[1] - pVSrc[v].k[1]);
+						fp32 dvz = (pVSrc[v2].k[2] - pVSrc[v].k[2]);
+						fp32 s = dvx*pP->n.k[0] + dvy*pP->n.k[1] + dvz*pP->n.k[2];
 						if (_bInvertPlanes) s = -s;
 						if (s)
 						{
-							fp4 sp = VertPDist[v];
-							fp4 t = -sp/s;
+							fp32 sp = VertPDist[v];
+							fp32 t = -sp/s;
 							pVDest[nClip].k[0] = pVSrc[v].k[0] + dvx * t;
 							pVDest[nClip].k[1] = pVSrc[v].k[1] + dvy * t;
 							pVDest[nClip].k[2] = pVSrc[v].k[2] + dvz * t;
@@ -3239,15 +3840,15 @@ int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _C
 				{
 					if (VertPDist[v2] > FACECUT2_EPSILON)
 					{
-						fp4 dvx = (pVSrc[v2].k[0] - pVSrc[v].k[0]);
-						fp4 dvy = (pVSrc[v2].k[1] - pVSrc[v].k[1]);
-						fp4 dvz = (pVSrc[v2].k[2] - pVSrc[v].k[2]);
-						fp4 s = dvx*pP->n.k[0] + dvy*pP->n.k[1] + dvz*pP->n.k[2];
+						fp32 dvx = (pVSrc[v2].k[0] - pVSrc[v].k[0]);
+						fp32 dvy = (pVSrc[v2].k[1] - pVSrc[v].k[1]);
+						fp32 dvz = (pVSrc[v2].k[2] - pVSrc[v].k[2]);
+						fp32 s = dvx*pP->n.k[0] + dvy*pP->n.k[1] + dvz*pP->n.k[2];
 						if (_bInvertPlanes) s = -s;
 						if (s)
 						{
-							fp4 sp = VertPDist[v];
-							fp4 t = -sp/s;
+							fp32 sp = VertPDist[v];
+							fp32 t = -sp/s;
 							pVDest[nClip].k[0] = pVSrc[v].k[0] + dvx * t;
 							pVDest[nClip].k[1] = pVSrc[v].k[1] + dvy * t;
 							pVDest[nClip].k[2] = pVSrc[v].k[2] + dvz * t;
@@ -3310,15 +3911,15 @@ int CRC_Core::Clip_CutFace(int _nv, const CPlane3Dfp4* _pPlanes, int _np, int _C
 	// Move if the latest vertices are in the wrong array.
 	if (pVSrc != m_ClipV) 
 	{
-		memcpy(m_ClipV, pVSrc, _nv*sizeof(CVec3Dfp4));
-		if (pNSrc) memcpy(m_ClipN, pNSrc, _nv*sizeof(CVec3Dfp4));
-		if (pColSrc0) memcpy(m_ClipCol, pColSrc0, _nv*sizeof(CVec4Dfp4));
-		if (pSpecSrc0) memcpy(m_ClipSpec, pSpecSrc0, _nv*sizeof(CVec4Dfp4));
-//		if (pFogSrc0) memcpy(m_ClipFog, pFogSrc0, _nv*sizeof(fp4));
-		if (pTVSrc0) memcpy(m_ClipTV0, pTVSrc0, _nv*sizeof(CVec4Dfp4));
-		if (pTVSrc1) memcpy(m_ClipTV1, pTVSrc1, _nv*sizeof(CVec4Dfp4));
-		if (pTVSrc2) memcpy(m_ClipTV2, pTVSrc2, _nv*sizeof(CVec4Dfp4));
-		if (pTVSrc3) memcpy(m_ClipTV3, pTVSrc3, _nv*sizeof(CVec4Dfp4));
+		memcpy(m_ClipV, pVSrc, _nv*sizeof(CVec3Dfp32));
+		if (pNSrc) memcpy(m_ClipN, pNSrc, _nv*sizeof(CVec3Dfp32));
+		if (pColSrc0) memcpy(m_ClipCol, pColSrc0, _nv*sizeof(CVec4Dfp32));
+		if (pSpecSrc0) memcpy(m_ClipSpec, pSpecSrc0, _nv*sizeof(CVec4Dfp32));
+//		if (pFogSrc0) memcpy(m_ClipFog, pFogSrc0, _nv*sizeof(fp32));
+		if (pTVSrc0) memcpy(m_ClipTV0, pTVSrc0, _nv*sizeof(CVec4Dfp32));
+		if (pTVSrc1) memcpy(m_ClipTV1, pTVSrc1, _nv*sizeof(CVec4Dfp32));
+		if (pTVSrc2) memcpy(m_ClipTV2, pTVSrc2, _nv*sizeof(CVec4Dfp32));
+		if (pTVSrc3) memcpy(m_ClipTV3, pTVSrc3, _nv*sizeof(CVec4Dfp32));
 	}
 	return _nv;
 }
@@ -3345,7 +3946,7 @@ void CRC_Core::Clip_RenderPolygon(int _nV, int _Components, int _PlaneMask)
 	}
 }
 
-int CRC_Core::Clip_InitVertexMasks(int _nV, const CVec3Dfp4* _pV, const uint16* _piV)
+int CRC_Core::Clip_InitVertexMasks(int _nV, const CVec3Dfp32* _pV, const uint16* _piV)
 {
 	MAUTOSTRIP(CRC_Core_Clip_InitVertexMasks, 0);
 	if (_nV > m_lClipVertexMask.Len())
@@ -3353,7 +3954,7 @@ int CRC_Core::Clip_InitVertexMasks(int _nV, const CVec3Dfp4* _pV, const uint16* 
 
 	Clip_Update();
 	uint16* pM = m_lClipVertexMask.GetBasePtr();
-	const CPlane3Dfp4* pP = m_ClipCurrent.m_Planes;
+	const CPlane3Dfp32* pP = m_ClipCurrent.m_Planes;
 	int nP = m_ClipCurrent.m_nPlanes;
 
 	int TotalMask = -1;	// If this one turns out != 0, all vertices are clipped away.
@@ -3366,7 +3967,7 @@ int CRC_Core::Clip_InitVertexMasks(int _nV, const CVec3Dfp4* _pV, const uint16* 
 	for(int v = 0; v < _nV; v++)
 	{
 		int iv = (_piV) ? _piV[v] : v;
-		const CVec3Dfp4* pVert = &_pV[iv];
+		const CVec3Dfp32* pVert = &_pV[iv];
 		int Mask = 0;
 		int Shift = 1;
 		for(int p = 0; p < nP; p++)
@@ -3389,9 +3990,9 @@ void CRC_Core::Clip_Update()
 	{
 		CRC_MatrixState& MS = Matrix_GetState();
 
-		const CMat4Dfp4& Mat = MS.m_lMatrices[CRC_MATRIX_MODEL];
+		const CMat4Dfp32& Mat = MS.m_lMatrices[CRC_MATRIX_MODEL];
 		Mat.InverseOrthogonal(m_ClipCurrentMatrixInv);
-		CVec3Dfp4 VP(0);
+		CVec3Dfp32 VP(0);
 		VP.MultiplyMatrix(m_ClipCurrentMatrixInv);
 		m_ClipCurrentLocalVP = VP;
 		m_bClipCurrentMatrixIsMirrored = MACRO_ISMIRRORED(Mat);
@@ -3426,7 +4027,7 @@ void CRC_Core::Clip_Clear()
 	m_bClipChanged = true;
 }
 
-void CRC_Core::Clip_Set(const CPlane3Dfp4* _pPlanes, int _nPlanes)
+void CRC_Core::Clip_Set(const CPlane3Dfp32* _pPlanes, int _nPlanes)
 {
 	MAUTOSTRIP(CRC_Core_Clip_Set, MAUTOSTRIP_VOID);
 	CRC_ClipStackEntry* pClip = &m_lClipStack[m_iClipStack];
@@ -3434,11 +4035,11 @@ void CRC_Core::Clip_Set(const CPlane3Dfp4* _pPlanes, int _nPlanes)
 		Error("Clip_Set", CStrF("Too many planes. (%d)", _nPlanes));
 
 	pClip->m_nPlanes = _nPlanes;
-	memcpy(&pClip->m_Planes, _pPlanes, sizeof(CPlane3Dfp4) * _nPlanes);
+	memcpy(&pClip->m_Planes, _pPlanes, sizeof(CPlane3Dfp32) * _nPlanes);
 	m_bClipChanged = true;
 }
 
-void CRC_Core::Clip_AddPlane(const CPlane3Dfp4& _Plane, const CMat4Dfp4* _pTransform, bool _bClipBack)
+void CRC_Core::Clip_AddPlane(const CPlane3Dfp32& _Plane, const CMat4Dfp32* _pTransform, bool _bClipBack)
 {
 	MAUTOSTRIP(CRC_Core_Clip_AddPlane, MAUTOSTRIP_VOID);
 	CRC_ClipStackEntry* pClip = &m_lClipStack[m_iClipStack];
@@ -3453,45 +4054,45 @@ void CRC_Core::Clip_AddPlane(const CPlane3Dfp4& _Plane, const CMat4Dfp4* _pTrans
 }
 
 // -------------------------------------------------------------------
-void CRC_Core::Geometry_VertexArray(const CVec3Dfp4* _pV, int _nVertices, int _bAllUsed)
+void CRC_Core::Geometry_VertexArray(const CVec3Dfp32* _pV, int _nVertices, int _bAllUsed)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_VertexArray, MAUTOSTRIP_VOID);
-	m_Geom.m_pV = const_cast<CVec3Dfp4*>(_pV);
+	m_Geom.m_pV = const_cast<CVec3Dfp32*>(_pV);
 	m_Geom.m_nV = _nVertices;
 	m_bGeomArrayAllUsed = _bAllUsed;
 }
 
-void CRC_Core::Geometry_NormalArray(const CVec3Dfp4* _pN)
+void CRC_Core::Geometry_NormalArray(const CVec3Dfp32* _pN)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_NormalArray, MAUTOSTRIP_VOID);
-	m_Geom.m_pN = const_cast<CVec3Dfp4*>(_pN);
+	m_Geom.m_pN = const_cast<CVec3Dfp32*>(_pN);
 }
 
-void CRC_Core::Geometry_TVertexArray(const fp4* _pTV, int _TxtChannel, int _nComp)
+void CRC_Core::Geometry_TVertexArray(const fp32* _pTV, int _TxtChannel, int _nComp)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_TVertexArray, MAUTOSTRIP_VOID);
-	m_Geom.m_pTV[_TxtChannel] = const_cast<fp4*>(_pTV);
+	m_Geom.m_pTV[_TxtChannel] = const_cast<fp32*>(_pTV);
 	m_Geom.m_nTVComp[_TxtChannel] = _nComp;
 }
 
-void CRC_Core::Geometry_TVertexArray(const CVec2Dfp4* _pTV, int _TxtChannel)
+void CRC_Core::Geometry_TVertexArray(const CVec2Dfp32* _pTV, int _TxtChannel)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_TVertexArray_2, MAUTOSTRIP_VOID);
-	m_Geom.m_pTV[_TxtChannel] = (fp4*)_pTV;
+	m_Geom.m_pTV[_TxtChannel] = (fp32*)_pTV;
 	m_Geom.m_nTVComp[_TxtChannel] = 2;
 }
 
-void CRC_Core::Geometry_TVertexArray(const CVec3Dfp4* _pTV, int _TxtChannel)
+void CRC_Core::Geometry_TVertexArray(const CVec3Dfp32* _pTV, int _TxtChannel)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_TVertexArray_3, MAUTOSTRIP_VOID);
-	m_Geom.m_pTV[_TxtChannel] = (fp4*)_pTV;
+	m_Geom.m_pTV[_TxtChannel] = (fp32*)_pTV;
 	m_Geom.m_nTVComp[_TxtChannel] = 3;
 }
 
-void CRC_Core::Geometry_TVertexArray(const CVec4Dfp4* _pTV, int _TxtChannel)
+void CRC_Core::Geometry_TVertexArray(const CVec4Dfp32* _pTV, int _TxtChannel)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_TVertexArray_4, MAUTOSTRIP_VOID);
-	m_Geom.m_pTV[_TxtChannel] = (fp4*)_pTV;
+	m_Geom.m_pTV[_TxtChannel] = (fp32*)_pTV;
 	m_Geom.m_nTVComp[_TxtChannel] = 4;
 }
 
@@ -3508,10 +4109,10 @@ void CRC_Core::Geometry_SpecularArray(const CPixel32* _pSpec)
 	m_Geom.m_pSpec = const_cast<CPixel32*>(_pSpec);
 }
 /*
-void CRC_Core::Geometry_FogArray(const fp4* _pFog)
+void CRC_Core::Geometry_FogArray(const fp32* _pFog)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_FogArray, MAUTOSTRIP_VOID);
-	m_Geom.m_pFog = const_cast<fp4*>(_pFog);
+	m_Geom.m_pFog = const_cast<fp32*>(_pFog);
 }
 */
 void CRC_Core::Geometry_MatrixIndexArray(const uint32* _pMI)
@@ -3520,14 +4121,14 @@ void CRC_Core::Geometry_MatrixIndexArray(const uint32* _pMI)
 	m_Geom.m_pMI = const_cast<uint32*>(_pMI);
 }
 
-void CRC_Core::Geometry_MatrixWeightArray(const fp4* _pMW, int _nComp)
+void CRC_Core::Geometry_MatrixWeightArray(const fp32* _pMW, int _nComp)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_MatrixWeightArray, MAUTOSTRIP_VOID);
-	m_Geom.m_pMW = const_cast<fp4*>(_pMW);
+	m_Geom.m_pMW = const_cast<fp32*>(_pMW);
 	m_Geom.m_nMWComp = _nComp;
 }
 
-void CRC_Core::Geometry_Color(CPixel32 _Col)
+void CRC_Core::Geometry_Color(uint32 _Col)
 {
 	MAUTOSTRIP(CRC_Core_Geometry_Color, MAUTOSTRIP_VOID);
 	m_GeomColor = _Col;
@@ -3694,14 +4295,16 @@ int CRC_Core::Geometry_BuildTriangleListFromPrimitivesCount(CRCPrimStreamIterato
 	// Primitive stream
 	
 	int DestPos = 0;
+
+	CRCPrimStreamIterator StreamIterate = _StreamIterate;
 	
-	if (_StreamIterate.IsValid())
+	if (StreamIterate.IsValid())
 	{		
 		while(1)
 		{
-			const uint16* pPrim = _StreamIterate.GetCurrentPointer();
+			const uint16* pPrim = StreamIterate.GetCurrentPointer();
 			
-			switch(_StreamIterate.GetCurrentType())
+			switch(StreamIterate.GetCurrentType())
 			{
 			case CRC_RIP_TRIFAN :
 				{
@@ -3754,121 +4357,35 @@ int CRC_Core::Geometry_BuildTriangleListFromPrimitivesCount(CRCPrimStreamIterato
 				break;
 			default :
 				{
-					Error("Geometry_BuildTriangleListFromPrimitives", CStrF("Unsupported primitive: %d", _StreamIterate.GetCurrentType()));
+					M_TRACEALWAYS("[Geometry_BuildTriangleListFromPrimitives] Unsupported primitive: %d\n", StreamIterate.GetCurrentType());
+					Error_static("Geometry_BuildTriangleListFromPrimitives", CStrF("Unsupported primitive: %d", StreamIterate.GetCurrentType()));
 					break;
 				}
 			}
 
-			if (!_StreamIterate.Next())
+			if (!StreamIterate.Next())
 				break;
 		}
 		
 	}
+
+	_StreamIterate = StreamIterate;
 
 	return DestPos;
 }
 
+class CDefaultMemCopy
+{
+public:
+	static void MemCopy(void *pDst, const void *_pSrc, mint _Size)
+	{
+		memcpy(pDst, _pSrc, _Size);
+	}
+};
 // -------------------------------------------------------------------
 bool CRC_Core::Geometry_BuildTriangleListFromPrimitives(CRCPrimStreamIterator &_StreamIterate, uint16* _pDest, int& _nMaxDestRetSize)
 {
-	MAUTOSTRIP(CRC_Core_Geometry_BuildTriangleListFromPrimitives, false);
-	// Returns true if the whole stream was processed and fit into destination buffer.
-	// _pPrim pointer to source primitive stream, points to the next primitive to process when function returns.
-	// _nPrimRetPos source primitive count, contains the primitive number left when function returns.
-	// _pDest destination buffer to put triangle list in.
-	// _nMaxDestRetSize size of destination buffer, updated with the number of _INDICES_ written.
-	
-	// Primitive stream
-	
-	int DestPos = 0;
-	int DestMax = _nMaxDestRetSize;
-	
-	bool bIsComplete = false;
-	uint16* pDest = _pDest;
-	
-	if (_StreamIterate.IsValid())
-	{		
-		while(1)
-		{
-			const uint16* pPrim = _StreamIterate.GetCurrentPointer();
-			
-			switch(_StreamIterate.GetCurrentType())
-			{
-			case CRC_RIP_TRIFAN :
-				{
-					int nV = *pPrim;
-					const uint16* piV = pPrim + 1;
-					int nTri = nV-2;
-					if (nTri > 0)
-					{
-						if (DestPos + nTri*3 > DestMax) goto End;
-						int iv0 = *(piV++);
-						int iv1 = *(piV++);
-						for(int t = 0; t < nTri; t++)
-						{
-							pDest[DestPos++] = iv0;
-							pDest[DestPos++] = iv1;
-							int iv2 = *(piV++);
-							pDest[DestPos++] = iv2;
-							iv1 = iv2;
-						}
-					}
-				}
-				break;
-			case CRC_RIP_TRISTRIP :
-				{
-					int nV = *pPrim;
-					const uint16* piV = pPrim + 1;
-					int nTri = nV-2;
-					if (nTri > 0)
-					{
-						if (DestPos + nTri*3 > DestMax) goto End;
-						
-						for(int v = 2; v < nV; v++)
-						{
-							if (v & 1)
-							{
-								pDest[DestPos++] = piV[v];
-								pDest[DestPos++] = piV[v-1]; 
-								pDest[DestPos++] = piV[v-2]; 
-							}
-							else
-							{
-								pDest[DestPos++] = piV[v-2]; 
-								pDest[DestPos++] = piV[v-1]; 
-								pDest[DestPos++] = piV[v];
-							}
-						}
-					}
-				}
-				break;
-			case CRC_RIP_TRIANGLES :
-				{
-					int nV = (*pPrim) * 3;
-					const uint16* piV = pPrim + 1;
-					if (DestPos + nV > DestMax) goto End;
-					memcpy(&pDest[DestPos], piV, nV*2);
-					DestPos += nV;
-				}
-				break;
-			default :
-				{
-					Error("Geometry_BuildTriangleListFromPrimitives", CStrF("Unsupported primitive: %d", _StreamIterate.GetCurrentType()));
-					break;
-				}
-			}
-
-			if (!_StreamIterate.Next())
-				break;
-		}
-		
-	}
-
-	bIsComplete = true;
-
-End:
-	_nMaxDestRetSize = DestPos;
-	return bIsComplete;
+	return Geometry_BuildTriangleListFromPrimitivesTemplate<CDefaultMemCopy>(_StreamIterate, _pDest, _nMaxDestRetSize);
 }
 
 
@@ -5058,17 +5575,17 @@ void CRC_Core::Geometry_MoveToClipBuffer(int _iV, int _iClip)
 
 	if (m_Geom.m_pCol)
 	{
-		m_ClipCol[_iClip].k[0] = fp4((m_Geom.m_pCol[_iV] >> 16) & 0xff) / 255.0f;
-		m_ClipCol[_iClip].k[1] = fp4((m_Geom.m_pCol[_iV] >> 8) & 0xff) / 255.0f;
-		m_ClipCol[_iClip].k[2] = fp4((m_Geom.m_pCol[_iV] >> 0) & 0xff) / 255.0f;
-		m_ClipCol[_iClip].k[3] = fp4((m_Geom.m_pCol[_iV] >> 24) & 0xff) / 255.0f;
+		m_ClipCol[_iClip].k[0] = fp32((m_Geom.m_pCol[_iV] >> 16) & 0xff) / 255.0f;
+		m_ClipCol[_iClip].k[1] = fp32((m_Geom.m_pCol[_iV] >> 8) & 0xff) / 255.0f;
+		m_ClipCol[_iClip].k[2] = fp32((m_Geom.m_pCol[_iV] >> 0) & 0xff) / 255.0f;
+		m_ClipCol[_iClip].k[3] = fp32((m_Geom.m_pCol[_iV] >> 24) & 0xff) / 255.0f;
 	}
 	if (m_Geom.m_pSpec)
 	{
-		m_ClipSpec[_iClip].k[0] = fp4((m_Geom.m_pSpec[_iV] >> 16) & 0xff) / 255.0f;
-		m_ClipSpec[_iClip].k[1] = fp4((m_Geom.m_pSpec[_iV] >> 8) & 0xff) / 255.0f;
-		m_ClipSpec[_iClip].k[2] = fp4((m_Geom.m_pSpec[_iV] >> 0) & 0xff) / 255.0f;
-		m_ClipSpec[_iClip].k[3] = fp4((m_Geom.m_pSpec[_iV] >> 24) & 0xff) / 255.0f;
+		m_ClipSpec[_iClip].k[0] = fp32((m_Geom.m_pSpec[_iV] >> 16) & 0xff) / 255.0f;
+		m_ClipSpec[_iClip].k[1] = fp32((m_Geom.m_pSpec[_iV] >> 8) & 0xff) / 255.0f;
+		m_ClipSpec[_iClip].k[2] = fp32((m_Geom.m_pSpec[_iV] >> 0) & 0xff) / 255.0f;
+		m_ClipSpec[_iClip].k[3] = fp32((m_Geom.m_pSpec[_iV] >> 24) & 0xff) / 255.0f;
 	}
 /*	if (m_Geom.m_pFog)
 	{
@@ -5311,7 +5828,16 @@ void CRC_Core::Render_IndexedWires(uint16* _pIndices, int _Len)
 void CRC_Core::Render_IndexedPolygon(uint16* _pIndices, int _Len)
 {
 	MAUTOSTRIP(CRC_Core_Render_IndexedPolygon, MAUTOSTRIP_VOID);
-	ConOut("(CRC_Core::Render_IndexedPolygon) This function is currently a no-op.");
+//	ConOut("(CRC_Core::Render_IndexedPolygon) This function is currently a no-op.");
+
+	if (_Len > 512)
+		return;
+
+	uint16 liPrim[514];
+	liPrim[0] = CRC_RIP_TRIFAN | ((_Len+2) << 8);
+	liPrim[1] = _Len;
+	memcpy(&liPrim[2], _pIndices, _Len*2);
+	Render_IndexedPrimitives((uint16*)liPrim, _Len+2);
 }
 
 void CRC_Core::Render_IndexedPrimitives(uint16* _pPrimStream, int _StreamLen)
@@ -5520,13 +6046,18 @@ void CRC_Core::Render_VertexBuffer(int _VBID)
 	// TODO: Emulate VB rendering..
 }
 
+void CRC_Core::Render_VertexBuffer_IndexBufferTriangles(uint _VBID, uint _IBID, uint _nTriangles, uint _PrimOffset)
+{
+	// Dummy
+}
+
 // -------------------------------------------------------------------
-void CRC_Core::Render_Wire(const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, CPixel32 _Color)
+void CRC_Core::Render_Wire(const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, CPixel32 _Color)
 {
 	MAUTOSTRIP(CRC_Core_Render_Wire, MAUTOSTRIP_VOID);
 }
 
-void CRC_Core::Render_WireStrip(const CVec3Dfp4* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color)
+void CRC_Core::Render_WireStrip(const CVec3Dfp32* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color)
 {
 	MAUTOSTRIP(CRC_Core_Render_WireStrip, MAUTOSTRIP_VOID);
 	DRenderTopClass Attrib_TextureID(0, 0);
@@ -5548,7 +6079,7 @@ void CRC_Core::Render_WireStrip(const CVec3Dfp4* _pV, const uint16* _piV, int _n
 	}
 }
 
-void CRC_Core::Render_WireLoop(const CVec3Dfp4* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color)
+void CRC_Core::Render_WireLoop(const CVec3Dfp32* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color)
 {
 	MAUTOSTRIP(CRC_Core_Render_WireLoop, MAUTOSTRIP_VOID);
 	DRenderTopClass Attrib_TextureID(0, 0);
@@ -5592,7 +6123,7 @@ int CRC_Core::OcclusionQuery_GetVisiblePixelCount(int _QueryID)
 	return 0;
 }
 
-int CRC_Core::OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp4 _z)
+int CRC_Core::OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp32 _z)
 {
 	MAUTOSTRIP(CRC_Core_OcclusionQuery_Rect, 0);
 	if (!(Caps_Flags() & CRC_CAPS_FLAGS_OCCLUSIONQUERY))
@@ -5601,27 +6132,28 @@ int CRC_Core::OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp4 _z)
 	//ConOut(CStrF("Query %d, Rct %d,%d,%d,%d, Z %f", _QueryID, _Rct, _z));
 
 	// Render..
-	DRenderTopClass Matrix_SetMode(CRC_MATRIX_MODEL);
+	CRenderContext::Matrix_SetMode(CRC_MATRIX_MODEL);
 	DRenderTopClass Matrix_SetUnit();
 	DRenderTopClass Attrib_Push();
 
 	CRC_Attributes Attr;
 	Attr.SetDefault();
-	DRenderCoreTopClass Attrib_Set(&Attr);
 
-	DRenderTopClass Attrib_Enable(CRC_FLAGS_ZCOMPARE);
-	DRenderTopClass Attrib_RasterMode(CRC_RASTERMODE_ALPHABLEND);
-	DRenderTopClass Attrib_Disable(CRC_FLAGS_CULL | CRC_FLAGS_COLORWRITE | CRC_FLAGS_ALPHAWRITE | CRC_FLAGS_ZWRITE);
+	Attr.Attrib_Enable(CRC_FLAGS_ZCOMPARE);
+	Attr.Attrib_RasterMode(CRC_RASTERMODE_ALPHABLEND);
+	Attr.Attrib_Disable(CRC_FLAGS_CULL | CRC_FLAGS_COLORWRITE | CRC_FLAGS_ALPHAWRITE | CRC_FLAGS_ZWRITE);
 
-	CVec3Dfp4 V[4];
+	DRenderTopClass Attrib_Set(Attr);
+
+	CVec3Dfp32 V[4];
 	static uint16 lPrimQuad[6] = { 0, 1, 2, 0, 2, 3 };
 
 	CRC_Viewport* pVP = Viewport_Get();
 
-	fp4 xScale = pVP->GetXScale() * 0.5f;
-	fp4 yScale = pVP->GetYScale() * 0.5f;
-	fp4 xs = _z / xScale;
-	fp4 ys = _z / yScale;
+	fp32 xScale = pVP->GetXScale() * 0.5f;
+	fp32 yScale = pVP->GetYScale() * 0.5f;
+	fp32 xs = _z / xScale;
+	fp32 ys = _z / yScale;
 
 	V[0][0] = _Rct.p0.x * xs;
 	V[0][1] = _Rct.p0.y * ys;
@@ -5652,7 +6184,7 @@ int CRC_Core::OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp4 _z)
 	return DRenderTopClass OcclusionQuery_GetVisiblePixelCount(_QueryID);
 }
 
-bool CRC_Core::ReadDepthPixels(int _x, int _y, int _w, int _h, fp4* _pBuffer)
+bool CRC_Core::ReadDepthPixels(int _x, int _y, int _w, int _h, fp32* _pBuffer)
 {
 	MAUTOSTRIP(CRC_Core_ReadDepthPixels, false);
 	return false;
@@ -5742,7 +6274,7 @@ void CRC_Core::Con_DumpTextures(int _v)
 			CTC_TextureProperties Prop;
 			m_pTC->GetTextureProperties(i, Prop);
 
-			fp4 PixelSize = Desc.GetPixelSize();
+			fp32 PixelSize = Desc.GetPixelSize();
 			if (Desc.GetMemModel() & IMAGE_MEM_COMPRESSED)
 			{
 				if (Desc.GetMemModel() & IMAGE_MEM_COMPRESSTYPE_S3TC)
@@ -5755,8 +6287,8 @@ void CRC_Core::Con_DumpTextures(int _v)
 			}
 
 //			int PicMip = (Prop.m_Flags & CTC_TEXTUREFLAGS_NOPICMIP) ? 0 : m_lPicMips[Prop.m_iPicMipGroup];
-			fp4 PixelsOrg = Desc.GetWidth() * Desc.GetHeight();
-//			fp4 Pixels = Max(1, Desc.GetWidth() >> PicMip) * Max(1, Desc.GetHeight()  >> PicMip);
+			fp32 PixelsOrg = Desc.GetWidth() * Desc.GetHeight();
+//			fp32 Pixels = Max(1, Desc.GetWidth() >> PicMip) * Max(1, Desc.GetHeight()  >> PicMip);
 
 			if (!(Prop.m_Flags & CTC_TEXTUREFLAGS_NOMIPMAP))
 			{
@@ -5764,9 +6296,9 @@ void CRC_Core::Con_DumpTextures(int _v)
 //				Pixels = Pixels*1.3333f;
 			}
 
-			fp4 SizeOrg = PixelsOrg * PixelSize;
-//			fp4 Size = Pixels * PixelSize;
-			fp4 Size = Texture_GetMem(i).m_BestCase;
+			fp32 SizeOrg = PixelsOrg * PixelSize;
+//			fp32 Size = Pixels * PixelSize;
+			fp32 Size = Texture_GetMem(i).m_BestCase;
 
 			LogFile(CStrF("ID %.4x, Flags %.4x, PropFlags %.4x, PropPMG %.2d, %.4dx%.4d, Fmt %.8x, ApproxBytes %.10d/%.10d, %s", 
 				i, Flags, Prop.m_Flags, Prop.m_iPicMipGroup, Desc.GetWidth(), Desc.GetHeight(), Desc.GetFormat(), 
@@ -5798,4 +6330,15 @@ void CRC_Core::Register(CScriptRegisterContext & _RegContext)
 	_RegContext.RegFunction("r_showgamma", this, &CRC_Core::Con_ShowGamma);
 	_RegContext.RegFunction("r_dumptextures", this, &CRC_Core::Con_DumpTextures);
 };
+
+
+CRC_Attributes::CAttributeCheck CRC_Attributes::ms_AttribCheck;
+CRC_Attributes M_ALIGN(16) CRC_Attributes::ms_AttribDefault;
+
+#ifdef PLATFORM_XENON
+	//JK-NOTE: 2006-11-26 This is just to get around a fucking compiler crash
+	#pragma optimize("", off)
+	#pragma inline_depth(0)
+#endif
+CRC_Attributes::CAttributeDefaultInit CRC_Attributes::ms_AttribDefaultInit;
 

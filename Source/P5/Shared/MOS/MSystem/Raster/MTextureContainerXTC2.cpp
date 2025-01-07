@@ -130,6 +130,13 @@ void CTextureContainer_VirtualXTC2::ReadImageDirectory(CDataFile* _pDFile)
 			//				pFile->ReadLE(Desc.m_lMipMapFilePos[i]);
 
 			Desc.m_Properties.Read(pFile);
+
+			if (Desc.m_Width == 2048 && Desc.m_Height == 2048 && Desc.m_Properties.GetPicMipOffset() == -1)
+			{
+				// screw you!(E3 hack!)
+				M_TRACEALWAYS("ignoring picmip offset -2 on big fucking texture (2048 x 2048)\n");
+				Desc.m_Properties.m_PicMipOffset = 0;
+			}
 		}
 
 #ifndef USE_HASHED_TEXTURENAME		
@@ -653,7 +660,8 @@ int CTextureContainer_VirtualXTC2::GetTextureDesc(int _iLocal, CImage* _pTargetI
 	MAUTOSTRIP(CTextureContainer_VirtualXTC2_GetTextureDesc, 0);
 	const CTextureDesc& Desc = m_lTextureDesc[_iLocal];
 	if (_pTargetImg)
-		_pTargetImg->CreateVirtual(Desc.GetWidth(), Desc.GetHeight(), Desc.m_Format, Desc.m_MemModel);
+		_pTargetImg->CreateVirtual_NoDelete(Desc.GetWidth(), Desc.GetHeight(), Desc.m_Format, Desc.m_MemModel, 0);
+//		_pTargetImg->CreateVirtual(Desc.GetWidth(), Desc.GetHeight(), Desc.m_Format, Desc.m_MemModel);
 	_Ret_nMipmaps = Desc.m_nMipMaps;
 	return CTC_TEXTURE_ACCESS;
 }
@@ -703,8 +711,9 @@ int CTextureContainer_VirtualXTC2::EnumTextureVersions(int _iLocal, uint8* _pDes
 	int nLocal = m_lTextureDesc.Len();
 	while((iLocal < nLocal) && (nVersions < _nMaxVersions) && (m_lTextureDesc[iLocal].m_TextureID == TexID))
 	{
-		_pDest[nVersions++]	= m_lTextureDesc[iLocal].m_Properties.m_TextureVersion;
+		if(_pDest) _pDest[nVersions]	= m_lTextureDesc[iLocal].m_Properties.m_TextureVersion;
 
+		nVersions++;
 		iLocal++;
 	}
 

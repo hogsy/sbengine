@@ -166,15 +166,15 @@ int CDisplayContext::PageFlip()
 							CImage ZBuffer;
 							ZBuffer.Create(w, h, IMAGE_FORMAT_I8, IMAGE_MEM_IMAGE);
 
-							TThinArray<fp4> lDepth;
+							TThinArray<fp32> lDepth;
 							lDepth.SetLen(spConv->GetWidth());
 
 							const CRC_Viewport* pVP = pRC->Viewport_Get();	// This might not be the viewport used to render the scene, so z-far/near could be completely off
-							fp4 f = pVP->GetBackPlane();
-							fp4 n = pVP->GetFrontPlane() * 0.5f;
+							fp32 f = pVP->GetBackPlane();
+							fp32 n = pVP->GetFrontPlane() * 0.5f;
 
 							MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
-							fp4 zmax = 1000.0f;
+							fp32 zmax = 1000.0f;
 							if(pSys)
 								zmax = pSys->GetEnvironment()->GetValuef("VID_CAPTUREZRANGE", 1000.0f);
 
@@ -186,9 +186,9 @@ int CDisplayContext::PageFlip()
 									pRC->ReadDepthPixels(0-w/2, y-h/2, spConv->GetWidth(), 1, lDepth.GetBasePtr() );
 									for(int x = 0; x < w; x++)
 									{
-										fp4 zw = lDepth[x];
-										fp4 zd = (zw - 0.5f) * 2.0f;
-										fp4 z = -2.0f * f * n / (zd*(f - n) - (f + n));
+										fp32 zw = lDepth[x];
+										fp32 zd = (zw - 0.5f) * 2.0f;
+										fp32 z = -2.0f * f * n / (zd*(f - n) - (f + n));
 										zmax = Max(z, zmax);
 									}
 								}
@@ -200,9 +200,9 @@ int CDisplayContext::PageFlip()
 									pRC->ReadDepthPixels(0-w/2, y-h/2, spConv->GetWidth(), 1, lDepth.GetBasePtr() );
 									for(int x = 0; x < w; x++)
 									{
-										fp4 zw = lDepth[x];
-										fp4 zd = (zw - 0.5f) * 2.0f;
-										fp4 z = -2.0f * f * n / (zd*(f - n) - (f + n));
+										fp32 zw = lDepth[x];
+										fp32 zd = (zw - 0.5f) * 2.0f;
+										fp32 z = -2.0f * f * n / (zd*(f - n) - (f + n));
 
 										int zi = RoundToInt(255.0f * z / zmax);
 										ZBuffer.SetPixel(ZBuffer.GetClipRect(), CPnt(x, y), CPixel32(zi,zi,zi,255));
@@ -225,14 +225,14 @@ int CDisplayContext::PageFlip()
 }
 
 
-void CDisplayContext::SetScreenRatio(int _Width, int _Height, fp4 _PixelAspect)
+void CDisplayContext::SetScreenRatio(int _Width, int _Height, fp32 _PixelAspect)
 {
 	// Standard resolution 
 	int width	= _Width;
 	int height	= _Height;
 
-	fp4 PixelAspect = _PixelAspect;
-	fp4 ScreenAspect = (((double)width / (double)height) * (3.0/4.0)) * PixelAspect;// / ((4.0/3.0) * (ScreenAspect)));
+	fp32 PixelAspect = _PixelAspect;
+	fp32 ScreenAspect = (((double)width / (double)height) * (3.0/4.0)) * PixelAspect;// / ((4.0/3.0) * (ScreenAspect)));
 		
 	SetScreenAspect(ScreenAspect);
 }
@@ -264,7 +264,7 @@ int CDisplayContext::ModeList_Find(int width, int height, int format, int _Refre
 	{
 		int Match = abs(m_lspModes[i]->m_Format.GetWidth() - width) * 4 + abs(m_lspModes[i]->m_Format.GetHeight() - height) * 3 + abs(m_lspModes[i]->m_RefreshRate - _RefreshRate);
 		if (!(m_lspModes[i]->m_Format.GetMemModel() & IMAGE_MEM_WINDOWED) 
-			&& m_lspModes[i]->m_Format.GetFormat() == format 
+			&& (m_lspModes[i]->m_Format.GetFormat() & format)
 			&& Match < BestMatch
 			)
 		{

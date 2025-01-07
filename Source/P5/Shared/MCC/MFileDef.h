@@ -69,8 +69,8 @@ public:
 	virtual void ReadLE(uint32& _Value) pure;
 	virtual void ReadLE(int64& _Value) pure;
 	virtual void ReadLE(uint64& _Value) pure;
-	virtual void ReadLE(fp4& _Value) pure;
-	virtual void ReadLE(fp8& _Value) pure;
+	virtual void ReadLE(fp32& _Value) pure;
+	virtual void ReadLE(fp64& _Value) pure;
 
 	virtual void WriteLE(const uint8& _Value) pure;
 	virtual void WriteLE(const int16& _Value) pure;
@@ -79,8 +79,8 @@ public:
 	virtual void WriteLE(const uint32& _Value) pure;
 	virtual void WriteLE(const int64& _Value) pure;
 	virtual void WriteLE(const uint64& _Value) pure;
-	virtual void WriteLE(const fp4& _Value) pure;
-	virtual void WriteLE(const fp8& _Value) pure;
+	virtual void WriteLE(const fp32& _Value) pure;
+	virtual void WriteLE(const fp64& _Value) pure;
 
 	virtual void ReadLE(uint8* _pData, int _Count) pure;
 	virtual void ReadLE(uint16* _pData, int _Count) pure;
@@ -104,8 +104,8 @@ public:
 	virtual void ReadBE(uint32& _Value) pure;
 	virtual void ReadBE(int64& _Value) pure;
 	virtual void ReadBE(uint64& _Value) pure;
-	virtual void ReadBE(fp4& _Value) pure;
-	virtual void ReadBE(fp8& _Value) pure;
+	virtual void ReadBE(fp32& _Value) pure;
+	virtual void ReadBE(fp64& _Value) pure;
 
 	virtual void WriteBE(const uint8& _Value) pure;
 	virtual void WriteBE(const int16& _Value) pure;
@@ -114,8 +114,8 @@ public:
 	virtual void WriteBE(const uint32& _Value) pure;
 	virtual void WriteBE(const int64& _Value) pure;
 	virtual void WriteBE(const uint64& _Value) pure;
-	virtual void WriteBE(const fp4& _Value) pure;
-	virtual void WriteBE(const fp8& _Value) pure;
+	virtual void WriteBE(const fp32& _Value) pure;
+	virtual void WriteBE(const fp64& _Value) pure;
 };
 */
 // -------------------------------------------------------------------
@@ -143,7 +143,7 @@ public:
 	virtual void Push(const char* _pLevelName = NULL) pure;
 	virtual void Pop() pure;
 
-	virtual void SetProgress(fp4 _p, const char* _pTaskName = NULL) pure;
+	virtual void SetProgress(fp32 _p, const char* _pTaskName = NULL) pure;
 	virtual void InitProgressCount(int _Count, const char* _pTaskName = NULL) pure;
 	virtual void SetProgressText(const char* _pTaskName = NULL) pure;
 	virtual void IncProgress(const char* _pTaskName = NULL) pure;

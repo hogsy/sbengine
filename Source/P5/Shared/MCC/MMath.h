@@ -127,10 +127,10 @@ public:
 	// --------------------------------
 	// Convertion
 	// --------------------------------
-	TVector3<fp4> Getfp4()								// Get float(fp4) vector
-	TVector3<fp8> Getfp8()								// Get double(fp8) vector
-	void Assignfp4(TVector3<fp4>& _Dst)					// Assign to float vector
-	void Assignfp8(TVector3<fp8>& _Dst)					// Assign to double vector
+	TVector3<fp32> Getfp32()								// Get float(fp32) vector
+	TVector3<fp64> Getfp64()								// Get double(fp64) vector
+	void Assignfp32(TVector3<fp32>& _Dst)					// Assign to float vector
+	void Assignfp64(TVector3<fp64>& _Dst)					// Assign to double vector
 
 	// --------------------------------
 	// Operators
@@ -228,7 +228,7 @@ public:
 	// --------------------------------
 	// Rotation convertion
 	// --------------------------------
-	void CreateAxisRotateMatrix(fp4 _Angle, CMat4Dfp4& _Mat) const		// Create matrix from axis-angle.
+	void CreateAxisRotateMatrix(fp32 _Angle, CMat4Dfp32& _Mat) const		// Create matrix from axis-angle.
 	void CreateMatrixFromAngles(int AnglePriority, M& DestMat) const	// Create matrix from euler-angles.
 	static T AngleFromVector(T x, T z)									// Get angle from 2D-vector
 	static void CreateAngleZYXFromMatrix(V& v, ... )					// Helper-function for CreateAnglesFromMatrix()
@@ -431,7 +431,7 @@ public:
 	void Normalize()
 	void Inverse()										// Inverse-rotation
 	T DotProd(const TQuaternion& _Q) const				// Dot product
-	void Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp4 _t) const
+	void Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp32 _t) const
 	void Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
 	void operator*= (const TQuaternion& _Quat2)
 	TQuaternion operator* (const TQuaternion& _Quat2) const
@@ -553,7 +553,7 @@ public:
 	void GetLocalBox(B& _Box) const						// Get local space AABB
 	void TransformToBoxSpace(const V& _v, V& _Dst) const// Transform vertex to box-space
 	void TransformFromBoxSpace(const V& _v, V& _Dst) const// Transform vertex from box-space
-	bool LocalPointInBox(const CVec3Dfp4 _p0) const		// Box-space point intersection
+	bool LocalPointInBox(const CVec3Dfp32 _p0) const		// Box-space point intersection
 	bool LocalIntersectLine(const V& _p0, const V& _p1, V& _HitPos) const	// Box-space intersect line
 	T LocalMinSqrDistance(const V& _v) const			// Calc minimum square distance from point to box in box-space.
 	T LocalMaxSqrDistance(const V& _v) const			// Calc maximum square distance from point to box in box-space.
@@ -584,17 +584,6 @@ public:
 	#include <math.h>
 #endif
 
-// -------------------------------------------------------------------
-
-
-// You can define this if you want all matrices to be stored as 4x4
-#define DEFINE_MAT43_IS_MAT4D
-
-
-//	THIS WILL FUCK UPP XWC, SO LEAVE IT THAT.
-#ifndef	PLATFORM_CONSOLE
-#define	DEFINE_MAT43_IS_MAT4D
-#endif
 
 // -------------------------------------------------------------------
 //  Miscellaneous helper macros
@@ -619,7 +608,7 @@ public:
 // -------------------------------------------------------------------
 //  Equation solvers
 // -------------------------------------------------------------------
-bool SolveP2(const fp4 a, const fp4 b, const fp4 c, fp4& _s0, fp4& _s1);
+bool SolveP2(const fp32 a, const fp32 b, const fp32 c, fp32& _s0, fp32& _s1);
 
 template <class Real>
 int SolveP3(Real fC0, Real fC1, Real fC2, Real fC3, Real& root1, Real& root2, Real& root3);
@@ -689,7 +678,10 @@ T Determinant4x4(T a, T b, T c, T d, T e, T f, T g, T h, T i, T j, T k, T l, T m
 
 template<class T> class TMatrix43;
 template<class T> class TVector3;
+template<class T> class TVector3Aggr;
 template<class T> class TVector4;
+template<class T> class TPlane3;
+template<class T> class TQuaternion;
 
 // -------------------------------------------------------------------
 // Template-fiffel(tm)
@@ -704,7 +696,23 @@ public:
 
 
 template<>
-class TMathTemplateProperties<fp4>
+class TMathTemplateProperties<fp32>
+{
+public:
+	typedef vec128 TMatrix4RowIntrinsic;
+	typedef vec128 TVector4Intrinsic;
+};
+
+template<>
+class TMathTemplateProperties<int32>
+{
+public:
+	typedef vec128 TMatrix4RowIntrinsic;
+	typedef vec128 TVector4Intrinsic;
+};
+
+template<>
+class TMathTemplateProperties<uint32>
 {
 public:
 	typedef vec128 TMatrix4RowIntrinsic;
@@ -751,8 +759,8 @@ public:
 	};
 };
 
-typedef TMatrix2<fp4> CMat2Dfp4;
-typedef TMatrix2<fp8> CMat2Dfp8;
+typedef TMatrix2<fp32> CMat2Dfp32;
+typedef TMatrix2<fp64> CMat2Dfp64;
 typedef TMatrix2<int8> CMat2Dint8;
 typedef TMatrix2<uint8> CMat2Duint8;
 typedef TMatrix2<int16> CMat2Dint16;
@@ -824,7 +832,8 @@ public:
 	void Multiply3x3(const M& m, M& DestMat) const		// Multiply 3x3 with destination, clearing affine part
 
 	void Normalize3x3()									// Normalize 3x3
-	void RecreateMatrix(int _Priority0, int _Priority1)	// Renormalize and make it orthogonal
+	void RecreateMatrix<_PrioRow0, _PrioRow1>()			// Renormalize and make it orthogonal (vec128 version)
+	void RecreateMatrix(int _Priority0, int _Priority1);// Renormalize and make it orthogonal
 
 	// --------------------------------
 	// Helpers
@@ -855,11 +864,6 @@ public:
 		Macro_Matrix_SetRow(3, k30, k31, k32, k33);
 	};
 
-	void CreateFrom(const TMatrix4<T>& _Src)
-	{
-		*this = _Src;
-	}
-
 	void CreateFrom(const M43& _Src)
 	{
 		V::GetMatrixRow(_Src, 0).SetMatrixRow(*this, 0);
@@ -872,6 +876,33 @@ public:
 		k[3][3] = 1.0f;
 	}
 
+	void Create(const TQuaternion<T>& _Quaternion, const TVector4<T>& _Translation)
+	{
+		_Quaternion.CreateMatrix3x3(*this);
+		k[0][3] = 0;
+		k[1][3] = 0;
+		k[2][3] = 0;
+		r[3]=_Translation;
+		k[3][3]=1.0f;
+	}
+
+
+	void CreateTranslation(const TVector3Aggr<T>& _Translation)
+	{
+		Macro_Matrix_SetRow(0, 1, 0, 0, 0);
+		Macro_Matrix_SetRow(1, 0, 1, 0, 0);
+		Macro_Matrix_SetRow(2, 0, 0, 1, 0);
+		Macro_Matrix_SetRow(3, _Translation.x, _Translation.y, _Translation.z, 1);
+	}
+
+	void CreateTranslation(const TVector4<T>& _Translation)
+	{
+		Macro_Matrix_SetRow(0, 1, 0, 0, 0);
+		Macro_Matrix_SetRow(1, 0, 1, 0, 0);
+		Macro_Matrix_SetRow(2, 0, 0, 1, 0);
+		r[3]=_Translation;
+		k[3][3]=1.0f;
+	}
 
 	void Unit()
 	{
@@ -901,23 +932,31 @@ public:
 		k[3][0] = (T) 0;
 	};
 
-	TMatrix4<fp4> Getfp4() const
+	TMatrix4<fp32> Getfp32() const
 	{
-		return TMatrix4<fp4>(k[0][0], k[0][1], k[0][2], k[0][3], 
+		return TMatrix4<fp32>(k[0][0], k[0][1], k[0][2], k[0][3], 
 											k[1][0], k[1][1], k[1][2], k[1][3], 
 											k[2][0], k[2][1], k[2][2], k[2][3],
 											k[3][0], k[3][1], k[3][2], k[3][3]);
 	}
 	
-	TMatrix4<fp8> Getfp8() const
+	TMatrix4<fp64> Getfp64() const
 	{
-		return TMatrix4<fp8>(k[0][0], k[0][1], k[0][2], k[0][3], 
+		return TMatrix4<fp64>(k[0][0], k[0][1], k[0][2], k[0][3], 
 											k[1][0], k[1][1], k[1][2], k[1][3], 
 											k[2][0], k[2][1], k[2][2], k[2][3],
 											k[3][0], k[3][1], k[3][2], k[3][3]);
 	}
 
-	void Assignfp4(TMatrix4<fp4>& _Dst) const
+	void operator= (const TMatrix4<T>& _M) 
+	{
+		r[0] = _M.r[0];
+		r[1] = _M.r[1];
+		r[2] = _M.r[2];
+		r[3] = _M.r[3];
+	}
+
+	void Assignfp32(TMatrix4<fp32>& _Dst) const
 	{
 		_Dst.k[0][0] = k[0][0];
 		_Dst.k[0][1] = k[0][1];
@@ -937,7 +976,7 @@ public:
 		_Dst.k[3][3] = k[3][3];
 	}
 
-	void Assignfp8(TMatrix4<fp8>& _Dst) const
+	void Assignfp64(TMatrix4<fp64>& _Dst) const
 	{
 		_Dst.k[0][0] = k[0][0];
 		_Dst.k[0][1] = k[0][1];
@@ -1305,9 +1344,9 @@ public:
 
 	bool IsMirrored() const
 	{
-		fp4 x = k[0][1] * k[1][2] - k[0][2] * k[1][1];
-		fp4 y = - k[0][0] * k[1][2] + k[0][2] * k[1][0];
-		fp4 z = k[0][0] * k[1][1] - k[0][1] * k[1][0];
+		T x = k[0][1] * k[1][2] - k[0][2] * k[1][1];
+		T y = - k[0][0] * k[1][2] + k[0][2] * k[1][0];
+		T z = k[0][0] * k[1][1] - k[0][1] * k[1][0];
 		return (x*k[2][0] + y*k[2][1] + z*k[2][2] < T(0.0));
 	}
 
@@ -1433,7 +1472,8 @@ public:
 		{
 			inverse = T(1.0) / dividend;
 			for (int i=0; i<3; i++)
-				for (int j=0; j<3; k[i][j] = k[i][j++]*inverse);
+				for (int j=0; j<3; j++)
+					k[i][j] = k[i][j]*inverse;
 		}
 		else
 		{
@@ -1465,38 +1505,17 @@ public:
 		}
 	}
 
+	template<int _PrioRow0, int _PrioRow1>
+	void RecreateMatrix();
 	void RecreateMatrix(int _Priority0, int _Priority1);
-/*
-	{
-		// The matrix normalizes the _Priority0 row, the uses the _Priority1 row to create an orthogonal matrix.
-		// The information in the third row (not _Priority0 and not _Priority1) is completely ignored.
 
-		int Missing = 3 - (_Priority0 + _Priority1);
-		if(_Priority0 < 0 || _Priority1 > 2)
-			Error_static("RecreateMatrix", "Invalid parameters");
-
-		int iType = _Priority0  - _Priority1;
-		if(iType == -1 || iType == 2)
-		{
-			CVec3Dfp4::GetMatrixRow(*this, _Priority0).Normalize();
-			CVec3Dfp4::GetMatrixRow(*this, Missing) = -(CVec3Dfp4::GetMatrixRow(*this, _Priority1) / CVec3Dfp4::GetMatrixRow(*this, _Priority0)).Normalize();
-			CVec3Dfp4::GetMatrixRow(*this, _Priority1) = CVec3Dfp4::GetMatrixRow(*this, Missing) / CVec3Dfp4::GetMatrixRow(*this, _Priority0);
-		}
-		else
-		{
-			CVec3Dfp4::GetMatrixRow(*this, _Priority0).Normalize();
-			CVec3Dfp4::GetMatrixRow(*this, Missing) = (CVec3Dfp4::GetMatrixRow(*this, _Priority1) / CVec3Dfp4::GetMatrixRow(*this, _Priority0)).Normalize();
-			CVec3Dfp4::GetMatrixRow(*this, _Priority1) = CVec3Dfp4::GetMatrixRow(*this, _Priority0) / CVec3Dfp4::GetMatrixRow(*this, Missing);
-		}
-	}
-*/
 	//---------------------------------------------------
 	CStr GetStringRow(int row) const
 	{
 		CStr tmp("(");
 		if ((row < 0) || (row > 3)) Error_static("TMatrix4::GetStringRow", "Invalid row.");
 		for (int j = 0; j < 4; j++)
-			tmp += CStrF("%.3f,", (fp8) k[row][j]);
+			tmp += CStrF("%.3f,", (fp64) k[row][j]);
 		tmp = tmp.Del(tmp.Len()-1, 1) + ")";
 		return tmp;
 	};
@@ -1558,12 +1577,6 @@ public:
 	}
 #endif
 	
-#ifdef DEFINE_MAT43_IS_MAT4D
-	//AR-NOTE: this is a dummy-method while I'm completing the Mat43-support
-	const M& Get4x4() const { return *this; }
-	      M& Get4x4()       { return *this; }
-#endif
-
 	// These functions use the TVector3-class, and are implemented after the TVector3-class
 	const V& GetRow(uint _iRow) const;
 	      V& GetRow(uint _iRow);
@@ -1573,8 +1586,10 @@ typedef TMatrix4<int8> CMat4Dint8;
 typedef TMatrix4<int16> CMat4Dint16;
 typedef TMatrix4<int32> CMat4Dint32;
 typedef TMatrix4<int> CMat4Dint;	// Undefined size integer matrix (ie. >= 32bit)
-typedef TMatrix4<fp4> CMat4Dfp4;
-typedef TMatrix4<fp8> CMat4Dfp8;
+typedef TMatrix4<fp32> CMat4Dfp32;
+typedef TMatrix4<fp64> CMat4Dfp64;
+typedef TMatrix43<fp32> CMat43fp32;
+//typedef TMatrix43<fp64> CMat43fp64;
 
 
 #define MACRO_DET3x3_43(V, r0, r1, r2, k0, k1) \
@@ -1598,7 +1613,14 @@ class TMatrix43
 	typedef TVector3<T> V;
 
 public:
-	T k[4][3];  // row, column
+	typedef typename TMathTemplateProperties<T>::TMatrix4RowIntrinsic TRowIntrinsic;
+
+	union
+	{
+		TRowIntrinsic v[3];
+		T k[4][3];  // row, column
+	};
+
 
 	TMatrix43()
 	{
@@ -1636,23 +1658,23 @@ public:
 		Macro_Matrix_SetRow3x3(3, T(0), T(0), T(0));
 	}
 
-	TMatrix43<fp4> Getfp4() const
+	TMatrix43<fp32> Getfp32() const
 	{
-		return TMatrix43<fp4>(k[0][0], k[0][1], k[0][2],
+		return TMatrix43<fp32>(k[0][0], k[0][1], k[0][2],
 		                                     k[1][0], k[1][1], k[1][2],
 		                                     k[2][0], k[2][1], k[2][2],
 		                                     k[3][0], k[3][1], k[3][2]);
 	}
 	
-	TMatrix43<fp8> Getfp8() const
+	TMatrix43<fp64> Getfp64() const
 	{
-		return TMatrix43<fp8>(k[0][0], k[0][1], k[0][2],
+		return TMatrix43<fp64>(k[0][0], k[0][1], k[0][2],
 		                                     k[1][0], k[1][1], k[1][2],
 		                                     k[2][0], k[2][1], k[2][2],
 		                                     k[3][0], k[3][1], k[3][2]);
 	}
 
-	void Assignfp4(TMatrix43<fp4>& _Dst) const
+	void Assignfp32(TMatrix43<fp32>& _Dst) const
 	{
 		Macro_Matrix_SetRow_Dest3x3(_Dst, 0, k[0][0], k[0][1], k[0][2]);
 		Macro_Matrix_SetRow_Dest3x3(_Dst, 1, k[1][0], k[1][1], k[1][2]);
@@ -1660,7 +1682,7 @@ public:
 		Macro_Matrix_SetRow_Dest3x3(_Dst, 3, k[3][0], k[3][1], k[3][2]);
 	}
 
-	void Assignfp8(TMatrix43<fp8>& _Dst) const
+	void Assignfp64(TMatrix43<fp64>& _Dst) const
 	{
 		Macro_Matrix_SetRow_Dest3x3(_Dst, 0, k[0][0], k[0][1], k[0][2]);
 		Macro_Matrix_SetRow_Dest3x3(_Dst, 1, k[1][0], k[1][1], k[1][2]);
@@ -1689,11 +1711,6 @@ public:
 		V::GetMatrixRow(_Src, 1).SetMatrixRow(*this, 1);
 		V::GetMatrixRow(_Src, 2).SetMatrixRow(*this, 2);
 		V::GetMatrixRow(_Src, 3).SetMatrixRow(*this, 3);
-	}
-
-	void CreateFrom(const TMatrix43<T>& _Src)
-	{
-		*this = _Src;
 	}
 
 	bool AlmostEqual(const M& _m, T _Epsilon) const
@@ -1979,9 +1996,9 @@ public:
 
 	bool IsMirrored() const
 	{
-		fp4 x =   k[0][1] * k[1][2] - k[0][2] * k[1][1];
-		fp4 y = - k[0][0] * k[1][2] + k[0][2] * k[1][0];
-		fp4 z =   k[0][0] * k[1][1] - k[0][1] * k[1][0];
+		T x =   k[0][1] * k[1][2] - k[0][2] * k[1][1];
+		T y = - k[0][0] * k[1][2] + k[0][2] * k[1][0];
+		T z =   k[0][0] * k[1][1] - k[0][1] * k[1][0];
 		return (x*k[2][0] + y*k[2][1] + z*k[2][2] < T(0));
 	}
 
@@ -2126,7 +2143,7 @@ public:
 		CStr tmp("(");
 		if ((row < 0) || (row > 3)) Error_static("TMatrix43::GetStringRow", "Invalid row.");
 		for (int j = 0; j < 3; j++)
-			tmp += CStrF("%.3f,", (fp8) k[row][j]);
+			tmp += CStrF("%.3f,", (fp64) k[row][j]);
 		tmp = tmp.Del(tmp.Len()-1, 1) + ")";
 		return tmp;
 	}
@@ -2209,15 +2226,6 @@ public:
 	      V& GetRow(uint _iRow);
 };
 
-#ifndef DEFINE_MAT43_IS_MAT4D
- typedef TMatrix43<fp4> CMat43fp4;
- typedef TMatrix43<fp8> CMat43fp8;
-#else
- typedef TMatrix4<fp4> CMat43fp4;
- typedef TMatrix4<fp8> CMat43fp8;
-#endif
-
-
 // typedef TMatrix4<fp10> CMat4Dfp10;
 
 // -------------------------------------------------------------------
@@ -2250,10 +2258,10 @@ public:
 	// --------------------------------
 	// Convertion
 	// --------------------------------
-	TVector3<fp4> Getfp4()								// Get float(fp4) vector
-	TVector3<fp8> Getfp8()								// Get double(fp8) vector
-	void Assignfp4(TVector3<fp4>& _Dst)					// Assign to float vector
-	void Assignfp8(TVector3<fp8>& _Dst)					// Assign to double vector
+	TVector3<fp32> Getfp32()								// Get float(fp32) vector
+	TVector3<fp64> Getfp64()								// Get double(fp64) vector
+	void Assignfp32(TVector3<fp32>& _Dst)					// Assign to float vector
+	void Assignfp64(TVector3<fp64>& _Dst)					// Assign to double vector
 
 	// --------------------------------
 	// Operators
@@ -2333,7 +2341,7 @@ public:
 	// --------------------------------
 	// Rotation convertion
 	// --------------------------------
-	void CreateAxisRotateMatrix(fp4 _Angle, CMat4Dfp4& _Mat) const		// Create matrix from axis-angle.
+	void CreateAxisRotateMatrix(fp32 _Angle, CMat4Dfp32& _Mat) const		// Create matrix from axis-angle.
 	void CreateMatrixFromAngles(int AnglePriority, M& DestMat) const	// Create matrix from euler-angles.
 	static T AngleFromVector(T x, T z)									// Get angle from 2D-vector
 	static void CreateAngleZYXFromMatrix(V& v, ... )					// Helper-function for CreateAnglesFromMatrix()
@@ -2353,19 +2361,19 @@ public:
 
 
 	// kma: Warning, if you use 1.0 as max you can get sign errors, use 1.01f
-	V& Unpack32(uint32 _V, fp4 _Max)
+	V& Unpack32(uint32 _V, fp32 _Max)
 	{
-		const fp4 Max2 = _Max + _Max;
-		k[0] = ((fp4((_V & 0xffe00000) >> 21) * (1.0f/ 2048.0f)) - 0.5f) * Max2;
-		k[1] = ((fp4((_V & 0x001ffc00) >> 10) * (1.0f/ 2048.0f)) - 0.5f) * Max2;
-		k[2] = ((fp4(_V & 0x000003ff) * (1.0f/ 1024.0f)) - 0.5f) * Max2;
+		const fp32 Max2 = _Max + _Max;
+		k[0] = ((fp32((_V & 0xffe00000) >> 21) * (1.0f/ 2048.0f)) - 0.5f) * Max2;
+		k[1] = ((fp32((_V & 0x001ffc00) >> 10) * (1.0f/ 2048.0f)) - 0.5f) * Max2;
+		k[2] = ((fp32(_V & 0x000003ff) * (1.0f/ 1024.0f)) - 0.5f) * Max2;
 		return *this;
 	}
 
 	// kma: Warning, if you use 1.0 as max you can get sign errors, use 1.01f
-	uint32 Pack32(fp4 _Max) const
+	uint32 Pack32(fp32 _Max) const
 	{
-		const fp4 Max2 = _Max + _Max;
+		const fp32 Max2 = _Max + _Max;
 		return Clamp(uint32((k[0] * (1.0f/ Max2) + 0.5f) * 2048.0f),0,2047) << 21 |
 			   Clamp(uint32((k[1] * (1.0f/ Max2) + 0.5f) * 2048.0f),0,2047) << 10 |
 			   Clamp(uint32((k[2] * (1.0f/ Max2) + 0.5f) * 1024.0f),0,1023);
@@ -2374,7 +2382,7 @@ public:
 	// Added by Mondelore {START}.
 	V& Unpack24(uint32 _V, T _Max)
 	{
-		const fp4 Max2 = _Max + _Max;
+		const fp32 Max2 = _Max + _Max;
 		k[0] = ((T(_V & 0x00ff0000) / ((T)(128 * 256 * 256))) - (T)0.5) * Max2;
 		k[1] = ((T(_V & 0x0000ff00) / ((T)(128 * 256))) - (T)0.5) * Max2;
 		k[2] = ((T(_V & 0x000000ff) / ((T)(128))) - (T)0.5) * Max2;
@@ -2389,18 +2397,18 @@ public:
 	}
 	// Added by Mondelore {END}.
 
-	V& Unpack16(uint16 _V, fp4 _Max)
+	V& Unpack16(uint16 _V, fp32 _Max)
 	{
-		const fp4 Max2 = _Max + _Max;
-		k[0] = ((fp4(_V & 0xfc00) * (1.0f/ (32.0f * 32 * 64))) - 0.5f) * Max2;
-		k[1] = ((fp4(_V & 0x03e0) * (1.0f/ (32.0f * 32))) - 0.5f) * Max2;
-		k[2] = ((fp4(_V & 0x001f) * (1.0f/ (32.0f))) - 0.5f) * Max2;
+		const fp32 Max2 = _Max + _Max;
+		k[0] = ((fp32(_V & 0xfc00) * (1.0f/ (32.0f * 32 * 64))) - 0.5f) * Max2;
+		k[1] = ((fp32(_V & 0x03e0) * (1.0f/ (32.0f * 32))) - 0.5f) * Max2;
+		k[2] = ((fp32(_V & 0x001f) * (1.0f/ (32.0f))) - 0.5f) * Max2;
 		return *this;
 	}
 
-	uint16 Pack16(fp4 _Max) const
+	uint16 Pack16(fp32 _Max) const
 	{
-		const fp4 Max2 = _Max + _Max;
+		const fp32 Max2 = _Max + _Max;
 		return uint16((k[0] * (1.0f/ Max2) + 0.5f) * (32.0f * 32 * 64)) & 0xfc00 |
 			   uint16((k[1] * (1.0f/ Max2) + 0.5f) * (32.0f * 32)) & 0x03e0 |
 			   uint16((k[2] * (1.0f/ Max2) + 0.5f) * 32.0f) & 0x001f;
@@ -2420,6 +2428,13 @@ public:
 		_Dst.k[2] = T2(k[2]);
 	}
 
+	void Set(T _x, T _y, T _z)
+	{
+		k[0] = _x;
+		k[1] = _y;
+		k[2] = _z;
+	}
+
 	void SetScalar(T _v)
 	{
 		k[0] = _v;
@@ -2428,11 +2443,11 @@ public:
 	}
 
 
-	TVector3Aggr<fp4> Getfp4() const { return Get<fp4>(); }
-	TVector3Aggr<fp8> Getfp8() const { return Get<fp8>(); }
+	TVector3Aggr<fp32> Getfp32() const { return Get<fp32>(); }
+	TVector3Aggr<fp64> Getfp64() const { return Get<fp64>(); }
 
-	void Assignfp4(TVector3<fp4>& _Dst) const { Assign<fp4>(_Dst); }
-	void Assignfp8(TVector3<fp8>& _Dst) const { Assign<fp8>(_Dst); }
+	void Assignfp32(TVector3<fp32>& _Dst) const { Assign<fp32>(_Dst); }
+	void Assignfp64(TVector3<fp64>& _Dst) const { Assign<fp64>(_Dst); }
 
 	T& operator[] (int _k)
 	{
@@ -2614,11 +2629,6 @@ public:
 		dest.k[2] = k2 * invt + t * o2;
 	}
 	
-	static void Lerp(const V& a, const V& b, V& dest, T t)
-	{
-		a.Lerp(b, t, dest);
-	}
-
 	void Moderate(const V& newq, V& qprim, int a)
 	{
 		const T Scale = T(512.0);
@@ -2695,41 +2705,68 @@ public:
 #else
 	M_INLINE V& Normalize()
 	{
-		T dividend;
+		T s = LengthSqr();
+	//	M_ASSERT(s != T(0), "WARNING: Don't normalize null vectors! (consider using SafeNormalize()?)");
 
-		dividend = LengthSqr();
-		if (dividend != (T)0)
-		{
-			T inverse = M_InvSqrt(dividend);
-			k[0] = k[0]*inverse;
-			k[1] = k[1]*inverse;
-			k[2] = k[2]*inverse;
-		}
-		else
-		{
-			k[0] = k[1] = k[2] = 0;
-		}
+		s = M_FSel(-s, T(1), s);	// protect against 0 vector
+		s = M_InvSqrt(s);
+
+		T x = k[0] * s;
+		T y = k[1] * s;
+		T z = k[2] * s;
+		k[0] = x;
+		k[1] = y;
+		k[2] = z;
 		return *this;
 	}
 
-	M_INLINE V& SetLength( const T& _Length)
+	M_INLINE V& SafeNormalize()
 	{
-		T dividend;
+		T s = LengthSqr();
+		s = M_FSel(-s, T(1), s);	// protect against 0 vector
+		s = M_InvSqrt(s);
 
-		dividend = LengthSqr();
-		if (dividend != (T)0)
-		{
-			T inverse = _Length * M_InvSqrt(dividend);
-			k[0] = k[0]*inverse;
-			k[1] = k[1]*inverse;
-			k[2] = k[2]*inverse;
-		}
-		else
-		{
-			k[0] = k[1] = k[2] = 0;
-		}
+		T x = k[0] * s;
+		T y = k[1] * s;
+		T z = k[2] * s;
+		k[0] = x;
+		k[1] = y;
+		k[2] = z;
 		return *this;
 	}
+
+	M_INLINE V& SetLength(T _Length)
+	{
+		T s = LengthSqr();
+	//	M_ASSERT(s != T(0), "WARNING: Don't normalize null vectors!");
+
+		s = M_FSel(-s, T(1), s);	// protect against 0 vector
+		s = _Length * M_InvSqrt(s);
+
+		T x = k[0] * s;
+		T y = k[1] * s;
+		T z = k[2] * s;
+		k[0] = x;
+		k[1] = y;
+		k[2] = z;
+		return *this;
+	}
+
+	M_INLINE V& SetMaxLength(T _MaxLen)
+	{
+		T curr2 = LengthSqr();
+		T new2 = Min(curr2, Sqr(_MaxLen));			// don't go above MaxLen
+		curr2 = M_FSel(-curr2, T(1), curr2);		// protect against 0 vector
+		T s = M_Sqrt(new2) * M_InvSqrt(curr2);		// v *= sqrt(newlen^2 / currlen^2)
+		T x = k[0] * s;
+		T y = k[1] * s;
+		T z = k[2] * s;
+		k[0] = x;
+		k[1] = y;
+		k[2] = z;
+		return *this;
+	}
+
 #endif	
 
 	//---------------------------------------------------
@@ -2802,27 +2839,27 @@ public:
 
 	void MultiplyMatrix(const M& m)
 	{
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 		for (int i = 0; i < 3; i++)
 			k[i] = m.k[0][i]*x + m.k[1][i]*y + m.k[2][i]*z + m.k[3][i];
 	}
 
 	void MultiplyMatrix3x3(const M& m)
 	{
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 		for (int i = 0; i < 3; i++)
 			k[i] = m.k[0][i]*x + m.k[1][i]*y + m.k[2][i]*z;
 	}
 
 	void MultiplyMatrix3x3(const M& m, V &_d) const
 	{
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 		for (int i = 0; i < 3; i++)
 			_d.k[i] = m.k[0][i]*x + m.k[1][i]*y + m.k[2][i]*z;
 	}
@@ -3019,9 +3056,9 @@ public:
 	// Mondelore: short, simple and it bloody works!
 	static void Spline2(const V& _v0, const V& _v1, const V& _v2, const V& _v3, T _t, V& _dest)
 	{
-		fp4 t = _t;
-		fp4 t2 = t * t;
-		fp4 t3 = t2 * t;
+		T t = _t;
+		T t2 = t * t;
+		T t3 = t2 * t;
 
 		V p, q, r, s;
 
@@ -3035,12 +3072,12 @@ public:
 
 	static void Spline3(const V& _v0, const V& _v1, const V& _v2, const V& _v3, T _t, V& _dest)
 	{
-		fp4 t, t2, t3;
+		T t, t2, t3;
 		t = _t;
 		t2 = t * t;
 		t3 = t2 * t;
 
-		fp4 m0, m1, m2, m3;
+		T m0, m1, m2, m3;
 		m0 = -t3 + 2 * t2 - t;
 		m1 = t3 - 2 * t2  + 1;
 		m2 = -t3 + t2 + t;
@@ -3131,26 +3168,26 @@ public:
 	//---------------------------------------------------
 	// Matrix and angle functions...
 	//---------------------------------------------------
-	void CreateAxisRotateMatrix(fp4 _Angle, CMat4Dfp4& _Mat) const
+	void CreateAxisRotateMatrix(T _Angle, M& _Mat) const
 	{
 		// *this == Rotation-axis, Must be normalized!
 		// _Angle = degrees / 360 (ie. 0..1)
 
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 
-		fp4 a = Sqr(x);
-		fp4 b = Sqr(y);
-		fp4 c = Sqr(z);
-		fp4 C = M_Cos(_Angle*T(2.0)*_PI);
-		fp4 S = M_Sin(_Angle*T(2.0)*_PI);
-		fp4 zS = z*S;
-		fp4 xS = x*S;
-		fp4 yS = y*S;
-		fp4 xz_ = x*z*(T(1.0)-C);
-		fp4 xy_ = x*y*(T(1.0)-C);
-		fp4 yz_ = y*z*(T(1.0)-C);
+		T a = Sqr(x);
+		T b = Sqr(y);
+		T c = Sqr(z);
+		T C = M_Cos(_Angle*T(2.0)*_PI);
+		T S = M_Sin(_Angle*T(2.0)*_PI);
+		T zS = z*S;
+		T xS = x*S;
+		T yS = y*S;
+		T xz_ = x*z*(T(1.0)-C);
+		T xy_ = x*y*(T(1.0)-C);
+		T yz_ = y*z*(T(1.0)-C);
 
 		_Mat.k[0][0] = a + C*(T(1.0)-a);
 		_Mat.k[0][1] = xy_ - zS;
@@ -3165,27 +3202,26 @@ public:
 		_Mat.UnitNot3x3();
 	}
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-	void CreateAxisRotateMatrix(fp4 _Angle, CMat43fp4& _Mat) const
+	void CreateAxisRotateMatrix(fp32 _Angle, CMat43fp32& _Mat) const
 	{
 		// *this == Rotation-axis, Must be normalized!
 		// _Angle = degrees / 360 (ie. 0..1)
 
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		fp32 x = k[0];
+		fp32 y = k[1];
+		fp32 z = k[2];
 
-		fp4 a = Sqr(x);
-		fp4 b = Sqr(y);
-		fp4 c = Sqr(z);
-		fp4 C = M_Cos(_Angle*T(2.0)*_PI);
-		fp4 S = M_Sin(_Angle*T(2.0)*_PI);
-		fp4 zS = z*S;
-		fp4 xS = x*S;
-		fp4 yS = y*S;
-		fp4 xz_ = x*z*(T(1.0)-C);
-		fp4 xy_ = x*y*(T(1.0)-C);
-		fp4 yz_ = y*z*(T(1.0)-C);
+		fp32 a = Sqr(x);
+		fp32 b = Sqr(y);
+		fp32 c = Sqr(z);
+		fp32 C = M_Cos(_Angle*T(2.0)*_PI);
+		fp32 S = M_Sin(_Angle*T(2.0)*_PI);
+		fp32 zS = z*S;
+		fp32 xS = x*S;
+		fp32 yS = y*S;
+		fp32 xz_ = x*z*(T(1.0)-C);
+		fp32 xy_ = x*y*(T(1.0)-C);
+		fp32 yz_ = y*z*(T(1.0)-C);
 
 		_Mat.k[0][0] = a + C*(T(1.0)-a);
 		_Mat.k[0][1] = xy_ - zS;
@@ -3199,7 +3235,6 @@ public:
 
 		_Mat.UnitNot3x3();
 	}
-#endif
 
 	void CreateMatrixFromAngles(int AnglePriority, M& DestMat) const
 	{
@@ -3465,10 +3500,10 @@ public:
 		if (!pStr) { SetScalar((T)0); return *this; }
 		int pos = 0;
 		int len = _s.Len();
-#ifdef CPU_SUPPORT_FP8
-		fp8 last = T(0.0);
+#ifdef CPU_SUPPORT_FP64
+		fp64 last = T(0.0);
 #else
-		fp4 last = T(0.0);
+		fp32 last = T(0.0);
 #endif
 		for(int i = 0; i < 3; i++)
 		{
@@ -3513,7 +3548,6 @@ public:
 		}
 	}
 
-//#ifndef DEFINE_MAT43_IS_MAT4D
 	V operator* (const M43& m) const
 	{
 		V r;
@@ -3606,18 +3640,18 @@ public:
 
 	void MultiplyMatrix(const M43& m)
 	{
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 		for (int i = 0; i < 3; i++)
 			k[i] = m.k[0][i]*x + m.k[1][i]*y + m.k[2][i]*z + m.k[3][i];
 	}
 
 	void MultiplyMatrix3x3(const M43& m)
 	{
-		fp4 x = k[0];
-		fp4 y = k[1];
-		fp4 z = k[2];
+		T x = k[0];
+		T y = k[1];
+		T z = k[2];
 		for (int i = 0; i < 3; i++)
 			k[i] = m.k[0][i]*x + m.k[1][i]*y + m.k[2][i]*z;
 	}
@@ -3821,7 +3855,7 @@ public:
 		VBase::k[2] = z;
 	};
 
-	void operator= (const VBase& _v)
+/*	void operator= (const VBase& _v)
 	{
 		T x = _v.k[0];
 		T y = _v.k[1];
@@ -3829,7 +3863,7 @@ public:
 		VBase::k[0] = x;
 		VBase::k[1] = y;
 		VBase::k[2] = z;	
-	}
+	}*/
 
 	static V& GetRow(M& _Mat, int _Row)
 	{
@@ -3887,8 +3921,9 @@ typedef TVector3<int16> CVec3Dint16;
 typedef TVector3<uint16> CVec3Duint16;
 typedef TVector3<int32> CVec3Dint32;	
 typedef TVector3<int> CVec3Dint;		// Undefined size integer vector (ie. >= 32bit)
-typedef TVector3<fp4> CVec3Dfp4;
-typedef TVector3<fp8> CVec3Dfp8;
+typedef TVector3<fp32> CVec3Dfp32;
+typedef TVector3Aggr<fp32> CVec3Dfp32Aggr;
+typedef TVector3<fp64> CVec3Dfp64;
 
 
 
@@ -3929,24 +3964,28 @@ TVector3Aggr<T> operator *(const TVector3Aggr<T> &k, const TMatrix4<T>& m)
 //  TPlane3
 // -------------------------------------------------------------------
 template<class T>
-class TPlane3
+class TPlane3Aggr
 {
-	typedef TVector3<T> V;
+public:
+	typedef TVector3Aggr<T> V;
+	typedef TVector3<T> V3;
 	typedef TMatrix4<T> M;
 	typedef TMatrix43<T> M43;
 	typedef typename TMathTemplateProperties<T>::TVector4Intrinsic TIntrinsic;
+	typedef TPlane3Aggr P;
+	typedef TPlane3<T> P3;
+
 
 public:
-/*	union
+	union
 	{
 		TIntrinsic v;
-*/
 		struct
 		{
 			V n;	// Normal
 			T d;	// Distance
 		};
-//	};
+	};
 
 	/*
 	// --------------------------------
@@ -3997,54 +4036,33 @@ public:
 
 	*/
 
-	M_INLINE TPlane3()
+	M_FORCEINLINE void operator= (const P& _p)
 	{
+		v = _p.v;
 	}
 
-	M_INLINE TPlane3(const TPlane3& _Plane)
-	{
-		n = _Plane.n;
-		d = _Plane.d;
-	}
-
-	M_INLINE TPlane3(const V& _n, T _d)
+	M_INLINE void CreateND(const V3& _n, T _d)
 	{
 		n = _n;
 		d = _d;
 	}
 
-	M_INLINE TPlane3(const V& _n, const V& _p)
-	{
-		CreateNV(_n, _p);
-	}
-
-	M_INLINE TPlane3(const V& _p0, const V& _p1, const V& _p2)
-	{
-		Create(_p0, _p1, _p2);
-	}
-
-	M_INLINE void CreateND(const V& _n, T _d)
-	{
-		n = _n;
-		d = _d;
-	}
-
-	M_INLINE void CreateNV(const V& _n, const V& _p)
+	M_INLINE void CreateNV(const V3& _n, const V3& _p)
 	{
 		n = _n;
 		d = -(_n*_p);
 	}
 
-	void Create(const V& _p0, const V& _p1, const V& _p2)
+	void Create(const V3& _p0, const V3& _p1, const V3& _p2)
 	{
-		V v0 = _p1 - _p0;
-		V v1 = _p2 - _p0;
+		V3 v0 = _p1 - _p0;
+		V3 v1 = _p2 - _p0;
 		n = (v0 / v1).Normalize();
 		d = -(n * _p0);
 //		p = _p0;
 	}
 
-	M_INLINE void CreateInverse(const TPlane3& _Plane)
+	M_INLINE void CreateInverse(const P& _Plane)
 	{
 		n = -_Plane.n;
 		d = -_Plane.d;
@@ -4056,17 +4074,25 @@ public:
 		d = -d;
 	}
 
-	V GetPointInPlane() const
+	V3 GetPointInPlane() const
 	{
 		return n * (-d);
 	}
 
-	M_INLINE T Distance(const V& v) const
+	M_INLINE T Distance(const V3& v) const
 	{
 		return (v.k[0]*n.k[0] + v.k[1]*n.k[1] + v.k[2]*n.k[2] + d);
 	}
 
-	int GetPlaneSide(const V& _v) const
+	bool AlmostEqual(const TPlane3<T>& _p1, T _EpsilonD = 0.0001, T _EpsilonN = 0.0001) const
+	{
+		if ((Abs(Distance(_p1.GetPointInPlane())) < _EpsilonD) &&
+			(Abs((T)1.0 - n*_p1.n) < _EpsilonN))
+			return true;
+		return false;
+	}
+
+	int GetPlaneSide(const V3& _v) const
 	{
 		// retur: 1 = normal sidan.
 		//		 -1 = baksidan
@@ -4078,7 +4104,7 @@ public:
 		return 0;
 	}
 
-	int GetPlaneSide_Epsilon(const V& _v, T _Epsilon) const
+	int GetPlaneSide_Epsilon(const V3& _v, T _Epsilon) const
 	{
 		// retur: 1 = normal sidan.
 		//		 -1 = baksidan
@@ -4090,7 +4116,7 @@ public:
 		return 0;
 	}
 
-	int GetPlaneSideMask_Epsilon(const V& _v, T _Epsilon) const
+	int GetPlaneSideMask_Epsilon(const V3& _v, T _Epsilon) const
 	{
 		// retur: 1 = normal sidan.
 		//		  2 = baksidan
@@ -4101,7 +4127,7 @@ public:
 		return 4;
 	}
 
-	int GetArrayPlaneSideMask(const V* _pV, int _nv) const
+	int GetArrayPlaneSideMask(const V3* _pV, int _nv) const
 	{
 		// retur: 1 = normal sidan.
 		//		  2 = baksidan
@@ -4118,7 +4144,7 @@ public:
 		return SideMask;
 	}
 
-	int GetArrayPlaneSideMask_Epsilon(const V* _pV, int _nv, T _Epsilon) const
+	int GetArrayPlaneSideMask_Epsilon(const V3* _pV, int _nv, T _Epsilon) const
 	{
 		// retur: 1 = normal sidan.
 		//		  2 = baksidan
@@ -4135,12 +4161,12 @@ public:
 		return SideMask;
 	}
 
-	int GetBoxPlaneSideMask(const V& _VMin, const V& _VMax) const
+	int GetBoxPlaneSideMask(const V3& _VMin, const V3& _VMax) const
 	{
 		// retur: 1 = normal sidan.
 		//		  2 = baksidan
 
-		fp4 xMin, xMax, yMin, yMax, zMin, zMax;
+		T xMin, xMax, yMin, yMax, zMin, zMax;
 //		if (n.k[0] > T(0.0)) 
 //			{ xMin = _VMin.k[0]*n.k[0]; xMax = _VMax.k[0]*n.k[0]; }
 //		else
@@ -4167,9 +4193,9 @@ public:
 		return 2;
 	}
 
-	M_INLINE T GetBoxMinDistance(const V& _VMin, const V& _VMax) const
+	M_INLINE T GetBoxMinDistance(const V3& _VMin, const V3& _VMax) const
 	{
-/*		fp4 Result = d;
+/*		fp32 Result = d;
 		if (FloatIsNeg(n[0]))
 			Result += _VMax.k[0]*n.k[0];
 		else
@@ -4187,13 +4213,13 @@ public:
 
 		return Result;
 */
-/*		fp4 xMin, yMin, zMin;
+/*		fp32 xMin, yMin, zMin;
 		xMin = (FloatIsNeg(n.k[0])) ? _VMax.k[0]*n.k[0] : _VMin.k[0]*n.k[0];
 		yMin = (FloatIsNeg(n.k[1])) ? _VMax.k[1]*n.k[1] : _VMin.k[1]*n.k[1];
 		zMin = (FloatIsNeg(n.k[2])) ? _VMax.k[2]*n.k[2] : _VMin.k[2]*n.k[2];
 		return xMin + yMin + zMin + d;*/
 
-		fp4 xMin, yMin, zMin;
+		T xMin, yMin, zMin;
 //		xMin = (n.k[0] > T(0.0)) ? _VMin.k[0]*n.k[0] : _VMax.k[0]*n.k[0];
 //		yMin = (n.k[1] > T(0.0)) ? _VMin.k[1]*n.k[1] : _VMax.k[1]*n.k[1];
 //		zMin = (n.k[2] > T(0.0)) ? _VMin.k[2]*n.k[2] : _VMax.k[2]*n.k[2];
@@ -4203,9 +4229,9 @@ public:
 		return xMin + yMin + zMin + d;
 	}
 
-	M_INLINE T GetBoxMaxDistance(const V& _VMin, const V& _VMax) const
+	M_INLINE T GetBoxMaxDistance(const V3& _VMin, const V3& _VMax) const
 	{
-/*		fp4 Result = d;
+/*		fp32 Result = d;
 		if (FloatIsNeg(n[0]))
 			Result += _VMin.k[0]*n.k[0];
 		else
@@ -4223,13 +4249,13 @@ public:
 
 		return Result;*/
 
-/*		fp4 xMax, yMax, zMax;
+/*		fp32 xMax, yMax, zMax;
 		xMax = (FloatIsNeg(n[0])) ? _VMin.k[0]*n.k[0] : _VMax.k[0]*n.k[0];
 		yMax = (FloatIsNeg(n[1])) ? _VMin.k[1]*n.k[1] : _VMax.k[1]*n.k[1];
 		zMax = (FloatIsNeg(n[2])) ? _VMin.k[2]*n.k[2] : _VMax.k[2]*n.k[2];
 		return xMax + yMax + zMax + d;*/
 
-		fp4 xMax, yMax, zMax;
+		T xMax, yMax, zMax;
 //		xMax = (n.k[0] < T(0.0)) ? _VMin.k[0]*n.k[0] : _VMax.k[0]*n.k[0];
 //		yMax = (n.k[1] < T(0.0)) ? _VMin.k[1]*n.k[1] : _VMax.k[1]*n.k[1];
 //		zMax = (n.k[2] < T(0.0)) ? _VMin.k[2]*n.k[2] : _VMax.k[2]*n.k[2];
@@ -4239,10 +4265,10 @@ public:
 		return xMax + yMax + zMax + d;
 	}
 
-	M_INLINE void GetBoxMinAndMaxDistance(const V& _VMin, const V& _VMax, fp4& _MinDistance, fp4& _MaxDistance) const
+	M_INLINE void GetBoxMinAndMaxDistance(const V3& _VMin, const V3& _VMax, T& _MinDistance, T& _MaxDistance) const
 	{
-/*		fp4 MinDist = d;
-		fp4 MaxDist = d;
+/*		fp32 MinDist = d;
+		fp32 MaxDist = d;
 
 		if (FloatIsNeg(n[0]))
 		{
@@ -4281,7 +4307,7 @@ public:
 		_MaxDistance = MaxDist;
 */
 
-		fp4 xMin, yMin, zMin, xMax, yMax, zMax;
+		T xMin, yMin, zMin, xMax, yMax, zMax;
 
 //		if (n.k[0] < 0.0f)
 //		{
@@ -4325,14 +4351,14 @@ public:
 		_MinDistance = xMin + yMin + zMin + d;
 		_MaxDistance = xMax + yMax + zMax + d;
 
-/*		fp4 xMin, yMin, zMin;
+/*		fp32 xMin, yMin, zMin;
 		xMin = (n.k[0] > 0.0f) ? _VMin.k[0]*n.k[0] : _VMax.k[0]*n.k[0];
 		yMin = (n.k[1] > 0.0f) ? _VMin.k[1]*n.k[1] : _VMax.k[1]*n.k[1];
 		zMin = (n.k[2] > 0.0f) ? _VMin.k[2]*n.k[2] : _VMax.k[2]*n.k[2];
 		return xMin + yMin + zMin + d;*/
 	}
 
-	bool IntersectsPlane(const V& _p0, const V& _p1, V& _RetV) const
+	bool IntersectsPlane(const V3& _p0, const V3& _p1, V3& _RetV) const
 	{
 		T dvx = (_p1.k[0] - _p0.k[0]);
 		T dvy = (_p1.k[1] - _p0.k[1]);
@@ -4357,7 +4383,7 @@ public:
 	}
 
 	
-	bool IntersectLineSegment(const V& _p0, const V& _p1, V& _RetV) const
+	bool IntersectLineSegment(const V3& _p0, const V3& _p1, V3& _RetV) const
 	{
 		T dvx = (_p1.k[0] - _p0.k[0]);
 		T dvy = (_p1.k[1] - _p0.k[1]);
@@ -4386,7 +4412,7 @@ public:
 	}
 	
 
-	void GetIntersectionPoint(const V& _p0, const V& _p1, V& _RetV) const
+	void GetIntersectionPoint(const V3& _p0, const V3& _p1, V3& _RetV) const
 	{
 		T dvx = (_p1.k[0] - _p0.k[0]);
 		T dvy = (_p1.k[1] - _p0.k[1]);
@@ -4407,7 +4433,7 @@ public:
 		_RetV.k[2] = _p0.k[2] + dvz * t;
 	}
 
-	void Translate(const V& _dV)
+	void Translate(const V3& _dV)
 	{
 		d -= (n * _dV);
 	}
@@ -4492,8 +4518,47 @@ public:
 #endif	
 };
 
-typedef TPlane3<fp4> CPlane3Dfp4;
-typedef TPlane3<fp8> CPlane3Dfp8;
+template<class T>
+class TPlane3 : public TPlane3Aggr<T>
+{
+	typedef TPlane3Aggr<T> PBase;
+	typedef TVector3<T> V;
+public:
+	M_INLINE TPlane3()
+	{
+	}
+
+	M_INLINE TPlane3(const TPlane3& _Plane)
+	{
+		PBase::v=_Plane.v;
+	}
+
+	M_INLINE TPlane3(const V& _n, T _d)
+	{
+		PBase::n = _n;
+		PBase::d = _d;
+	}
+
+	M_INLINE TPlane3(const V& _n, const V& _p)
+	{
+		CreateNV(_n, _p);
+	}
+
+	M_INLINE TPlane3(const V& _p0, const V& _p1, const V& _p2)
+	{
+		Create(_p0, _p1, _p2);
+	}
+
+	M_FORCEINLINE void operator= (const PBase& _p)
+	{
+		TPlane3Aggr<T>::v = _p.v;
+	}
+};
+
+
+
+typedef TPlane3<fp32> CPlane3Dfp32;
+typedef TPlane3<fp64> CPlane3Dfp64;
 
 // -------------------------------------------------------------------
 //  TVector4
@@ -4574,6 +4639,22 @@ public:
 	void ParseColor(CStr& _s)							// Parse color in hex or float notation.
 	*/
 
+	void Set(T _x, T _y, T _z, T _w)
+	{
+		k[0] = _x;
+		k[1] = _y;
+		k[2] = _z;
+		k[3] = _w;
+	}
+
+	void SetScalar(T _v)
+	{
+		k[0] = _v;
+		k[1] = _v;
+		k[2] = _v;
+		k[3] = _v;
+	}
+
 	TVector4()
 	{
 	}
@@ -4596,20 +4677,14 @@ public:
 
 	TVector4(const V& a)
 	{
-		k[0] = a.k[0];
-		k[1] = a.k[1];
-		k[2] = a.k[2];
-		k[3] = a.k[3];
+		v = a.v;
 	};
 
 	TVector4(TIntrinsic _v) : v(_v) {};
 
 	void operator= (const TVector4& a)
 	{
-		k[0] = a.k[0];
-		k[1] = a.k[1];
-		k[2] = a.k[2];
-		k[3] = a.k[3];
+		v = a.v;
 	}
 
 	void operator= (const V3& _v)
@@ -5000,14 +5075,16 @@ public:
 	}
 };
 
-typedef TVector4<fp4> CVec4Dfp4;
-typedef TVector4<fp8> CVec4Dfp8;
+typedef TVector4<fp32> CVec4Dfp32;
+typedef TVector4<fp64> CVec4Dfp64;
+typedef TVector4<uint32> CVec4Duint32;
+typedef TVector4<int32> CVec4Dint32;
 
 // -------------------------------------------------------------------
 //  TVector2
 // -------------------------------------------------------------------
 template <class T>
-class TVector2
+class TVector2Aggr
 {
 	/*
 	Summary of operators:
@@ -5026,37 +5103,35 @@ class TVector2
 public:
 	T k[2];
 	typedef TMatrix2<T> M;
-	typedef TVector2<T> V;
+	typedef TVector2Aggr<T> V;
 	typedef T CDataType;
-	
-	TVector2()
-	{
-	}
-	
-	TVector2(T val) 
-	{
-		k[0] = val;
-		k[1] = val;
-	}
 
-	TVector2(T x, T y)
+/*	M_FORCEINLINE void operator= (const V& _v)
 	{
+		T x = _v.k[0];
+		T y = _v.k[1];
 		k[0] = x;
 		k[1] = y;
+	}*/
+	
+	M_FORCEINLINE void Set(T _x, T _y)
+	{
+		k[0] = _x;
+		k[1] = _y;
 	}
 
-	TVector2(const V& a)
+	M_FORCEINLINE void SetScalar(T _Scalar)
 	{
-		k[0] = a.k[0];
-		k[1] = a.k[1];
-	};
+		k[0] = _Scalar;
+		k[1] = _Scalar;
+	}
 
-	const T& operator[] (int _k) const
+	M_FORCEINLINE const T& operator[] (int _k) const
 	{
 		return k[_k];
 	}
 
-	T& operator[] (int _k)
+	M_FORCEINLINE T& operator[] (int _k)
 	{
 		return k[_k];
 	}
@@ -5073,22 +5148,26 @@ public:
 
 	V operator+ (const V& a) const
 	{
-		return V(k[0]+a.k[0], k[1]+a.k[1]);
+		V Ret;
+		Ret[0] = k[0] + a.k[0];
+		Ret[1] = k[1] + a.k[1];
+		return Ret;
 	}
 	
 	V operator- (const V& a) const
 	{
-		return V(k[0]-a.k[0], k[1]-a.k[1]);
-	};
-
-	V operator- (const V* a) const
-	{
-		return V(k[0] - a->k[0], k[1] - a->k[1]);
+		V Ret;
+		Ret[0] = k[0] - a.k[0];
+		Ret[1] = k[1] - a.k[1];
+		return Ret;
 	};
 
 	V operator- () 	
 	{
-		return V(-k[0], -k[1]);
+		V Ret;
+		Ret[0] = -k[0];
+		Ret[1] = -k[1];
+		return Ret;
 	};
 
 	void operator+= (const V& a)
@@ -5110,7 +5189,10 @@ public:
 
 	V operator* (T scalar) const
 	{
-		return V(k[0]*scalar, k[1]*scalar);
+		V Ret;
+		Ret[0] = k[0]*scalar;
+		Ret[1] = k[1]*scalar;
+		return Ret;
 	};
 
 //	V operator* (int scalar) const
@@ -5300,42 +5382,42 @@ public:
 
 	//---------------------------------------------------
 
-	uint32 Pack32(fp4 _Max)
+	uint32 Pack32(fp32 _Max)
 	{
-		fp4 xf = (k[0] / (_Max * 2) + 0.5f);
-		fp4 yf = (k[1] / (_Max * 2) + 0.5f);
-		uint32 xi = uint32(xf * (fp4)0xFFFF) & 0xFFFF;
-		uint32 yi = uint32(yf * (fp4)0xFFFF) & 0xFFFF;
+		fp32 xf = (k[0] / (_Max * 2) + 0.5f);
+		fp32 yf = (k[1] / (_Max * 2) + 0.5f);
+		uint32 xi = uint32(xf * (fp32)0xFFFF) & 0xFFFF;
+		uint32 yi = uint32(yf * (fp32)0xFFFF) & 0xFFFF;
 		return ((xi << 16) | yi);
 	}
 
-	void Unpack32(uint32 _V, fp4 _Max)
+	void Unpack32(uint32 _V, fp32 _Max)
 	{
 		uint32 xi = (_V >> 16) & 0xFFFF;
 		uint32 yi = _V & 0xFFFF;
-		fp4 xf = xi / (fp4)(0xFFFF);
-		fp4 yf = yi / (fp4)(0xFFFF);
+		fp32 xf = xi / (fp32)(0xFFFF);
+		fp32 yf = yi / (fp32)(0xFFFF);
 		k[0] = (xf - 0.5f) * _Max * 2;
 		k[1] = (yf - 0.5f) * _Max * 2;
 	}
 
 	//---------------------------------------------------
 
-	uint32 Pack16(fp4 _Max)
+	uint32 Pack16(fp32 _Max)
 	{
-		fp4 xf = (k[0] / (_Max * 2) + 0.5f);
-		fp4 yf = (k[1] / (_Max * 2) + 0.5f);
-		uint32 xi = uint32(xf * (fp4)0xFF) & 0xFF;
-		uint32 yi = uint32(yf * (fp4)0xFF) & 0xFF;
+		fp32 xf = (k[0] / (_Max * 2) + 0.5f);
+		fp32 yf = (k[1] / (_Max * 2) + 0.5f);
+		uint32 xi = uint32(xf * (fp32)0xFF) & 0xFF;
+		uint32 yi = uint32(yf * (fp32)0xFF) & 0xFF;
 		return ((xi << 8) | yi);
 	}
 
-	void Unpack16(uint32 _V, fp4 _Max)
+	void Unpack16(uint32 _V, fp32 _Max)
 	{
 		uint32 xi = (_V >> 8) & 0xFF;
 		uint32 yi = _V & 0xFF;
-		fp4 xf = xi / (fp4)(0xFF);
-		fp4 yf = yi / (fp4)(0xFF);
+		fp32 xf = xi / (fp32)(0xFF);
+		fp32 yf = yi / (fp32)(0xFF);
 		k[0] = (xf - 0.5f) * _Max * 2;
 		k[1] = (yf - 0.5f) * _Max * 2;
 	}
@@ -5374,9 +5456,9 @@ public:
 	// Mondelore: short, simple and it bloody works!
 	static void Spline2(const V& _v0, const V& _v1, const V& _v2, const V& _v3, T _t, V& _dest)
 	{
-		fp4 t = _t;
-		fp4 t2 = t * t;
-		fp4 t3 = t2 * t;
+		T t = _t;
+		T t2 = t * t;
+		T t3 = t2 * t;
 
 		V p, q, r, s;
 
@@ -5390,12 +5472,12 @@ public:
 
 	static void Spline3(const V& _v0, const V& _v1, const V& _v2, const V& _v3, T _t, V& _dest)
 	{
-		fp4 t, t2, t3;
+		T t, t2, t3;
 		t = _t;
 		t2 = t * t;
 		t3 = t2 * t;
 
-		fp4 m0, m1, m2, m3;
+		T m0, m1, m2, m3;
 		m0 = -t3 + 2 * t2 - t;
 		m1 = t3 - 2 * t2  + 1;
 		m2 = -t3 + t2 + t;
@@ -5430,7 +5512,12 @@ public:
 
 	static void GetMinBoundRect(const V* src, V& _min, V& _max, int n)
 	{
-		if (n == 0) { _min = 0; _max = 0; return; };
+		if (n == 0)
+		{ 
+			_min.SetScalar(0); 
+			_max.SetScalar(0);
+			return;
+		};
 
 		V min = src[0];
 		V max = src[0];
@@ -5530,10 +5617,10 @@ public:
 	V& ParseString(const CStr& _s)
 	{
 		const char* pStr = (const char*) _s;
-		if (!pStr) { *this = 0; return *this; }
+		if (!pStr) { SetScalar(0); return *this; }
 		int pos = 0;
 		int len = _s.Len();
-		fp4 last = 0.0f;
+		fp32 last = 0.0f;
 		for(int i = 0; i < 2; i++)
 		{
 			pos = CStr::GoToDigit(pStr, pos, len);
@@ -5577,8 +5664,45 @@ public:
 #endif
 };
 
-typedef TVector2<fp4> CVec2Dfp4;
-typedef TVector2<fp8> CVec2Dfp8;
+template<typename T>
+class TVector2 : public TVector2Aggr<T>
+{
+public:
+	typedef TVector2Aggr<T> V;
+
+	TVector2()
+	{
+	}
+
+	TVector2(T val) 
+	{
+		V::k[0] = val;
+		V::k[1] = val;
+	}
+
+	TVector2(T x, T y)
+	{
+		V::k[0] = x;
+		V::k[1] = y;
+	}
+
+	TVector2(const V& a)
+	{
+		V::k[0] = a.k[0];
+		V::k[1] = a.k[1];
+	};
+
+	M_FORCEINLINE void operator= (const V& _v)
+	{
+		T x = _v.k[0];
+		T y = _v.k[1];
+		V::k[0] = x;
+		V::k[1] = y;
+	}
+};
+
+typedef TVector2<fp32> CVec2Dfp32;
+typedef TVector2<fp64> CVec2Dfp64;
 
 typedef TVector2<uint8> CVec2Duint8;
 typedef TVector2<uint16> CVec2Duint16;
@@ -5691,8 +5815,8 @@ public:
 	};
 };
 
-typedef TComplex<fp4> cfp4;
-typedef TComplex<fp8> cfp8;
+typedef TComplex<fp32> cfp32;
+typedef TComplex<fp64> cfp64;
 //typedef TComplex<fp10> cfp10;
 
 // -------------------------------------------------------------------
@@ -5703,8 +5827,9 @@ class TQuaternion
 {
 	// sqrt(sqr(x)+sqr(y)+sqr(z)+sqr(w)) == 1
 	// cos(2v) = w
+	typedef TQuaternion<T> Q;
 	typedef TMatrix4<T> M;
-	typedef TVector3<T> V;
+	typedef TVector3Aggr<T> V;
 	typedef TMatrix43<T> M43;
 	typedef typename TMathTemplateProperties<T>::TVector4Intrinsic TIntrinsic;
 
@@ -5731,7 +5856,7 @@ public:
 	void Normalize()
 	void Inverse()										// Inverse-rotation
 	T DotProd(const TQuaternion& _Q) const				// Dot product
-	void Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp4 _t) const
+	void Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp32 _t) const
 	void Multiply(const TQuaternion& _Quat2)			// same as *= operator
 	void Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
 
@@ -5752,6 +5877,11 @@ public:
 	*/
 
 	// Create from axis-angle
+	M_FORCEINLINE void operator= (const Q& _q)
+	{
+		v = _q.v;
+	}
+
 	void Create(const V& _v, T _Angle)
 	{
 		T x = _v.k[0];
@@ -5894,35 +6024,31 @@ public:
 		return k0*qk0 + k1*qk1 + k2*qk2 + k3*qk3;
 	}
 
-	void Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp4 _t) const
+	M_INLINE void Lerp(const TQuaternion& _Other, T _t, TQuaternion& _Dest) const
 	{
 		T a0 = k[0];
 		T a1 = k[1];
 		T a2 = k[2];
 		T a3 = k[3];
-		T u = 1.0f - _t;
-		if((a0 * _Other.k[0] + a1 * _Other.k[1] + a2 * _Other.k[2] + a3 * _Other.k[3]) < 0.0f)
-		{
-			u = _t - 1.0f;
-		}
+
+		T dot = (a0 * _Other.k[0] + a1 * _Other.k[1] + a2 * _Other.k[2] + a3 * _Other.k[3]);
+		T u = M_FSel(dot, (T)1.0 - _t, _t - (T)1.0);
 
 		T d0 = a0 * u + _Other.k[0] * _t;
 		T d1 = a1 * u + _Other.k[1] * _t;
 		T d2 = a2 * u + _Other.k[2] * _t;
 		T d3 = a3 * u + _Other.k[3] * _t;
 		T InvLen = M_InvSqrt(Sqr(d0) + Sqr(d1) + Sqr(d2) + Sqr(d3));
-		if (InvLen == (T) 0) return;
+#ifndef M_RTM
+		if (InvLen == (T)0)
+			return;
+#endif
 		_Dest.k[0] = d0 * InvLen;
 		_Dest.k[1] = d1 * InvLen;
 		_Dest.k[2] = d2 * InvLen;
 		_Dest.k[3] = d3 * InvLen;
 	}
 	
-	static M_INLINE void Lerp(const TQuaternion& _Q1, const TQuaternion& _Q2, TQuaternion& _Dest, fp4 _t)
-	{
-		_Q1.Interpolate(_Q2, _Dest, _t);
-	}
-
 	static void Spline(const TQuaternion* pQuatA0, const TQuaternion* pQuatA1, const TQuaternion* pQuatA2,
 		const TQuaternion* pQuatB0, const TQuaternion* pQuatB1, const TQuaternion* pQuatB2, 
 		TQuaternion* _pDest, T _tFrac, T _tA0, T _tA1, T _tB0, T _tB1, int _nQ)
@@ -6277,8 +6403,8 @@ public:
 	
 };
 
-typedef TQuaternion<fp4> CQuatfp4;
-typedef TQuaternion<fp8> CQuatfp8;
+typedef TQuaternion<fp32> CQuatfp32;
+typedef TQuaternion<fp64> CQuatfp64;
 
 // -------------------------------------------------------------------
 template<class T>
@@ -6292,16 +6418,16 @@ class TAxisRot
 	typedef typename TMathTemplateProperties<T>::TVector4Intrinsic TIntrinsic;
 
 public:
-/*	union
+	union
 	{
 		TIntrinsic v;
-*/
+
 		struct
 		{
-			V m_Axis;
+			TVector3Aggr<T> m_Axis;
 			T m_Angle;
 		};
-//	};
+	};
 
 	/*
 	// --------------------------------
@@ -6336,6 +6462,11 @@ public:
 	CStr GetString() const								// Get string for output.
 
 	*/
+
+	M_FORCEINLINE void operator= (const TAxisRot<T>& _AxisRot)
+	{
+		v = _AxisRot.v;
+	}
 
 	TAxisRot()
 	{
@@ -6519,7 +6650,6 @@ public:
 	}
 
 
-#ifndef DEFINE_MAT43_IS_MAT4D
 	TAxisRot(const M43& _Mat)
 	{
 		Create(_Mat);
@@ -6569,22 +6699,29 @@ public:
 		CreateMatrix3x3(_Mat);
 		_Mat.UnitNot3x3();
 	}
-#endif
 };
 
-typedef TAxisRot<fp4> CAxisRotfp4;
-typedef TAxisRot<fp8> CAxisRotfp8;
+typedef TAxisRot<fp32> CAxisRotfp32;
+typedef TAxisRot<fp64> CAxisRotfp64;
 
 // -------------------------------------------------------------------
 template<class T> 
 class TRect
 {
 	typedef TMatrix2<T> M;
-	typedef TVector2<T> V;
+	typedef TVector2Aggr<T> V;
+	typedef typename TMathTemplateProperties<T>::TVector4Intrinsic TIntrinsic;
 
 public:
-	V m_Min;
-	V m_Max;
+	union
+	{
+		struct
+		{
+			V m_Min;
+			V m_Max;
+		};
+		TIntrinsic v;
+	};
 
 	/*
 	// --------------------------------
@@ -6610,6 +6747,28 @@ public:
 	}
 
 	TRect(const V& _Min, const V& _Max)
+	{
+		m_Min = _Min;
+		m_Max = _Max;
+	}
+
+	TRect(T _minx, T _miny, T _maxx, T _maxy)
+	{
+		m_Min[0] = _minx;
+		m_Min[1] = _miny;
+		m_Max[0] = _maxx;
+		m_Max[1] = _maxy;
+	}
+
+	void Set(T _minx, T _miny, T _maxx, T _maxy)
+	{
+		m_Min[0] = _minx;
+		m_Min[1] = _miny;
+		m_Max[0] = _maxx;
+		m_Max[1] = _maxy;
+	}
+
+	void Set(const V& _Min, const V& _Max)
 	{
 		m_Min = _Min;
 		m_Max = _Max;
@@ -6790,8 +6949,8 @@ typedef TRect<uint8> CRect2Duint8;
 typedef TRect<int16> CRect2Dint16;
 typedef TRect<int8> CRect2Dint8;
 typedef TRect<int> CRect2Dint;
-typedef TRect<fp4> CRect2Dfp4;
-typedef TRect<fp8> CRect2Dfp8;
+typedef TRect<fp32> CRect2Dfp32;
+typedef TRect<fp64> CRect2Dfp64;
 
 // -------------------------------------------------------------------
 template<class T> 
@@ -6800,6 +6959,7 @@ class TBox
 	typedef TMatrix4<T> M;
 	typedef TMatrix43<T> M43;
 	typedef TVector3<T> V;
+	typedef TVector4<T> V4;
 	typedef TPlane3<T> P;
 
 public:
@@ -6947,12 +7107,12 @@ public:
 
 	void GetVertices(V* _pV) const
 	{
-		const fp4 a = m_Min.k[0];
-		const fp4 b = m_Min.k[1];
-		const fp4 c = m_Min.k[2];
-		const fp4 d = m_Max.k[0];
-		const fp4 e = m_Max.k[1];
-		const fp4 f = m_Max.k[2];
+		const T a = m_Min.k[0];
+		const T b = m_Min.k[1];
+		const T c = m_Min.k[2];
+		const T d = m_Max.k[0];
+		const T e = m_Max.k[1];
+		const T f = m_Max.k[2];
 
 		_pV[0].k[0] = a;		_pV[0].k[1] = b;		_pV[0].k[2] = c;
 		_pV[1].k[0] = d;		_pV[1].k[1] = b;		_pV[1].k[2] = c;
@@ -6962,6 +7122,25 @@ public:
 		_pV[5].k[0] = d;		_pV[5].k[1] = b;		_pV[5].k[2] = f;
 		_pV[6].k[0] = a;		_pV[6].k[1] = e;		_pV[6].k[2] = f;
 		_pV[7].k[0] = d;		_pV[7].k[1] = e;		_pV[7].k[2] = f;
+	}
+
+	void GetVerticesV4(V4* _pV) const
+	{
+		const T a = m_Min.k[0];
+		const T b = m_Min.k[1];
+		const T c = m_Min.k[2];
+		const T d = m_Max.k[0];
+		const T e = m_Max.k[1];
+		const T f = m_Max.k[2];
+
+		_pV[0].k[0] = a;		_pV[0].k[1] = b;		_pV[0].k[2] = c;		_pV[0].k[3] = 1.0f;
+		_pV[1].k[0] = d;		_pV[1].k[1] = b;		_pV[1].k[2] = c;		_pV[1].k[3] = 1.0f;
+		_pV[2].k[0] = a;		_pV[2].k[1] = e;		_pV[2].k[2] = c;		_pV[2].k[3] = 1.0f;
+		_pV[3].k[0] = d;		_pV[3].k[1] = e;		_pV[3].k[2] = c;		_pV[3].k[3] = 1.0f;
+		_pV[4].k[0] = a;		_pV[4].k[1] = b;		_pV[4].k[2] = f;		_pV[4].k[3] = 1.0f;
+		_pV[5].k[0] = d;		_pV[5].k[1] = b;		_pV[5].k[2] = f;		_pV[5].k[3] = 1.0f;
+		_pV[6].k[0] = a;		_pV[6].k[1] = e;		_pV[6].k[2] = f;		_pV[6].k[3] = 1.0f;
+		_pV[7].k[0] = d;		_pV[7].k[1] = e;		_pV[7].k[2] = f;		_pV[7].k[3] = 1.0f;
 	}
 
 	bool InVolume(const P* _pP, int _nP) const
@@ -7183,7 +7362,6 @@ public:
 		return CStrF("(%.3f,%.3f,%.3f), (%.3f,%.3f,%.3f)", m_Min.k[0], m_Min.k[1], m_Min.k[2], m_Max.k[0], m_Max.k[1], m_Max.k[2]);
 	}
 
-//#ifndef DEFINE_MAT43_IS_MAT4D
 	void Transform(const M43& _Mat, TBox& _Dest)
 	{
 		// Transforms and expands box so that it still is a valid bounding box for the original space.
@@ -7200,12 +7378,11 @@ public:
 		_Dest.m_Min += C;
 		_Dest.m_Max += C;
 	}
-//#endif
 };
 
 typedef TBox<int> CBox3Dint;
-typedef TBox<fp4> CBox3Dfp4;
-typedef TBox<fp8> CBox3Dfp8;
+typedef TBox<fp32> CBox3Dfp32;
+typedef TBox<fp64> CBox3Dfp64;
 
 // -------------------------------------------------------------------
 //  TOBB, Oriented bounding box
@@ -7247,7 +7424,7 @@ public:
 	void GetLocalBox(B& _Box) const						// Get local space AABB
 	void TransformToBoxSpace(const V& _v, V& _Dst) const// Transform vertex to box-space
 	void TransformFromBoxSpace(const V& _v, V& _Dst) const// Transform vertex from box-space
-	bool LocalPointInBox(const CVec3Dfp4 _p0) const		// Box-space point intersection
+	bool LocalPointInBox(const CVec3Dfp32 _p0) const		// Box-space point intersection
 	bool LocalIntersectLine(const V& _p0, const V& _p1, V& _HitPos) const	// Box-space intersect line
 	T LocalMinSqrDistance(const V& _v) const			// Calc minimum square distance from point to box in box-space.
 	T LocalMaxSqrDistance(const V& _v) const			// Calc maximum square distance from point to box in box-space.
@@ -7381,12 +7558,12 @@ public:
 
 	void TransformToBoxSpace(const V& _v, V& _Dst) const
 	{
-		fp4 vx = _v[0] - m_C[0];
-		fp4 vy = _v[1] - m_C[1];
-		fp4 vz = _v[2] - m_C[2];
-		fp4 dstx = vx*m_A[0][0] + vy*m_A[0][1] + vz*m_A[0][2];
-		fp4 dsty = vx*m_A[1][0] + vy*m_A[1][1] + vz*m_A[1][2];
-		fp4 dstz = vx*m_A[2][0] + vy*m_A[2][1] + vz*m_A[2][2];
+		T vx = _v[0] - m_C[0];
+		T vy = _v[1] - m_C[1];
+		T vz = _v[2] - m_C[2];
+		T dstx = vx*m_A[0][0] + vy*m_A[0][1] + vz*m_A[0][2];
+		T dsty = vx*m_A[1][0] + vy*m_A[1][1] + vz*m_A[1][2];
+		T dstz = vx*m_A[2][0] + vy*m_A[2][1] + vz*m_A[2][2];
 		_Dst.k[0] = dstx;
 		_Dst.k[1] = dsty;
 		_Dst.k[2] = dstz;
@@ -7394,9 +7571,9 @@ public:
 
 	void TransformFromBoxSpace(const V& _v, V& _Dst) const
 	{
-		fp4 dstx = _v.k[0]*m_A[0][0] + _v.k[1]*m_A[1][0] + _v.k[2]*m_A[2][0] + m_C[0];
-		fp4 dsty = _v.k[0]*m_A[0][1] + _v.k[1]*m_A[1][1] + _v.k[2]*m_A[2][1] + m_C[1];
-		fp4 dstz = _v.k[0]*m_A[0][2] + _v.k[1]*m_A[1][2] + _v.k[2]*m_A[2][2] + m_C[2];
+		T dstx = _v.k[0]*m_A[0][0] + _v.k[1]*m_A[1][0] + _v.k[2]*m_A[2][0] + m_C[0];
+		T dsty = _v.k[0]*m_A[0][1] + _v.k[1]*m_A[1][1] + _v.k[2]*m_A[2][1] + m_C[1];
+		T dstz = _v.k[0]*m_A[0][2] + _v.k[1]*m_A[1][2] + _v.k[2]*m_A[2][2] + m_C[2];
 		_Dst.k[0] = dstx;
 		_Dst.k[1] = dsty;
 		_Dst.k[2] = dstz;
@@ -7404,12 +7581,12 @@ public:
 
 	void TransformToBoxSpace_Vector(const V& _v, V& _Dst) const
 	{
-		fp4 vx = _v[0];
-		fp4 vy = _v[1];
-		fp4 vz = _v[2];
-		fp4 dstx = vx*m_A[0][0] + vy*m_A[0][1] + vz*m_A[0][2];
-		fp4 dsty = vx*m_A[1][0] + vy*m_A[1][1] + vz*m_A[1][2];
-		fp4 dstz = vx*m_A[2][0] + vy*m_A[2][1] + vz*m_A[2][2];
+		T vx = _v[0];
+		T vy = _v[1];
+		T vz = _v[2];
+		T dstx = vx*m_A[0][0] + vy*m_A[0][1] + vz*m_A[0][2];
+		T dsty = vx*m_A[1][0] + vy*m_A[1][1] + vz*m_A[1][2];
+		T dstz = vx*m_A[2][0] + vy*m_A[2][1] + vz*m_A[2][2];
 		_Dst.k[0] = dstx;
 		_Dst.k[1] = dsty;
 		_Dst.k[2] = dstz;
@@ -7417,15 +7594,15 @@ public:
 
 	void TransformFromBoxSpace_Vector(const V& _v, V& _Dst) const
 	{
-		fp4 dstx = _v.k[0]*m_A[0][0] + _v.k[1]*m_A[1][0] + _v.k[2]*m_A[2][0];
-		fp4 dsty = _v.k[0]*m_A[0][1] + _v.k[1]*m_A[1][1] + _v.k[2]*m_A[2][1];
-		fp4 dstz = _v.k[0]*m_A[0][2] + _v.k[1]*m_A[1][2] + _v.k[2]*m_A[2][2];
+		T dstx = _v.k[0]*m_A[0][0] + _v.k[1]*m_A[1][0] + _v.k[2]*m_A[2][0];
+		T dsty = _v.k[0]*m_A[0][1] + _v.k[1]*m_A[1][1] + _v.k[2]*m_A[2][1];
+		T dstz = _v.k[0]*m_A[0][2] + _v.k[1]*m_A[1][2] + _v.k[2]*m_A[2][2];
 		_Dst.k[0] = dstx;
 		_Dst.k[1] = dsty;
 		_Dst.k[2] = dstz;
 	}
 
-	bool LocalPointInBox(const CVec3Dfp4& _p0) const
+	bool LocalPointInBox(const V& _p0) const
 	{
 		for(int i = 0; i < 3; i++)
 		{
@@ -7663,39 +7840,78 @@ public:
 	}
 };
 
-typedef TOBB<fp4> COBBfp4;
-typedef TOBB<fp4> COBBfp8;
+typedef TOBB<fp32> COBBfp32;
+typedef TOBB<fp64> COBBfp64;
 
 // -------------------------------------------------------------------
 //  TCapsule
 // -------------------------------------------------------------------
+#define CAPSULE_VERSION 1
+enum eCapsuleFlags {
+	CAPSULE_INVERTED=1
+};
+
 template<class T>
 class TCapsule
 {
 public:
 	typedef TMatrix4<T> M;
-
-	TVector3<T> m_Point1, m_Point2;
-	T m_Radius;
-	T m_InvSqrDistance; // 1 / Sqr(m_Point2 - m_Point1)
-	int32 m_UserValue;
+	typedef typename TMathTemplateProperties<T>::TVector4Intrinsic TIntrinsic;
+	union
+	{
+		struct  
+		{
+			TVector3Aggr<T> m_Point1;
+			T m_w1;
+		};
+		TIntrinsic m_Pointv1;
+	};
+	union
+	{
+		struct  
+		{
+			TVector3Aggr<T> m_Point2;
+			T m_w2;
+		};
+		TIntrinsic m_Pointv2;
+	};
+	union 
+	{	
+		struct  
+		{
+			T m_Radius;
+			T m_InvSqrDistance; // 1 / Sqr(m_Point2 - m_Point1)
+			int32 m_UserValue;
+			uint32 m_Flags;
+		};
+		TIntrinsic m_Misc;
+	};
 
 	TCapsule() {}
 
 	TCapsule(const TCapsule<T>& _capsule)
-		: m_Point1(_capsule.m_Point1)
-		, m_Point2(_capsule.m_Point2)
-		, m_Radius(_capsule.m_Radius)
-		, m_InvSqrDistance(_capsule.m_InvSqrDistance)
-		, m_UserValue(_capsule.m_UserValue)
-	{ }
+	{
+		m_Pointv1=_capsule.m_Pointv1;
+		m_Pointv2=_capsule.m_Pointv2;
+		m_Misc=_capsule.m_Misc;
+	}
 
-	void Read(CCFile* _pFile)
+	bool IsInverted() const { return (m_Flags & CAPSULE_INVERTED)!=0; }
+
+	void Read(CCFile* _pFile,int _Version)
 	{
 		_pFile->ReadLE(m_Radius);
 		m_Point1.Read(_pFile);
 		m_Point2.Read(_pFile);
 		_pFile->ReadLE(m_UserValue);
+		if (_Version==0)
+			m_Flags=0;
+		else if (_Version==1)
+			_pFile->ReadLE(m_Flags);
+		else
+		{
+			M_ASSERT(0,"Unknown capsule version.");
+		}
 		UpdateInternal();
 	}
 
@@ -7705,11 +7921,12 @@ public:
 		m_Point1.Write(_pFile);
 		m_Point2.Write(_pFile);
 		_pFile->WriteLE(m_UserValue);
+		_pFile->WriteLE(m_Flags);
 	}
 
 	void UpdateInternal()
 	{
-		CVec3Dfp4 ab = m_Point2 - m_Point1;
+		TVector3<T> ab = m_Point2 - m_Point1;
 		m_InvSqrDistance = 1.0f / (ab * ab);
 	}
 };
@@ -7717,8 +7934,8 @@ public:
 // -------------------------------------------------------------------
 //  TIndexedEdge
 // -------------------------------------------------------------------
-typedef TCapsule<fp4> CCapsulefp4;
-typedef TCapsule<fp8> CCapsulefp8;
+typedef TCapsule<fp32> CCapsulefp32;
+typedef TCapsule<fp64> CCapsulefp64;
 
 template<class T>
 class TIndexedEdge
@@ -7788,7 +8005,6 @@ typedef TIndexedTriangle<uint16> CIndexedTriangle16;
 typedef TIndexedTriangle<uint32> CIndexedTriangle32;
 
 
-
 template <class T>
 void M_INLINE TMatrix4<T>::RecreateMatrix(int _Priority0, int _Priority1)
 {
@@ -7813,6 +8029,7 @@ void M_INLINE TMatrix4<T>::RecreateMatrix(int _Priority0, int _Priority1)
 		GetRow(_Priority1) = GetRow(_Priority0) / GetRow(Missing);
 	}
 }
+
 
 template <class T>
 void M_INLINE TMatrix43<T>::RecreateMatrix(int _Priority0, int _Priority1)
@@ -7842,26 +8059,26 @@ void M_INLINE TMatrix43<T>::RecreateMatrix(int _Priority0, int _Priority1)
 // -------------------------------------------------------------------
 //  Some pretty useful functions...
 // -------------------------------------------------------------------
-int MCCDLLEXPORT CutFence(CVec3Dfp4* _pVerts, int _nv, const CPlane3Dfp4* _pPlanes, int _np, int& _bClip);
-#ifndef CPU_SOFTWARE_FP8
-int MCCDLLEXPORT CutFence(CVec3Dfp8* _pVerts, int _nv, const CPlane3Dfp8* _pPlanes, int _np, int& _bClip);
+int MCCDLLEXPORT CutFence(CVec3Dfp32* _pVerts, int _nv, const CPlane3Dfp32* _pPlanes, int _np, int& _bClip);
+#ifndef CPU_SOFTWARE_FP64
+int MCCDLLEXPORT CutFence(CVec3Dfp64* _pVerts, int _nv, const CPlane3Dfp64* _pPlanes, int _np, int& _bClip);
 #endif
 // Use (_bInvertPlanes = true) to yield the same result as CutFence.
-int MCCDLLEXPORT CutFence(CVec3Dfp4* _pVerts, int _nv, const CPlane3Dfp4* _pPlanes, int _np, 
-	bool _bInvertPlanes, CVec2Dfp4* _pTVerts1 = NULL, CVec2Dfp4* _pTVerts2 = NULL, CVec2Dfp4* _pTVerts3 = NULL);
+int MCCDLLEXPORT CutFence(CVec3Dfp32* _pVerts, int _nv, const CPlane3Dfp32* _pPlanes, int _np, 
+	bool _bInvertPlanes, CVec2Dfp32* _pTVerts1 = NULL, CVec2Dfp32* _pTVerts2 = NULL, CVec2Dfp32* _pTVerts3 = NULL);
 
 // -------------------------------------------------------------------
 
 // Added by Mondelore.
-//void MCCDLLEXPORT MatrixLerp(const CMat4Dfp4 &_M0, const CMat4Dfp4 &_M1, fp4 _fpTime, CMat4Dfp4 &_Rese);
-void MCCDLLEXPORT MatrixLerp(const CMat4Dfp4 &_M0o, const CMat4Dfp4 &_M1o, fp4 _fpTime, CMat4Dfp4 &_Res);
-void MCCDLLEXPORT MatrixReflect(const CMat4Dfp4 &_Source, const CMat4Dfp4 &_Pivot, CMat4Dfp4 &_Dest);
-void MCCDLLEXPORT MatrixSpline(const CMat4Dfp4 &_M0o, const CMat4Dfp4 &_M1o, const CMat4Dfp4 &_M2o, const CMat4Dfp4 &_M3o, fp4 _TimeFraction, CMat4Dfp4 &_Res);
+//void MCCDLLEXPORT MatrixLerp(const CMat4Dfp32 &_M0, const CMat4Dfp32 &_M1, fp32 _fpTime, CMat4Dfp32 &_Rese);
+void MCCDLLEXPORT MatrixLerp(const CMat4Dfp32 &_M0o, const CMat4Dfp32 &_M1o, fp32 _fpTime, CMat4Dfp32 &_Res);
+void MCCDLLEXPORT MatrixReflect(const CMat4Dfp32 &_Source, const CMat4Dfp32 &_Pivot, CMat4Dfp32 &_Dest);
+void MCCDLLEXPORT MatrixSpline(const CMat4Dfp32 &_M0o, const CMat4Dfp32 &_M1o, const CMat4Dfp32 &_M2o, const CMat4Dfp32 &_M3o, fp32 _TimeFraction, CMat4Dfp32 &_Res);
 
 // Added by Anton. 4x3 versions of the above..
-void MCCDLLEXPORT MatrixLerp(const CMat43fp4 &_M0o, const CMat43fp4 &_M1o, fp4 _fpTime, CMat43fp4 &_Res);
-void MCCDLLEXPORT MatrixReflect(const CMat43fp4 &_Source, const CMat43fp4 &_Pivot, CMat43fp4 &_Dest);
-void MCCDLLEXPORT MatrixSpline(const CMat43fp4 &_M0o, const CMat43fp4 &_M1o, const CMat43fp4 &_M2o, const CMat43fp4 &_M3o, fp4 _TimeFraction, CMat43fp4 &_Res);
+void MCCDLLEXPORT MatrixLerp(const CMat43fp32 &_M0o, const CMat43fp32 &_M1o, fp32 _fpTime, CMat43fp32 &_Res);
+void MCCDLLEXPORT MatrixReflect(const CMat43fp32 &_Source, const CMat43fp32 &_Pivot, CMat43fp32 &_Dest);
+void MCCDLLEXPORT MatrixSpline(const CMat43fp32 &_M0o, const CMat43fp32 &_M1o, const CMat43fp32 &_M2o, const CMat43fp32 &_M3o, fp32 _TimeFraction, CMat43fp32 &_Res);
 
 template <typename t_CType0, typename t_CType1>
 static M_INLINE bool AlmostEqual(const t_CType0& _Number0, const t_CType0& _Number1, t_CType1 _Margin)
@@ -7870,44 +8087,159 @@ static M_INLINE bool AlmostEqual(const t_CType0& _Number0, const t_CType0& _Numb
 	return 0;
 } 
 
-// -------------------------------------------------------------------
-
-template <>
-static M_INLINE bool AlmostEqual<fp4, fp4>(const fp4& _Number0, const fp4& _Number1, fp4 _Margin)
-{
-	if (M_Fabs(_Number0 - _Number1) < _Margin)
-		return true;
-	return false;
-}
-
-template <>
-static M_INLINE bool AlmostEqual<fp4, fp8>(const fp4& _Number0, const fp4& _Number1, fp8 _Margin)
-{
-	if (M_Fabs(_Number0 - _Number1) < _Margin)
-		return true;
-	return false;
-}
-
-template <>
-static M_INLINE bool AlmostEqual<fp8, fp8>(const fp8& _Number0, const fp8& _Number1, fp8 _Margin)
-{
-	if (M_Fabs(_Number0 - _Number1) < _Margin)
-		return true;
-	return false;
-}
-
-template <>
-static M_INLINE bool AlmostEqual<fp8, fp4>(const fp8& _Number0, const fp8& _Number1, fp4 _Margin)
-{
-	if (M_Fabs(_Number0 - _Number1) < _Margin)
-		return true;
-	return false;
-}
+template <> MCCDLLEXPORT bool TBox<fp32>::IntersectLine(const V& _p0, const V& _p1, V& _RetHitPos) const;
 
 // -------------------------------------------------------------------
 
+template <>
+static M_INLINE bool AlmostEqual<fp32, fp32>(const fp32& _Number0, const fp32& _Number1, fp32 _Margin)
+{
+	if (M_Fabs(_Number0 - _Number1) < _Margin)
+		return true;
+	return false;
+}
+
+template <>
+static M_INLINE bool AlmostEqual<fp32, fp64>(const fp32& _Number0, const fp32& _Number1, fp64 _Margin)
+{
+	if (M_Fabs(_Number0 - _Number1) < _Margin)
+		return true;
+	return false;
+}
+
+template <>
+static M_INLINE bool AlmostEqual<fp64, fp64>(const fp64& _Number0, const fp64& _Number1, fp64 _Margin)
+{
+	if (M_Fabs(_Number0 - _Number1) < _Margin)
+		return true;
+	return false;
+}
+
+template <>
+static M_INLINE bool AlmostEqual<fp64, fp32>(const fp64& _Number0, const fp64& _Number1, fp32 _Margin)
+{
+	if (M_Fabs(_Number0 - _Number1) < _Margin)
+		return true;
+	return false;
+}
+
+// -------------------------------------------------------------------
+
+class M_ALIGN(8) CScissorRect
+{
+protected:
+	uint32 m_Min;		// Low 16 is X, High 16 is Y
+	uint32 m_Max;		// Low 16 is X, High 16 is Y
+public:
+	typedef TVector2<uint16> V;
+
+	M_INLINE void SetRect(uint32 _MinX, uint32 _MinY, uint32 _MaxX, uint32 _MaxY)
+	{
+		m_Min = _MinX | (_MinY << 16);
+		m_Max = _MaxX | (_MaxY << 16);
+	}
+
+	M_INLINE void SetRect(uint32 _Min, uint32 _Max)
+	{
+		m_Min = _Min | (_Min << 16);
+		m_Max = _Max | (_Max << 16);
+	}
+
+	M_INLINE void GetRect(uint32& _MinX, uint32& _MinY, uint32& _MaxX, uint32& _MaxY) const
+	{
+		_MinX = m_Min & 0xffff;
+		_MinY = (m_Min >> 16) & 0xffff;
+		_MaxX = m_Max & 0xffff;
+		_MaxY = (m_Max >> 16) & 0xffff;
+	}
+
+	M_INLINE void And(const CScissorRect& _Other)
+	{
+		uint32 MinX = Max(m_Min & 0xffff, _Other.m_Min & 0xffff);
+		uint32 MinY = Max((m_Min >> 16) & 0xffff, (_Other.m_Min >> 16) & 0xffff);
+		uint32 MaxX = Min(m_Max & 0xffff, _Other.m_Max & 0xffff);
+		uint32 MaxY = Min((m_Max >> 16) & 0xffff, (_Other.m_Max >> 16) & 0xffff);
+		m_Min = MinX | (MinY << 16);
+		m_Max = MaxX | (MaxY << 16);
+	}
+
+	M_INLINE void Expand(const CScissorRect& _Other)
+	{
+		uint32 MinX = Min(m_Min & 0xffff, _Other.m_Min & 0xffff);
+		uint32 MinY = Min((m_Min >> 16) & 0xffff, (_Other.m_Min >> 16) & 0xffff);
+		uint32 MaxX = Max(m_Max & 0xffff, _Other.m_Max & 0xffff);
+		uint32 MaxY = Max((m_Max >> 16) & 0xffff, (_Other.m_Max >> 16) & 0xffff);
+		m_Min = MinX | (MinY << 16);
+		m_Max = MaxX | (MaxY << 16);
+	}
+
+	M_INLINE void Expand(const CRect2Duint16& _Other)
+	{
+		uint32 MinX = Min(m_Min & 0xffff, (uint32)_Other.m_Min[0]);
+		uint32 MinY = Min((m_Min >> 16) & 0xffff, (uint32)_Other.m_Min[1]);
+		uint32 MaxX = Max(m_Max & 0xffff, (uint32)_Other.m_Max[0]);
+		uint32 MaxY = Max((m_Max >> 16) & 0xffff, (uint32)_Other.m_Max[1]);
+		m_Min = MinX | (MinY << 16);
+		m_Max = MaxX | (MaxY << 16);
+	}
+
+	M_INLINE void Expand(const V& _v)
+	{
+		uint32 MinX = Min(m_Min & 0xffff, (uint32)_v.k[0]);
+		uint32 MinY = Min((m_Min >> 16) & 0xffff, (uint32)_v.k[1]);
+		uint32 MaxX = Max(m_Max & 0xffff, (uint32)_v.k[0]);
+		uint32 MaxY = Max((m_Max >> 16) & 0xffff, (uint32)_v.k[1]);
+		m_Min = MinX | (MinY << 16);
+		m_Max = MaxX | (MaxY << 16);
+	}
+
+	M_INLINE bool IsEqual(const CScissorRect& _Other) const
+	{
+		return (m_Min == _Other.m_Min) && (m_Max == _Other.m_Max);
+	}
+
+	M_INLINE bool IsValid() const
+	{
+		return ((m_Min & 0xffff) < (m_Max & 0xffff)) && (((m_Min >> 16) & 0xffff) < ((m_Max >> 16) & 0xffff));
+	}
+
+	M_INLINE uint32 GetMinX() const
+	{
+		return m_Min & 0xffff;
+	}
+
+	M_INLINE uint32 GetMinY() const
+	{
+		return (m_Min >> 16) & 0xffff;
+	}
+
+	M_INLINE uint32 GetMaxX() const
+	{
+		return m_Max & 0xffff;
+	}
+
+	M_INLINE uint32 GetMaxY() const
+	{
+		return (m_Max >> 16) & 0xffff;
+	}
+
+	M_INLINE uint32 GetWidth() const
+	{
+		return GetMaxX() - GetMinX();
+	}
+
+	M_INLINE uint32 GetHeight() const
+	{
+		return GetMaxY() - GetMinY();
+	}
+};
+
+// -------------------------------------------------------------------
+
+#include "MMath_Vec128_TemplateSpec.h"
 #include "MMath_SSE.h"
 #include "MMath_Xenon.h"
 #include "MMath_PS3.h"
+
 
 #endif

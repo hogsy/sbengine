@@ -60,7 +60,7 @@ public:
 		return p0 == p1;
 	}
 
-	inline bool AlmostEqual( const VQPixel &v, fp4 _range ) const {
+	inline bool AlmostEqual( const VQPixel &v, fp32 _range ) const {
 		if( fabsf( r - v.r ) > _range ) return false;
 		if( fabsf( g - v.g ) > _range ) return false;
 		if( fabsf( b - v.b ) > _range ) return false;
@@ -121,7 +121,7 @@ public:
 		return true;
 	}
 
-	inline bool AlmostEqual( const VQVector &_v, fp4 _range ) const
+	inline bool AlmostEqual( const VQVector &_v, fp32 _range ) const
 	{
 		for( int32 i = 0; i < 4; i++ )
 			if( !c[i].AlmostEqual( _v.c[i], _range ) )
@@ -129,13 +129,13 @@ public:
 		return true;
 	}
 
-	inline void RandomModify( const fp4 _Step ) {
+	inline void RandomModify( const fp32 _Step ) {
 		for( int32 i = 0; i < 4; i++ )
 		{
 			float v[4];
 			for( int32 j = 0; j < 4; j++ )
 			{
-				v[j] = _Step * ( MRTC_GETRAND()->GenRand1Inclusive_fp4() - 0.5f );
+				v[j] = _Step * ( MRTC_GETRAND()->GenRand1Inclusive_fp32() - 0.5f );
 			}
 			c[i] = c[i] + VQPixel( v[0], v[1], v[2], v[3] );
 			c[i].Validate();

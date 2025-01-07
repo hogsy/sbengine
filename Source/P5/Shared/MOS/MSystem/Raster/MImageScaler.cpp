@@ -92,8 +92,8 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 	int TargetWidth = _pDest->GetWidth();
 	int TargetHeight = _pDest->GetHeight();
 	int TargetModulo = _pDest->GetModulo();
-	fp4 DeltaX = (fp4)(SourceWidth) / (fp4)TargetWidth;
-	fp4 DeltaY = (fp4)(SourceHeight) / (fp4)TargetHeight;
+	fp32 DeltaX = (fp32)(SourceWidth) / (fp32)TargetWidth;
+	fp32 DeltaY = (fp32)(SourceHeight) / (fp32)TargetHeight;
 
 	TThinArray<int> lColOffsets;
 	TThinArray<tCompType> lColWeights;
@@ -110,7 +110,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 
 	if(TargetWidth >= SourceWidth)
 	{
-		fp4 Scale = TargetWidth / (fp4)SourceWidth;
+		fp32 Scale = TargetWidth / (fp32)SourceWidth;
 		int BorderWidth = RoundToInt(Scale * 0.5f);
 
 		for(int i = 0; i < BorderWidth; i++)
@@ -121,7 +121,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 			pColWeights[TargetWidth - BorderWidth + i]	= 1.0f;
 		}
 
-		fp4 FloatColWeight = 0.0f;
+		fp32 FloatColWeight = 0.0f;
 		int ColPos = 0;
 		for(int i = BorderWidth; i < (TargetWidth - BorderWidth); i++)
 		{
@@ -138,7 +138,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 	else
 	{
 		// This becomes pointsampling.. should do it some other way
-		fp4 FloatColWeight = 0.0f;
+		fp32 FloatColWeight = 0.0f;
 		int ColPos = 0;
 		for(int i = 0; i < TargetWidth; i++)
 		{
@@ -148,7 +148,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 			if(FloatColWeight > 1.0f)
 			{
 				int Count = (int)FloatColWeight;
-				FloatColWeight	-= (fp4)Count;
+				FloatColWeight	-= (fp32)Count;
 				ColPos	+= PixelSize * Count;
 			}
 		}
@@ -156,7 +156,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 
 	if(TargetHeight >= SourceHeight)
 	{
-		fp4 Scale = TargetHeight / (fp4)SourceHeight;
+		fp32 Scale = TargetHeight / (fp32)SourceHeight;
 		int BorderHeight = RoundToInt(Scale * 0.5f);
 
 		for(int i = 0; i < BorderHeight; i++)
@@ -167,7 +167,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 			pRowWeights[TargetHeight - BorderHeight + i]	= 1.0f;
 		}
 
-		fp4 FloatRowWeight = 0.0f;
+		fp32 FloatRowWeight = 0.0f;
 		int RowPos = 0;
 		for(int i = BorderHeight; i < (TargetHeight - BorderHeight); i++)
 		{
@@ -183,7 +183,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 	}
 	else
 	{
-		fp4 FloatRowWeight = 0.0f;
+		fp32 FloatRowWeight = 0.0f;
 		int RowPos = 0;
 		for(int i = 0; i < TargetHeight; i++)
 		{
@@ -193,7 +193,7 @@ static void CImage_Stretch(CImage* _pSrc, CImage* _pDest)
 			if(FloatRowWeight > 1.0f)
 			{
 				int Count = (int)FloatRowWeight;
-				FloatRowWeight	-= (fp4)Count;
+				FloatRowWeight	-= (fp32)Count;
 				RowPos	+= SourceModulo * Count;
 			}
 		}

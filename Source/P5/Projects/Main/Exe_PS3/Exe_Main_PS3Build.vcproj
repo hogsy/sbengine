@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="Exe_Main_PS3Build"
+	ProjectGUID="{06C03759-D6D3-4F43-940B-417D98B7FF74}"
+	RootNamespace="Exe_Main_PS3Build"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug_RTM|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="RTM|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="RTMD|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="RTMD_Profile|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) build ..\Misc\Scripts"
+				ReBuildCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) rebuild  ..\Misc\Scripts"
+				CleanCommandLine="$(SolutionDir)..\Misc\Scripts\BuildVS.bat $(SolutionDir) $(SolutionFileName) $(ConfigurationName) clean  ..\Misc\Scripts"
+				Output="Exe_Main_PS3Build.elf"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

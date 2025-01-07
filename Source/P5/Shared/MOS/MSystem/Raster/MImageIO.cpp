@@ -7,7 +7,7 @@
 #endif
 
 #ifdef IMAGE_IO_PNG
-#include "Png/Png.h"
+#include "../../SDK/Png/Png.h"
 #endif
 
 // -------------------------------------------------------------------
@@ -1897,6 +1897,7 @@ spCImage CImageIO_JPG::ReadInfo(const CStr& filename)
 {
 	MAUTOSTRIP(CImageIO_JPG_ReadInfo, NULL);
 	Error("ReadInfo", "Not implemented.");
+	return NULL;
 }
 
 void CImageIO_JPG::ReadJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, int _MemModel, int _Fmt)
@@ -1971,7 +1972,7 @@ void CImageIO_JPG::ReadJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, int _Mem
 	jpeg_destroy_decompress(&cinfo);
 }
 
-void CImageIO_JPG::WriteJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, fp4 _Quality)
+void CImageIO_JPG::WriteJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, fp32 _Quality)
 {
 	MAUTOSTRIP(CImageIO_JPG_WriteJPG, MAUTOSTRIP_VOID);
 	struct jpeg_compress_struct cinfo;

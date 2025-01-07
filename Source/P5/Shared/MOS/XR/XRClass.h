@@ -33,6 +33,7 @@ class CXR_VBManager;
 class CXR_VBMScope;
 class CXR_AnimState;
 class CXR_Model;
+class CXR_IndexedSolidContainer32;
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -42,16 +43,16 @@ class CXR_Model;
 class CXR_BoxMapping
 {
 public:
-	CVec2Dfp4 m_Offset;
-	CVec2Dfp4 m_Scale;
-	fp4 m_Rot;
+	CVec2Dfp32 m_Offset;
+	CVec2Dfp32 m_Scale;
+	fp32 m_Rot;
 	
 	CXR_BoxMapping() {}
 
 	void CreateUnit();
-	void Create(const class CXR_PlaneMapping&, fp4 _Epsilon = 0.001f);
+	void Create(const class CXR_PlaneMapping&, fp32 _Epsilon = 0.001f);
 
-	bool AlmostEqual(const CXR_BoxMapping& _Map, fp4 _Epsilon) const;
+	bool AlmostEqual(const CXR_BoxMapping& _Map, fp32 _Epsilon) const;
 
 	void Read(CCFile* _pFile);
 	void Write(CCFile* _pFile) const;
@@ -65,21 +66,21 @@ public:
 class CXR_PlaneMapping
 {
 public:
-	CVec3Dfp4 m_U;
-	fp4 m_UOffset;
-	CVec3Dfp4 m_V;
-	fp4 m_VOffset;
+	CVec3Dfp32 m_U;
+	fp32 m_UOffset;
+	CVec3Dfp32 m_V;
+	fp32 m_VOffset;
 
-//	fp4 m_ULengthRecp;
-//	fp4 m_VLengthRecp;
+//	fp32 m_ULengthRecp;
+//	fp32 m_VLengthRecp;
 	
 	CXR_PlaneMapping() {}
 
 	void CreateUnit();
-	void Create(const class CXR_BoxMapping&, const CPlane3Dfp8& _Plane);
-	void Create(const class CXR_BoxMapping&, const CPlane3Dfp4& _Plane);
+	void Create(const class CXR_BoxMapping&, const CPlane3Dfp64& _Plane);
+	void Create(const class CXR_BoxMapping&, const CPlane3Dfp32& _Plane);
 
-	int AlmostEqual(const CXR_PlaneMapping& _Map, fp4 _Epsilon) const;
+	int AlmostEqual(const CXR_PlaneMapping& _Map, fp32 _Epsilon) const;
 
 	void Read(CCFile* _pFile);
 	void Write(CCFile* _pFile);
@@ -112,9 +113,9 @@ enum
 class CXR_LightInfo
 {
 public:
-	CRect2Duint16 m_Scissor;
+	CScissorRect m_Scissor;
 #ifndef	PLATFORM_PS2
-	CRect2Duint16 m_ShadowScissor;
+	CScissorRect m_ShadowScissor;
 #endif	// PLATFORM_PS2
 	const class CXR_Light* m_pLight;
 };
@@ -126,33 +127,38 @@ public:
 class CXR_LightOcclusionInfo
 {
 public:
-	CRect2Duint16 m_ScissorVisible;
 #ifndef	PLATFORM_PS2
-	CRect2Duint16 m_ScissorShaded;
-	CRect2Duint16 m_ScissorShadow;
+	CScissorRect m_ScissorShaded;
+	CScissorRect m_ScissorShadow;
 #endif	// PLATFORM_PS2
+	CScissorRect m_ScissorVisible;
+	CScissorRect m_Padding;
 
 	void Clear()
 	{
-		m_ScissorVisible.m_Min[0] = 0xffff;
-		m_ScissorVisible.m_Min[1] = 0xffff;
-		m_ScissorVisible.m_Max[0] = 0;
-		m_ScissorVisible.m_Max[1] = 0;
+		m_ScissorVisible.SetRect(0xffff, 0x0000);
+//		m_ScissorVisible.m_Min[0] = 0xffff;
+//		m_ScissorVisible.m_Min[1] = 0xffff;
+//		m_ScissorVisible.m_Max[0] = 0;
+//		m_ScissorVisible.m_Max[1] = 0;
 #ifndef	PLATFORM_PS2
-		m_ScissorShaded.m_Min[0] = 0xffff;
-		m_ScissorShaded.m_Min[1] = 0xffff;
-		m_ScissorShaded.m_Max[0] = 0;
-		m_ScissorShaded.m_Max[1] = 0;
-		m_ScissorShadow.m_Min[0] = 0xffff;
-		m_ScissorShadow.m_Min[1] = 0xffff;
-		m_ScissorShadow.m_Max[0] = 0;
-		m_ScissorShadow.m_Max[1] = 0;
+		m_ScissorShaded.SetRect(0xffff, 0x0000);
+		m_ScissorShadow.SetRect(0xffff, 0x0000);
+//		m_ScissorShaded.m_Min[0] = 0xffff;
+//		m_ScissorShaded.m_Min[1] = 0xffff;
+//		m_ScissorShaded.m_Max[0] = 0;
+//		m_ScissorShaded.m_Max[1] = 0;
+//		m_ScissorShadow.m_Min[0] = 0xffff;
+//		m_ScissorShadow.m_Min[1] = 0xffff;
+//		m_ScissorShadow.m_Max[0] = 0;
+//		m_ScissorShadow.m_Max[1] = 0;
 #endif	// PLATFORM_PS2
 	}
 
 	bool IsVisible() const
 	{
-		return ((m_ScissorVisible.m_Min[0] < m_ScissorVisible.m_Max[0]) && (m_ScissorVisible.m_Min[1] < m_ScissorVisible.m_Max[1]));
+		return m_ScissorVisible.IsValid();
+//		return ((m_ScissorVisible.m_Min[0] < m_ScissorVisible.m_Max[0]) && (m_ScissorVisible.m_Min[1] < m_ScissorVisible.m_Max[1]));
 	}
 };
 
@@ -167,13 +173,14 @@ public:
 
 	int m_Flags;								// CXR_RENDERINFO_xxxx flags
 	int m_MediumFlags;
-	fp4 m_BasePriority_Opaque;
-	fp4 m_BasePriority_Transparent;
+	fp32 m_BasePriority_Opaque;
+	fp32 m_BasePriority_Transparent;
 	int m_iNHFNode;
 	CXR_MediumDesc* m_pMedium;
 	class CXR_LightVolume* m_pLightVolume;		// Old school light volume, to be removed
 
-	CRect2Duint16 m_Scissor;					// 2D-visibility for the volume
+//	CRect2Duint16 m_Scissor;					// 2D-visibility for the volume
+	CScissorRect m_Scissor;
 
 	CXR_LightInfo* m_pLightInfo;				// This pointer is supplied by the model calling View_GetClip_xxxx
 	uint16 m_MaxLights;							// Maximum number of lights that can be supplied in m_pLightInfo, this is supplied by the model calling View_GetClip_xxxx.
@@ -207,20 +214,22 @@ public:
 \*************************************************************************************************/
 enum
 {
-	CXR_LIGHT_NOSHADOWS =				1,		// This flag is only meaningful on dynamic lights when using unified lighting
-	CXR_LIGHT_FLARE =					2,		// This is used in CWObject_Light.
-	CXR_LIGHT_LIGHTFIELDMAP =			4,		// Light is not added to engine. It will only be used for light field map rendering.
-	CXR_LIGHT_ENABLED =					8,
-	CXR_LIGHT_FLAREDIRECTIONAL =		16,		// This is used in CWObject_Light.
-	CXR_LIGHT_PROJMAPTRANSFORM =		32,		// m_ProjMapTransform is used for proj map.
-	CXR_LIGHT_HINT_ADDITIVE =			64,
-	CXR_LIGHT_HINT_DONTAFFECTMODELS =	128,	// Light will only illuminate world.
-	CXR_LIGHT_ANIMTIME =				256,	// AnimTime member of CXR_Light is valid.
-	CXR_LIGHT_NODIFFUSE =				512, 
-	CXR_LIGHT_NOSPECULAR =				1024,
-	CXR_LIGHT_RADIOSITY =				2048,
-	
-	CXR_LIGHT_LAST =					4096,
+	CXR_LIGHT_NOSHADOWS =				M_Bit(0),	// This flag is only meaningful on dynamic lights when using unified lighting
+	CXR_LIGHT_FLARE =					M_Bit(1),	// This is used in CWObject_Light.
+	CXR_LIGHT_LIGHTFIELDMAP =			M_Bit(2),	// Light is not added to engine. It will only be used for light field map rendering.
+	CXR_LIGHT_ENABLED =					M_Bit(3),
+	CXR_LIGHT_FLAREDIRECTIONAL =		M_Bit(4),	// This is used in CWObject_Light.
+	CXR_LIGHT_PROJMAPTRANSFORM =		M_Bit(5),	// m_ProjMapTransform is used for proj map.
+	CXR_LIGHT_HINT_ADDITIVE =			M_Bit(6),
+	CXR_LIGHT_HINT_DONTAFFECTMODELS =	M_Bit(7),	// Light will only illuminate world.
+	CXR_LIGHT_ANIMTIME =				M_Bit(8),	// AnimTime member of CXR_Light is valid.
+	CXR_LIGHT_NODIFFUSE =				M_Bit(9), 
+	CXR_LIGHT_NOSPECULAR =				M_Bit(10),
+	CXR_LIGHT_RADIOSITY =				M_Bit(11),
+	CXR_LIGHT_FLAREONLY =				M_Bit(12),
+
+	CXR_LIGHT_LAST =					M_Bit(13),
+	// note: 16 bits
 };
 
 // -------------------------------------------------------------------
@@ -297,10 +306,12 @@ public:
 class CXR_LightFieldElement
 {
 public:
+	fp2 m_Scaler;
 	uint8 m_Axis[6][3];
 
 	M_INLINE void Clear()
 	{
+		m_Scaler.Set(FP2_ONE);
 		for(int i = 0; i < 6; i++)
 		{
 			m_Axis[i][0] = 0;
@@ -308,7 +319,7 @@ public:
 			m_Axis[i][2] = 0;
 		}
 	}
-
+/*
 	bool IsWithinBounds(const CXR_LightFieldElement& _Other, int _Delta) const
 	{
 		return  (Abs(m_Axis[0][0] - _Other.m_Axis[0][0]) <= _Delta) &&
@@ -353,9 +364,6 @@ public:
 				(m_Axis[5][2] != _Other.m_Axis[5][2]);
 	}
 
-	void Read(CCFile* _pF, int _Ver);
-	void Write(CCFile* _pF) const;
-
 	CStr GetString() const
 	{
 		return CStrF("(%.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x)",
@@ -365,6 +373,14 @@ public:
 			m_Axis[3][0], m_Axis[3][1], m_Axis[3][2],
 			m_Axis[4][0], m_Axis[4][1], m_Axis[4][2],
 			m_Axis[5][0], m_Axis[5][1], m_Axis[5][2]);
+	}
+*/
+
+	void Read(CCFile* _pF, int _Ver);
+	void Write(CCFile* _pF) const;
+	void SwapLE()
+	{
+		m_Scaler.SwapLE();
 	}
 };
 #if defined(COMPILER_CODEWARRIOR)
@@ -384,55 +400,58 @@ class CXR_LightVolume
 public:
 	virtual class CXR_LightVolume* GetNext() pure;
 	virtual const class CXR_LightVolume* GetNext() const pure;
-	virtual fp4 Light_EvalVertex(const class CXR_LightID* _pIDMap, const CVec3Dfp4& _V, CVec3Dfp4& _LDir, CVec3Dfp4& _LColor) pure;
-	virtual CPixel32 Light_Vertex(const class CXR_LightID* _pIDMap, const CVec3Dfp4& _V, const CVec3Dfp4* _pN) pure;
-	virtual void Light_Array(const class CXR_LightID* _pIDMap, int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN = NULL, const CMat43fp4* _pWMat = NULL, int _Flags = 0) pure;
-	virtual void Light_EvalPoint(const CVec3Dfp4& _V, CVec4Dfp4* _pAxis) pure;
+	virtual fp32 Light_EvalVertex(const class CXR_LightID* _pIDMap, const CVec3Dfp32& _V, CVec3Dfp32& _LDir, CVec3Dfp32& _LColor) pure;
+	virtual CPixel32 Light_Vertex(const class CXR_LightID* _pIDMap, const CVec3Dfp32& _V, const CVec3Dfp32* _pN) pure;
+	virtual void Light_Array(const class CXR_LightID* _pIDMap, int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN = NULL, const CMat4Dfp32* _pWMat = NULL, int _Flags = 0) pure;
+	virtual void Light_EvalPoint(const CVec3Dfp32& _V, CVec4Dfp32* _pAxis) pure;
+	virtual void Light_EvalPointArrayMax(const CVec3Dfp32* _pV, int _nV, CVec4Dfp32* _pAxis) pure;
 };
 
 class CXR_LightPosition
 {
 public:
 	// Big things first
-	CMat43fp4 m_Pos;
-	CMat43fp4 m_ProjMapTransform;					// No IO
-	int16 m_Flags;
+	CMat4Dfp32 m_Pos;
+	CMat4Dfp32 m_ProjMapTransform;					// No IO
+	uint16 m_Flags;
 	int16 m_Type;
 
-	void SetDirection(const CVec3Dfp4&);
-	const CVec3Dfp4& GetDirection() const;
+	void SetDirection(const CVec3Dfp32&);
+	const CVec3Dfp32& GetDirection() const;
 
-	void SetPosition(const CVec3Dfp4&);
-	const CVec3Dfp4& GetPosition() const;
+	void SetPosition(const CVec3Dfp32&);
+	const CVec3Dfp32& GetPosition() const;
 
-	fp4 GetDistance(const CVec3Dfp4& _Pos) const;
-	fp4 GetDistanceSqr(const CVec3Dfp4& _Pos) const;
+	fp32 GetDistance(const CVec3Dfp32& _Pos) const;
+	fp32 GetDistanceSqr(const CVec3Dfp32& _Pos) const;
 
-	void Transform(const CMat43fp4&, CXR_LightPosition& _Dest) const;
+	void Transform(const CMat4Dfp32&, CXR_LightPosition& _Dest) const;
 };
 
 class CXR_Light : public CXR_LightPosition
 {
+private:
+	CVec4Dfp32 m_Intensity;							// Clamped to [0..1] atm.
 public:
-	CVec3Dfp4 m_Intensity;							// Clamped to [0..1] atm.
-	fp4 m_Range;
-	fp4 m_SpotWidth;
-	fp4 m_SpotHeight;
+	fp32 m_Range;
+	fp32 m_SpotWidth;
+	fp32 m_SpotHeight;
 
-	CBox3Dfp4 m_BoundBox;
+	CBox3Dfp32 m_BoundBox;
 
 	uint32 m_ProjMapID;								// No IO
-	fp4 m_AnimTime;									// No IO
+	fp32 m_AnimTime;									// No IO
 	uint16 m_LightGUID;								// No IO, this is used to name dynamic lights.
 	uint16 m_iLight;								// No IO, this is used as a rendering order priority among other things. (All passes and shadowvolumes must be rendered together in a particular order and not be mixed up with rendering passes for other lights)
-	CPixel32 m_IntensityInt32;						// No IO
-	fp4 m_RangeInv;									// No IO
+	fp32 m_iLightf;									// m_iLight in float format for use in priority calculations without int->float conversion.
+//	CPixel32 m_IntensityInt32;						// No IO
+	fp32 m_RangeInv;									// No IO
 	CXR_LightVolume* m_pLightVolume;				// No IO
 
 	union 
 	{
 		uint8* m_pPVS;							// No IO
-		fp4 m_SortVal;
+		fp32 m_SortVal;
 	};
 
 	static int ParseFlags(const char* _pStr);
@@ -441,12 +460,13 @@ public:
 	bool IsStaticMatch(CXR_Light *_pLight);
 #endif
 
-	void SetProjectionMap(int _TextureID, const CMat43fp4* _pTransform = NULL);
+	void SetProjectionMap(int _TextureID, const CMat4Dfp32* _pTransform = NULL);
 
-	void SetIntensity(const CVec3Dfp4& _Intensity);
+	void SetIntensity(const CVec3Dfp32& _Intensity);
+	M_FORCEINLINE const CVec3Dfp32& GetIntensity() const { return *((const CVec3Dfp32*)&m_Intensity); }
 
 
-	void Transform(const CMat43fp4&);
+	void Transform(const CMat4Dfp32&);
 
 #ifndef PLATFORM_CONSOLE
 	TPtr<class CSolid> CreateBoundSolid() const;	// Very, very slow!
@@ -454,14 +474,24 @@ public:
 #endif
 	void CalcBoundBoxFast();
 
+	M_INLINE fp32 GetIntensityf() const
+	{
+		return ((CVec3Dfp32&)m_Intensity).Length();
+	}
+	M_INLINE fp32 GetIntensitySqrf() const
+	{
+		return ((CVec3Dfp32&)m_Intensity).LengthSqr();
+	}
+	M_INLINE CVec4Dfp32 GetIntensityv() const
+	{
+		return m_Intensity;
+	}
+
 	CXR_Light* m_pNext;
 
 	CXR_Light();
-	CXR_Light(const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags = 0, int _Type = 0);
-#ifndef DEFINE_MAT43_IS_MAT4D
-	CXR_Light(const CMat43fp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags = 0, int _Type = 0);
-#endif
-	CXR_Light(const CMat4Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range, int _Flags = 0, int _Type = 0);
+	CXR_Light(const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags = 0, int _Type = 0);
+	CXR_Light(const CMat4Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range, int _Flags = 0, int _Type = 0);
 
 	CXR_Light* GetNext() const { return m_pNext; };
 
@@ -490,9 +520,9 @@ public:
 	DECLARE_OPERATOR_NEW
 
 
-	TList_Vector<CXR_LightID> m_lLightIDs;
-	TList_Vector<CXR_Light> m_lDynamic;
-	TList_Vector<CXR_Light> m_lStatic;
+	TArray<CXR_LightID> m_lLightIDs;
+	TArray<CXR_Light> m_lDynamic;
+	TArray<CXR_Light> m_lStatic;
 
 	int m_nDynamic;
 	int m_nStatic;
@@ -503,26 +533,26 @@ public:
 	void Create(int _nIDs = 256, int _MaxDynamic = 16, int _MaxStatic = 32);
 
 	void PrepareFrame();
-	void Set(int _LightID, const CVec3Dfp4& _Intensity);
+	void Set(int _LightID, const CVec3Dfp32& _Intensity);
 
 	void AddDynamic(const CXR_Light& _Light);
-	void AddDynamic(const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range = 256.0f, int _Flags = 0, int _Type = 0);
+	void AddDynamic(const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range = 256.0f, int _Flags = 0, int _Type = 0);
 	void AddStatic(const CXR_Light& _Light);
-	void AddStatic(int _LightID, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Intensity, fp4 _Range = 512.0f, int _Flags = 0, int _Type = 0);
-	void AddLightVolume(CXR_LightVolume* _pLightVolume, const CVec3Dfp4& _ReferencePos);
+	void AddStatic(int _LightID, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Intensity, fp32 _Range = 512.0f, int _Flags = 0, int _Type = 0);
+	void AddLightVolume(CXR_LightVolume* _pLightVolume, const CVec3Dfp32& _ReferencePos);
 
 	void InitLinks();				// Run this...
 	CXR_Light* GetFirst();	// ...then use this.
 
 	void CopyAndCull(const CXR_WorldLightState* _pWLS, CXR_ViewClipInterface* _pView);
-	void CopyAndCull(const CXR_WorldLightState* _pWLS, fp4 _BoundR, const CVec3Dfp4 _BoundPos, int _MaxStatic, int _MaxDynamic);
+	void CopyAndCull(const CXR_WorldLightState* _pWLS, fp32 _BoundR, const CVec3Dfp32 _BoundPos, int _MaxStatic, int _MaxDynamic);
 
-	void Optimize(const CVec3Dfp4 _Pos, fp4 _Radius, fp4 _ParallellTresh, const CMat43fp4* _pMat = NULL);
+	void Optimize(const CVec3Dfp32 _Pos, fp32 _Radius, fp32 _ParallellTresh, const CMat4Dfp32* _pMat = NULL);
 
-	void Transform(const CMat43fp4& _Mat);
+	void Transform(const CMat4Dfp32& _Mat);
 
-	static void LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN, int _bOmni, CPixel32* pVLight, int _Alpha = 255, fp4 _Scale = 1.0f);
-	static void LightSpecular(CXR_Light* _pLights, int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN, int _Power, CPixel32* pVLight, const CVec3Dfp4& _Eye, int _Alpha = 255, fp4 _Scale = 1.0f);
+	static void LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN, int _bOmni, CPixel32* pVLight, int _Alpha = 255, fp32 _Scale = 1.0f);
+	static void LightSpecular(CXR_Light* _pLights, int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN, int _Power, CPixel32* pVLight, const CVec3Dfp32& _Eye, int _Alpha = 255, fp32 _Scale = 1.0f);
 };
 
 typedef TPtr<CXR_WorldLightState> spCXR_WorldLightState;
@@ -537,7 +567,7 @@ typedef TPtr<CXR_WorldLightState> spCXR_WorldLightState;
 class CXR_ModelInstanceContext
 {
 public:
-	CXR_ModelInstanceContext(uint32 _GameTick, fp4 _TimePerTick, void* _pObj = NULL, void* _pClient = NULL, uint32 _Flags = 0, const CXR_AnimState* _pAnimState = NULL)
+	CXR_ModelInstanceContext(uint32 _GameTick, fp32 _TimePerTick, void* _pObj = NULL, void* _pClient = NULL, uint32 _Flags = 0, const CXR_AnimState* _pAnimState = NULL)
 		: m_GameTick(_GameTick)
 		, m_TimePerTick(_TimePerTick)
 		, m_pObj(_pObj)
@@ -549,7 +579,7 @@ public:
 	}
 
 	uint32 m_GameTick;
-	fp4 m_TimePerTick;
+	fp32 m_TimePerTick;
 	CMTime m_GameTime;
 	void* m_pObj;
 	void* m_pClient;
@@ -561,7 +591,7 @@ class CXR_ModelInstance : public CReferenceCount
 {
 public:
 	virtual void Create(CXR_Model* _pModel, const CXR_ModelInstanceContext& _Context) {}
-	virtual void OnRefresh(const CXR_ModelInstanceContext& _Context, const CMat43fp4 *_pMat = NULL, int _nMat = 0, int _Flags = 0) {}
+	virtual void OnRefresh(const CXR_ModelInstanceContext& _Context, const CMat4Dfp32 *_pMat = NULL, int _nMat = 0, int _Flags = 0) {}
 	virtual bool NeedRefresh(CXR_Model* _pModel, const CXR_ModelInstanceContext& _Context) { return false; }
 
 	virtual TPtr<CXR_ModelInstance> Duplicate() const = 0;
@@ -589,8 +619,8 @@ public:
 	int16	m_Anim0;
 	int16	m_Anim1;
 
-	fp4		m_AnimAttr0;
-	fp4		m_AnimAttr1;
+	fp32		m_AnimAttr0;
+	fp32		m_AnimAttr1;
 
 	uint32	m_Variation : 8;
 	uint32	__m_Padd0 : 24;
@@ -744,7 +774,7 @@ enum
 	CXR_MODEL_PARAM_NEEDPATHDATA			= 8, // Added by Mondelore.
 	CXR_MODEL_PARAM_SETPICMIPGROUP			= 9,
 	CXR_MODEL_PARAM_TIMEMODE				= 10,
-	CXR_MODEL_PARAM_ISALIVE					= 11,
+//	CXR_MODEL_PARAM_ISALIVE					= 11,
 	CXR_MODEL_PARAM_ISSHADOWCASTER			= 12,
 	CXR_MODEL_PARAM_THINSOLIDS				= 13,
 	CXR_MODEL_PARAM_N_THINSOLIDS			= 14,
@@ -752,6 +782,7 @@ enum
 	CXR_MODEL_PARAM_CAPSULES				= 16,
 	CXR_MODEL_PARAM_N_CAPSULES				= 17,
 	CXR_MODEL_PARAM_REGISTRY				= 18,
+	CXR_MODEL_PARAM_GLOBALSCALE				= 19,
 
 	// Time modes
 	CXR_MODEL_TIMEMODE_CONTINUOUS			= 0,
@@ -768,20 +799,28 @@ enum
 	MODEL_PARAM_KEYS						= CXR_MODEL_PARAM_KEYS,
 //	MODEL_PARAM_NEEDPATHDATA				= CXR_MODEL_PARAM_NEEDPATHDATA, // Added by Mondelore.
 	
-	CXR_MODEL_ONRENDERFLAGS_WORLD			= DBit(0),
-	CXR_MODEL_ONRENDERFLAGS_CULLED			= DBit(1),
-	CXR_MODEL_ONRENDERFLAGS_MAXLOD			= DBit(2),
-	CXR_MODEL_ONRENDERFLAGS_MINLOD			= DBit(3),
-	CXR_MODEL_ONRENDERFLAGS_NOCULL			= DBit(4),
-	CXR_MODEL_ONRENDERFLAGS_NOSHADOWS		= DBit(5),
-	CXR_MODEL_ONRENDERFLAGS_INVISIBLE		= DBit(6),
-	CXR_MODEL_ONRENDERFLAGS_WIRE			= DBit(7),
+	CXR_MODEL_ONRENDERFLAGS_WORLD			= M_Bit(0),
+	CXR_MODEL_ONRENDERFLAGS_CULLED			= M_Bit(1),
+	CXR_MODEL_ONRENDERFLAGS_MAXLOD			= M_Bit(2),
+	CXR_MODEL_ONRENDERFLAGS_MINLOD			= M_Bit(3),
+	CXR_MODEL_ONRENDERFLAGS_NOCULL			= M_Bit(4),
+	CXR_MODEL_ONRENDERFLAGS_NOSHADOWS		= M_Bit(5),
+	CXR_MODEL_ONRENDERFLAGS_INVISIBLE		= M_Bit(6),
+	CXR_MODEL_ONRENDERFLAGS_WIRE			= M_Bit(7),
 
 	CXR_MODEL_ONRENDERFLAGS_SURFMODE_BASE	= 8,
-	CXR_MODEL_ONRENDERFLAGS_SURF0_ADD		= DBit(8),		// 0: Replace, 1: Add
-	CXR_MODEL_ONRENDERFLAGS_SURF1_ADD		= DBit(9),		//
-	CXR_MODEL_ONRENDERFLAGS_SURF2_ADD		= DBit(10),		//   - " - 
-	CXR_MODEL_ONRENDERFLAGS_SURF3_ADD		= DBit(11),		// 
+	CXR_MODEL_ONRENDERFLAGS_SURF0_ADD		= M_Bit(8),		// 0: Replace, 1: Add
+	CXR_MODEL_ONRENDERFLAGS_SURF1_ADD		= M_Bit(9),		//
+	CXR_MODEL_ONRENDERFLAGS_SURF2_ADD		= M_Bit(10),		//   - " - 
+	CXR_MODEL_ONRENDERFLAGS_SURF3_ADD		= M_Bit(11),		// 
+
+	CXR_MODEL_ONRENDERFLAGS_SHADOW			= M_Bit(12),		// trimesh internal
+	CXR_MODEL_ONRENDERFLAGS_NOSOLID			= M_Bit(13),		// trimesh internal
+	CXR_MODEL_ONRENDERFLAGS_ISLOD			= M_Bit(14),		// trimesh internal
+
+	CXR_MODEL_ONRENDERFLAGS_USEWLS			= M_Bit(15),		// Ogier icon rendering - ae
+
+	CXR_MODEL_ONRENDERFLAGS_NODYNAMICLIGHT	= M_Bit(16),		// bsp2-only, used to prevent side scene from receiving light from the scene.
 };
 
 
@@ -820,28 +859,35 @@ public:
 		return this;
 	}
 
-	virtual CXR_Model* GetLOD(const CMat4Dfp4& _WMat, const CMat4Dfp4& _VMat, CXR_Engine* _pEngine, int *_piLod = NULL) { return this; };
+	virtual CXR_Model* GetLOD(const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, CXR_Engine* _pEngine, int *_piLod = NULL) { return this; };
 	virtual CXR_Skeleton* GetSkeleton() { return NULL; };
 	virtual CXR_Skeleton* GetPhysSkeleton() { return NULL; };
+	virtual CXR_IndexedSolidContainer32 * GetIndexedSolidContainer() { return NULL; }
+	virtual void SetIndxedSolidContainer (CXR_IndexedSolidContainer32 *_pSolidContainer) { }
 
 	virtual aint GetParam(int _Param) { return 0; };
 	virtual void SetParam(int _Param, aint _Value) { };
-	virtual int GetParamfv(int _Param, fp4* _pRetValues) { return 0; };
-	virtual void SetParamfv(int _Param, const fp4* _pValues) { };
+	virtual int GetParamfv(int _Param, fp32* _pRetValues) { return 0; };
+	virtual void SetParamfv(int _Param, const fp32* _pValues) { };
 
 	// Bounding volumes in model-space
-	virtual fp4 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
-	virtual void GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState = NULL);
-	virtual void GetBound_Box(CBox3Dfp4& _Box, int _Mask, const CXR_AnimState* _pAnimState = NULL);
+	virtual fp32 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
+	virtual void GetBound_Box(CBox3Dfp32& _Box, const CXR_AnimState* _pAnimState = NULL);
+	virtual void GetBound_Box(CBox3Dfp32& _Box, int _Mask, const CXR_AnimState* _pAnimState = NULL);
 
 	// This function is called, for each view-context, AFTER all models have been enumerated, 
 	// and BEFORE rendering of any portals/mirrors.
 	virtual void PreRender(CXR_Engine* _pEngine, CXR_ViewClipInterface* _pViewClip,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0) {};
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0) {};
 
 	// This function is called once during rendering for each view-context.
 	virtual void OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0) pure;
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0) pure;
+	virtual void OnRender2(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, const CMat4Dfp32& _WVelMat, int _Flags = 0)
+	{
+		OnRender(_pEngine, _pRender, _pVBM, _pViewClip, _spWLS, _pAnimState, _WMat, _VMat, _Flags);
+	}
 
 	virtual void OnPrecache(CXR_Engine* _pEngine, int _iVariation) {};
 	virtual void OnPostPrecache(CXR_Engine* _pEngine) {};
@@ -903,28 +949,28 @@ public:
 #endif
 	virtual CXR_Model* OnResolveVariationProxy(const CXR_AnimState& _AnimState, CXR_AnimState& _DstAnimState);
 
-	virtual CXR_Model* GetLOD(const CMat4Dfp4& _WMat, const CMat4Dfp4& _VMat, CXR_Engine* _pEngine, int *_piLod = NULL);
+	virtual CXR_Model* GetLOD(const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, CXR_Engine* _pEngine, int *_piLod = NULL);
 	virtual CXR_Skeleton* GetSkeleton();
 	virtual CXR_Skeleton* GetPhysSkeleton();
 
 	virtual aint GetParam(int _Param);
 	virtual void SetParam(int _Param, aint _Value);
-	virtual int GetParamfv(int _Param, fp4* _pRetValues);
-	virtual void SetParamfv(int _Param, const fp4* _pValues);
+	virtual int GetParamfv(int _Param, fp32* _pRetValues);
+	virtual void SetParamfv(int _Param, const fp32* _pValues);
 
 	// Bounding volumes in model-space
-	virtual fp4 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
-	virtual void GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState = NULL);
-	virtual void GetBound_Box(CBox3Dfp4& _Box, int _Mask, const CXR_AnimState* _pAnimState = NULL);
+	virtual fp32 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
+	virtual void GetBound_Box(CBox3Dfp32& _Box, const CXR_AnimState* _pAnimState = NULL);
+	virtual void GetBound_Box(CBox3Dfp32& _Box, int _Mask, const CXR_AnimState* _pAnimState = NULL);
 
 	// This function is called, for each view-context, AFTER all models have been enumerated, 
 	// and BEFORE rendering of any portals/mirrors.
 	virtual void PreRender(CXR_Engine* _pEngine, CXR_ViewClipInterface* _pViewClip,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0);
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0);
 
 	// This function is called once during rendering for each view-context.
 	virtual void OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0);
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0);
 
 	virtual void OnPrecache(CXR_Engine* _pEngine, int _iVariation);
 	virtual void OnPostPrecache(CXR_Engine* _pEngine);
@@ -976,7 +1022,7 @@ public:
 	// -------------------------------------------------------------------
 	// Object linking
 
-	virtual void SceneGraph_LinkElement(uint16 _Elem, const CBox3Dfp4& _Box, int _Flags) pure;
+	virtual void SceneGraph_LinkElement(uint16 _Elem, const CBox3Dfp32& _Box, int _Flags) pure;
 	virtual void SceneGraph_LinkInfiniteElement(uint16 _Elem, int _Flags) pure;
 	virtual void SceneGraph_UnlinkElement(uint16 _Elem) pure;
 	virtual int SceneGraph_EnumerateElementNodes(int _Elem, uint32* _piRetNodes, int _MaxRet) pure;
@@ -996,15 +1042,15 @@ public:
 	virtual int SceneGraph_Light_GetGUID(int _iLight) pure;										// Convert iLight to LightGUID, if return == 0 iLight doesn't exist.
 	virtual void SceneGraph_Light_Unlink(int _iLight) pure;
 
-	virtual void SceneGraph_Light_SetIntensity(int _iLight, const CVec3Dfp4& _Intensity, bool _bIsOff) pure;
-	virtual void SceneGraph_Light_SetRotation(int _iLight, const CMat43fp4& _Rotation) pure;	// Invalid operation on static spot lights
-	virtual void SceneGraph_Light_SetPosition(int _iLight, const CMat43fp4& _Pos) pure;			// Invalid operation on static lights
-	virtual void SceneGraph_Light_SetProjectionMap(int _iLight, int _TextureID, const CMat43fp4* _Pos) pure;
+	virtual void SceneGraph_Light_SetIntensity(int _iLight, const CVec3Dfp32& _Intensity, bool _bIsOff) pure;
+	virtual void SceneGraph_Light_SetRotation(int _iLight, const CMat4Dfp32& _Rotation) pure;	// Invalid operation on static spot lights
+	virtual void SceneGraph_Light_SetPosition(int _iLight, const CMat4Dfp32& _Pos) pure;			// Invalid operation on static lights
+	virtual void SceneGraph_Light_SetProjectionMap(int _iLight, int _TextureID, const CMat4Dfp32* _Pos) pure;
 	virtual void SceneGraph_Light_Get(int _iLight, CXR_Light& _Light) pure;
-	virtual void SceneGraph_Light_GetIntensity(int _iLight, CVec3Dfp4& _Intensity) { _Intensity = 1.0f; };	// Returns (1, 1, 1) if _iLight is invalid
+	virtual void SceneGraph_Light_GetIntensity(int _iLight, CVec3Dfp32& _Intensity) { _Intensity = 1.0f; };	// Returns (1, 1, 1) if _iLight is invalid
 	
-	virtual int SceneGraph_Light_Enum(const CBox3Dfp4& _Box, const CXR_Light** _lpLights, int _nMaxLights) pure;	// Returns number of lights written to _lpLights
-	virtual int SceneGraph_Light_Enum(const uint16* _piPL, int _nPL, const CBox3Dfp4& _Box, const CXR_Light** _lpLights, int _nMaxLights) pure;	// Returns number of lights written to _lpLights
+	virtual int SceneGraph_Light_Enum(const CBox3Dfp32& _Box, const CXR_Light** _lpLights, int _nMaxLights) pure;	// Returns number of lights written to _lpLights
+	virtual int SceneGraph_Light_Enum(const uint16* _piPL, int _nPL, const CBox3Dfp32& _Box, const CXR_Light** _lpLights, int _nMaxLights) pure;	// Returns number of lights written to _lpLights
 };
 
 typedef TPtr<CXR_SceneGraphInstance> spCXR_SceneGraphInstance;
@@ -1020,10 +1066,10 @@ public:
 	// PVS
 	virtual void SceneGraph_PVSInitCache(int _NumCached) pure;
 	virtual int SceneGraph_PVSGetLen() pure;
-	virtual bool SceneGraph_PVSGet(int _PVSType, const CVec3Dfp4& _Pos, uint8* _pDst) pure;
-	virtual const uint8* SceneGraph_PVSLock(int _PVSType, const CVec3Dfp4& _Pos) pure;
+	virtual bool SceneGraph_PVSGet(int _PVSType, const CVec3Dfp32& _Pos, uint8* _pDst) pure;
+	virtual const uint8* SceneGraph_PVSLock(int _PVSType, const CVec3Dfp32& _Pos) pure;
 	virtual void SceneGraph_PVSRelease(const uint8* _pPVS) pure;
-	virtual int SceneGraph_GetPVSNode(const CVec3Dfp4& _Pos) pure;
+	virtual int SceneGraph_GetPVSNode(const CVec3Dfp32& _Pos) pure;
 
 	// Scenegraph
 	virtual spCXR_SceneGraphInstance SceneGraph_CreateInstance() pure;
@@ -1044,12 +1090,12 @@ public:
 	virtual void View_SetState(int _iView, int _State, int _Value);
 
 	virtual void View_Init(int _iView, CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_ViewClipInterface* _pViewClip,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0) pure;
-	virtual void View_Init(int _iView, CXR_Engine* _pEngine, CRenderContext* _pRender, CVec3Dfp4* _pVPortal, int _nVPortal,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags = 0) pure;
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0) pure;
+	virtual void View_Init(int _iView, CXR_Engine* _pEngine, CRenderContext* _pRender, CVec3Dfp32* _pVPortal, int _nVPortal,
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags = 0) pure;
 	virtual void View_SetCurrent(int _iView, CXR_SceneGraphInstance* _pSceneGraphInstance) pure;
-	virtual bool View_GetClip_Sphere(CVec3Dfp4 _v0, fp4 _Radius, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo) pure;
-	virtual bool View_GetClip_Box(CVec3Dfp4 _min, CVec3Dfp4 _max, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo) pure;
+	virtual bool View_GetClip_Sphere(CVec3Dfp32 _v0, fp32 _Radius, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo) pure;
+	virtual bool View_GetClip_Box(CVec3Dfp32 _min, CVec3Dfp32 _max, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo) pure;
 	virtual void View_GetClip(int _Elem, CXR_RenderInfo* _pRenderInfo) {};
 
 	// -------------------------------------------------------------------
@@ -1058,7 +1104,8 @@ public:
 	virtual const uint16* View_Light_GetVisible(int& _nRetLights) { _nRetLights = 0; return NULL; }		// Return index list of visible lights in the scene
 	virtual CXR_LightOcclusionInfo* View_Light_GetOcclusionArray(int& _nLights) { return NULL; _nLights = 0; }	// Return occlusion for a single light
 	virtual CXR_LightOcclusionInfo* View_Light_GetOcclusion(int _iLight) { return NULL; }				// Return occlusion for a single light
-	virtual void View_Light_ApplyOcclusionArray(CXR_LightOcclusionInfo* _pLO, int _nLights) {}
+	virtual void View_Light_ApplyOcclusionArray(int _nLights, const uint16* _piLights, const CXR_LightOcclusionInfo* _pLO) {}
+	virtual void View_Light_ApplyOcclusionArray_ShadowShaded(uint _nLights, const uint16* _piLights, const CScissorRect* _pScissors) {}
 	virtual int View_Light_GetOcclusionSize() {return 0;}
 };
 
@@ -1070,8 +1117,8 @@ public:
 class CXR_PhysicsContext
 {
 public:
-	CMat4Dfp4	m_WMat;
-	CMat4Dfp4	m_WMatInv;
+	CMat4Dfp32	m_WMat;
+	CMat4Dfp32	m_WMatInv;
 	class CWireContainer* m_pWC;
 	const CXR_AnimState* m_pAnimState;
 	uint16 m_PhysGroupMaskThis;
@@ -1087,7 +1134,7 @@ public:
 		m_PhysGroupMaskCollider = ~0;
 	}
 
-	CXR_PhysicsContext(const CMat4Dfp4 &_WMat, const class CXR_AnimState* _pAnimState = NULL, class CWireContainer* _pWC = NULL)
+	CXR_PhysicsContext(const CMat4Dfp32 &_WMat, const class CXR_AnimState* _pAnimState = NULL, class CWireContainer* _pWC = NULL)
 	{
 		m_WMat	= _WMat;
 		m_WMat.InverseOrthogonal(m_WMatInv);
@@ -1097,7 +1144,7 @@ public:
 		m_PhysGroupMaskCollider = ~0;
 	}
 
-	CXR_PhysicsContext(const CMat4Dfp4 &_WMat, uint16 _PhysGroupMaskThis, uint16 _PhysGroupMaskCollider, const class CXR_AnimState* _pAnimState, class CWireContainer* _pWC)
+	CXR_PhysicsContext(const CMat4Dfp32 &_WMat, uint16 _PhysGroupMaskThis, uint16 _PhysGroupMaskCollider, const class CXR_AnimState* _pAnimState, class CWireContainer* _pWC)
 	{
 		m_WMat	= _WMat;
 		m_WMat.InverseOrthogonal(m_WMatInv);
@@ -1113,21 +1160,21 @@ class CXR_PhysicsModel : public CXR_Model
 {
 public:
 	// Bounding volumes are in world-space.
-	virtual void Phys_GetBound_Sphere(const CMat43fp4& _Pos, CVec3Dfp4& _RetPos, fp4& _Radius) pure;
-	virtual void Phys_GetBound_Box(const CMat43fp4& _Pos, CBox3Dfp4& _RetBox) pure;
+	virtual void Phys_GetBound_Sphere(const CMat4Dfp32& _Pos, CVec3Dfp32& _RetPos, fp32& _Radius) pure;
+	virtual void Phys_GetBound_Box(const CMat4Dfp32& _Pos, CBox3Dfp32& _RetBox) pure;
 
 	// Collision services. All indata is in world coordinates.
 	virtual void Phys_Init(CXR_PhysicsContext* _pPhysContext) pure;
 
-	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0) pure;
-	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, CXR_MediumDesc& _RetMedium) pure;
+	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0) pure;
+	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, CXR_MediumDesc& _RetMedium) pure;
 	
-	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL) pure;
-	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _Origin, const CVec3Dfp4& _Dest, fp4 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL) pure;
+	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL) pure;
+	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _Origin, const CVec3Dfp32& _Dest, fp32 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL) pure;
 	virtual bool Phys_IntersectBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _BoxOrigin, const CPhysOBB& _BoxDest, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL) pure;
 
 	/*
-	virtual int Phys_CollideBox(const CBox3Dfp4& _Box, const CMat4Dfp4& _Position, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int nMaxCollisions) 
+	virtual int Phys_CollideBox(const CBox3Dfp32& _Box, const CMat4Dfp32& _Position, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int nMaxCollisions) 
 	{
 		CXR_PhysicsContext context(_Position);
 		bool collide =  Phys_IntersectBox(&context, _Box, _Box, _MediumFlags, _pCollisionInfo);
@@ -1140,22 +1187,25 @@ public:
 
 	virtual int Phys_CollideBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _Box, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions) 
 	{
-		//CXR_PhysicsContext context;
-		bool collide =  Phys_IntersectBox(_pPhysContext, _Box, _Box, _MediumFlags, _pCollisionInfo);
-		return collide ? 1 : 0;
+		return 0;
 	}
 
-	virtual int Phys_CollideBSP2(CXR_PhysicsContext* _pPhysContext, class CXR_Model_BSP2 *_pBSP2, const CMat43fp4& _BSP2Transform, const CVec3Dfp4& _Offset, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions) 
+	virtual int Phys_CollideBSP2(CXR_PhysicsContext* _pPhysContext, class CXR_IndexedSolidContainer32 *_pSolidContainer, const CMat4Dfp32& _BSP2Transform, const CVec3Dfp32& _Offset, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions) 
+	{
+		return 0;
+	}
+
+	virtual int Phys_CollideCapsule(CXR_PhysicsContext* _pPhysContext, const CPhysCapsule& _Capsule,int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions)
 	{
 		return 0;
 	}
 
 	virtual void CollectPCS(CXR_PhysicsContext* _pPhysContext, const uint8 _IN1N2Flags, CPotColSet *_pcs, const int _iObj, const int _MediumFlags ) pure;
 
-	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4* _pV, int _nV, uint32* _pRetMediums);
-	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4* _pV, int _nV, CXR_MediumDesc* _pRetMediums);
+	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32* _pV, int _nV, uint32* _pRetMediums);
+	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32* _pV, int _nV, CXR_MediumDesc* _pRetMediums);
 	
-	virtual int Phys_GetCombinedMediumFlags(CXR_PhysicsContext* _pPhysContext, const CBox3Dfp4& _Box) { return XW_MEDIUM_AIR | XW_MEDIUM_SEETHROUGH; };
+	virtual int Phys_GetCombinedMediumFlags(CXR_PhysicsContext* _pPhysContext, const CBox3Dfp32& _Box) { return XW_MEDIUM_AIR | XW_MEDIUM_SEETHROUGH; };
 
 	virtual CXR_PhysicsModel* Phys_GetInterface() { return this; };
 };
@@ -1175,9 +1225,9 @@ public:
 	int32 m_SurfaceID;
 	uint16 m_SurfaceParam_TextureID[XR_WALLMARK_MAXTEXTUREPARAMS];
 	uint32 m_Flags : 16;
-	uint32 m_iNode : 8;
+	uint32 m_iNode : 16;
 	uint32 m_GUID;
-	fp4 m_Size;
+	fp32 m_Size;
 
 	CXR_WallmarkDesc()
 	{
@@ -1216,8 +1266,8 @@ class CXR_WallmarkInterface
 public:
 	virtual int Wallmark_CreateContext(const CXR_WallmarkContextCreateInfo& _CreateInfo) pure;
 	virtual void Wallmark_DestroyContext(int _hContext) pure;
-	virtual int Wallmark_Create(int _hContext, const CXR_WallmarkDesc& _WM, const CMat43fp4& _Origin, fp4 _Tolerance, int _Flags, int _Material = 0) pure;
-	virtual void Wallmark_CreateWithContainer(void* _pContainer, const CXR_WallmarkDesc& _WM, const CMat43fp4& _Origin, fp4 _Tolerance, int _Flags, int _Material = 0) {};
+	virtual int Wallmark_Create(int _hContext, const CXR_WallmarkDesc& _WM, const CMat4Dfp32& _Origin, fp32 _Tolerance, int _Flags, int _Material = 0) pure;
+	virtual void Wallmark_CreateWithContainer(void* _pContainer, const CXR_WallmarkDesc& _WM, const CMat4Dfp32& _Origin, fp32 _Tolerance, int _Flags, int _Material = 0) {};
 	virtual bool Wallmark_Destroy(int _GUID) { return false; }
 };
 
@@ -1232,7 +1282,7 @@ public:
 	virtual void Sky_PrepareFrame(CXR_Engine* _pEngine) pure;
 	virtual void Sky_ClearFrustrum(CXR_Engine* _pEngine) pure;		// Call to clear visible areas.
 	virtual void Sky_OpenFrustrum(CXR_Engine* _pEngine) pure;		// Call before Render if the whole screen should be filled with sky
-	virtual void Sky_ExpandFrustrum(CXR_Engine* _pEngine, const CMat43fp4& _WMat, const CMat43fp4& _VMat, const CVec3Dfp4* _pV, int _nV) pure;
+	virtual void Sky_ExpandFrustrum(CXR_Engine* _pEngine, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, const CVec3Dfp32* _pV, int _nV) pure;
 };
 
 /*************************************************************************************************\
@@ -1243,26 +1293,26 @@ public:
 class CXR_PhysicsModel_Sphere : public CXR_PhysicsModel
 {
 protected:
-	fp4 m_PhysRadius;
+	fp32 m_PhysRadius;
 
 public:
-	virtual void Phys_SetDimensions(fp4 _Radius);
+	virtual void Phys_SetDimensions(fp32 _Radius);
 
-	virtual void Phys_GetBound_Sphere(const CMat43fp4& _Pos, CVec3Dfp4& _RetPos, fp4& _Radius);
-	virtual void Phys_GetBound_Box(const CMat43fp4& _Pos, CBox3Dfp4& _RetBox);
+	virtual void Phys_GetBound_Sphere(const CMat4Dfp32& _Pos, CVec3Dfp32& _RetPos, fp32& _Radius);
+	virtual void Phys_GetBound_Box(const CMat4Dfp32& _Pos, CBox3Dfp32& _RetBox);
 
 	// Collision services. All indata is in world coordinates.
 	virtual void Phys_Init(CXR_PhysicsContext* _pPhysContext);
-	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0);
-	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, CXR_MediumDesc& _RetMedium);
-	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
-	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _Origin, const CVec3Dfp4& _Dest, fp4 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
+	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0);
+	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, CXR_MediumDesc& _RetMedium);
+	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
+	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _Origin, const CVec3Dfp32& _Dest, fp32 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
 	virtual bool Phys_IntersectBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _BoxOrigin, const CPhysOBB& _BoxDest, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
 
 	virtual void CollectPCS(CXR_PhysicsContext* _pPhysContext, const uint8 _IN1N2Flags, CPotColSet *_pcs, const int _iObj, const int _MediumFlags ) {};
 
 	virtual void OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags) {};
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags) {};
 };
 
 /*************************************************************************************************\
@@ -1276,17 +1326,17 @@ protected:
 	CPhysOBB m_Box;
 
 public:
-	virtual void Phys_SetDimensions(const CVec3Dfp4& _Dim);
+	virtual void Phys_SetDimensions(const CVec3Dfp32& _Dim);
 
-	virtual void Phys_GetBound_Sphere(const CMat43fp4& _Pos, CVec3Dfp4& _RetPos, fp4& _Radius);
-	virtual void Phys_GetBound_Box(const CMat43fp4& _Pos, CBox3Dfp4& _RetBox);
+	virtual void Phys_GetBound_Sphere(const CMat4Dfp32& _Pos, CVec3Dfp32& _RetPos, fp32& _Radius);
+	virtual void Phys_GetBound_Box(const CMat4Dfp32& _Pos, CBox3Dfp32& _RetBox);
 
 	// Collision services. All indata is in world coordinates.
 	virtual void Phys_Init(CXR_PhysicsContext* _pPhysContext);
-	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0);
-	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, CXR_MediumDesc& _RetMedium);
-	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
-	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp4& _Origin, const CVec3Dfp4& _Dest, fp4 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
+	virtual int Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0);
+	virtual void Phys_GetMedium(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, CXR_MediumDesc& _RetMedium);
+	virtual bool Phys_IntersectLine(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
+	virtual bool Phys_IntersectSphere(CXR_PhysicsContext* _pPhysContext, const CVec3Dfp32& _Origin, const CVec3Dfp32& _Dest, fp32 _Radius, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
 	virtual bool Phys_IntersectBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _BoxOrigin, const CPhysOBB& _BoxDest, int _MediumFlags, CCollisionInfo* _pCollisionInfo = NULL);
 
 	virtual int Phys_CollideBox(CXR_PhysicsContext* _pPhysContext, const CPhysOBB& _Box, int _MediumFlags, CCollisionInfo* _pCollisionInfo, int _nMaxCollisions);
@@ -1294,7 +1344,7 @@ public:
 	virtual void CollectPCS(CXR_PhysicsContext* _pPhysContext, const uint8 _IN1N2Flags, CPotColSet *_pcs, const int _iObj, const int _MediumFlags ) {};
 
 	virtual void OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags) {};
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags) {};
 };
 
 /*************************************************************************************************\

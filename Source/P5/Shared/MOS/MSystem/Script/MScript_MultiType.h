@@ -20,7 +20,7 @@ public:
 	{
 		const char *m_pString;
 		int32 m_Integer;
-		fp4 m_Float;
+		fp32 m_Float;
 	};
 
 	UData m_Data;
@@ -55,7 +55,7 @@ public:
 		m_Type = EType_Integer;
 	}
 
-	M_INLINE CScriptMultiType(fp4 _Value)
+	M_INLINE CScriptMultiType(fp32 _Value)
 	{
 		m_Data.m_Float = _Value;
 		m_Type = EType_Float;
@@ -81,7 +81,7 @@ public:
 		return *this;
 	}
 
-	M_INLINE CScriptMultiType & operator =(fp4 _Value)
+	M_INLINE CScriptMultiType & operator =(fp32 _Value)
 	{
 		m_Data.m_Float = _Value;
 		m_Type = EType_Float;
@@ -122,7 +122,7 @@ public:
 		return m_Data.m_Integer;
 	}
 
-	M_INLINE fp4 GetFloat()
+	M_INLINE fp32 GetFloat()
 	{
 		M_ASSERT(m_Type == EType_Float, "");
 		return m_Data.m_Float;
@@ -130,7 +130,7 @@ public:
 
 	const char *SafeGetStr(CStr &_TempStr);
 	int32 SafeGetInteger();
-	fp4 SafeGetFloat();
+	fp32 SafeGetFloat();
 	
 };
 */

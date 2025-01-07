@@ -2,11 +2,14 @@
 
 #include "XRSurf.h"
 #include "XRSurfaceContext.h"
-//#include "XRShader.h"
+#include "XRShader.h"
 
 #include "../MOS.h"
 #include "../MSystem/Raster/MTextureContainers.h"
 #include "MFloat.h"
+
+//#pragma optimize( "", off )
+//#pragma inline_depth(0)
 
 
 	MRTC_IMPLEMENT_DYNAMIC(CXW_SurfaceKeyFrame, CReferenceCount);
@@ -35,6 +38,7 @@ CXW_LayerOperation::CXW_LayerOperation()
 	m_iOperatorClass = 0;
 	m_Components = 0;
 	m_OperatorClass[0] = 0;
+	m_pOperator = NULL;
 }
 
 void CXW_LayerOperation::SetClass(const char* _pStr)
@@ -102,19 +106,19 @@ bool CXW_LayerOperation::ParseKey(CStr _Value)
 
 	// Parse params
 	int nP = 0;
-	fp4 Params[256];
+	fp32 Params[256];
 
 	Val.Trim();
 	while(Val != "")
 	{
 		if (nP >= 256) Error_static("ParseKey", "Too many parameters.");
-		fp4 v = (Val.GetStrMSep(" ,")).Val_fp8();
+		fp32 v = (Val.GetStrMSep(" ,")).Val_fp64();
 		Params[nP++] = v;
 		Val.Trim();
 	}
 
 	m_lParams.SetLen(nP);
-	memcpy(m_lParams.GetBasePtr(), Params, sizeof(fp4) * nP);
+	memcpy(m_lParams.GetBasePtr(), Params, sizeof(fp32) * nP);
 
 	return true;
 }
@@ -257,12 +261,12 @@ void CXW_SurfaceLayer::ParseContainer(CKeyContainer& _Keys)
 	TArray<CXW_LayerOperation> lOpCodes;
 
 	bool bAlphaRef = false;
-	fp4 AlphaRefFloat = 1;
+	fp32 AlphaRefFloat = 1;
 	int Mapping = 0; 
 
-	CVec2Dfp4 Offset(0);
-	CVec2Dfp4 Scale(1);
-	fp4 Params[4] = { 0,0,0,128 };
+	CVec2Dfp32 Offset(0);
+	CVec2Dfp32 Scale(1);
+	fp32 Params[4] = { 0,0,0,128 };
 
 	int nKeys = _Keys.GetnKeys();
 	for(int iKey = 0; iKey < nKeys; iKey++)
@@ -313,7 +317,7 @@ void CXW_SurfaceLayer::ParseContainer(CKeyContainer& _Keys)
 		{
 			bAlphaRef = true;
 			m_AlphaRef = Value.Val_int();
-			AlphaRefFloat = Value.Val_fp8();
+			AlphaRefFloat = Value.Val_fp64();
 		}
 		else if (Key == "USERCOLOR")
 		{
@@ -329,26 +333,26 @@ void CXW_SurfaceLayer::ParseContainer(CKeyContainer& _Keys)
 		}
 		else if (Key == "OFFSET")
 		{
-			Offset.k[0] = (Value.GetStrSep(",")).Val_fp8();
-			Offset.k[1] = (Value.GetStrSep(",")).Val_fp8();
+			Offset.k[0] = (Value.GetStrSep(",")).Val_fp64();
+			Offset.k[1] = (Value.GetStrSep(",")).Val_fp64();
 		}
 		else if (Key == "SCALE")
 		{
-			Scale.k[0] = (Value.GetStrSep(",")).Val_fp8();
-			Scale.k[1] = (Value.GetStrSep(",")).Val_fp8();
+			Scale.k[0] = (Value.GetStrSep(",")).Val_fp64();
+			Scale.k[1] = (Value.GetStrSep(",")).Val_fp64();
 		}
 		else if (Key == "PARAM0")
-			Params[0] = Value.Val_fp8();
+			Params[0] = Value.Val_fp64();
 		else if (Key == "PARAM1")
-			Params[1] = Value.Val_fp8();
+			Params[1] = Value.Val_fp64();
 		else if (Key == "PARAM2")
-			Params[2] = Value.Val_fp8();
+			Params[2] = Value.Val_fp64();
 		else if (Key == "PARAM3")
-			Params[3] = Value.Val_fp8();
+			Params[3] = Value.Val_fp64();
 		else if (Key == "PARAMS")
 		{
 			for(int i = 0; i < 4; i++)
-				Params[i] = (Value.GetStrSep(",")).Val_fp8();
+				Params[i] = (Value.GetStrSep(",")).Val_fp64();
 		}
 		else if (Key == "TEXTURE")
 		{
@@ -442,7 +446,7 @@ void CXW_SurfaceLayer::Read(CCFile* _pFile)
 			_pFile->ReadLE(m_Mapping);
 			_pFile->ReadLE(m_RasterMode);
 			_pFile->ReadLE(m_Color);
-			CVec2Dfp4 Dummy;
+			CVec2Dfp32 Dummy;
 			Dummy.Read(_pFile);
 			Dummy.Read(_pFile);
 			{ for(int i = 0; i < 4; i++) _pFile->ReadLE(Dummy.k[0]); }
@@ -467,7 +471,7 @@ void CXW_SurfaceLayer::Read(CCFile* _pFile)
 			_pFile->ReadLE(m_ZFunc);
 			_pFile->ReadLE(m_AlphaFunc);
 			_pFile->ReadLE(m_AlphaRef);
-			CVec2Dfp4 Dummy;
+			CVec2Dfp32 Dummy;
 			Dummy.Read(_pFile);
 			Dummy.Read(_pFile);
 			{ for(int i = 0; i < 4; i++) _pFile->ReadLE(Dummy.k[0]); }
@@ -492,7 +496,7 @@ void CXW_SurfaceLayer::Read(CCFile* _pFile)
 			_pFile->ReadLE(m_ZFunc);
 			_pFile->ReadLE(m_AlphaFunc);
 			_pFile->ReadLE(m_AlphaRef);
-			CVec2Dfp4 Dummy;
+			CVec2Dfp32 Dummy;
 			Dummy.Read(_pFile);
 			Dummy.Read(_pFile);
 			{ for(int i = 0; i < 4; i++) _pFile->ReadLE(Dummy.k[0]); }
@@ -556,10 +560,10 @@ void CXW_SurfaceLayer::Read(CCFile* _pFile)
 			uint32 Color32;
 			_pFile->ReadLE(Color32);
 			CPixel32 Color = Color32;
-			m_HDRColor.k[0] = fp4(Color.GetR()) / 255.0f;
-			m_HDRColor.k[1] = fp4(Color.GetG()) / 255.0f;
-			m_HDRColor.k[2] = fp4(Color.GetB()) / 255.0f;
-			m_HDRColor.k[3] = fp4(Color.GetA()) / 255.0f;
+			m_HDRColor.k[0].Set(fp32(Color.GetR()) / 255.0f);
+			m_HDRColor.k[1].Set(fp32(Color.GetG()) / 255.0f);
+			m_HDRColor.k[2].Set(fp32(Color.GetB()) / 255.0f);
+			m_HDRColor.k[3].Set(fp32(Color.GetA()) / 255.0f);
 			_pFile->ReadLE(m_SpecularFresnelBias);
 			_pFile->ReadLE(m_SpecularFresnelScale);
 
@@ -672,7 +676,7 @@ CXW_SurfaceKeyFrame::CXW_SurfaceKeyFrame()
 	m_PolygonOffsetScale = 1.0f;
 	m_PolygonOffsetUnits = 0;
 
-	m_Friction = 0.5f;
+	m_Friction = 0.4f;
 	m_Elasticy = 0.0f;
 	m_MaterialType = 0;
 	FillChar(m_User, sizeof(m_User), 0);
@@ -726,7 +730,7 @@ static CPixel32 AlphaBlend(CPixel32 c0, CPixel32 c1, int alpha)
 }
 */
 
-void CXW_SurfaceLayer::Interpolate(const CXW_SurfaceLayer& _Frm, fp4 t, CXW_SurfaceLayer& _Dst) const
+void CXW_SurfaceLayer::Interpolate(const CXW_SurfaceLayer& _Frm, fp32 t, CXW_SurfaceLayer& _Dst) const
 {
 	MAUTOSTRIP(CXW_SurfaceLayer_Interpolate, MAUTOSTRIP_VOID);
 	_Dst.m_Flags = m_Flags;
@@ -735,7 +739,10 @@ void CXW_SurfaceLayer::Interpolate(const CXW_SurfaceLayer& _Frm, fp4 t, CXW_Surf
 
 	int TInt = RoundToInt(t*255.0f);
 //	_Dst.m_Color = AlphaBlend(m_Color, _Frm.m_Color, TInt);
-	m_HDRColor.Lerp(_Frm.m_HDRColor, t, _Dst.m_HDRColor);
+	vec128 tvec = M_VLdScalar(t);
+	vec128 dstcol = M_VLrp(M_VLd_V4f16_f32(&m_HDRColor), M_VLd_V4f16_f32(&_Frm.m_HDRColor), tvec);
+	M_VSt_V4f32_f16(dstcol, &_Dst.m_HDRColor);
+//	m_HDRColor.Lerp(_Frm.m_HDRColor, t, _Dst.m_HDRColor);
 
 	_Dst.m_TexCoordNr = m_TexCoordNr;
 	_Dst.m_TexChannel = m_TexChannel;
@@ -762,6 +769,7 @@ void CXW_SurfaceLayer::Interpolate(const CXW_SurfaceLayer& _Frm, fp4 t, CXW_Surf
 
 			OperDst.m_OpCode = OperSrc.m_OpCode;
 			OperDst.m_iOperatorClass = OperSrc.m_iOperatorClass;
+			OperDst.m_pOperator = OperSrc.m_pOperator;
 			OperDst.m_Components = OperSrc.m_Components;
 
 			if (OperSrc.m_lParams.Len() == OperFrm.m_lParams.Len())
@@ -769,9 +777,9 @@ void CXW_SurfaceLayer::Interpolate(const CXW_SurfaceLayer& _Frm, fp4 t, CXW_Surf
 				// Lerp params
 				int nP = OperSrc.m_lParams.Len();
 				OperDst.m_lParams.SetLen(nP);
-				const fp4* pParamSrc = OperSrc.m_lParams.GetBasePtr();
-				const fp4* pParamFrm = OperFrm.m_lParams.GetBasePtr();
-				fp4* pParamDst = OperDst.m_lParams.GetBasePtr();
+				const fp32* pParamSrc = OperSrc.m_lParams.GetBasePtr();
+				const fp32* pParamFrm = OperFrm.m_lParams.GetBasePtr();
+				fp32* pParamDst = OperDst.m_lParams.GetBasePtr();
 				for(int iP = 0; iP < nP; iP++)
 					pParamDst[iP] = pParamSrc[iP] + t*(pParamFrm[iP] - pParamSrc[iP]);
 			}
@@ -799,7 +807,7 @@ CXW_SurfaceLayer* CXW_SurfaceKeyFrame::GetBumpMap()
 	return NULL;
 }
 
-void CXW_SurfaceKeyFrame::Interpolate(const CXW_SurfaceKeyFrame& _Frm, fp4 t, CXW_SurfaceKeyFrame& _Dst) const
+void CXW_SurfaceKeyFrame::Interpolate(const CXW_SurfaceKeyFrame& _Frm, fp32 t, CXW_SurfaceKeyFrame& _Dst) const
 {
 	MAUTOSTRIP(CXW_SurfaceKeyFrame_Interpolate, MAUTOSTRIP_VOID);
 	int i;
@@ -811,7 +819,7 @@ void CXW_SurfaceKeyFrame::Interpolate(const CXW_SurfaceKeyFrame& _Frm, fp4 t, CX
 #ifdef XW_FOGMASK_ENABLE	
 	_Dst.m_FogMaskTextureID = m_FogMaskTextureID;
 #endif
-	const fp4 invt = 1.0f - t;
+	const fp32 invt = 1.0f - t;
 	_Dst.m_PolygonOffsetScale = m_PolygonOffsetScale * invt + _Frm.m_PolygonOffsetScale * t;
 	_Dst.m_PolygonOffsetUnits = m_PolygonOffsetUnits * invt + _Frm.m_PolygonOffsetUnits * t;
 	_Dst.m_Friction = m_Friction * invt + _Frm.m_Friction * t;
@@ -835,7 +843,7 @@ void CXW_SurfaceKeyFrame::ParseContainer(CKeyContainer& _Keys)
 		{
 			if (Key == "DURATION")
 			{
-				m_Duration = Value.Val_fp8();
+				m_Duration = Value.Val_fp64();
 				m_DurationRecp = 1.0f / m_Duration;
 			}
 #ifdef XW_FOGMASK_ENABLE	
@@ -844,13 +852,13 @@ void CXW_SurfaceKeyFrame::ParseContainer(CKeyContainer& _Keys)
 #endif				
 			else if (Key == "POLYGONOFFSET")
 			{
-				m_PolygonOffsetScale = Value.Getfp8Sep(",");
-				m_PolygonOffsetUnits = Value.Getfp8Sep(",");
+				m_PolygonOffsetScale = Value.Getfp64Sep(",");
+				m_PolygonOffsetUnits = Value.Getfp64Sep(",");
 			}
 			else if (Key == "FRICTION")
-				m_Friction = Value.Val_fp8();
+				m_Friction = Value.Val_fp64();
 			else if (Key == "ELASTICY")
-				m_Elasticy = Value.Val_fp8();
+				m_Elasticy = Value.Val_fp64();
 			else if (Key == "MATERIALTYPE")
 				m_MaterialType = Value.Val_int();
 			else if (Key == "USER0")
@@ -862,13 +870,13 @@ void CXW_SurfaceKeyFrame::ParseContainer(CKeyContainer& _Keys)
 			else if (Key == "USER3")
 				m_User[3] = Value.Val_int();
 			else if (Key == "USER0F")
-				m_fUser[0] = Value.Val_fp8();
+				m_fUser[0] = Value.Val_fp64();
 			else if (Key == "USER1F")
-				m_fUser[1] = Value.Val_fp8();
+				m_fUser[1] = Value.Val_fp64();
 			else if (Key == "USER2F")
-				m_fUser[2] = Value.Val_fp8();
+				m_fUser[2] = Value.Val_fp64();
 			else if (Key == "USER3F")
-				m_fUser[3] = Value.Val_fp8();
+				m_fUser[3] = Value.Val_fp64();
 		}
 	}
 }
@@ -928,6 +936,8 @@ void CXW_SurfaceKeyFrame::InitTextures(CTextureContext* pTC, bool _bReportFailur
 			Layer.m_TextureID = XW_SURFTEX_REFRACTIONMAP;
 		else if (Layer.m_TextureNameID == StringToHash("$LIGHTMAP"))
 			Layer.m_TextureID = XW_SURFTEX_LIGHTMAP;
+		else if (Layer.m_TextureNameID == StringToHash("$ENVIRONMENTMAP"))
+			Layer.m_TextureID = XW_SURFTEX_ENVIRONMENTMAP;
 		else if (Layer.m_TextureNameID == StringToHash("$TEXTUREMAP0"))
 			Layer.m_TextureID = XW_SURFTEX_TEXTUREMAP0;
 		else if (Layer.m_TextureNameID == StringToHash("$TEXTUREMAP1"))
@@ -948,6 +958,8 @@ void CXW_SurfaceKeyFrame::InitTextures(CTextureContext* pTC, bool _bReportFailur
 				Layer.m_TextureID = XW_SURFTEX_REFRACTIONMAP;
 			else if(strncmp(pTextureName, "$LIGHTMAP", 9) == 0)
 				Layer.m_TextureID = XW_SURFTEX_LIGHTMAP;
+			else if(strncmp(pTextureName, "$ENVIRONMENTMAP", 9) == 0)
+				Layer.m_TextureID = XW_SURFTEX_ENVIRONMENTMAP;
 			else if(strncmp(pTextureName, "$TEXTUREMAP0", 12) == 0)
 				Layer.m_TextureID = XW_SURFTEX_TEXTUREMAP0;
 			else if(strncmp(pTextureName, "$TEXTUREMAP1", 12) == 0)
@@ -1097,7 +1109,7 @@ void CXW_SurfaceKeyFrame::SetTextureParam(CTextureContext* pTC, int _Param, int 
 #endif		
 }
 
-void CXW_SurfaceKeyFrame::SetTextureParamfv(CTextureContext* pTC, int _Param, const fp4* _pValues)
+void CXW_SurfaceKeyFrame::SetTextureParamfv(CTextureContext* pTC, int _Param, const fp32* _pValues)
 {
 	MAUTOSTRIP(CXW_SurfaceKeyFrame_SetTextureParamfv, MAUTOSTRIP_VOID);
 	CXR_SurfaceContext* pSC = NULL;
@@ -1146,7 +1158,7 @@ void CXW_SurfaceKeyFrame::SetTextureParamfv(CTextureContext* pTC, int _Param, co
 }
 
 #ifndef PLATFORM_CONSOLE
-bool CXW_SurfaceKeyFrame::IsTransparent(CTextureContext* _pTC, CVec2Dfp4 _uv)
+bool CXW_SurfaceKeyFrame::IsTransparent(CTextureContext* _pTC, CVec2Dfp32 _uv)
 {
 	MAUTOSTRIP(CXW_SurfaceKeyFrame_IsTransparent, false);
 	if(m_lTextures.Len() != 0)
@@ -1347,9 +1359,13 @@ void CXW_SurfaceKeyFrame::MulSpecPower()
 		CXW_SurfaceLayer &Tex = m_lTextures[i];
 
 		// If alpharef was set on a specular2 layer we assume someone wanted to set specular power with it
-		if( Tex.m_Type == XW_LAYERTYPE_DIFFUSE2 && Tex.m_AlphaRef != 128 )
+		if (Tex.m_Type == XW_LAYERTYPE_SPECULAR)
 		{
-			Tex.m_HDRColor.k[3] = fp4(Tex.m_HDRColor.k[3]) * fp4(Tex.m_AlphaRef);
+			Tex.m_HDRColor.k[3].Set(fp32(Tex.m_AlphaRef));
+		}
+		else if ((Tex.m_Type == XW_LAYERTYPE_SPECULAR2) && Tex.m_AlphaRef != 128 )
+		{
+			Tex.m_HDRColor.k[3] .Set(Tex.m_HDRColor.k[3].Getfp32() * fp32(Tex.m_AlphaRef));
 		}
 	}
 }
@@ -1403,41 +1419,52 @@ CXW_SurfaceSequence::CXW_SurfaceSequence()
 	m_iRepEFrame = 0;
 	m_RepSTime = 0;
 	m_RepETime = 0;
+#ifndef XW_SURF_THIN
+	m_lspKeyFrames.SetGrow(32);
+#endif
+}
+
+const CXW_SurfaceSequence& CXW_SurfaceSequence::operator=(const CXW_SurfaceSequence& _Src)
+{
+	m_iRepSFrame = _Src.m_iRepSFrame;
+	m_iRepEFrame = _Src.m_iRepEFrame;
+	m_RepSTime = _Src.m_RepSTime;
+	m_RepETime = _Src.m_RepETime;
+	m_TotTime = _Src.m_TotTime;
+	int nKeys = _Src.GetNumKeys();
+#ifdef XW_SURF_THIN
+	m_lKeyFrames.SetLen(nKeys);
+	for(uint i = 0; i < nKeys; i++)
+		m_lKeyFrames[i] = _Src.m_lKeyFrames[i];
+#else
+	if (D_MXDFCREATE && D_MPLATFORM != 0)
+	{
+		m_lKeyFramesThin.SetLen(nKeys);
+		for(uint i = 0; i < nKeys; i++)
+			m_lKeyFramesThin[i] = _Src.m_lKeyFramesThin[i];
+	}
+	else
+	{
+		m_lspKeyFrames.GrowLen(nKeys);
+		for(uint i = 0; i < nKeys; i++)
+			m_lspKeyFrames[i] = _Src.m_lspKeyFrames[i]->Duplicate();
+	}
+#endif
+
+	return *this;
 }
 
 spCXW_SurfaceSequence CXW_SurfaceSequence::Duplicate() const
 {
 	MAUTOSTRIP(CXW_SurfaceSequence_Duplicate, NULL);
 	MSCOPESHORT(CXW_SurfaceSequence::Duplicate);
-	int i;
 	spCXW_SurfaceSequence spSeq = MNew(CXW_SurfaceSequence);
 	if (!spSeq) MemError("Duplicate");
-	spSeq->m_iRepSFrame = m_iRepSFrame;
-	spSeq->m_iRepEFrame = m_iRepEFrame;
-	spSeq->m_RepSTime = m_RepSTime;
-	spSeq->m_RepETime = m_RepETime;
-	int nKeys = GetNumKeys();
-#ifdef XW_SURF_THIN
-	spSeq->m_lKeyFrames.SetLen(nKeys);
-	for(i = 0; i < nKeys; i++)
-		spSeq->m_lKeyFrames[i] = m_lKeyFrames[i];
-#else
-	if (D_MXDFCREATE && D_MPLATFORM != 0)
-	{
-		spSeq->m_lKeyFramesThin.SetLen(nKeys);
-		for(i = 0; i < nKeys; i++)
-			spSeq->m_lKeyFramesThin[i] = m_lKeyFramesThin[i];
-	}
-	else
-	{
-		spSeq->m_lspKeyFrames.SetLen(nKeys);
-		for(i = 0; i < nKeys; i++)
-			spSeq->m_lspKeyFrames[i] = m_lspKeyFrames[i]->Duplicate();
-	}
-#endif
+	*spSeq = *this;
 	return spSeq;
 }
 
+#ifndef XW_SURF_THIN
 CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetBaseFrame(CXW_Surface* _pSurf)
 {
 	MAUTOSTRIP(CXW_SurfaceSequence_GetBaseFrame, NULL);
@@ -1483,55 +1510,7 @@ const CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetBaseFrame(const CXW_Surface* 
 	}
 #endif
 }
-
-void CXW_SurfaceSequence::GetFrameAndTimeFraction(const CMTime& _Time, int& _Frame, fp4& _tFrac, CMTime& _tWrapped) const
-{
-	MAUTOSTRIP(CXW_SurfaceSequence_GetFrameAndTimeFraction, MAUTOSTRIP_VOID);
-	_Frame = 0;
-	_tFrac = 0;
-	_tWrapped = _Time; // Make sure the time isn't too large
-
-	int nKeys = GetNumKeys();
-	if (!nKeys) return;
-
-	fp4 t = 0;
-	int Frame = 0;
-	if (m_iRepSFrame || m_iRepEFrame)
-	{
-//	LogFile(CStrF("Before loop, t %f -> %f, Frame %d", _Time, t, Frame));
-		if (_Time.Compare(m_RepSTime) > 0.0f)
-		{
-			fp4 Mod = m_RepETime - m_RepSTime;
-			if(Mod > 0.0001f)
-				t = (_Time - CMTime::CreateFromSeconds(m_RepSTime)).GetTimeModulus(Mod);
-//			t = M_FMod(_Time - m_RepSTime, m_RepETime - m_RepSTime);
-			Frame = m_iRepSFrame;
-//	LogFile(CStrF("In loop, t %f -> %f, Frame %d", _Time, t, Frame));
-		}
-		else
-			t = _Time.GetTime();
-	}
-	else if (_Time.Compare(m_TotTime) >= 0) 
-	{
-		_Frame = nKeys-1;
-		return;
-	}
-	else
-		t = _Time.GetTime();
-
-
-	_tWrapped = CMTime::CreateFromSeconds(t + m_RepSTime);
-
-	while(t > GetKey(Frame)->m_Duration)
-	{
-		t -= GetKey(Frame)->m_Duration;
-		if (Frame+1 >= nKeys) break;
-		Frame++;
-	}
-
-	_Frame = Frame;
-	_tFrac = t;
-}
+#endif
 
 CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetFrame(int _iFrm)
 {
@@ -1544,19 +1523,27 @@ CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetFrame(int _iFrm)
 		return GetKey(_iFrm);
 }
 
-CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetFrame(const CMTime& _Time, CXW_SurfaceKeyFrame& _TmpStorage)
+CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetFrame(const CMTime& _Time, CXW_SurfaceKeyFrame* _pTmpStorage)
 {
 	MAUTOSTRIP(CXW_SurfaceSequence_GetFrame_2, NULL);
 	MSCOPESHORT(CXW_SurfaceSequence::GetFrame);
 	if (GetNumKeys() < 2)
 	{
 		CXW_SurfaceKeyFrame* pSKF = GetKey(0);
-		pSKF->m_AnimTime = _Time;
-		pSKF->m_AnimTimeWrapped = _Time;
+//		pSKF->m_AnimTime = _Time;
+//		pSKF->m_AnimTimeWrapped = _Time;
 		return pSKF;
+
+		//JK-NOTE: x06 revert, this code is correct but it breaks the effectsystem
+		//MH-NOTE: This is fscking slow!
+/*		CXW_SurfaceKeyFrame* pSKF = GetKey(0);
+		_TmpStorage = *pSKF;
+		_TmpStorage.m_AnimTime = _Time;
+		_TmpStorage.m_AnimTimeWrapped = _Time;
+		return &_TmpStorage;*/
 	}
 
-	fp4 tFrac;
+	fp32 tFrac;
 	CMTime tWrapped;
 	int Frame;
 	GetFrameAndTimeFraction(_Time, Frame, tFrac, tWrapped);
@@ -1566,22 +1553,34 @@ CXW_SurfaceKeyFrame* CXW_SurfaceSequence::GetFrame(const CMTime& _Time, CXW_Surf
 //ConOut(CStrF("SurfSeq on frame %f, %d", _Time, Frame));
 //LogFile(CStrF("SurfSeq on frame %f, %d", _Time, Frame));
 		CXW_SurfaceKeyFrame* pSKF = GetKey(Frame);
-		pSKF->m_AnimTime = _Time;
-		pSKF->m_AnimTimeWrapped = tWrapped;
+//		pSKF->m_AnimTime = _Time;
+//		pSKF->m_AnimTimeWrapped = tWrapped;
 		return pSKF;
+
+		//JK-NOTE: x06 revert, this code is correct but it breaks the effectsystem
+		//MH-NOTE: This is fscking slow!
+/*		CXW_SurfaceKeyFrame* pSKF = GetKey(Frame);
+		_TmpStorage = *pSKF;
+		_TmpStorage.m_AnimTime = _Time;
+		_TmpStorage.m_AnimTimeWrapped = tWrapped;
+		return &_TmpStorage;*/
 	}
 	else
 	{
+		static TMRTC_ThreadLocal<CXW_SurfaceKeyFrame> s_SurfKeyFrame;
+		if (!_pTmpStorage)
+			_pTmpStorage = s_SurfKeyFrame.Get();
+
 		tFrac *= GetKey(Frame)->m_DurationRecp;
 		int Frame2 = Min(Frame+1, GetNumKeys()-1);
-		GetKey(Frame)->Interpolate(*GetKey(Frame2), tFrac, _TmpStorage);
+		GetKey(Frame)->Interpolate(*GetKey(Frame2), tFrac, *_pTmpStorage);
 
-		_TmpStorage.m_AnimTime = _Time;
-		_TmpStorage.m_AnimTimeWrapped = tWrapped;
+//		_TmpStorage.m_AnimTime = _Time;
+		_pTmpStorage->m_AnimTimeWrapped = tWrapped;
 
 //ConOut(CStrF("SurfSeq %f, %d, %f, %.8x", _Time, Frame, tFrac, _TmpStorage.m_lTextures[0].m_Color));
 //LogFile(CStrF("SurfSeq %f, %d, %f, %.8x", _Time, Frame, tFrac, _TmpStorage.m_lTextures[0].m_Color));
-		return &_TmpStorage;
+		return _pTmpStorage;
 	}
 }
 
@@ -1598,7 +1597,7 @@ void CXW_SurfaceSequence::SetNumKeyFrames(int _nKeys)
 	}
 	else
 	{
-		m_lspKeyFrames.SetLen(_nKeys);
+		m_lspKeyFrames.GrowLen(_nKeys);
 		for(int i = 0; i < _nKeys; i++)
 			if (!m_lspKeyFrames[i])
 			{
@@ -1795,7 +1794,7 @@ void CXW_SurfaceSequence::SetTextureParam(CTextureContext* pTC, int _Param, int 
 		GetKey(i)->SetTextureParam(pTC, _Param, _Value);
 }
 
-void CXW_SurfaceSequence::SetTextureParamfv(CTextureContext* pTC, int _Param, const fp4* _pValues)
+void CXW_SurfaceSequence::SetTextureParamfv(CTextureContext* pTC, int _Param, const fp32* _pValues)
 {
 	MAUTOSTRIP(CXW_SurfaceSequence_SetTextureParamfv, MAUTOSTRIP_VOID);
 	int nKeys = GetNumKeys();
@@ -1856,6 +1855,7 @@ void CXW_SurfaceSequence::Write(CCFile* _pFile) const
 CXW_Surface::CXW_Surface()
 {
 	MAUTOSTRIP(CXW_Surface_ctor, MAUTOSTRIP_VOID);
+	m_pFastPathVA = NULL;
 	m_Flags = 0;
 	m_iController = 0;
 	m_iGroup = 0;
@@ -1880,6 +1880,15 @@ CXW_Surface::CXW_Surface()
 	m_Medium.SetSolid();*/
 }
 
+CXW_Surface::~CXW_Surface()
+{
+	if (m_pFastPathVA)
+	{
+		delete m_pFastPathVA;
+		m_pFastPathVA = NULL;
+	}
+}
+
 void CXW_Surface::Inherit(const CXW_Surface& _Surf)
 {
 	MAUTOSTRIP(CXW_Surface_Inherit, MAUTOSTRIP_VOID);
@@ -1895,9 +1904,16 @@ void CXW_Surface::Inherit(const CXW_Surface& _Surf)
 	m_SmoothAngle = _Surf.m_SmoothAngle;
 #endif
 
+#ifdef XW_SURF_THINSEQ
+	uint nSeq = _Surf.m_lSequences.Len();
+	m_lSequences.SetLen(nSeq);
+	for(int i = 0; i < nSeq; i++)
+		m_lSequences[i] = _Surf.m_lSequences[i];
+#else
 	m_lspSequences.SetLen(_Surf.m_lspSequences.Len());
 	for(int i = 0; i < _Surf.m_lspSequences.Len(); i++)
 		m_lspSequences[i] = _Surf.m_lspSequences[i]->Duplicate();
+#endif
 
 
 //	m_nTextures = _Surf.m_nTextures;
@@ -1982,27 +1998,29 @@ void CXW_Surface::AddSurfaceVersion(spCXW_Surface _spSurf)
 }
 #endif
 
+#ifndef PLATFORM_CONSOLE
 CXW_SurfaceKeyFrame* CXW_Surface::GetBaseFrame()
 {
 	MAUTOSTRIP(CXW_Surface_GetBaseFrame, NULL);
-	if (!m_lspSequences.Len()) Error("GetBaseFrame", "Surface have no sequences (" + m_Name + ")");
-	return m_lspSequences[0]->GetBaseFrame(this);
+	if (!GetNumSequences()) Error("GetBaseFrame", "Surface have no sequences (" + m_Name + ")");
+	return GetSequence(0)->GetBaseFrame(this);
 }
-
 const CXW_SurfaceKeyFrame* CXW_Surface::GetBaseFrame() const
 {
 	MAUTOSTRIP(CXW_Surface_GetBaseFrame2, NULL);
-	if (!m_lspSequences.Len()) Error("GetBaseFrame", "Surface have no sequences (" + m_Name + ")");
-	return m_lspSequences[0]->GetBaseFrame(this);
+	if (!GetNumSequences()) Error("GetBaseFrame", "Surface have no sequences (" + m_Name + ")");
+	return GetSequence(0)->GetBaseFrame(this);
 }
+#endif
 
-CXW_SurfaceKeyFrame* CXW_Surface::GetFrame(int _iSeq, const CMTime& _Time, CXW_SurfaceKeyFrame& _TmpStorage)
+CXW_SurfaceKeyFrame* CXW_Surface::GetFrame(int _iSeq, const CMTime& _Time, CXW_SurfaceKeyFrame* _pTmpStorage)
 {
 	MAUTOSTRIP(CXW_Surface_GetFrame, NULL);
+	int nSeq = GetNumSequences();
 	if (_iSeq <  0) _iSeq = 0;
-	if (_iSeq >= m_lspSequences.Len()) _iSeq = m_lspSequences.Len()-1;
+	if (_iSeq >= nSeq) _iSeq = nSeq-1;
 
-	return m_lspSequences[_iSeq]->GetFrame(_Time, _TmpStorage);
+	return GetSequence(_iSeq)->GetFrame(_Time, _pTmpStorage);
 }
 
 spCXW_Surface CXW_Surface::Duplicate() const
@@ -2055,7 +2073,7 @@ void CXW_Surface::Read(CCFile* _pFile)
 			_pFile->ReadLE(nBumpMaps);
 
 			SetNumSequences(1);
-			m_lspSequences[0]->SetNumKeyFrames(1);
+			GetSequence(0)->SetNumKeyFrames(1);
 			CXW_SurfaceKeyFrame* pSKF = GetBaseFrame();
 
 			pSKF->m_lTextures.SetLen(nTextures);
@@ -2065,7 +2083,7 @@ void CXW_Surface::Read(CCFile* _pFile)
 			CXW_SurfaceLayer Dummy;
 			{ for(int i = 0; i < nBumpMaps; i++) Dummy.Read(_pFile); }
 
-			fp4 Foo;
+			fp32 Foo;
 			int32 Foo32;
 			_pFile->ReadLE(pSKF->m_Friction);
 			_pFile->ReadLE(Foo);			// Was m_Density
@@ -2115,13 +2133,10 @@ void CXW_Surface::Read(CCFile* _pFile)
 
 			int32 nSeq = 0;
 			_pFile->ReadLE(nSeq);
-			m_lspSequences.SetLen(nSeq);
-			for(int iSeq = 0; iSeq < m_lspSequences.Len(); iSeq++)
-			{
-				m_lspSequences[iSeq] = MNew(CXW_SurfaceSequence);
-				if (!m_lspSequences[iSeq]) MemError("Read");
-				m_lspSequences[iSeq]->Read(_pFile);
-			}
+
+			SetNumSequences(nSeq);
+			for(int iSeq = 0; iSeq < nSeq; iSeq++)
+				GetSequence(iSeq)->Read(_pFile);
 
 		}
 		break;
@@ -2151,13 +2166,10 @@ void CXW_Surface::Read(CCFile* _pFile)
 
 			int32 nSeq = 0;
 			_pFile->ReadLE(nSeq);
-			m_lspSequences.SetLen(nSeq);
-			for(int iSeq = 0; iSeq < m_lspSequences.Len(); iSeq++)
-			{
-				m_lspSequences[iSeq] = MNew(CXW_SurfaceSequence);
-				if (!m_lspSequences[iSeq]) MemError("Read");
-				m_lspSequences[iSeq]->Read(_pFile);
-			}
+
+			SetNumSequences(nSeq);
+			for(int iSeq = 0; iSeq < nSeq; iSeq++)
+				GetSequence(iSeq)->Read(_pFile);
 
 #ifdef XW_SURF_THIN
 			m_Keys.Read(_pFile);
@@ -2221,14 +2233,10 @@ void CXW_Surface::Read(CCFile* _pFile)
 
 			int32 nSeq = 0;
 			_pFile->ReadLE(nSeq);
-			m_lspSequences.SetLen(nSeq);
-			for(int iSeq = 0; iSeq < m_lspSequences.Len(); iSeq++)
-			{
-				MSCOPESHORT(Sequence);
-				m_lspSequences[iSeq] = MNew(CXW_SurfaceSequence);
-				if (!m_lspSequences[iSeq]) MemError("Read");
-				m_lspSequences[iSeq]->Read(_pFile);
-			}
+
+			SetNumSequences(nSeq);
+			for(int iSeq = 0; iSeq < nSeq; iSeq++)
+				GetSequence(iSeq)->Read(_pFile);
 
 			if (m_Flags & XW_SURFFLAGS_HASKEYS)
 			{
@@ -2320,10 +2328,10 @@ void CXW_Surface::Write(CCFile* _pFile)
 	_pFile->WriteLE(m_SmoothGroup);
 	_pFile->WriteLE(m_SmoothAngle);
 
-	int32 nSeq = m_lspSequences.Len();
+	int32 nSeq = GetNumSequences();
 	_pFile->WriteLE(nSeq);
-	for(int iSeq = 0; iSeq < m_lspSequences.Len(); iSeq++)
-		m_lspSequences[iSeq]->Write(_pFile);
+	for(int iSeq = 0; iSeq < nSeq; iSeq++)
+		GetSequence(iSeq)->Write(_pFile);
 
 	if (m_Flags & XW_SURFFLAGS_HASKEYS)
 		m_spKeys->Write(_pFile);
@@ -2352,6 +2360,157 @@ void CXW_Surface::Write(CCFile* _pFile)
 
 	m_Keys.Write(_pFile);*/
 #endif
+}
+
+class CXR_VirtualAttributes_Surface01 : public CXR_VirtualAttributes_SurfaceBase
+{
+public:
+	static CRC_Attributes ms_BaseAttrib;
+//	CRC_Attributes m_Attrib;
+	uint32 m_Flags;
+	uint32 m_SourceDestBlend : 16;
+	uint32 m_ZCompare : 4;
+	uint32 m_AlphaCompare : 4;
+	uint32 m_AlphaRef : 8;
+	uint16 m_TextureID;
+
+	void Create(CXW_SurfaceLayer* _pLayer)
+	{
+		m_pBaseAttrib = &ms_BaseAttrib;
+		m_Class = 0x0200;
+
+		m_ZCompare = _pLayer->m_ZFunc;
+		m_TextureID = _pLayer->m_TextureID;
+		m_HDRColor = _pLayer->m_HDRColor;
+
+		m_SourceDestBlend = CRC_Attributes::GetSourceDestBlend(_pLayer->m_RasterMode);
+
+		uint32 Flags = CRC_FLAGS_ALPHAWRITE | CRC_FLAGS_COLORWRITE | CRC_FLAGS_ZWRITE | CRC_FLAGS_ZCOMPARE | CRC_FLAGS_SMOOTH | CRC_FLAGS_PERSPECTIVE;
+		if (_pLayer->m_RasterMode != CRC_RASTERMODE_NONE)
+			Flags |= CRC_FLAGS_BLEND;
+		if (_pLayer->m_Flags & XW_LAYERFLAGS_NOZWRITE)
+			Flags &= ~CRC_FLAGS_ZWRITE;
+		if (_pLayer->m_Flags & XW_LAYERFLAGS_NOCOLORWRITE)
+			Flags &= ~CRC_FLAGS_COLORWRITE;
+		if (_pLayer->m_Flags & XW_LAYERFLAGS_NOALPHAWRITE)
+			Flags &= ~CRC_FLAGS_ALPHAWRITE;
+		if (_pLayer->m_Flags & XW_LAYERFLAGS_ALPHACOMPARE)
+		{
+			m_AlphaCompare = _pLayer->m_AlphaFunc;
+			m_AlphaRef = _pLayer->m_AlphaRef;
+		}
+		else
+		{
+			m_AlphaCompare = CRC_COMPARE_ALWAYS;
+			m_AlphaRef = 0;
+		}
+
+		m_Flags = Flags;
+	}
+
+	int OnCompare(const CXR_VirtualAttributes* _pOther)
+	{
+		// Lets pretend these are not worth sorting.
+		return 0;
+	}
+
+	uint OnSetAttributes(CRC_Attributes* _pDest, const CXR_VirtualAttributes* _pLastAttr)
+	{
+		int AttrChg = 0;
+		if (!_pLastAttr || _pLastAttr->m_Class != m_Class)
+		{
+			*_pDest = *m_pBaseAttrib;
+			_pDest->m_SourceDestBlend = m_SourceDestBlend;
+			_pDest->m_Flags = m_Flags;
+			_pDest->m_AlphaCompare = m_AlphaCompare;
+			_pDest->m_AlphaRef = m_AlphaRef;
+			_pDest->m_TextureID[0] = m_TextureID;
+			AttrChg = -1;
+		}
+		else
+		{
+			CXR_VirtualAttributes_Surface01 *pLast = (CXR_VirtualAttributes_Surface01 *)_pLastAttr;
+			if (pLast->m_SourceDestBlend != m_SourceDestBlend)
+			{
+				_pDest->m_SourceDestBlend = m_SourceDestBlend;
+				AttrChg |= CRC_ATTRCHG_BLEND;
+			}
+			if (pLast->m_Flags != m_Flags)
+			{
+				_pDest->m_Flags = m_Flags;
+				AttrChg |= CRC_ATTRCHG_FLAGS;
+			}
+			if (pLast->m_ZCompare != m_ZCompare)
+			{
+				_pDest->m_ZCompare = m_ZCompare;
+				AttrChg |= CRC_ATTRCHG_ZCOMPARE;
+			}
+			if ((pLast->m_AlphaCompare != m_AlphaCompare) ||
+				(pLast->m_AlphaRef != m_AlphaRef))
+			{
+				_pDest->m_AlphaCompare = m_AlphaCompare;
+				_pDest->m_AlphaRef = m_AlphaRef;
+				AttrChg |= CRC_ATTRCHG_ALPHACOMPARE;
+			}
+			if (pLast->m_TextureID != m_TextureID)
+			{
+				_pDest->m_TextureID[0] = m_TextureID;
+				AttrChg |= CRC_ATTRCHG_TEXTUREID;
+			}
+		}
+
+		return AttrChg;
+	}
+};
+
+CRC_Attributes CXR_VirtualAttributes_Surface01::ms_BaseAttrib;
+
+void CXW_Surface::InitFastPath()
+{
+	// Delete old VA
+	if (m_pFastPathVA)
+	{
+		delete m_pFastPathVA;
+		m_pFastPathVA = NULL;
+	}
+
+	// Figure out if we can use the fast path
+
+	if (GetNumSequences() != 1)
+		return;
+	CXW_SurfaceSequence* pSeq = GetSequence(0);
+	if (pSeq->GetNumKeys() != 1)
+		return;
+	CXW_SurfaceKeyFrame* pKey = pSeq->GetBaseFrame(this);
+	uint nRSLayers = 0;
+	uint iRSLayer = 0;
+	TAP<CXW_SurfaceLayer> pLayers = pKey->m_lTextures;
+	for(uint i = 0; i < pLayers.Len(); i++)
+		if (pLayers[i].m_Type == XW_LAYERTYPE_RENDERSURFACE)
+		{
+			nRSLayers++;
+			iRSLayer = i;
+		}
+
+	if (nRSLayers != 1)
+		return;
+	CXW_SurfaceLayer* pLayer = &pLayers[iRSLayer];
+	if (pLayer->m_lOper.Len())
+		return;
+	if (pLayer->m_Flags & (XW_LAYERFLAGS_GROUP | XW_LAYERFLAGS_INVISIBLE | XW_SURFFLAGS_LIGHTING | XW_LAYERFLAGS_FOGBLACK | XW_LAYERFLAGS_FOGCOLOR | XW_LAYERFLAGS_FOGALPHA))
+		return;
+
+	// Yes, go ahead and create it
+	CXR_VirtualAttributes_Surface01* pVA = DNew(CXR_VirtualAttributes_Surface01) CXR_VirtualAttributes_Surface01;
+	if (!pVA)
+		MemError("InitFastPath");
+	m_pFastPathVA = pVA;
+
+	pVA->Create(pLayer);
+
+//	M_TRACEALWAYS("(CXW_Surface::InitFastPath) Fast path created for '%s'\n", m_Name.Str());
+	
+	CXR_VirtualAttributes_Surface01::ms_BaseAttrib.SetDefault();
 }
 
 void CXW_Surface::Init()
@@ -2405,7 +2564,7 @@ void CXW_Surface::Init()
 				}
 				else if (s.CompareNoCase("DRAWORDER") == 0)
 				{
-					m_PriorityOffset = m_spKeys->GetKeyValue(i).Val_fp8();
+					m_PriorityOffset = m_spKeys->GetKeyValue(i).Val_fp64();
 				}
 			}
 		}
@@ -2418,13 +2577,18 @@ void CXW_Surface::Init()
 	m_Flags &= ~XW_SURFFLAGS_SHADER;
 	m_Flags |= XW_SURFFLAGS_SHADERONLY;
 	m_Requirements = 0;
-	for(int iSeq = 0; iSeq < m_lspSequences.Len(); iSeq++)
+	uint nSeq = GetNumSequences();
+	for(int iSeq = 0; iSeq < nSeq; iSeq++)
 	{
-		CXW_SurfaceSequence* pSeq = m_lspSequences[iSeq];
+		CXW_SurfaceSequence* pSeq = GetSequence(iSeq);
 		pSeq->Initialize();
+
+		CMTime AnimTimeWrapped;
 		for(int iKey = 0; iKey < pSeq->GetNumKeys(); iKey++)
 		{
 			CXW_SurfaceKeyFrame* pKey = pSeq->GetKey(iKey);
+			pKey->m_AnimTimeWrapped = AnimTimeWrapped;
+			AnimTimeWrapped += CMTime::CreateFromSeconds(pKey->m_Duration);
 
 			// Check polygonoffset
 			if (pKey->m_PolygonOffsetScale != 1.0f ||
@@ -2459,6 +2623,12 @@ void CXW_Surface::Init()
 //					m_Flags |= XW_SURFFLAGS_NEEDTANGENTS;	// ?
 				}
 
+				// Patch HDR color for spec power
+				if (pLayer->m_Type == XW_LAYERTYPE_SPECULAR)
+				{
+					pLayer->m_HDRColor.k[3].Set(fp32(pLayer->m_AlphaRef));
+				}
+
 				// Check for reflection-map
 #ifdef USE_HASHED_TEXTURENAME
 				if (pLayer->m_TextureNameID == StringToHash("$REFLECTIONMAP"))
@@ -2484,6 +2654,7 @@ void CXW_Surface::Init()
 					Oper.m_iOperatorClass = pSC->VBOperator_GetOperatorID(Oper.GetClass());
 
 					CXR_VBOperator* pVBOper = pSC->VBOperator_Get(Oper.m_iOperatorClass);
+					Oper.m_pOperator = pVBOper;
 					if (pVBOper)
 						pVBOper->OnInitSurface(this, Oper);
 					else
@@ -2518,7 +2689,12 @@ void CXW_Surface::Init()
 		m_Flags &= ~XW_SURFFLAGS_SHADERONLY;
 
 	if (m_spNextSurf != NULL)
+	{
+		m_Flags &= ~XW_SURFFLAGS_NOVERSIONS;
 		m_spNextSurf->Init();
+	}
+	else
+		m_Flags |= XW_SURFFLAGS_NOVERSIONS;
 }
 
 void CXW_Surface::InitTextures(bool _bReportFailure)
@@ -2528,26 +2704,32 @@ void CXW_Surface::InitTextures(bool _bReportFailure)
 	if (!pTC) Error("InitTextures", "No texture-context available.");
 
 	InitTextures(pTC, _bReportFailure);
+	InitFastPath();
 }
 
 void CXW_Surface::InitTextures(CTextureContext* _pTC, bool _bReportFailure)
 {
 	MAUTOSTRIP(CXW_Surface_InitTextures_2, MAUTOSTRIP_VOID);
-	int nSeq = m_lspSequences.Len();
+	int nSeq = GetNumSequences();
 	for(int i = 0; i < nSeq; i++)
-		m_lspSequences[i]->InitTextures(_pTC, _bReportFailure);
+		GetSequence(i)->InitTextures(_pTC, _bReportFailure);
 
 	if (m_spNextSurf != NULL)
 		m_spNextSurf->InitTextures(_pTC, _bReportFailure);
+	InitFastPath();
 }
 
-CVec3Dfp4 CXW_Surface::GetTextureMappingReferenceDimensions()
+CVec3Dfp32 CXW_Surface::GetTextureMappingReferenceDimensions(CXW_SurfaceKeyFrame *_pKeyFrame)
 {
-	MAUTOSTRIP(CXW_Surface_GetTextureMappingReferenceDimensions, CVec3Dfp4());
+	MAUTOSTRIP(CXW_Surface_GetTextureMappingReferenceDimensions, CVec3Dfp32());
 	MACRO_GetRegisterObject(CTextureContext, pTC, "SYSTEM.TEXTURECONTEXT");
 	if (!pTC) Error("GetTextureMappingReferenceDimensions", "No texture-context available.");
 
-	const CXW_SurfaceKeyFrame* pSKF = GetBaseFrame();
+	const CXW_SurfaceKeyFrame* pSKF;
+	if(_pKeyFrame)
+		pSKF = _pKeyFrame;
+	else
+		pSKF = GetBaseFrame();
 
 	int nTextures = pSKF->m_lTextures.Len();
 	// Check for an explicitly definied reference layer.
@@ -2570,14 +2752,14 @@ CVec3Dfp4 CXW_Surface::GetTextureMappingReferenceDimensions()
 
 				CImage Desc; int nMipMaps;
 				pTC->GetTextureDesc(TxtID, &Desc, nMipMaps);
-				return CVec3Dfp4(Desc.GetWidth(), Desc.GetHeight(), 256);
+				return CVec3Dfp32(Desc.GetWidth(), Desc.GetHeight(), 256);
 			}
 		}
 	}
 
 	// No layer was set, get an appropriate layer automatically.
 	{
-		CVec3Dfp4 Dim(256.0f);
+		CVec3Dfp32 Dim(256.0f);
 		for(int i = 0; i < nTextures; i++)
 		{
 			int TxtID = pSKF->m_lTextures[i].m_TextureID;
@@ -2630,23 +2812,23 @@ void CXW_Surface::SetTextureParam(int _Param, int _Value)
 	MACRO_GetRegisterObject(CTextureContext, pTC, "SYSTEM.TEXTURECONTEXT");
 	if (!pTC) Error("InitTextures", "No texture-context available.");
 
-	int nSeq = m_lspSequences.Len();
+	int nSeq = GetNumSequences();
 	for(int i = 0; i < nSeq; i++)
-		m_lspSequences[i]->SetTextureParam(pTC, _Param, _Value);
+		GetSequence(i)->SetTextureParam(pTC, _Param, _Value);
 
 	if (m_spNextSurf != NULL)
 		m_spNextSurf->SetTextureParam(_Param, _Value);
 }
 
-void CXW_Surface::SetTextureParamfv(int _Param, const fp4* _pValues)
+void CXW_Surface::SetTextureParamfv(int _Param, const fp32* _pValues)
 {
 	MAUTOSTRIP(CXW_Surface_SetTextureParamfv, MAUTOSTRIP_VOID);
 	MACRO_GetRegisterObject(CTextureContext, pTC, "SYSTEM.TEXTURECONTEXT");
 	if (!pTC) Error("InitTextures", "No texture-context available.");
 
-	int nSeq = m_lspSequences.Len();
+	int nSeq = GetNumSequences();
 	for(int i = 0; i < nSeq; i++)
-		m_lspSequences[i]->SetTextureParamfv(pTC, _Param, _pValues);
+		GetSequence(i)->SetTextureParamfv(pTC, _Param, _pValues);
 
 	if (m_spNextSurf != NULL)
 		m_spNextSurf->SetTextureParamfv(_Param, _pValues);
@@ -2756,6 +2938,9 @@ void CXW_Surface::SetNumSequences(int _nSeq)
 {
 	MAUTOSTRIP(CXW_Surface_SetNumSequences, MAUTOSTRIP_VOID);
 	MSCOPESHORT(CXW_Surface::SetNumSequences);
+#ifdef XW_SURF_THINSEQ
+	m_lSequences.SetLen(_nSeq);
+#else
 	m_lspSequences.SetLen(_nSeq);
 	for(int i = 0; i < _nSeq; i++)
 		if (!m_lspSequences[i])
@@ -2763,6 +2948,7 @@ void CXW_Surface::SetNumSequences(int _nSeq)
 			m_lspSequences[i] = MNew(CXW_SurfaceSequence);
 			if (!m_lspSequences[i]) MemError("SetNumSequences");
 		}
+#endif
 }
 
 void CXW_Surface::DeleteSequence(CKeyContainer* _pKC)
@@ -2825,7 +3011,7 @@ void CXW_Surface::ParseContainer(CKeyContainer& _Keys)
 		"delete", "needdiffuse", "needspecular", "neednormals", 
 		"nocull", "sky", "nodynamiclight", "nowallmark", 
 		"nolightmap", "$$$", "$$$", "$$$", 
-		"needreflectionmap", "needrefractionmap", "nofog", "subdivision", 
+		"needreflectionmap", "needrefractionmap", "nofog", "backlightselfshadow", 
 		"needtangents", "$$$", "$$$", "keepallversions",
 		
 		(char*)NULL
@@ -2869,7 +3055,7 @@ void CXW_Surface::ParseContainer(CKeyContainer& _Keys)
 			else if (Key == "OCCLUSIONMASK")
 				m_OcclusionMask = Value.Val_int();
 			else if (Key == "DRAWORDER")
-				m_PriorityOffset = Value.Val_fp8();
+				m_PriorityOffset = Value.Val_fp64();
 			else if (Key == "OPTIONS")
 			{
 				if (Value[0] >= '0' && Value[0] <= '9')
@@ -2888,7 +3074,7 @@ void CXW_Surface::ParseContainer(CKeyContainer& _Keys)
 			else if (Key == "SMOOTHGROUP")
 				m_SmoothGroup = Value.Val_int();
 			else if (Key == "SMOOTHANGLE")
-				m_SmoothAngle = Value.Val_fp8();
+				m_SmoothAngle = Value.Val_fp64();
 #endif
 			else if (Key == "TEXTURE")
 			{
@@ -2938,7 +3124,7 @@ void CXW_Surface::ParseContainer(CKeyContainer& _Keys)
 	}
 }
 
-void CXW_Surface::ParseNode_r(CKeyContainerNode* _pNode, const CXW_Surface& _Surf, TList_Vector<spCXW_Surface>& _lspSurfaces)
+void CXW_Surface::ParseNode_r(CKeyContainerNode* _pNode, const CXW_Surface& _Surf, TArray<spCXW_Surface>& _lspSurfaces)
 {
 	MAUTOSTRIP(CXW_Surface_ParseNode_r, MAUTOSTRIP_VOID);
 	MSCOPESHORT(ParseNode_r);
@@ -2957,18 +3143,19 @@ void CXW_Surface::ParseNode_r(CKeyContainerNode* _pNode, const CXW_Surface& _Sur
 
 		spCKeyContainerNode spNode = _pNode->Duplicate();
 		DeleteNoSurfaceChildren(spNode);
+		spSurf->SetNumSequences(nSeq);
 		for(int i = 0; i < nSeq; i++)
 		{
 			if (i)
-				spSurf->m_lspSequences.Add(spSurf->m_lspSequences[i-1]->Duplicate());
-			spSurf->m_lspSequences[i]->ParseNode(spNode);
+				*spSurf->GetSequence(i) = *spSurf->GetSequence(i-1);
+			spSurf->GetSequence(i)->ParseNode(spNode);
 			CXW_Surface::DeleteSequence_r(spNode);
 		}
 	}
 	else
 	{
 		spSurf->SetNumSequences(1);
-		spSurf->m_lspSequences[0]->ParseNode(_pNode);
+		spSurf->GetSequence(0)->ParseNode(_pNode);
 	}
 
 //	spSurf->ParseContainer_Surface(*_pNode->GetKeys());
@@ -3038,10 +3225,10 @@ void CXW_Surface::ParseNode_r(CKeyContainerNode* _pNode, const CXW_Surface& _Sur
 	)
 }
 
-TList_Vector<spCXW_Surface> CXW_Surface::CombineSurfaces(TList_Vector<spCXW_Surface> _lspSurf)
+TArray<spCXW_Surface> CXW_Surface::CombineSurfaces(TArray<spCXW_Surface> _lspSurf)
 {
-	MAUTOSTRIP(CXW_Surface_CombineSurfaces, TList_Vector<spCXW_Surface>());
-	TList_Vector<spCXW_Surface> lspSurf2;
+	MAUTOSTRIP(CXW_Surface_CombineSurfaces, TArray<spCXW_Surface>());
+	TArray<spCXW_Surface> lspSurf2;
 	lspSurf2.SetGrow(256);
 
 	int i = 0;
@@ -3075,9 +3262,10 @@ void CXW_Surface::AddTextureName(CXW_Surface* _pS, CStr _dName)
 	MAUTOSTRIP(CXW_Surface_AddTextureName, MAUTOSTRIP_VOID);
 	// Append _dName to all texture names in all layers in all keyframes in all sequences.
 
-	for(int iSeq = 0; iSeq < _pS->m_lspSequences.Len(); iSeq++)
+	uint nSeq = _pS->GetNumSequences();
+	for(uint iSeq = 0; iSeq < nSeq; iSeq++)
 	{
-		CXW_SurfaceSequence* pSeq = _pS->m_lspSequences[iSeq];
+		CXW_SurfaceSequence* pSeq = _pS->GetSequence(iSeq);
 		for(int iFrm = 0; iFrm < pSeq->GetNumKeys(); iFrm++)
 		{
 			CXW_SurfaceKeyFrame* pFrame = pSeq->GetKey(iFrm);
@@ -3091,11 +3279,11 @@ void CXW_Surface::AddTextureName(CXW_Surface* _pS, CStr _dName)
 #endif
 }
 
-TList_Vector<spCXW_Surface> CXW_Surface::ExpandLODSurfaces(TList_Vector<spCXW_Surface> _lspSurf)
+TArray<spCXW_Surface> CXW_Surface::ExpandLODSurfaces(TArray<spCXW_Surface> _lspSurf)
 {
-	MAUTOSTRIP(CXW_Surface_ExpandLODSurfaces, TList_Vector<spCXW_Surface>());
+	MAUTOSTRIP(CXW_Surface_ExpandLODSurfaces, TArray<spCXW_Surface>());
 	MSCOPESHORT(ExpandLODSurfaces);
-	TList_Vector<spCXW_Surface> lspSurf2;
+	TArray<spCXW_Surface> lspSurf2;
 	lspSurf2.SetGrow(256);
 
 	int i = 0;
@@ -3154,7 +3342,7 @@ TList_Vector<spCXW_Surface> CXW_Surface::ExpandLODSurfaces(TList_Vector<spCXW_Su
 	return lspSurf2;
 }
 
-TList_Vector<spCXW_Surface> CXW_Surface::ReadScript(TArray<uint8> _lData)
+TArray<spCXW_Surface> CXW_Surface::ReadScript(TArray<uint8> _lData)
 {
 	CCFile MemFile;
 	MemFile.Open(_lData, CFILE_READ);
@@ -3162,37 +3350,37 @@ TList_Vector<spCXW_Surface> CXW_Surface::ReadScript(TArray<uint8> _lData)
 	CKeyContainerNode Node;
 	Node.ReadFromScript(&MemFile);
 
-	TList_Vector<spCXW_Surface> lspSurfaces;
+	TArray<spCXW_Surface> lspSurfaces;
 	lspSurfaces.SetGrow(256);
 
 	CXW_Surface Surf;
 	ParseNode_r(&Node, Surf, lspSurfaces);
 
-	TList_Vector<spCXW_Surface> lspCombined = CombineSurfaces(lspSurfaces);
-	TList_Vector<spCXW_Surface> lspExpanded = ExpandLODSurfaces(lspCombined);
+	TArray<spCXW_Surface> lspCombined = CombineSurfaces(lspSurfaces);
+	TArray<spCXW_Surface> lspExpanded = ExpandLODSurfaces(lspCombined);
 	return lspExpanded;
 }
 
-TList_Vector<spCXW_Surface> CXW_Surface::ReadScript(CStr _Filename)
+TArray<spCXW_Surface> CXW_Surface::ReadScript(CStr _Filename)
 {
-	MAUTOSTRIP(CXW_Surface_ReadScript, TList_Vector<spCXW_Surface>());
+	MAUTOSTRIP(CXW_Surface_ReadScript, TArray<spCXW_Surface>());
 	// Mirror any changes here to CXR_SurfaceContext::AddSurfaces in XRSurface.cpp
 
 	CKeyContainerNode Node;
 	Node.ReadFromScript(_Filename);
 
-	TList_Vector<spCXW_Surface> lspSurfaces;
+	TArray<spCXW_Surface> lspSurfaces;
 	lspSurfaces.SetGrow(256);
 
 	CXW_Surface Surf;
 	ParseNode_r(&Node, Surf, lspSurfaces);
 
-	TList_Vector<spCXW_Surface> lspCombined = CombineSurfaces(lspSurfaces);
-	TList_Vector<spCXW_Surface> lspExpanded = ExpandLODSurfaces(lspCombined);
+	TArray<spCXW_Surface> lspCombined = CombineSurfaces(lspSurfaces);
+	TArray<spCXW_Surface> lspExpanded = ExpandLODSurfaces(lspCombined);
 	return lspExpanded;
 }
 
-void CXW_Surface::Write(CCFile* _pFile, TList_Vector<spCXW_Surface>& _lspSurfaces) 
+void CXW_Surface::Write(CCFile* _pFile, TArray<spCXW_Surface>& _lspSurfaces) 
 {
 	MAUTOSTRIP(CXW_Surface_Write_2, MAUTOSTRIP_VOID);
 	for(int iSurf = 0; iSurf < _lspSurfaces.Len(); iSurf++)
@@ -3250,10 +3438,10 @@ void CXW_Surface::Read(CCFile* _pFile, TThinArray<spCXW_Surface>& _lspSurfaces, 
 	}
 }
 
-void CXW_Surface::Read(CCFile* _pFile, TList_Vector<spCXW_Surface>& _lspSurfaces, int _nSurf)
+void CXW_Surface::Read(CCFile* _pFile, TArray<spCXW_Surface>& _lspSurfaces, int _nSurf)
 {
 	MAUTOSTRIP(CXW_Surface_Read_2, MAUTOSTRIP_VOID);
-	MSCOPESHORT(CXW_Surface::Read(CCFile,TList_Vector,int));
+	MSCOPESHORT(CXW_Surface::Read(CCFile,TArray,int));
 
 	_lspSurfaces.SetLen(_nSurf);
 	for(int iSurf = 0; iSurf < _lspSurfaces.Len(); iSurf++)
@@ -3301,7 +3489,7 @@ void CXW_Surface::Read(CCFile* _pFile, TList_Vector<spCXW_Surface>& _lspSurfaces
 	}
 }
 
-int CXW_Surface::GetSurfaceIndex(TList_Vector<spCXW_Surface> _lspSurfaces, const char* _pSurfName)
+int CXW_Surface::GetSurfaceIndex(TArray<spCXW_Surface> _lspSurfaces, const char* _pSurfName)
 {
 	MAUTOSTRIP(CXW_Surface_GetSurfaceIndex, 0);
 	int nS = _lspSurfaces.Len();
@@ -3321,10 +3509,10 @@ spCXW_Surface CXW_Surface::CreateOptimizedSurfaces()
 	if (m_Requirements & (XW_SURFREQ_NV20 | XW_SURFREQ_NV10 | XW_SURFREQ_MULTITEX2 | XW_SURFREQ_MULTITEX3 | XW_SURFREQ_MULTITEX4 | XW_SURFREQ_MULTITEX8))
 		return NULL;
 
-	if (m_lspSequences.Len() != 1)
+	if (GetNumSequences() != 1)
 		return NULL;
 
-	const CXW_SurfaceSequence& Seq = *m_lspSequences[0];
+	const CXW_SurfaceSequence& Seq = *GetSequence(0);
 
 	if (Seq.GetNumKeys() != 1)
 		return NULL;
@@ -3380,7 +3568,7 @@ spCXW_Surface CXW_Surface::CreateOptimizedSurfaces()
 		spNewSurf->m_Flags |= XW_SURFFLAGS_GENERATED;
 		spNewSurf->m_Requirements |= XW_SURFREQ_GENERATED;
 
-		CXW_SurfaceKeyFrame& Key = *spNewSurf->m_lspSequences[0]->GetKey(0);
+		CXW_SurfaceKeyFrame& Key = *spNewSurf->GetSequence(0)->GetKey(0);
 		CXW_SurfaceLayer* pNewL = Key.m_lTextures.GetBasePtr();
 
 		pNewL[0].m_Flags |= XW_LAYERFLAGS_GROUP;
@@ -3443,43 +3631,43 @@ spCXW_Surface CXW_Surface::CreateShaderFallbackSurface()
 	spCXW_Surface spS = Duplicate();
 	if (!spS)
 		MemError("CreateShaderFallbackSurface");
-	if (spS->m_lspSequences.Len() < 1)
+	if (spS->GetNumSequences() < 1)
 	{
 		LogFile(CStrF("WARNING: No sequences in surface %s.", m_Name.Str()));
 		return NULL;
 	}
 
-	int nSequences = m_lspSequences.Len();
+	int nSequences = GetNumSequences();
 	for( int iSeq = 0; iSeq < nSequences; iSeq++ )
 	{
 //		spS->m_lspSequences.SetLen(1);
 		spS->m_Options = XW_SURFOPTION_LIGHTMAP;
 
-		spCXW_SurfaceSequence spSeq = spS->m_lspSequences[iSeq];
+		CXW_SurfaceSequence* pSeq = spS->GetSequence(iSeq);
 
 		#ifdef XW_SURF_THIN
-		int nKeyFrames = spSeq->m_lKeyFrames.Len();
+		int nKeyFrames = pSeq->m_lKeyFrames.Len();
 		#else
 		int nKeyFrames;
 		if (D_MXDFCREATE && D_MPLATFORM != 0)
-			nKeyFrames = spSeq->m_lKeyFramesThin.Len();
+			nKeyFrames = pSeq->m_lKeyFramesThin.Len();
 		else
-			nKeyFrames = spSeq->m_lspKeyFrames.Len();
+			nKeyFrames = pSeq->m_lspKeyFrames.Len();
 
 		#endif
 		for( int iKey = 0; iKey < nKeyFrames; iKey++ )
 		{
 //TODO: Need to check so neither Diffuse, Normal or Specular are being animated (since we can't do that). All other layers may animate though
 		#ifdef XW_SURF_THIN
-//			spSeq->m_lKeyFrames.SetLen(1);
-			CXW_SurfaceKeyFrame& Key = spSeq->m_lKeyFrames[iKey];
+//			pSeq->m_lKeyFrames.SetLen(1);
+			CXW_SurfaceKeyFrame& Key = pSeq->m_lKeyFrames[iKey];
 		#else
-//			spSeq->m_lspKeyFrames.SetLen(1);
+//			pSeq->m_lspKeyFrames.SetLen(1);
 			CXW_SurfaceKeyFrame* pKey;
 			if (D_MXDFCREATE && D_MPLATFORM != 0)
-				pKey = &(spSeq->m_lKeyFramesThin[iKey]);
+				pKey = &(pSeq->m_lKeyFramesThin[iKey]);
 			else
-				pKey = spSeq->m_lspKeyFrames[iKey];
+				pKey = pSeq->m_lspKeyFrames[iKey];
 			CXW_SurfaceKeyFrame& Key = *pKey;
 		#endif
 

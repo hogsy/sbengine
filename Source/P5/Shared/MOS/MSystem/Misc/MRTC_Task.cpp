@@ -4,30 +4,14 @@
 
 #ifdef PLATFORM_WIN_PC
 #include "winsock2.h"
+#include "ws2tcpip.h"
 #elif defined (PLATFORM_XENON)
 #include "xtl.h"
 #endif
 
 //#pragma optimize("",off)
+//#pragma inline_depth(0)
 
-
-enum
-{
-	TASKMAN_PORT_COORDINATOR	= 12110,
-
-	HOST_PACKET_REQUEST_SESSION	= 1,		// Host is asking for a session ID
-	HOST_PACKET_RESPOND_SESSION,			// Coord. is handing out a session ID
-	HOST_PACKET_KILL_SESSION,				// Host is terminating session (but might keep the connection alive)
-	HOST_PACKET_REQUEST_AGENTS,				// Host is asking for a number of agents
-	HOST_PACKET_RESPOND_AGENTS,				// Coord. hands out agents (might not be the same number that the host asked for)
-	HOST_PACKET_HOST_INFO,
-	HOST_PACKET_REQUEST_AGENTS_EXT,			// Host is asking for a number of agent with extended attributes (possibly amount of RAM or if a GFX card is required)
-
-
-	HOST_REQUEST_FL_GFXCARD	= DBit(0),
-	HOST_REQUEST_FL_MEMORY	= DBit(1),
-	HOST_REQUEST_FL_MUTUALEXCLUSIVE	= DBit(2),	// Only run 1 instance of this task on a single client
-};
 
 enum
 {
@@ -194,15 +178,15 @@ public:
 					int size = sizeof(sock);
 					getpeername(Connection, (sockaddr*)&sock, &size);
 
-					hostent* pent = gethostbyaddr((const char*)&sock.sin_addr.S_un.S_addr, 4, AF_INET);
-
 					spMRTC_TaskClient spClient = MNew(MRTC_TaskClient);
 					spClient->m_Socket	= Connection;
 					spClient->m_Host	= sock.sin_addr.S_un.S_addr;
 					spClient->m_State	= TASKCLIENT_STATE_NEWCONNECTION;
-					if(pent)
-						spClient->m_HostName	= pent->h_name;
-					else
+
+//					char aHost[256];
+//					if(getnameinfo((sockaddr*)&sock, sizeof(sock), aHost, 256, NULL, 0, 0) == 0)
+//						spClient->m_HostName	= aHost;
+//					else
 						spClient->m_HostName	= CStrF("%d.%d.%d.%d", (spClient->m_Host & 0xff), ((spClient->m_Host>>8) & 0xff), ((spClient->m_Host>>16) & 0xff), ((spClient->m_Host>>24) & 0xff));
 
 					{
@@ -239,16 +223,17 @@ public:
 					int size = sizeof(sock);
 					getpeername(Connection, (sockaddr*)&sock, &size);
 
-					hostent* pent = gethostbyaddr((const char*)&sock.sin_addr.S_un.S_addr, 4, AF_INET);
 
 					spMRTC_TaskAgent spAgent = MNew(MRTC_TaskAgent);
 					spAgent->m_lExeFile	= m_pTaskManager->m_lExeFile;
 					spAgent->m_Socket	= Connection;
 					spAgent->m_Host	= sock.sin_addr.S_un.S_addr;
 					spAgent->m_State	= TASKCLIENT_STATE_NEWCONNECTION;
-					if(pent)
-						spAgent->m_HostName	= pent->h_name;
-					else
+
+//					char aHost[256];
+//					if(getnameinfo((sockaddr*)&sock, sizeof(sock), aHost, 256, NULL, 0, 0) == 0)
+//						spAgent->m_HostName	= aHost;
+//					else
 						spAgent->m_HostName	= CStrF("%d.%d.%d.%d", (spAgent->m_Host & 0xff), ((spAgent->m_Host>>8) & 0xff), ((spAgent->m_Host>>16) & 0xff), ((spAgent->m_Host>>24) & 0xff));
 
 					spAgent->m_WorkerThread.Create(spAgent);
@@ -721,6 +706,9 @@ MRTC_TaskManager::MRTC_TaskManager(bool _bIgnoreLogOverride)
 	m_ClientSocket	= INVALID_SOCKET;
 	m_spLogger	= MNew(MRTC_TaskLogger);
 	m_hFileLock = NULL;
+	MACRO_GetSystem;
+	m_RestartTaskTime = pSys->GetEnvironment()->GetValuef("XWC_DIST_TIMEOUT", 45) * 60;
+	m_ReportTaskTime = pSys->GetEnvironment()->GetValuef("XWC_DIST_REPORTINTERVAL", 5) * 60;
 	if(_bIgnoreLogOverride == false)
 	{
 		m_spLog	= MNew2(MRTC_TaskManLog, this, "SYSTEM.LOG");
@@ -870,7 +858,7 @@ void MRTC_TaskManager::Host_Start()
 		return;
 	}
 
-	if(listen(HostSocket, 16) || listen(AgentSocket, 16))
+	if(listen(HostSocket, 64) || listen(AgentSocket, 64))
 	{
 		closesocket(CoordSocket);
 		closesocket(HostSocket);
@@ -1071,7 +1059,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 				// Some error on socket.
 				if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 				{
-					LogFile(CStrF("ERROR: Error %d occured on client '%s' when polling socket-send-state, adding assigned task to pending queue.", SendError, pClient->m_HostName.GetStr()));
+					LogFile(CStrF("ERROR: Error %d occured on client '%s(%d)' when polling socket-send-state, adding assigned task to pending queue.", SendError, pClient->m_HostName.GetStr(), pClient->m_Socket));
 					AddPendingRemoteTask(pClient->m_spTask);
 				}
 				pClient->Close();
@@ -1092,7 +1080,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 				// Some error on socket.
 				if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 				{
-					LogFile(CStrF("ERROR: Error %d occured on client '%s' when polling socket-recv-state, adding assigned task to pending queue.", RecvError, pClient->m_HostName.GetStr()));
+					LogFile(CStrF("ERROR: Error %d occured on client '%s(%d)' when polling socket-recv-state, adding assigned task to pending queue.", RecvError, pClient->m_HostName.GetStr(), pClient->m_Socket));
 					AddPendingRemoteTask(pClient->m_spTask);
 				}
 				pClient->Close();
@@ -1119,7 +1107,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 				{
 					if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 					{
-						LogFile(CStrF("ERROR: Unknown error occured on client '%s' when fetching packet-type, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+						LogFile(CStrF("ERROR: Error %d occured on client '%s(%d)' when fetching packet-type, adding assigned task to pending queue.", ErrorCode, pClient->m_HostName.GetStr(), pClient->m_Socket));
 						AddPendingRemoteTask(pClient->m_spTask);
 					}
 					pClient->Close();
@@ -1130,7 +1118,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 			{
 				if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 				{
-					LogFile(CStrF("ERROR: Client '%s' closed connection while fetching packet-type, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+					LogFile(CStrF("ERROR: Client '%s(%d)' closed connection while fetching packet-type, adding assigned task to pending queue.", pClient->m_HostName.GetStr(), pClient->m_Socket));
 					AddPendingRemoteTask(pClient->m_spTask);
 				}
 				pClient->Close();
@@ -1160,7 +1148,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 				{
 					if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 					{
-						LogFile(CStrF("ERROR: Unknown error occured on client '%s' when fetching packet-size, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+						LogFile(CStrF("ERROR: Error %d occured on client '%s(%d)' when fetching packet-size, adding assigned task to pending queue.", ErrorCode, pClient->m_HostName.GetStr(), pClient->m_Socket));
 						AddPendingRemoteTask(pClient->m_spTask);
 					}
 					pClient->Close();
@@ -1171,7 +1159,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 			{
 				if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 				{
-					LogFile(CStrF("ERROR: Client '%s' closed connection while fetching packet-size, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+					LogFile(CStrF("ERROR: Client '%s(%d)' closed connection while fetching packet-size, adding assigned task to pending queue.", pClient->m_HostName.GetStr(), pClient->m_Socket));
 					AddPendingRemoteTask(pClient->m_spTask);
 				}
 				pClient->Close();
@@ -1205,7 +1193,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 					{
 						if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 						{
-							LogFile(CStrF("ERROR: Unknown error occured on client '%s' when fetching packet-data, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+							LogFile(CStrF("ERROR: Error %d occured on client '%s(%d)' when fetching packet-data, adding assigned task to pending queue.", ErrorCode, pClient->m_HostName.GetStr(), pClient->m_Socket));
 							AddPendingRemoteTask(pClient->m_spTask);
 						}
 						pClient->Close();
@@ -1216,7 +1204,7 @@ TPtr<TaskPacket> MRTC_TaskManager::Host_FetchPacket(spMRTC_TaskClient _spClient)
 				{
 					if(pClient->m_spTask && pClient->m_spTask->m_nFailures < 3)
 					{
-						LogFile(CStrF("ERROR: Client '%s' closed connection while fetching packetdata, adding assigned task to pending queue.", pClient->m_HostName.GetStr()));
+						LogFile(CStrF("ERROR: Client '%s(%d)' closed connection while fetching packetdata, adding assigned task to pending queue.", pClient->m_HostName.GetStr(), pClient->m_Socket));
 						AddPendingRemoteTask(pClient->m_spTask);
 					}
 					pClient->Close();
@@ -1281,11 +1269,20 @@ void MRTC_TaskManager::Host_FetchPackets()
 			case PACKET_TYPE_REQUESTDATA:
 				{
 					// Client request task data (either just param or everything)
+
+					TArray<TArray<uint8> > llPacketData = spClient->m_spTask->m_llPacketData;
+					TArray<uint8> lParamData = spClient->m_spTask->m_lParamData;
+					if(spClient->m_spTask->m_pfnOnDistribute && !spClient->m_spTask->m_bOnDistributeDone)
+					{
+						// Need to re-create the damn data again
+						spClient->m_spTask->m_pfnOnDistribute(spClient->m_spTask->m_pTask, spClient->m_spTask->m_pTaskArg, lParamData, llPacketData);
+					}
+
 					uint32 FilesNeeded = *((uint32*)spPacket->m_lData.GetBasePtr());
 					if(FilesNeeded != 0)
 					{
 						uint32* pFiles = ((uint32*)spPacket->m_lData.GetBasePtr()) + 1;
-						for(int32 iFile = 0; spClient->m_spTask && (iFile < spClient->m_spTask->m_llPacketData.Len()) && (FilesNeeded != 0); iFile++)
+						for(int32 iFile = 0; spClient->m_spTask && (iFile < llPacketData.Len()) && (FilesNeeded != 0); iFile++)
 						{
 							bool bSend = false;
 							if(FilesNeeded == 0xffffffff)
@@ -1302,7 +1299,7 @@ void MRTC_TaskManager::Host_FetchPackets()
 							}
 
 							if(bSend)
-								Host_SendPacket(spClient, PACKET_TYPE_TASKDATA, spClient->m_spTask->m_llPacketData[iFile], &iFile, 1);
+								Host_SendPacket(spClient, PACKET_TYPE_TASKDATA, llPacketData[iFile], &iFile, 1);
 						}
 
 					}
@@ -1319,6 +1316,15 @@ void MRTC_TaskManager::Host_FetchPackets()
 //					}
 					if(spClient->m_spTask->m_lParamData.Len() > 0)
 						Host_SendPacket(spClient, PACKET_TYPE_TASKPARAM, spClient->m_spTask->m_lParamData);
+
+					if(spClient->m_spTask->m_pfnOnDistribute)
+					{
+						// Nuke data and recreate on demand?
+						spClient->m_spTask->m_bOnDistributeDone = false;
+						spClient->m_spTask->m_llPacketData.Destroy();
+						spClient->m_spTask->m_lPacketChecksum.Destroy();
+					}
+
 					Host_SendPacket(spClient, PACKET_TYPE_TASKEXECUTE, 0, 0);
 					break;
 				}
@@ -1332,6 +1338,7 @@ void MRTC_TaskManager::Host_FetchPackets()
 					case TASK_RETURN_FINISHED:
 						{
 //							LogFile(CStrF("Host %s finished a task successfully", spClient->m_HostName.GetStr()));
+							LogFile(CStrF("XWCDIST: Finished %s(%d)", spClient->m_HostName.Str(), spClient->m_Socket));
 							if(spPacket->m_lData.Len() > 4)
 							{
 								spClient->m_spTask->m_lResultData.SetLen(spPacket->m_lData.Len() - 4);
@@ -1360,6 +1367,7 @@ void MRTC_TaskManager::Host_FetchPackets()
 //							LogFile(CStrF("Host %s finished a task unsuccessfully", spClient->m_HostName.GetStr()));
 							M_ASSERT(spClient->m_spTask->m_pTask, "RemoteTask with no callee class assigned");
 							// Flag callee task as corrupt
+							LogFile(CStrF("XWCDIST: Error %s(%d)", spClient->m_HostName.Str(), spClient->m_Socket));
 							spClient->m_spTask->m_pTask->m_State = TASK_STATE_CORRUPT;
 							spClient->m_spTask->m_State	= REMOTETASK_STATE_CORRUPT;
 							spClient->m_spTask	= 0;
@@ -1392,6 +1400,7 @@ void MRTC_TaskManager::Host_UpdateNet()
 
 void MRTC_TaskManager::Host_BlockUntilDone()
 {
+	LogFile("XWCDIST: Start processing");
 	if(m_AgentSocket == INVALID_SOCKET)
 	{
 		// If not started yet then try to start networking
@@ -1407,6 +1416,7 @@ void MRTC_TaskManager::Host_BlockUntilDone()
 	}
 
 	Host_CloseAllClients();
+	LogFile("XWCDIST: Finished processing");
 
 	if(m_bThrowExceptionOnCorrupt && m_bCorrupt)
 	{
@@ -1637,13 +1647,13 @@ void MRTC_TaskManager::Host_SpawnClients()
 		while(iCurrent < nTaskCount)
 		{
 			uint64 RamSize = m_lspPendingRemoteTasks[iCurrent]->m_RamSize;
-			int32 Flags = m_lspPendingRemoteTasks[iCurrent]->m_Flags;
+			int32 Flags = (m_lspPendingRemoteTasks[iCurrent]->m_Flags & HOST_REQUEST_FL_MASK);
 			iCurrent = iCurrent + 1;
 			for(; iCurrent < nTaskCount; iCurrent++)
 			{
 				if(RamSize != m_lspPendingRemoteTasks[iCurrent]->m_RamSize)
 					break;
-				if(Flags != m_lspPendingRemoteTasks[iCurrent]->m_Flags)
+				if(Flags != (m_lspPendingRemoteTasks[iCurrent]->m_Flags & HOST_REQUEST_FL_MASK))
 					break;
 
 				nTasks++;
@@ -1828,6 +1838,13 @@ void MRTC_TaskManager::LogLine(CStr _Line)
 	m_spLogger->AddLine(_Line);
 }
 
+void MRTC_TaskManager::FlushLog()
+{
+	TArray<CStr> lLines = m_spLogger->GetLines();
+	for(int i = 0; i < lLines.Len(); i++)
+		LogFile(lLines[i]);
+}
+
 class MRTC_TaskArgVirtualRemoteTask : public MRTC_TaskBaseArg
 {
 	MRTC_DECLARE;
@@ -1993,6 +2010,8 @@ void MRTC_TaskManager::Host_ProcessRemote()
 						pClient->m_StartTime.Snapshot();
 						pClient->m_TimeOfLastPacket.Snapshot();
 						spTask->m_State	= REMOTETASK_STATE_RUNNING;
+
+						LogFile(CStrF("XWCDIST: Start %s(%d)", pClient->m_HostName.Str(), pClient->m_Socket));
 					}
 				}
 			}
@@ -2009,17 +2028,17 @@ void MRTC_TaskManager::Host_ProcessRemote()
 			if(pClient && pClient->m_spTask)
 			{
 				CMTime DeltaTime = TimeNow - pClient->m_TimeOfLastPacket;
-				if(DeltaTime.Compare(CMTime::CreateFromSeconds(60 * 15)) > 0)
+				if((DeltaTime.Compare(CMTime::CreateFromSeconds(m_RestartTaskTime)) > 0) && !(pClient->m_spTask->m_Flags & CLIENT_REQUEST_FL_SLOWTASK))
 				{
-					LogFile(CStrF("Agent '%s' has not updated itself in %s, terminating task and relocating to other host.", pClient->m_HostName.GetStr(), pClient->m_spTask->m_TaskName.GetStr(), CMTimeToStr(DeltaTime).GetStr()));
+					LogFile(CStrF("Agent '%s(%d)' has not updated itself in %s, terminating task and relocating to other host.", pClient->m_HostName.GetStr(), pClient->m_Socket, pClient->m_spTask->m_TaskName.GetStr(), CMTimeToStr(DeltaTime).GetStr()));
 					closesocket(pClient->m_Socket);
 					pClient->m_Socket = INVALID_SOCKET;
 				}
-				else if(DeltaTime.Compare(CMTime::CreateFromSeconds(60 * 5)) > 0)
+				else if(DeltaTime.Compare(CMTime::CreateFromSeconds(m_ReportTaskTime)) > 0)
 				{
 					CMTime Measure = TimeNow - pClient->m_StartTime;
 
-					LogFile(CStrF("Agent '%s' running task '%s', active for %s, time since last packet %s", pClient->m_HostName.GetStr(), pClient->m_spTask->m_TaskName.GetStr(), CMTimeToStr(Measure).GetStr(), CMTimeToStr(DeltaTime).GetStr()));
+					LogFile(CStrF("Agent '%s(%d)' running task '%s', active for %s, time since last packet %s", pClient->m_HostName.GetStr(), pClient->m_Socket, pClient->m_spTask->m_TaskName.GetStr(), CMTimeToStr(Measure).GetStr(), CMTimeToStr(DeltaTime).GetStr()));
 				}
 			}
 		}
@@ -2098,10 +2117,25 @@ bool MRTC_TaskManager::Client_Start(int _Address, int _Port)
 	return true;
 }
 
+void MRTC_TaskManager::Client_SetBlocking(bool _bBlocking)
+{
+	if (m_ClientSocket != INVALID_SOCKET)
+	{
+		uint32 NonBlocking = _bBlocking == false;
+		ioctlsocket(m_ClientSocket, FIONBIO, &NonBlocking);
+	}
+}
+
 void MRTC_TaskManager::Client_Stop()
 {
 	if(m_ClientSocket != INVALID_SOCKET)
 	{
+
+		linger l;
+		l.l_onoff = 1;
+		l.l_linger = 5;
+		setsockopt(m_ClientSocket, SOL_SOCKET, SO_LINGER, (char*)&l, sizeof(l));
+
 		closesocket(m_ClientSocket);
 		m_ClientSocket	= INVALID_SOCKET;
 	}
@@ -2260,7 +2294,6 @@ void MRTC_TaskManager::Client_SendData(void* _pData, int _Size)
 			}
 			else
 			{
-				LogFile(CStrF("Socket error %d when trying to send client data", SocketError));
 				// Lost connection
 				closesocket(m_ClientSocket);
 				m_ClientSocket	= INVALID_SOCKET;
@@ -2346,7 +2379,7 @@ void MRTC_TaskManager::Host_SendData(spMRTC_TaskClient _spClient, void* _pData, 
 			// Connection has been closed from other side
 			if(_spClient->m_spTask && _spClient->m_spTask->m_nFailures < 3)
 			{
-				LogFile(CStrF("ERROR: Lost connection to client '%s', adding assigned task to pending queue.", _spClient->m_HostName.GetStr()));
+				LogFile(CStrF("ERROR: Lost connection to client '%s(%d)', adding assigned task to pending queue.", _spClient->m_HostName.GetStr(), _spClient->m_Socket));
 				AddPendingRemoteTask(_spClient->m_spTask);
 			}
 			_spClient->Close();
@@ -2365,7 +2398,7 @@ void MRTC_TaskManager::Host_SendData(spMRTC_TaskClient _spClient, void* _pData, 
 				// Lost connection
 				if(_spClient->m_spTask && _spClient->m_spTask->m_nFailures < 3)
 				{
-					LogFile(CStrF("ERROR: Unknown error occured on client '%s', adding assigned task to pending queue.", _spClient->m_HostName.GetStr()));
+					LogFile(CStrF("ERROR: Unknown error occured on client '%s(%d)', adding assigned task to pending queue.", _spClient->m_HostName.GetStr(), _spClient->m_Socket));
 					AddPendingRemoteTask(_spClient->m_spTask);
 				}
 				_spClient->Close();

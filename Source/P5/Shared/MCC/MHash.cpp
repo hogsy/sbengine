@@ -45,7 +45,7 @@ void CHash2D::Create(int _nBoxes, int _BoxShiftSize, int _MaxIDs, bool _bUseLarg
 	THash<int32, CHash2DNull>::Create(_MaxIDs, m_nBoxes, _bUseLarge);
 }
 
-void CHash2D::Insert(int _ID, const CVec3Dfp4& _Min, const CVec3Dfp4& _Max)
+void CHash2D::Insert(int _ID, const CVec3Dfp32& _Min, const CVec3Dfp32& _Max)
 {
 	if (!m_pHash) Error("Insert", "Not initialized.");
 	// Object med radie större än lådstorleken hamnar i large-listan.
@@ -76,7 +76,7 @@ void CHash2D::Insert(int _ID, const CVec3Dfp4& _Min, const CVec3Dfp4& _Max)
 		THash<int32, CHash2DNull>::InsertLarge(_ID);
 }
 
-int CHash2D::EnumerateBox(const CVec3Dfp4& _Min, const CVec3Dfp4& _Max, int32* _pEnumRetIDs, int _MaxEnumIDs)
+int CHash2D::EnumerateBox(const CVec3Dfp32& _Min, const CVec3Dfp32& _Max, int32* _pEnumRetIDs, int _MaxEnumIDs)
 {
 	if (!m_pHash) Error("Insert", "Not initialized.");
 	int nIDs = 0;
@@ -94,7 +94,7 @@ int CHash2D::EnumerateBox(const CVec3Dfp4& _Min, const CVec3Dfp4& _Max, int32* _
 			ID = m_pIDInfo[ID].m_iNext;
 			
 			/*		CWObject* pObj = m_pIDInfo[CurID].m_pObj;
-			const CBox3Dfp4* pBox = pObj->GetAbsBoundBox();
+			const CBox3Dfp32* pBox = pObj->GetAbsBoundBox();
 			if (pBox->m_Min.k[0] > _Max.k[0]) continue;
 			if (pBox->m_Min.k[1] > _Max.k[1]) continue;
 			if (pBox->m_Min.k[2] > _Max.k[2]) continue;
@@ -161,7 +161,7 @@ int CHash2D::EnumerateBox(const CVec3Dfp4& _Min, const CVec3Dfp4& _Max, int32* _
 				ID = m_pIDInfo[ID].m_iNext;
 
 /*				CWObject* pObj = m_pIDInfo[CurID].m_pObj;
-				const CBox3Dfp4* pBox = pObj->GetAbsBoundBox();
+				const CBox3Dfp32* pBox = pObj->GetAbsBoundBox();
 				if (pBox->m_Min.k[0] > _Max.k[0]) continue;
 				if (pBox->m_Min.k[1] > _Max.k[1]) continue;
 				if (pBox->m_Min.k[2] > _Max.k[2]) continue;

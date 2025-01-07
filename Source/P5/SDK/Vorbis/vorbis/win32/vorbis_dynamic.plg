@@ -1,0 +1,207 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: vorbis_dynamic - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\Temp1\Windows\RSP89.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ogg_d.lib /nologo /dll /incremental:yes /pdb:"Vorbis_Dynamic_Debug/vorbis_d.pdb" /debug /machine:I386 /def:".\vorbis.def" /out:"Vorbis_Dynamic_Debug/vorbis_d.dll" /implib:"Vorbis_Dynamic_Debug/vorbis_d.lib" /pdbtype:sept /libpath:"..\..\ogg\win32\Dynamic_Debug" 
+.\Vorbis_Dynamic_Debug\analysis.obj
+.\Vorbis_Dynamic_Debug\barkmel.obj
+.\Vorbis_Dynamic_Debug\bitrate.obj
+.\Vorbis_Dynamic_Debug\block.obj
+.\Vorbis_Dynamic_Debug\codebook.obj
+.\Vorbis_Dynamic_Debug\envelope.obj
+.\Vorbis_Dynamic_Debug\floor0.obj
+.\Vorbis_Dynamic_Debug\floor1.obj
+.\Vorbis_Dynamic_Debug\info.obj
+.\Vorbis_Dynamic_Debug\lpc.obj
+.\Vorbis_Dynamic_Debug\lsp.obj
+.\Vorbis_Dynamic_Debug\mapping0.obj
+.\Vorbis_Dynamic_Debug\mdct.obj
+.\Vorbis_Dynamic_Debug\psy.obj
+.\Vorbis_Dynamic_Debug\registry.obj
+.\Vorbis_Dynamic_Debug\res0.obj
+.\Vorbis_Dynamic_Debug\sharedbook.obj
+.\Vorbis_Dynamic_Debug\smallft.obj
+.\Vorbis_Dynamic_Debug\synthesis.obj
+.\Vorbis_Dynamic_Debug\vorbisenc.obj
+.\Vorbis_Dynamic_Debug\window.obj
+]
+Creating command line "link.exe @D:\Temp1\Windows\RSP89.tmp"
+<h3>Output Window</h3>
+Linking...
+LINK : warning LNK4224: /PDBTYPE is no longer supported;  ignored
+   Creating library Vorbis_Dynamic_Debug/vorbis_d.lib and object Vorbis_Dynamic_Debug/vorbis_d.exp
+smallft.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+synthesis.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+vorbisenc.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+window.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function __vorbis_window
+mdct.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _mdct_init
+psy.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+res0.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+sharedbook.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+info.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+lpc.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+lsp.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+mapping0.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+codebook.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+envelope.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function __ve_envelope_init
+floor0.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+floor1.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+analysis.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _vorbis_analysis
+barkmel.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+bitrate.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _vorbis_bitrate_init
+block.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+smallft.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+synthesis.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+vorbisenc.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+window.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+mdct.obj : error LNK2019: unresolved external symbol __RTC_Shutdown referenced in function _mdct_init
+psy.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+res0.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+sharedbook.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+info.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+lpc.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+lsp.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+mapping0.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+codebook.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+envelope.obj : error LNK2019: unresolved external symbol __RTC_Shutdown referenced in function __ve_envelope_init
+floor0.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+floor1.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+analysis.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+barkmel.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+bitrate.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+block.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+smallft.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+synthesis.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+vorbisenc.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+window.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+mdct.obj : error LNK2019: unresolved external symbol __RTC_InitBase referenced in function _mdct_init
+psy.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+res0.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+sharedbook.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+info.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+lpc.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+lsp.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+mapping0.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+codebook.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+envelope.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+floor0.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+floor1.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+analysis.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+barkmel.obj : error LNK2019: unresolved external symbol __RTC_InitBase referenced in function _main
+bitrate.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+block.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+res0.obj : error LNK2001: unresolved external symbol @_RTC_CheckStackVars@8
+sharedbook.obj : error LNK2001: unresolved external symbol @_RTC_CheckStackVars@8
+synthesis.obj : error LNK2001: unresolved external symbol @_RTC_CheckStackVars@8
+info.obj : error LNK2001: unresolved external symbol @_RTC_CheckStackVars@8
+lsp.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function _vorbis_fromdBlook
+mapping0.obj : error LNK2001: unresolved external symbol @_RTC_CheckStackVars@8
+psy.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function __vp_psy_init
+analysis.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function __analysis_output_always
+bitrate.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function _vorbis_bitrate_addblock
+envelope.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function __ve_amp
+floor1.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function _floor1_look
+vorbisenc.obj : error LNK2001: unresolved external symbol __ftol2
+mdct.obj : error LNK2019: unresolved external symbol __ftol2 referenced in function _mdct_backward
+psy.obj : error LNK2001: unresolved external symbol __ftol2
+res0.obj : error LNK2001: unresolved external symbol __ftol2
+sharedbook.obj : error LNK2019: unresolved external symbol __ftol2 referenced in function __make_words
+barkmel.obj : error LNK2019: unresolved external symbol __ftol2 referenced in function _main
+bitrate.obj : error LNK2001: unresolved external symbol __ftol2
+floor0.obj : error LNK2001: unresolved external symbol __ftol2
+floor1.obj : error LNK2001: unresolved external symbol __ftol2
+Vorbis_Dynamic_Debug/vorbis_d.dll : fatal error LNK1120: 5 unresolved externals
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+vorbis_d.dll - 81 error(s), 1 warning(s)
+<h3>
+--------------------Configuration: vorbis_static - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+
+
+
+<h3>Results</h3>
+vorbis_static_d.lib - 0 error(s), 0 warning(s)
+<h3>
+--------------------Configuration: vorbisenc_dynamic - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\Temp1\Windows\RSP8D.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib vorbis_d.lib /nologo /dll /incremental:yes /pdb:"VorbisEnc_Dynamic_Debug/vorbisenc_d.pdb" /debug /machine:I386 /def:".\vorbisenc.def" /out:"VorbisEnc_Dynamic_Debug/vorbisenc_d.dll" /implib:"VorbisEnc_Dynamic_Debug/vorbisenc_d.lib" /pdbtype:sept /libpath:"../../vorbis/win32/Vorbis_Dynamic_Debug" 
+.\VorbisEnc_Dynamic_Debug\vorbisenc.obj
+]
+Creating command line "link.exe @D:\Temp1\Windows\RSP8D.tmp"
+<h3>Output Window</h3>
+Linking...
+LINK : warning LNK4224: /PDBTYPE is no longer supported;  ignored
+   Creating library VorbisEnc_Dynamic_Debug/vorbisenc_d.lib and object VorbisEnc_Dynamic_Debug/vorbisenc_d.exp
+vorbisenc.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _vorbis_encode_setup_init
+vorbisenc.obj : error LNK2019: unresolved external symbol __ftol2 referenced in function _vorbis_encode_setup_init
+vorbisenc.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+vorbisenc.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+VorbisEnc_Dynamic_Debug/vorbisenc_d.dll : fatal error LNK1120: 4 unresolved externals
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+vorbisenc_d.dll - 5 error(s), 1 warning(s)
+<h3>
+--------------------Configuration: vorbisenc_static - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+
+
+
+<h3>Results</h3>
+vorbisenc_static_d.lib - 0 error(s), 0 warning(s)
+<h3>
+--------------------Configuration: vorbisfile_dynamic - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\Temp1\Windows\RSP91.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ogg_d.lib vorbis_d.lib /nologo /dll /incremental:yes /pdb:"VorbisFile_Dynamic_Debug/vorbisfile_d.pdb" /debug /machine:I386 /def:".\vorbisfile.def" /out:"VorbisFile_Dynamic_Debug/vorbisfile_d.dll" /implib:"VorbisFile_Dynamic_Debug/vorbisfile_d.lib" /pdbtype:sept /libpath:"..\..\ogg\win32\Dynamic_Debug" /libpath:".\Vorbis_Dynamic_Debug" 
+.\VorbisFile_Dynamic_Debug\vorbisfile.obj
+]
+Creating command line "link.exe @D:\Temp1\Windows\RSP91.tmp"
+<h3>Output Window</h3>
+Linking...
+LINK : warning LNK4224: /PDBTYPE is no longer supported;  ignored
+   Creating library VorbisFile_Dynamic_Debug/vorbisfile_d.lib and object VorbisFile_Dynamic_Debug/vorbisfile_d.exp
+vorbisfile.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _ov_clear
+vorbisfile.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+vorbisfile.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+vorbisfile.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function __fetch_headers
+vorbisfile.obj : error LNK2019: unresolved external symbol __ftol2 referenced in function _ov_bitrate
+VorbisFile_Dynamic_Debug/vorbisfile_d.dll : fatal error LNK1120: 5 unresolved externals
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+vorbisfile_d.dll - 6 error(s), 1 warning(s)
+<h3>
+--------------------Configuration: vorbisfile_static - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+
+
+
+<h3>Results</h3>
+vorbisfile_static_d.lib - 0 error(s), 0 warning(s)
+Build Time 0:00.6
+</pre>
+</body>
+</html>

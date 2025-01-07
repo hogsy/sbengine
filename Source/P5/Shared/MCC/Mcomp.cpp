@@ -1007,8 +1007,8 @@ void* CLZW::Compress(void *Source, void *Destination, uint32 Len)
 
 	if (Dst==NULL) Dst=DNew(uint8) uint8[Size+4+4];
 
-	TList_Vector<StringEntryComp>* StringTable=
-		DNew(TList_Vector<StringEntryComp>) TList_Vector<StringEntryComp>[1 << m_MaxBits];
+	TArray<StringEntryComp>* StringTable=
+		DNew(TArray<StringEntryComp>) TArray<StringEntryComp>[1 << m_MaxBits];
 
 	if (Dst==NULL || StringTable==NULL) {
 		if (Dst!=NULL && Destination==NULL) delete[] Dst;	
@@ -1918,16 +1918,16 @@ void CLZSS::SetCompress(CCompressSettings& Settings)
 		m_MaxMatchLength=((CLZSSSettings*)&Settings)->GetMaxMatchLength();
 		m_bUseHuffman=((CLZSSSettings*)&Settings)->GetHuffman();
 
-		uint8 NrBits=(uint8)(logf(fp4(m_WindowSize))/logf(fp4(2))+0.5f);
+		uint8 NrBits=(uint8)(logf(fp32(m_WindowSize))/logf(fp32(2))+0.5f);
 		if ((m_WindowSize-(1 << NrBits))!=0)
 			Error("SetCompress","m_pWindow size must be a power of 2.");
 
 		m_MinMatchLength=0;
-		while (m_MinMatchLength*9<=NrBits+2+M_Floor(logf(fp4(m_MaxMatchLength-m_MinMatchLength))/logf(fp4(2))))
+		while (m_MinMatchLength*9<=NrBits+2+M_Floor(logf(fp32(m_MaxMatchLength-m_MinMatchLength))/logf(fp32(2))))
 			m_MinMatchLength++;
 
 		m_OffsetSize=NrBits;
-		m_LengthSize=1+(uint32)M_Floor(logf(fp4(m_MaxMatchLength-m_MinMatchLength))/logf(fp4(2)));
+		m_LengthSize=1+(uint32)M_Floor(logf(fp32(m_MaxMatchLength-m_MinMatchLength))/logf(fp32(2)));
 	}
 	else
 		Error("SetCompress","Incompatible LZSS-compression settings.");

@@ -57,12 +57,12 @@ public:
 
 protected:
 	int m_MaxIDs;
-	TList_Vector<TLink> m_lHash;
+	TArray<TLink> m_lHash;
 	TLink* m_pHash;
 	TLink m_iFirstLarge;
 	bool m_bUseLarge;
 
-	TList_Vector<CHashIDInfo> m_lIDInfo;
+	TArray<CHashIDInfo> m_lIDInfo;
 	CHashIDInfo* m_pIDInfo;
 
 public:
@@ -122,6 +122,15 @@ public:
 		m_pIDInfo = m_lIDInfo.GetBasePtr();
 		m_MaxIDs = _MaxIDs;
 		m_bUseLarge = _bUseLarge;
+	}
+
+	void Resize(int _MaxIDs)
+	{
+		m_lIDInfo.SetLen(_MaxIDs);
+		m_pIDInfo = m_lIDInfo.GetBasePtr();
+		for (int i = m_MaxIDs; i < _MaxIDs; i++)
+			m_pIDInfo[i].ClearLinkage();
+		m_MaxIDs = _MaxIDs;
 	}
 
 protected:
@@ -203,174 +212,7 @@ public:
 	}
 };
 
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| CDA_Hash
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
 
-class MCCDLLEXPORT CDA_Hashable;
-class MCCDLLEXPORT CDA_HashableMember;
-
-class MCCDLLEXPORT CDA_Hash
-{
-public:
-
-	CDA_HashableMember **m_ppHash;
-	mint m_HashBits;
-	mint m_NumElements;
-	mint m_NumHashed;
-	uint8 m_NumHashBits;
-	uint8 m_AutomaticGrowth;
-	mint m_IdOffset;
-
-	CDA_Hash();
-	CDA_Hash (uint8 _NumHashBits, mint _IdOffset, uint8 _AutomaticGrowth);
-	virtual ~CDA_Hash();
-
-	void InitHash(uint8 _NumHashBits, mint _IdOffset, uint8 _AutomaticGrowth);
-	virtual CDA_Hashable *Get(void *_pHashData);
-	virtual CDA_HashableMember *GetMember(void *_pHashData);
-
-	virtual void MoveToLoc(CDA_Hash *_pNewLoc);	
-
-#ifdef _DEBUG
-	void ShowSpread();
-#endif
-
-	virtual bool IsSame(void *_pFirst, void *_pSecond) pure;
-	virtual mint GetHash(void *_pHashData) pure;
-};
-
-class MCCDLLEXPORT CDA_IDHash : public CDA_Hash
-{
-public:
-
-	mint m_IdSize;
-
-	CDA_IDHash ();
-	CDA_IDHash (uint8 _NumHashBits, mint _IdOffset, mint _IdSize, uint8 _AutomaticGrowth);
-	void InitHash(uint8 _NumHashBits, mint _IdOffset, mint _IdSize, uint8 _AutomaticGrowth);
-
-	virtual CDA_Hashable *Get(void *_pHashData);
-	virtual CDA_HashableMember *GetMember(void *_pHashData);
-
-	virtual void MoveToLoc(CDA_Hash *_pNewLoc);	
-
-	virtual bool IsSame(void *_pFirst, void *_pSecond){return false;}
-	virtual mint GetHash(void *_pHashData);
-};
-
-class MCCDLLEXPORT CDA_HashableMember : public CDA_Poolable
-{
-public:
-	CDA_Hashable *m_pHashable;
-	CDA_HashableMember *m_pHashable_Next;
-	CDA_HashableMember *m_pHashable_Prev;
-
-	CDA_Hash *m_pHash;
-	CDA_HashableMember **m_ppHash_First;
-	CDA_HashableMember *m_pHash_Prev;
-	CDA_HashableMember *m_pHash_Next;
-
-	CDA_HashableMember();
-	~CDA_HashableMember();
-
-//	void Hash_Insert(CDA_Hash *_Hash);
-	
-};
-
-class MCCDLLEXPORT CDA_Hashable
-{
-public:
-	CDA_HashableMember *m_pDA_Hash_First;
-
-	CDA_Hashable();
-	virtual ~CDA_Hashable();
-
-	void MoveToLoc(CDA_Hashable *_pNewLoc);
-
-	void Hash_Insert(CDA_Hash *_pHash);
-	void Hash_Insert(CDA_Hash &_Hash);
-
-	void Hash_Remove(CDA_Hash *_pHash);
-	void Hash_Remove(CDA_Hash &_Hash);
-
-};
-
-
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| Small hash
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-
-class CDA_HashSmall;
-
-class MCCDLLEXPORT CDA_HashLink
-{
-public:
-	void *m_pHashable;
-	CDA_HashLink **m_ppHash_First;
-	CDA_HashLink *m_pHash_Prev;
-	CDA_HashLink *m_pHash_Next;
-
-	CDA_HashLink();
-	~CDA_HashLink();
-
-	void Hash_Insert(CDA_HashSmall *_Hash, void *_Hashable);
-	void RemoveFromHash();
-};
-
-class MCCDLLEXPORT CDA_HashSmall
-{
-public:
-
-	CDA_HashLink **m_ppHash;
-	mint m_HashBits;
-	mint m_NumElements;
-	mint m_NumHashed;
-	uint8 m_NumHashBits;
-	uint8 m_AutomaticGrowth;
-	mint m_IdOffset;
-
-	CDA_HashLink m_HashLink;
-
-	CDA_HashSmall();
-	CDA_HashSmall (uint8 _NumHashBits, mint _IdOffset, uint8 _AutomaticGrowth);
-	virtual ~CDA_HashSmall();
-
-	void InitHash(uint8 _NumHashBits, mint _IdOffset, uint8 _AutomaticGrowth);
-	void *Get(void *_pHashData);
-
-	virtual bool IsSame(void *_pFirst, void *_pSecond) pure;
-	virtual mint GetHash(void *_pHashData) pure;
-};
-
-
-template <class TMember> 
-class TCDA_IDHashType : public CDA_IDHash
-{
-public:
-
-	TMember *GetByID(void *_pID)
-	{
-		return (TMember *)CDA_IDHash::Get(_pID);
-
-	}
-};
-
-template <class TMember, class TImpl, class THashData> 
-class TCDA_HashType : public TImpl
-{
-public:
-
-	TMember *GetTyped(THashData *HashData)
-	{
-		return (TMember *)TImpl::Get(HashData);
-
-	}
-};
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -395,6 +237,7 @@ public:
 	void Create(int _nIndices, bool _bCaseSensitive = true, int _HashShiftSize = 8);
 	void Insert(int _Index, CStr _Str);
 	int GetIndex(const char* _pStr);
+	int GetIndex(uint32 _StrHash);
 };
 
 typedef TPtr<CStringHash> spCStringHash;
@@ -407,7 +250,14 @@ typedef TPtr<CStringHash> spCStringHash;
 class CStringHashConstElement
 {
 public:
-	const char* m_pStr;
+	union
+	{
+		const char* m_pStr;
+		uint32 m_StrHash;
+	};
+#ifndef M_RTM
+	const char* m_pStrDebug;
+#endif
 };
 
 class MCCDLLEXPORT CStringHashConst : public THash<int16, CStringHashConstElement>
@@ -422,6 +272,7 @@ public:
 	void Create(int _nIndices, bool _bCaseSensitive = true, int _HashShiftSize = 8);
 	void Insert(int _Index, const char* _pStr);
 	int GetIndex(const char* _pStr);
+	int GetIndex(uint32 _StrHash);
 };
 
 typedef TPtr<CStringHashConst> spCStringHashConst;
@@ -473,8 +324,8 @@ public:
 	void Create(int16 _MaxID, int _HashBits);
 
 	void Insert(int16 _ID, uint32 _Value);
-	bool GetValue(int16 _ID, uint32& _RetValue);
-	int16 GetIndex(uint32 _Value);					// -1 == Not found
+	bool GetValue(int16 _ID, uint32& _RetValue) const;
+	int16 GetIndex(uint32 _Value) const;					// -1 == Not found
 };
 
 typedef TPtr<CMap32> spCMap32;

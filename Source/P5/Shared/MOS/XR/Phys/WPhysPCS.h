@@ -66,8 +66,8 @@ private:
 	}
 
 
-	int IntersectFaceBox(const float *_fFace, const CMat43fp4 *_T0, const CMat43fp4 *_T1, const float *_BoxMinMax, CCollisionInfo *_pCollInfo);
-	int IntersectBoxBox(const float *_Box, const CMat43fp4 *_T0, const CMat43fp4 *_T1, const float *_BoxMinMax, CCollisionInfo *_pCollInfo);
+	int IntersectFaceBox(const float *_fFace, const CMat4Dfp32 *_T0, const CMat4Dfp32 *_T1, const float *_BoxMinMax, CCollisionInfo *_pCollInfo);
+	int IntersectBoxBox(const float *_Box, const CMat4Dfp32 *_T0, const CMat4Dfp32 *_T1, const float *_BoxMinMax, CCollisionInfo *_pCollInfo);
 
 
 public:
@@ -120,8 +120,8 @@ public:
 	void Clear();		// clear a set
 
 	void SetBox(const float *_BoxMinMax);
-	void SetBox(const CBox3Dfp4* _pBox);
-	void SetBox(const CVec3Dfp4* _pMin, const CVec3Dfp4* _pMax);
+	void SetBox(const CBox3Dfp32* _pBox);
+	void SetBox(const CVec3Dfp32* _pMin, const CVec3Dfp32* _pMax);
 	void GetBox(float *_BoxMinMax) const;
 
 	void CollectSet(const float *_BoxMinMax, CXR_PhysicsModel *_pObj, int _nObj);
@@ -132,7 +132,7 @@ public:
 
 	int CollidePoint(const float *_u, const float *_v, CCollisionInfo *_pCollisionInfo, int _nMaxCollInfo);
 	int CollideSphere(const float *_u, const float *_v, const float _radius, CCollisionInfo *_pCollisionInfo, int _nMaxCollInfo);
-	int CollideBox(const CMat43fp4 *_T0, const CMat43fp4 *_T1, const float *_BoxMinMax, CCollisionInfo* _pCollInfo, int _nMaxCollInfo);
+	int CollideBox(const CMat4Dfp32 *_T0, const CMat4Dfp32 *_T1, const float *_BoxMinMax, CCollisionInfo* _pCollInfo, int _nMaxCollInfo);
 
 	void AddFace(const uint8 _iFlags, const int _iObj, const float *_fPlaneEq, const float *_fFace, const class CXW_Surface *_pSurface);
 	void AddPoint(const uint8 _iFlags, const int _iObj, const float *_fPoint);

@@ -27,6 +27,7 @@
 
 #endif
 
+
 //JK-NOTE: Had to move the constructor out from the class since it requires the definition of CByteStreamData class
 CByteStreamManager::CByteStreamManager()
 {
@@ -34,7 +35,6 @@ CByteStreamManager::CByteStreamManager()
 	m_spLogFile = MNew(CLogFile);
 
 	M_OFFSET(CByteStreamDrive, m_DriveName, Offset);
-	m_DriveHash.InitHash(2, Offset, 2);
 	m_DefaultCacheSize = 65536;
 	m_DefaultNumCaches = 4;
 	m_pXDFThread = 0;
@@ -135,18 +135,6 @@ void CByteStreamCacheLine::BlockUntilDone()
 	m_pStream->Service();
 }
 
-
-int CByteStreamDriveSortList::Compare(void *_pFirst, void *_pSecond)
-{
-	CByteStreamCacheLine *pFirst = (CByteStreamCacheLine *)_pFirst;
-	CByteStreamCacheLine *pSecond = (CByteStreamCacheLine *)_pSecond;
-	if (pFirst->m_Prio > pSecond->m_Prio)
-		return 1;
-	if (pFirst->m_Prio < pSecond->m_Prio)
-		return -1;
-	
-	return 0;
-}
 
 
 void CByteStreamDrive::Create(const char *_pDriveName)
@@ -286,6 +274,13 @@ void CByteStreamCacheLine::Destroy()
 	bool bWantThrow = false;
 	M_ASSERT(!m_PendingOperation.m_pInstance || m_PendingOperation.Done(false, bWantThrow), "Must not be doing this there");
 
+	{
+		M_LOCK(m_pDrive->m_Lock);
+		m_CacheLineLink.Unlink();
+		m_DriveLink.Unlink();
+		m_PendingLink.Unlink();
+	}
+
 	if (m_PendingOperation.m_pInstance)
 		m_PendingOperation.CloseInstance();
 
@@ -294,16 +289,8 @@ void CByteStreamCacheLine::Destroy()
 	else if (m_bOwnCacheLine)
 		MRTC_GetMemoryManager()->Free(m_pAlignedCacheLine);
 
-	{
-		M_LOCK(m_pDrive->m_Lock);
-		m_CacheLineList.Unlink();
-		m_DriveList.Unlink();
-		m_PendingList.Unlink();
-	}
 }
 
-
-DA_LLSI(CByteStreamData);
 
 
 //#################################################################################
@@ -342,10 +329,16 @@ void CByteStreamManager::XDF_Use(const char* _pName, const char* _pBasePath)
 	}
 	m_pXDFThread = MRTC_SystemInfo::OS_GetThreadID();
 	
-	if (m_pXDFUse)
-		delete m_pXDFUse;
+	M_TRACEALWAYS("--- XDFUse (name='%s' basepath='%s') ---\n", _pName, _pBasePath);
 
-	m_pXDFUse = NULL;
+	CXDF * pUse = m_pXDFUse;
+
+	{
+		DLock(m_XDFUseLock);
+		m_pXDFUse = NULL;
+	}
+	if (pUse)
+		delete m_pXDFUse;
 	
 	CXDF *pUseXDF = DNew(CXDF) CXDF;
 	
@@ -361,12 +354,15 @@ void CByteStreamManager::XDF_Use(const char* _pName, const char* _pBasePath)
 	}
 	)
 	
-	m_pXDFUse = pUseXDF;
+	{
+		DLock(m_XDFUseLock);
+		m_pXDFUse = pUseXDF;
+	}
 }
 
 CStr CByteStreamManager::XDF_GetCurrent()
 {
-	M_LOCK(m_XDFLock);
+	DLock(m_XDFUseLock);
 	if (m_pXDFUse)
 	{
 		return m_pXDFUse->m_File;
@@ -392,16 +388,20 @@ void CByteStreamManager::XDF_Stop()
 	if (m_pXDFThread != MRTC_SystemInfo::OS_GetThreadID())
 		return;	
 
-	M_TRACEALWAYS("XDFStop\n");
+	M_TRACEALWAYS("--- XDFStop ---\n");
 	m_pXDFThread = NULL;
 	
 	if (m_pXDFRecord)
 		delete m_pXDFRecord;
 	m_pXDFRecord = NULL;
 	
-	if (m_pXDFUse)
-		delete m_pXDFUse;
-	m_pXDFUse = NULL;
+	CXDF * pXDF = m_pXDFUse;
+	{
+		DLock(m_XDFUseLock);
+		m_pXDFUse = NULL;
+	}
+	if (pXDF)
+		delete pXDF;
 }
 
 void CByteStreamManager::XDF_Pause()
@@ -475,9 +475,13 @@ void CByteStreamManager::XDF_Destruct()
 	if (m_pXDFRecord)
 		delete m_pXDFRecord;
 	m_pXDFRecord = NULL;
-	if (m_pXDFUse)
-		delete m_pXDFUse;
-	m_pXDFUse = NULL;
+	CXDF *pUse = m_pXDFUse;
+	{
+		DLock(m_XDFUseLock);
+		m_pXDFUse = NULL;
+	}
+	if (pUse)
+		delete pUse;
 }
 
 #ifndef M_RTM
@@ -545,8 +549,8 @@ CByteStreamDrive *CByteStreamManager::CreateDrive(CStr &_Drive)
 
 	pDrive = DNew(CByteStreamDrive) CByteStreamDrive;
 	pDrive->Create(_Drive);
-	pDrive->m_HashLink.Hash_Insert(&m_DriveHash, pDrive);
-	pDrive->m_ListLink.Link(m_Drives, pDrive);
+	m_DriveTree.f_Insert(pDrive);
+	m_Drives.Insert(pDrive);
 	return pDrive;
 }
 
@@ -554,16 +558,17 @@ bool CByteStreamManager::ServiceDrives(bool _bThrows)
 {
 	bool bThrew = 0;
 	M_LOCK(m_Lock);
-	SICByteStreamDrive Iter = m_Drives;
+	DLinkDS_Iter(CByteStreamDrive, m_Link) Iter = m_Drives;
 
 	while (Iter)
 	{
+		CByteStreamDrive *pDrive = Iter;
+		++Iter;
 		{
 			M_UNLOCK(m_Lock);
-			if (Iter->Service(NULL))
+			if (pDrive->Service(NULL))
 				bThrew = true;
 		}
-		++Iter;
 	}
 
 	return bThrew;
@@ -576,23 +581,18 @@ CByteStreamManager::~CByteStreamManager()
 
 	m_spLogFile = NULL;
 	{
-		SICByteStreamData Iter = m_OpenStreams;
+		DLinkDS_Iter(CByteStreamData, m_Link) Iter = m_OpenStreams;
 		while (Iter)
 		{
 			CByteStreamData* pData = (CByteStreamData*)Iter;
+			++Iter;
 			M_TRACEALWAYS("Autodeleting stream for file %s\r\n", pData->m_FileName.GetStr());
-			delete (CByteStreamData *)Iter;
-			Iter = m_OpenStreams;
+			delete pData;
 		}
 	}
 
-	SICByteStreamDrive Iter = m_Drives;
-	while (Iter)
-	{
-		delete (CByteStreamDrive *)Iter;
-		Iter = m_Drives;
-	}
-
+	m_DriveTree.RemoveAll();
+	m_Drives.DeleteAll();
 }
 
 
@@ -622,7 +622,7 @@ void CByteStreamManager::SetDriveCacheNum(const char *_pDrive, aint _Value)
 	GetDrive(Tmp)->SetCacheNum(_Value);
 }
 
-void CByteStreamData::SetPriority(fp4 _Priority)
+void CByteStreamData::SetPriority(fp32 _Priority)
 {
 	m_Priority = _Priority;
 }
@@ -675,7 +675,10 @@ bool CByteStreamData::Create(const CStr &_FileName, int _Flags, float _Priority,
 		m_pDrive = m_pStreamManager->GetDrive(DriveName);
 	}
 
-	m_ListLink.Link(&m_pStreamManager->m_OpenStreams, this);
+	{
+		M_LOCK(m_pStreamManager->m_Lock);
+		m_pStreamManager->m_OpenStreams.Insert(this);
+	}
 
 	{
 		m_OpenFlags = _Flags;
@@ -706,7 +709,7 @@ void CByteStreamData::Close()
 		if (!(m_OpenFlags & EByteStream_NoLog))
 		{
 			m_TimeOpen.Stop();
-			fp4 Time = m_TimeOpen.GetTime();
+			fp32 Time = m_TimeOpen.GetTime();
 
 			M_LOCK(m_pStreamManager->m_Lock);
 			m_pStreamManager->m_spLogFile->Log(CFStrF("X %9d (%.3f MB/Sec, %.1f ms) Closed File %s", (int)m_BytesRead, (m_BytesRead / Time) / (1024.0f * 1024.0f), Time*1000.0f, m_FileName.Str()).Str());
@@ -727,7 +730,7 @@ void CByteStreamData::Close()
 		// Remove those that are not writing
 		if (!(m_OpenFlags & (EByteStream_Write | EByteStream_NoDeferClose)))
 		{
-			SICByteStreamCacheLine Iter = m_PendingCacheLines;
+			DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) Iter = m_PendingCacheLines;
 			if (Iter)
 			{
 				MSCOPESHORT(CByteStreamCacheLine::BlockOnPending);
@@ -742,9 +745,9 @@ void CByteStreamData::Close()
 						{
 							M_LOCK(m_pDrive->m_Lock);
 
-							_pToDelete->m_CacheLineList.Unlink();
-							_pToDelete->m_DriveList.Unlink();
-							_pToDelete->m_PendingList.Unlink();
+							_pToDelete->m_CacheLineLink.Unlink();
+							_pToDelete->m_DriveLink.Unlink();
+							_pToDelete->m_PendingLink.Unlink();
 						}
 
 						_pToDelete->m_bPending = false;
@@ -754,10 +757,12 @@ void CByteStreamData::Close()
 
 						if (_pToDelete->m_PendingOperation.m_pInstance && !_pToDelete->Done(false, bWantedToThrow))
 						{
-							_pToDelete->m_PendingList.Link(m_pDrive->m_PendingCacheLinesForDelete, _pToDelete);
+							M_LOCK(m_pDrive->m_Lock);
+							m_pDrive->m_PendingCacheLinesForDelete.Insert(_pToDelete);
 						}
 						else
 						{
+							M_LOCK(m_pDrive->m_Lock);
 							m_pStreamManager->m_PoolCacheLines.Delete(_pToDelete);
 						}						
 					}
@@ -771,11 +776,11 @@ void CByteStreamData::Close()
 			Service();
 
 			{
-				SICByteStreamCacheLine Iter = m_PendingCacheLines;
-				if (Iter)
+				CByteStreamCacheLine *pFirst = m_PendingCacheLines.GetFirst();
+				if (pFirst)
 				{
 					MSCOPESHORT(CByteStreamCacheLine::BlockOnPending);
-					while (Iter)
+					while (pFirst)
 					{
 						Service();
 		/*				CByteStreamCacheLine *_pToDelete = Iter;
@@ -783,7 +788,7 @@ void CByteStreamData::Close()
 						
 						delete _pToDelete;*/
 						MRTC_SystemInfo::OS_Sleep(0);
-						Iter = m_PendingCacheLines;
+						pFirst = m_PendingCacheLines.GetFirst();
 					}
 					Service();
 				}
@@ -796,10 +801,12 @@ void CByteStreamData::Close()
 		}
 		)
 
-		SICByteStreamCacheLine Iter = m_CacheLines;
-		while (Iter)
+		CByteStreamCacheLine *pFirst = m_CacheLines.GetFirst();
+		while (pFirst)
 		{
-			CByteStreamCacheLine *_pToDelete = Iter;
+			CByteStreamCacheLine *_pToDelete = pFirst;
+
+
 			if (_pToDelete->m_bDirty)
 			{
 				M_ASSERT(!_pToDelete->m_bWrite, "HoHo");
@@ -829,9 +836,10 @@ void CByteStreamData::Close()
 				}
 				)
 			}
+
 			
 			m_pStreamManager->m_PoolCacheLines.Delete(_pToDelete);
-			Iter = m_CacheLines;
+			pFirst = m_CacheLines.GetFirst();
 		}
 		m_nCacheLines = 0;
 	}
@@ -870,6 +878,10 @@ void CByteStreamData::Close()
 	if (bFailedDelete)
 		FileError_static("CByteStreamAsyncInstance::Close", "Failed closing file", 0);						
 
+	{
+		M_LOCK(m_pStreamManager->m_Lock);
+		m_pStreamManager->m_OpenStreams.Remove(this);
+	}
 }
 
 
@@ -907,7 +919,7 @@ void CByteStreamData::CreateCachelines()
 			CByteStreamCacheLine *pNewCacheLine = m_pStreamManager->m_PoolCacheLines.New();
 			pNewCacheLine->Create(this, CacheLineSize, m_pDrive->m_Granulartity, NULL);
 
-			pNewCacheLine->m_CacheLineList.Link(&m_CacheLines, pNewCacheLine);
+			m_CacheLines.Insert(pNewCacheLine);
 
 			--NumCacheLines;
 		}
@@ -963,6 +975,21 @@ void CByteStreamData::SeekCur(fint _BytesFromCur)
 	}
 }
 
+class CCompare_ServicePrecache
+{
+public:
+	static int Compare(void *_pContext, CByteStreamCacheLine *pFirst, CByteStreamCacheLine *pSecond)
+	{
+		if (pFirst->m_DataOffest > pSecond->m_DataOffest)
+			return 1;
+		else if (pFirst->m_DataOffest < pSecond->m_DataOffest)
+			return -1;
+		return 0;
+	}
+};
+
+
+
 void CByteStreamData::ServicePrecache()
 {
 	if (!m_bAllowPrecache)
@@ -973,22 +1000,20 @@ void CByteStreamData::ServicePrecache()
 		MSCOPESHORT(CByteStreamData::ServicePrecache);
 
 		// Add sorted to new temporary list
-		CSortList TempList;
-		CDA_LinkedList TempList2;
-		SICByteStreamCacheLine IterSrc = m_PendingCacheLines;
+		DLinkDS_List(CByteStreamCacheLine, m_TempLink) TempList;
+		DLinkDS_List(CByteStreamCacheLine, m_TempLink) TempList2;
+		DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) IterSrc = m_PendingCacheLines;
 		{
-//				MSCOPESHORT(1);
-			
 			while (IterSrc)
 			{
-				IterSrc->List_InsertSortedStartHead(&TempList);
+				TempList.InsertSorted<CCompare_ServicePrecache>(IterSrc);
 				++IterSrc;
 			}
 			
 			IterSrc = m_CacheLines;
 			while (IterSrc)
 			{
-				IterSrc->List_InsertSortedStartHead(&TempList);
+				TempList.InsertSorted<CCompare_ServicePrecache>(IterSrc);
 				++IterSrc;
 			}
 		}
@@ -997,10 +1022,8 @@ void CByteStreamData::ServicePrecache()
 		fint MaxOffset = LastOffsetGotten + (m_nCacheLines - 1) * m_pLastCacheLine->m_NumBytes;
 		if (MaxOffset > Len())
 			MaxOffset = Len();
-//		fint LastOffsetFoundMatching = m_pLastCacheLine->m_DataOffest + m_pLastCacheLine->m_NumBytesUsed;
 		{
-//				MSCOPESHORT(2);
-			ICByteStreamCacheLine Iter = TempList;
+			DLinkDS_Iter(CByteStreamCacheLine, m_TempLink) Iter = TempList;
 			while (Iter)
 			{
 				CByteStreamCacheLine *pIter = Iter;
@@ -1014,7 +1037,6 @@ void CByteStreamData::ServicePrecache()
 				}
 				else if (pIter->m_bDirty)
 				{
-					//					WriteCacheLine(pIter);
 				}
 				else 
 				{
@@ -1027,8 +1049,7 @@ void CByteStreamData::ServicePrecache()
 						|| pIter->m_NumBytesUsed != m_pLastCacheLine->m_NumBytes
 						))
 					{
-						pIter->List_RemoveFromAllLists();
-						pIter->List_Insert(TempList2);
+						TempList2.Insert(pIter);
 					}				
 				}
 				
@@ -1037,14 +1058,11 @@ void CByteStreamData::ServicePrecache()
 		
 		// Rebuild list
 		fint CurrentOffset = LastOffsetGotten;
-		
 		{
-//				MSCOPESHORT(3);
-			
 			while (CurrentOffset < MaxOffset)
 			{
 				bool Found = false;
-				ICByteStreamCacheLine Iter = TempList;
+				DLinkDS_Iter(CByteStreamCacheLine, m_TempLink) Iter = TempList;
 				while (Iter)
 				{
 					if (Iter->m_DataOffest == CurrentOffset)
@@ -1056,12 +1074,11 @@ void CByteStreamData::ServicePrecache()
 				}
 				if (!Found)
 				{
-					CByteStreamCacheLine *pIter2 = ICByteStreamCacheLine(TempList2);
+					CByteStreamCacheLine *pIter2 = TempList2.GetFirst();
 					// failing misarably
 					if (!pIter2)
 						break;
-					pIter2->List_RemoveFromAllLists();
-					
+					pIter2->m_TempLink.Unlink();
 					PrepareCacheline(pIter2, CurrentOffset, m_pLastCacheLine->m_NumBytes, true);
 					pIter2->m_bPrecache = true;
 					m_bAllowPrecache = false;
@@ -1070,25 +1087,6 @@ void CByteStreamData::ServicePrecache()
 				CurrentOffset += m_pLastCacheLine->m_NumBytes;
 			}
 		}
-		
-		{
-//				MSCOPESHORT(4);
-			ICByteStreamCacheLine Iter = TempList;
-			while (Iter)
-			{
-				CByteStreamCacheLine *pIter = Iter;
-				++Iter;
-				pIter->List_RemoveFromAllLists();
-			}
-			Iter = TempList2;
-			while (Iter)
-			{
-				CByteStreamCacheLine *pIter = Iter;
-				++Iter;
-				pIter->List_RemoveFromAllLists();
-			}
-		}
-		
 	}
 }
 
@@ -1096,7 +1094,7 @@ void CByteStreamData::Service()
 {
 	if (m_pDrive)
 		m_pDrive->Service(this);
-	SICByteStreamCacheLine Iter = m_PendingCacheLines;
+	DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) Iter = m_PendingCacheLines;
 
 	while (Iter)
 	{
@@ -1112,7 +1110,7 @@ void CByteStreamData::Service()
 			pToTest->m_bWrite = false;
 			pToTest->SetOperating(false);
 
-			pToTest->m_CacheLineList.Link(m_CacheLines, pToTest);
+			m_CacheLines.Insert(pToTest);
 		}
 	}
 
@@ -1129,9 +1127,8 @@ void CByteStreamData::WriteCacheLine(CByteStreamCacheLine *_pCacheLine)
 	pCacheLine->m_bDirty = false;
 
 	m_pDrive->AddRequest(pCacheLine);
-
 	pCacheLine->SetOperating(true);
-	pCacheLine->m_CacheLineList.Link(m_PendingCacheLines, pCacheLine);
+	m_PendingCacheLines.Insert(pCacheLine);
 
 }
 
@@ -1173,7 +1170,7 @@ bool CByteStreamData::PrepareCacheline(CByteStreamCacheLine *_pCacheLine, fint _
 			return false;
 	}
 
-	pCacheLine->m_CacheLineList.Unlink();
+	pCacheLine->m_CacheLineLink.Unlink();
 
 	pCacheLine->m_bDirty = false;
 	pCacheLine->m_bPending = false;
@@ -1191,7 +1188,7 @@ bool CByteStreamData::PrepareCacheline(CByteStreamCacheLine *_pCacheLine, fint _
 	{
 		// Off end of file
 		pCacheLine->m_NumBytesUsed = pCacheLine->m_NumBytes;
-		pCacheLine->m_CacheLineList.Link(m_CacheLines, pCacheLine);
+		m_CacheLines.Insert(pCacheLine);
 	} 
 	else
 	{
@@ -1213,7 +1210,7 @@ bool CByteStreamData::PrepareCacheline(CByteStreamCacheLine *_pCacheLine, fint _
 			m_pDrive->AddRequest(pCacheLine);
 		}
 		
-		pCacheLine->m_CacheLineList.Link(m_PendingCacheLines, pCacheLine);
+		m_PendingCacheLines.Insert(pCacheLine);
 	}
 
 	return true;
@@ -1223,8 +1220,7 @@ CByteStreamCacheLine *CByteStreamData::PrepareCacheline(fint _Start, mint _NumBy
 {
 //		MSCOPESHORT(CByteStream::PrepareCacheline);
 
-
-	SICByteStreamCacheLine Iter = m_CacheLines;
+	DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) Iter = m_CacheLines;
 	// First try to find an empty cache line
 	while (Iter)
 	{
@@ -1237,22 +1233,18 @@ CByteStreamCacheLine *CByteStreamData::PrepareCacheline(fint _Start, mint _NumBy
 	
 	while (!Iter)
 	{
-		Iter = m_CacheLines;
-		if (!Iter)
+		if (!_bBlock)
+			return NULL;
 		{
-			if (!_bBlock)
-				return NULL;
-
+			//				MSCOPESHORT(CByteStreamCacheLine::m_PendingCacheLines.IsEmpty);
+			while (!m_PendingCacheLines.IsEmpty())
 			{
-				//				MSCOPESHORT(CByteStreamCacheLine::m_PendingCacheLines.IsEmpty);
-				while (!m_PendingCacheLines.IsEmpty())
-				{
-					Service();
-					// Wait until nothing is pending
-					MRTC_SystemInfo::OS_Sleep(0);
-				}
+				Service();
+				// Wait until nothing is pending
+				MRTC_SystemInfo::OS_Sleep(0);
 			}
 		}
+		Iter = m_CacheLines;
 	}
 	
 	CByteStreamCacheLine *pCacheLine = Iter;
@@ -1658,11 +1650,12 @@ bool CByteStreamData::AsyncFlush(bool _bBlock)
 {
 	m_pLastCacheLine = NULL;
 	{			
-		SICByteStreamCacheLine Iter = m_CacheLines;
+		DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) Iter = m_CacheLines;
 		while (Iter)
 		{
 			CByteStreamCacheLine *_pToDelete = Iter;
-			if (_pToDelete->m_bDirty)
+			++Iter;
+			if (_pToDelete->m_bDirty && !_pToDelete->m_bOperating)
 			{
 				M_ASSERT(!_pToDelete->m_bWrite, "HoHo");
 #ifndef PLATFORM_CONSOLE
@@ -1684,11 +1677,7 @@ bool CByteStreamData::AsyncFlush(bool _bBlock)
 					MRTC_SystemInfo::OS_FileSetFileSize(Temp, m_FileSize);
 				}
 #endif
-				Iter = m_CacheLines;
 			}
-			else
-				++Iter;
-			
 		}
 	}
 
@@ -1696,8 +1685,7 @@ bool CByteStreamData::AsyncFlush(bool _bBlock)
 	do
 	{
 		Service();
-		SICByteStreamCacheLine Iter = m_PendingCacheLines;
-		if (Iter)
+		if (m_PendingCacheLines.GetFirst())
 		{
 			if (!_bBlock)
 				return false;
@@ -1755,7 +1743,7 @@ bool CByteStreamDrive::Service(class CByteStreamData *_pTrowOnStream)
 
 	bool bThrew = false;
 	int NumFree = 2;
-	SICByteStreamCacheLine Iter = m_PendingOpr;
+	DLinkDS_Iter(CByteStreamCacheLine, m_PendingLink) Iter = m_PendingOpr;
 	while (Iter)
 	{
 		CByteStreamCacheLine *pCurrentCacheLine = Iter;
@@ -1763,7 +1751,7 @@ bool CByteStreamDrive::Service(class CByteStreamData *_pTrowOnStream)
 		if (pCurrentCacheLine->Done(pCurrentCacheLine->m_pStream == _pTrowOnStream, bThrew))
 		{
 			// Remove from pending list
-			pCurrentCacheLine->m_PendingList.Unlink();
+			pCurrentCacheLine->m_PendingLink.Unlink();
 		}
 		else
 			--NumFree;
@@ -1773,22 +1761,22 @@ bool CByteStreamDrive::Service(class CByteStreamData *_pTrowOnStream)
 
 	while (NumFree)
 	{
-		SICByteStreamCacheLine Iter = m_Requests;
+		CByteStreamCacheLine *pFirst = m_RequestsSorted.Pop();
 
-		if (Iter)
-		{		
-			Iter->m_PendingList.Link(m_PendingOpr, Iter);
+		if (pFirst)
+		{	
+			CByteStreamCacheLine *pChangeLine = pFirst;
+			m_PendingOpr.Insert(pChangeLine);
 			{
-				MSCOPESHORT(Iter->PerformOperation);
-				Iter->PerformOperation();
+				MSCOPESHORT(pChangeLine->PerformOperation);
+				pChangeLine->PerformOperation();
 			}
-			Iter->m_DriveList.Unlink();
 		}
 		--NumFree;
 	}
 
 	{
-		SICByteStreamCacheLine Iter = m_PendingCacheLinesForDelete;
+		DLinkDS_Iter(CByteStreamCacheLine, m_PendingLink) Iter = m_PendingCacheLinesForDelete;
 		while (Iter)
 		{
 			CByteStreamCacheLine *pCacheLine = Iter;
@@ -1797,6 +1785,12 @@ bool CByteStreamDrive::Service(class CByteStreamData *_pTrowOnStream)
 			if (pCacheLine->m_PendingOperation.Done(pCacheLine->m_pStream == _pTrowOnStream, bThrew))
 			{
 				pCacheLine->m_PendingOperation.CloseInstance();
+/*				{
+					DLock(pCacheLine->m_pStream->m_Lock);
+					pCacheLine->m_CacheLineLink.Unlink();
+					pCacheLine->m_DriveLink.Unlink();
+					pCacheLine->m_PendingLink.Unlink();
+				}*/
 				
 				GetStreamManager()->m_PoolCacheLines.Delete(pCacheLine);
 			}
@@ -1814,7 +1808,7 @@ CByteStreamCacheLine *CByteStreamData::GetCacheLine_NotINL(fint _Start, mint _Nu
 
 		if (m_pLastCacheLine)
 		{
-			M_ASSERT(m_pLastCacheLine->m_CacheLineList.IsInList(), "nono");
+			M_ASSERT(m_pLastCacheLine->m_CacheLineLink.IsInList(), "nono");
 			M_ASSERT(m_pLastCacheLine->Done(false, bWantedToThrow), "");
 			M_ASSERT(!m_pLastCacheLine->GetOperating(), "");
 			if (_Start >= m_pLastCacheLine->m_DataOffest && _Start < (m_pLastCacheLine->m_DataOffest + m_pLastCacheLine->m_NumBytesUsed))
@@ -1824,17 +1818,17 @@ CByteStreamCacheLine *CByteStreamData::GetCacheLine_NotINL(fint _Start, mint _Nu
 		}
 
 		Service();
-		SICByteStreamCacheLine Iter = m_CacheLines;
+		DLinkDS_Iter(CByteStreamCacheLine, m_CacheLineLink) Iter = m_CacheLines;
 
 		while (Iter)
 		{
-			if (_Start >= Iter->m_DataOffest && _Start < (Iter->m_DataOffest + Iter->m_NumBytesUsed))
-			{
-				SetLastCacheLine(Iter);
-				return Iter;
-			}
-			
+			CByteStreamCacheLine *pIter = Iter;
 			++Iter;
+			if (_Start >= pIter->m_DataOffest && _Start < (pIter->m_DataOffest + pIter->m_NumBytesUsed))
+			{
+				SetLastCacheLine(pIter);
+				return pIter;
+			}
 		}
 
 		// Check if its in the pending cache lines, then we need to wait for it
@@ -1842,9 +1836,11 @@ CByteStreamCacheLine *CByteStreamData::GetCacheLine_NotINL(fint _Start, mint _Nu
 
 		while (Iter)
 		{
-			if (_Start >= Iter->m_DataOffest && _Start < (Iter->m_DataOffest + Iter->m_NumBytesUsed))
+			CByteStreamCacheLine *pIter = Iter;
+			++Iter;
+			if (_Start >= pIter->m_DataOffest && _Start < (pIter->m_DataOffest + pIter->m_NumBytesUsed))
 			{
-				CByteStreamCacheLine *pCacheLine = Iter;
+				CByteStreamCacheLine *pCacheLine = pIter;
 
 				if (_bBlock)
 					pCacheLine->BlockUntilDone();
@@ -1859,7 +1855,6 @@ CByteStreamCacheLine *CByteStreamData::GetCacheLine_NotINL(fint _Start, mint _Nu
 				return pCacheLine;
 			}
 			
-			++Iter;
 		}
 
 		m_bAllowPrecache = true;

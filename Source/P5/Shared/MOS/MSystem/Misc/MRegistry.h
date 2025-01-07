@@ -55,7 +55,7 @@
 			Integer value is free.
 			Float value is free.
 			Data-value consume 
-				((24+7) & ~7) + 8 bytes for CListVectorData.(*)
+				((24+7) & ~7) + 8 bytes for CArrayData.(*)
 				((Size+7) & ~7) + 8 for the data.(*)
 
 			Possible remedies:
@@ -77,7 +77,7 @@
 		FUNCTION POSTFIXES
 
 			i = Integer
-			f = float, fp4
+			f = float, fp32
 			d = data, TArray<uint8>
 			nothing = string
 
@@ -87,7 +87,7 @@
 class CRegistry;
 typedef TPtr2<CRegistry, CVirtualRefCount> spCRegistry;
 
-typedef TList_Vector<spCRegistry> lspCRegistry;
+typedef TArray<spCRegistry> lspCRegistry;
 typedef TPtr<lspCRegistry> splspCRegistry;
 
 enum
@@ -109,7 +109,7 @@ enum
 	REGISTRY_TYPE_UINT8			= 3,
 	REGISTRY_TYPE_INT16			= 4,
 	REGISTRY_TYPE_INT32			= 5,
-	REGISTRY_TYPE_FP4			= 6,
+	REGISTRY_TYPE_FP32			= 6,
 	REGISTRY_TYPE_FP2			= 7,
 	REGISTRY_TYPE_UINT32		= 8,
 	REGISTRY_TYPE_MAX,
@@ -213,14 +213,14 @@ public:
 	virtual void SetThisValue(const wchar* _pValue) pure;
 	virtual void SetThisValue(CStr _Value) pure;
 	virtual void SetThisValuei(int32 _Value, int _StoreType = REGISTRY_TYPE_INT32) pure;
-	virtual void SetThisValuef(fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4) pure;
+	virtual void SetThisValuef(fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32) pure;
 	virtual void SetThisValued(const uint8* _pValue, int _Size, bint _bQuick = true) pure;
 	virtual void SetThisValued(TArray<uint8> _lValue, bint _bReference = true) pure;
 
 	virtual void SetThisValuea(int _nDim, const CStr *_Value) pure;
 	virtual void SetThisValuead(int _nDim, const TArray<uint8> *_lValue, bint _bReference = true) pure;
 	virtual void SetThisValueai(int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32) pure;
-	virtual void SetThisValueaf(int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4) pure;
+	virtual void SetThisValueaf(int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32) pure;
 
 
 	/////////////////////////////////////////////////////////////////
@@ -239,8 +239,8 @@ public:
 	virtual void Anim_ThisSetFlags(uint32 _Flags) pure;
 	virtual uint32 Anim_ThisGetFlags() const pure;
 
-	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp4 *_pParams, int _nParams) pure;
-	virtual uint32 Anim_ThisGetInterpolate(fp4 *_pParams, int &_nParams) const pure;
+	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp32 *_pParams, int _nParams) pure;
+	virtual uint32 Anim_ThisGetInterpolate(fp32 *_pParams, int &_nParams) const pure;
 
 	virtual bint Anim_ThisIsValidSequenceKeyframe(int _iSec, int _iKF) const pure;
 
@@ -250,62 +250,62 @@ public:
 	virtual void Anim_ThisSetNumSeq(int _nSeq) pure;
 	virtual int Anim_ThisGetNumSeq() const pure;
 
-	virtual fp4 Anim_ThisGetSeqLoopStart(int _iSeq) const pure;
-	virtual fp4 Anim_ThisGetSeqLoopEnd(int _iSeq) const pure;
-	virtual fp4 Anim_ThisGetSeqLength(int _iSeq) const pure;
+	virtual fp32 Anim_ThisGetSeqLoopStart(int _iSeq) const pure;
+	virtual fp32 Anim_ThisGetSeqLoopEnd(int _iSeq) const pure;
+	virtual fp32 Anim_ThisGetSeqLength(int _iSeq) const pure;
 
-	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time) pure;
-	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time) pure;
+	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp32 _Time) pure;
+	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp32 _Time) pure;
 
-	virtual void Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const pure;
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const pure;
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const pure;
+	virtual void Anim_ThisGetKF(int _iSeq, fp32 _Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const pure;
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const pure;
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const pure;
 
 	virtual void Anim_ThisSetNumKF(int _iSeq, int _nKF) pure;
 	virtual int Anim_ThisGetNumKF(int _iSeq = 0) const pure;
 
 	virtual void Anim_ThisDeleteKF(int _iSeq, int _iKF) pure;
 
-	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time)  pure;
-	virtual fp4 Anim_ThisGetKFTime(int _iSeq, int _iKF) const pure;
+	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp32 _Time)  pure;
+	virtual fp32 Anim_ThisGetKFTime(int _iSeq, int _iKF) const pure;
 
-	virtual fp4 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const pure;
+	virtual fp32 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const pure;
 
 	// Adds
-	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFf(int _iSeq, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp4 _Time = -1) pure;
+	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFf(int _iSeq, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp32 _Time = -1) pure;
 
-	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1) pure;
-	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp4 _Time = -1) pure;
+	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1) pure;
+	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp32 _Time = -1) pure;
 
 	// Set
-	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp4 _Time) pure;
+	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp32 _Time) pure;
 
 	virtual void Anim_ThisSetKFValue(int _iSeq, int _iKF, CStr _Val) pure;
 	virtual void Anim_ThisSetKFValuei(int _iSeq, int _iKF, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32) pure;
-	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4) pure;
+	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32) pure;
 	virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, const uint8* _pValue, int _Size, bint _bQuick = true) pure;
 	virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, TArray<uint8> _lValue, bint _bReference = true) pure;
 
 	virtual void Anim_ThisSetKFValuea(int _iSeq, int _iKF, int _nDim, const CStr *_pVal) pure;
 	virtual void Anim_ThisSetKFValueai(int _iSeq, int _iKF, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32) pure;
-	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4) pure;
+	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32) pure;
 	virtual void Anim_ThisSetKFValuead(int _iSeq, int _iKF, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true) pure;
 
 	// Get Value
 	virtual CStr Anim_ThisGetKFValue(int _iSeq, int _iKF) const pure;
 	virtual int32 Anim_ThisGetKFValuei(int _iSeq, int _iKF) const pure;
-	virtual fp4 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const pure;
+	virtual fp32 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const pure;
 	virtual TArray<uint8> Anim_ThisGetKFValued(int _iSeq, int _iKF) const pure;
 
 	virtual void Anim_ThisGetKFValuea(int _iSeq, int _iKF, int _nDim, CStr *_pDest) const pure;
 	virtual void Anim_ThisGetKFValueai(int _iSeq, int _iKF, int _nDim, int32 *_pDest) const pure;
-	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const pure;
+	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const pure;
 	virtual void Anim_ThisGetKFValuead(int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest) const pure;
 
 
@@ -325,13 +325,13 @@ public:
 
 	virtual CStr GetThisValue() const pure;
 	virtual int32 GetThisValuei() const pure;
-	virtual fp4 GetThisValuef() const pure;
+	virtual fp32 GetThisValuef() const pure;
 	virtual const TArray<uint8> GetThisValued() const pure;
 	virtual TArray<uint8> GetThisValued() pure;
 
 	virtual void GetThisValuea(int _nDim, CStr *_pDest) const pure;
 	virtual void GetThisValueai(int _nDim, int32 *_pDest) const pure;
-	virtual void GetThisValueaf(int _nDim, fp4 *_pDest) const pure;
+	virtual void GetThisValueaf(int _nDim, fp32 *_pDest) const pure;
 	virtual void GetThisValuead(int _nDim, TArray<uint8> *_pDest) const pure;
 
 	////////////////// IO
@@ -402,13 +402,13 @@ public:
 	void SetThisKey(const char* _pName, const wchar* _pValue);
 	void SetThisKey(const char* _pName, CStr _Value);
 	void SetThisKeyi(const char* _pName, int32 _Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetThisKeyf(const char* _pName, fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetThisKeyf(const char* _pName, fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetThisKeyd(const char* _pName, const uint8* _pValue, int _Size, bint _bQuick = true);
 	void SetThisKeyd(const char* _pName, TArray<uint8> _lValue, bint _bReference = true);
 
 	void SetThisKeya(const char* _pName, int _nDim, const CStr *_Value);
 	void SetThisKeyai(const char* _pName, int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetThisKeyaf(const char* _pName, int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetThisKeyaf(const char* _pName, int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetThisKeyad(const char* _pName, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 
 	// Adding keys (NOTE: AddKey always adds a new key. It does NOT modify any existing keys with the same name.)
@@ -416,14 +416,14 @@ public:
 	void AddKey(const char* _pName, const wchar* _pValue);
 	void AddKey(const char* _pName, CStr _Value);
 	void AddKeyi(const char* _pName, int32 _Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void AddKeyf(const char* _pName, fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void AddKeyf(const char* _pName, fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void AddKeyd(const char* _pName, const uint8* _pValue, int _Size, bint _bQuick = true);
 	void AddKeyd(const char* _pName, TArray<uint8> _lValue, bint _bReference = true);
 	void AddKey(const CRegistry* _pReg);
 
 	void AddKeya(const char* _pName, int _nDim, const CStr *_Value);
 	void AddKeyai(const char* _pName, int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void AddKeyaf(const char* _pName, int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void AddKeyaf(const char* _pName, int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void AddKeyad(const char* _pName, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 
 	// Setting keys (Checks for matching key and modifies it's value, otherwise a new key is created.)
@@ -431,13 +431,13 @@ public:
 	void SetValue(const char* _pName, const wchar* _pValue);
 	void SetValue(const char* _pName, CStr _Value);
 	void SetValuei(const char* _pName, int32 _Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetValuef(const char* _pName, fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetValuef(const char* _pName, fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetValued(const char* _pName, const uint8* _pValue, int _Size, bint _bQuick = true);
 	void SetValued(const char* _pName, TArray<uint8> _lValue, bint _bReference = true);
 
 	void SetValuea(const char* _pName, int _nDim, const CStr *_Value);
 	void SetValueai(const char* _pName, int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetValueaf(const char* _pName, int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetValueaf(const char* _pName, int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetValuead(const char* _pName, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 
 	// Special
@@ -448,13 +448,13 @@ public:
 	void SetValue(int _iKey, const wchar* _pValue);
 	void SetValue(int _iKey, CStr _Value);
 	void SetValuei(int _iKey, int32 _Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetValuef(int _iKey, fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetValuef(int _iKey, fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetValued(int _iKey, const uint8* _pValue, int _Size, bint _bQuick = true);
 	void SetValued(int _iKey, TArray<uint8> _lValue, bint _bReference = true);
 
 	void SetValuea(int _iKey, int _nDim, const CStr *_Value);
 	void SetValueai(int _iKey, int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32);
-	void SetValueaf(int _iKey, int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4);
+	void SetValueaf(int _iKey, int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32);
 	void SetValuead(int _iKey, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 
 	// Special
@@ -475,54 +475,54 @@ public:
 	// Get Value
 	CStr Anim_ThisGetKFValue(int _iSeq, int _iKF, CStr _Default) const;
 	int32 Anim_ThisGetKFValuei(int _iSeq, int _iKF, int32 _Default) const;
-	fp4 Anim_ThisGetKFValuef(int _iSeq, int _iKF, fp4 _Default) const;
+	fp32 Anim_ThisGetKFValuef(int _iSeq, int _iKF, fp32 _Default) const;
 	TArray<uint8> Anim_ThisGetKFValued(int _iSeq, int _iKF, const TArray<uint8> &_Default) const;
 
 	void Anim_ThisGetKFValuea(int _iSeq, int _iKF, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_ThisGetKFValueai(int _iSeq, int _iKF, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
+	void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
 	void Anim_ThisGetKFValuead(int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
 	// Get Interpolated Value
 	CStr Anim_ThisGetIPValue(int _iSeq, const CMTime &_Time, CStr _Default) const;
 	int32 Anim_ThisGetIPValuei(int _iSeq, const CMTime &_Time, int32 _Default) const;
-	fp4 Anim_ThisGetIPValuef(int _iSeq, const CMTime &_Time, fp4 _Default) const;
+	fp32 Anim_ThisGetIPValuef(int _iSeq, const CMTime &_Time, fp32 _Default) const;
 	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, const CMTime &_Time, const TArray<uint8> &_Default) const;
 
 	void Anim_ThisGetIPValuea(int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_ThisGetIPValueai(int _iSeq, const CMTime &_Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_ThisGetIPValueaf(int _iSeq, const CMTime &_Time, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
+	void Anim_ThisGetIPValueaf(int _iSeq, const CMTime &_Time, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
 	void Anim_ThisGetIPValuead(int _iSeq, const CMTime &_Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
-	CStr Anim_ThisGetIPValue(int _iSeq, fp4 _Time, CStr _Default) const;
-	int32 Anim_ThisGetIPValuei(int _iSeq, fp4 _Time, int32 _Default) const;
-	fp4 Anim_ThisGetIPValuef(int _iSeq, fp4 _Time, fp4 _Default) const;
-	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, fp4 _Time, const TArray<uint8> &_Default) const;
+	CStr Anim_ThisGetIPValue(int _iSeq, fp32 _Time, CStr _Default) const;
+	int32 Anim_ThisGetIPValuei(int _iSeq, fp32 _Time, int32 _Default) const;
+	fp32 Anim_ThisGetIPValuef(int _iSeq, fp32 _Time, fp32 _Default) const;
+	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, fp32 _Time, const TArray<uint8> &_Default) const;
 
-	void Anim_ThisGetIPValuea(int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
-	void Anim_ThisGetIPValueai(int _iSeq, fp4 _Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_ThisGetIPValueaf(int _iSeq, fp4 _Time, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
-	void Anim_ThisGetIPValuead(int _iSeq, fp4 _Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
+	void Anim_ThisGetIPValuea(int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
+	void Anim_ThisGetIPValueai(int _iSeq, fp32 _Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
+	void Anim_ThisGetIPValueaf(int _iSeq, fp32 _Time, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
+	void Anim_ThisGetIPValuead(int _iSeq, fp32 _Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
 	CStr Anim_ThisGetIPValue(int _iSeq, const CMTime &_Time) const;
 	int32 Anim_ThisGetIPValuei(int _iSeq, const CMTime &_Time) const;
-	fp4 Anim_ThisGetIPValuef(int _iSeq, const CMTime &_Time) const;
+	fp32 Anim_ThisGetIPValuef(int _iSeq, const CMTime &_Time) const;
 	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, const CMTime &_Time) const;
 
 	void Anim_ThisGetIPValuea(int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest) const;
 	void Anim_ThisGetIPValueai(int _iSeq, const CMTime &_Time, int _nDim, int32 *_pDest) const;
-	void Anim_ThisGetIPValueaf(int _iSeq, const CMTime &_Time, int _nDim, fp4 *_pDest) const;
+	void Anim_ThisGetIPValueaf(int _iSeq, const CMTime &_Time, int _nDim, fp32 *_pDest) const;
 	void Anim_ThisGetIPValuead(int _iSeq, const CMTime &_Time, int _nDim, TArray<uint8> *_pDest) const;
 
-	CStr Anim_ThisGetIPValue(int _iSeq, fp4 _Time) const;
-	int32 Anim_ThisGetIPValuei(int _iSeq, fp4 _Time) const;
-	fp4 Anim_ThisGetIPValuef(int _iSeq, fp4 _Time) const;
-	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, fp4 _Time) const;
+	CStr Anim_ThisGetIPValue(int _iSeq, fp32 _Time) const;
+	int32 Anim_ThisGetIPValuei(int _iSeq, fp32 _Time) const;
+	fp32 Anim_ThisGetIPValuef(int _iSeq, fp32 _Time) const;
+	TArray<uint8> Anim_ThisGetIPValued(int _iSeq, fp32 _Time) const;
 
-	void Anim_ThisGetIPValuea(int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
-	void Anim_ThisGetIPValueai(int _iSeq, fp4 _Time, int _nDim, int32 *_pDest) const;
-	void Anim_ThisGetIPValueaf(int _iSeq, fp4 _Time, int _nDim, fp4 *_pDest) const;
-	void Anim_ThisGetIPValuead(int _iSeq, fp4 _Time, int _nDim, TArray<uint8> *_pDest) const;
+	void Anim_ThisGetIPValuea(int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_ThisGetIPValueai(int _iSeq, fp32 _Time, int _nDim, int32 *_pDest) const;
+	void Anim_ThisGetIPValueaf(int _iSeq, fp32 _Time, int _nDim, fp32 *_pDest) const;
+	void Anim_ThisGetIPValuead(int _iSeq, fp32 _Time, int _nDim, TArray<uint8> *_pDest) const;
 
 	///////////////////////
 	// Key ID
@@ -531,65 +531,65 @@ public:
 	// Get Value
 	CStr Anim_GetKFValue(int _iKey, int _iSeq, int _iKF) const;
 	int32 Anim_GetKFValuei(int _iKey, int _iSeq, int _iKF) const;
-	fp4 Anim_GetKFValuef(int _iKey, int _iSeq, int _iKF) const;
+	fp32 Anim_GetKFValuef(int _iKey, int _iSeq, int _iKF) const;
 	TArray<uint8> Anim_GetKFValued(int _iKey, int _iSeq, int _iKF) const;
 
 	void Anim_GetKFValuea(int _iKey, int _iSeq, int _iKF, int _nDim, CStr *_pDest) const;
 	void Anim_GetKFValueai(int _iKey, int _iSeq, int _iKF, int _nDim, int32 *_pDest) const;
-	void Anim_GetKFValueaf(int _iKey, int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const;
+	void Anim_GetKFValueaf(int _iKey, int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const;
 	void Anim_GetKFValuead(int _iKey, int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest) const;
 
 	// Get Value
 	CStr Anim_GetKFValue(int _iKey, int _iSeq, int _iKF, CStr _Default) const;
 	int32 Anim_GetKFValuei(int _iKey, int _iSeq, int _iKF, int32 _Default) const;
-	fp4 Anim_GetKFValuef(int _iKey, int _iSeq, int _iKF, fp4 _Default) const;
+	fp32 Anim_GetKFValuef(int _iKey, int _iSeq, int _iKF, fp32 _Default) const;
 	TArray<uint8> Anim_GetKFValued(int _iKey, int _iSeq, int _iKF, const TArray<uint8> &_Default) const;
 
 	void Anim_GetKFValuea(int _iKey, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_GetKFValueai(int _iKey, int _iSeq, int _iKF, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_GetKFValueaf(int _iKey, int _iSeq, int _iKF, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
+	void Anim_GetKFValueaf(int _iKey, int _iSeq, int _iKF, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
 	void Anim_GetKFValuead(int _iKey, int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
 	// Get Interpolated Value
 	CStr Anim_GetIPValue(int _iKey, int _iSeq, const CMTime &_Time, CStr _Default) const;
 	int32 Anim_GetIPValuei(int _iKey, int _iSeq, const CMTime &_Time, int32 _Default) const;
-	fp4 Anim_GetKFValuef(int _iKey, int _iSeq, const CMTime &_Time, fp4 _Default) const;
+	fp32 Anim_GetKFValuef(int _iKey, int _iSeq, const CMTime &_Time, fp32 _Default) const;
 	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, const CMTime &_Time, const TArray<uint8> &_Default) const;
 
 	void Anim_GetIPValuea(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_GetIPValueai(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_GetKFValueaf(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
+	void Anim_GetKFValueaf(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
 	void Anim_GetIPValuead(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
-	CStr Anim_GetIPValue(int _iKey, int _iSeq, fp4 _Time, CStr _Default) const;
-	int32 Anim_GetIPValuei(int _iKey, int _iSeq, fp4 _Time, int32 _Default) const;
-	fp4 Anim_GetIPValuef(int _iKey, int _iSeq, fp4 _Time, fp4 _Default) const;
-	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, fp4 _Time, const TArray<uint8> &_Default) const;
+	CStr Anim_GetIPValue(int _iKey, int _iSeq, fp32 _Time, CStr _Default) const;
+	int32 Anim_GetIPValuei(int _iKey, int _iSeq, fp32 _Time, int32 _Default) const;
+	fp32 Anim_GetIPValuef(int _iKey, int _iSeq, fp32 _Time, fp32 _Default) const;
+	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, fp32 _Time, const TArray<uint8> &_Default) const;
 
-	void Anim_GetIPValuea(int _iKey, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
-	void Anim_GetIPValueai(int _iKey, int _iSeq, fp4 _Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void Anim_GetIPValueaf(int _iKey, int _iSeq, fp4 _Time, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
-	void Anim_GetIPValuead(int _iKey, int _iSeq, fp4 _Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
+	void Anim_GetIPValuea(int _iKey, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
+	void Anim_GetIPValueai(int _iKey, int _iSeq, fp32 _Time, int _nDim, int32 *_pDest, const int32 *_Default) const;
+	void Anim_GetIPValueaf(int _iKey, int _iSeq, fp32 _Time, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
+	void Anim_GetIPValuead(int _iKey, int _iSeq, fp32 _Time, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default) const;
 
 	CStr Anim_GetIPValue(int _iKey, int _iSeq, const CMTime &_Time) const;
 	int32 Anim_GetIPValuei(int _iKey, int _iSeq, const CMTime &_Time) const;
-	fp4 Anim_GetIPValuef(int _iKey, int _iSeq, const CMTime &_Time) const;
+	fp32 Anim_GetIPValuef(int _iKey, int _iSeq, const CMTime &_Time) const;
 	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, const CMTime &_Time) const;
 
 	void Anim_GetIPValuea(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest) const;
 	void Anim_GetIPValueai(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, int32 *_pDest) const;
-	void Anim_GetIPValueaf(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, fp4 *_pDest) const;
+	void Anim_GetIPValueaf(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, fp32 *_pDest) const;
 	void Anim_GetIPValuead(int _iKey, int _iSeq, const CMTime &_Time, int _nDim, TArray<uint8> *_pDest) const;
 
-	CStr Anim_GetIPValue(int _iKey, int _iSeq, fp4 _Time) const;
-	int32 Anim_GetIPValuei(int _iKey, int _iSeq, fp4 _Time) const;
-	fp4 Anim_GetIPValuef(int _iKey, int _iSeq, fp4 _Time) const;
-	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, fp4 _Time) const;
+	CStr Anim_GetIPValue(int _iKey, int _iSeq, fp32 _Time) const;
+	int32 Anim_GetIPValuei(int _iKey, int _iSeq, fp32 _Time) const;
+	fp32 Anim_GetIPValuef(int _iKey, int _iSeq, fp32 _Time) const;
+	TArray<uint8> Anim_GetIPValued(int _iKey, int _iSeq, fp32 _Time) const;
 
-	void Anim_GetIPValuea(int _iKey, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
-	void Anim_GetIPValueai(int _iKey, int _iSeq, fp4 _Time, int _nDim, int32 *_pDest) const;
-	void Anim_GetIPValueaf(int _iKey, int _iSeq, fp4 _Time, int _nDim, fp4 *_pDest) const;
-	void Anim_GetIPValuead(int _iKey, int _iSeq, fp4 _Time, int _nDim, TArray<uint8> *_pDest) const;
+	void Anim_GetIPValuea(int _iKey, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_GetIPValueai(int _iKey, int _iSeq, fp32 _Time, int _nDim, int32 *_pDest) const;
+	void Anim_GetIPValueaf(int _iKey, int _iSeq, fp32 _Time, int _nDim, fp32 *_pDest) const;
+	void Anim_GetIPValuead(int _iKey, int _iSeq, fp32 _Time, int _nDim, TArray<uint8> *_pDest) const;
 
 	///////////////////////
 	// Key Name
@@ -598,7 +598,7 @@ public:
 	// Get Value
 	CStr Anim_GetKFValue(const char* _pName, int _iSeq, int _iKF) const;
 	int32 Anim_GetKFValuei(const char* _pName, int _iSeq, int _iKF) const;
-	fp4 Anim_GetKFValuef(const char* _pName, int _iSeq, int _iKF) const;
+	fp32 Anim_GetKFValuef(const char* _pName, int _iSeq, int _iKF) const;
 	TArray<uint8> Anim_GetKFValued(const char* _pName, int _iSeq, int _iKF) const;
 
 	void Anim_GetKFValuea(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest) const;
@@ -609,38 +609,38 @@ public:
 	// Get Value
 	CStr Anim_GetKFValue(const char* _pName, int _iSeq, int _iKF, CStr _Default) const;
 	int32 Anim_GetKFValuei(const char* _pName, int _iSeq, int _iKF, int32 _Default) const;
-	fp4 Anim_GetKFValuef(const char* _pName, int _iSeq, int _iKF, fp4 _Default) const;
+	fp32 Anim_GetKFValuef(const char* _pName, int _iSeq, int _iKF, fp32 _Default) const;
 	TArray<uint8> Anim_GetKFValued(const char* _pName, int _iSeq, int _iKF, const TArray<uint8> &_Default) const;
 
 	void Anim_GetKFValuea(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_GetKFValueai(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const int32 *_Default) const;
-	void Anim_GetKFValueaf(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const fp4 *_Default) const;
+	void Anim_GetKFValueaf(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const fp32 *_Default) const;
 	void Anim_GetKFValuead(const char* _pName, int _iSeq, int _iKF, int _nDim, CStr *_pDest, const TArray<uint8> *_Default) const;
 
 	// Get Interpolated Value
 	CStr Anim_GetIPValue(const char* _pName, int _iSeq, const CMTime &_Time, CStr _Default) const;
 	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, const CMTime &_Time, int32 _Default) const;
-	fp4 Anim_GetIPValuef(const char* _pName, int _iSeq, const CMTime &_Time, fp4 _Default) const;
+	fp32 Anim_GetIPValuef(const char* _pName, int _iSeq, const CMTime &_Time, fp32 _Default) const;
 	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, const CMTime &_Time, const TArray<uint8> &_Default) const;
 
 	void Anim_GetIPValuea(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void Anim_GetIPValueai(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const int32 *_Default) const;
-	void Anim_GetIPValueaf(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const fp4 *_Default) const;
+	void Anim_GetIPValueaf(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const fp32 *_Default) const;
 	void Anim_GetIPValuead(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest, const TArray<uint8> *_Default) const;
 
-	CStr Anim_GetIPValue(const char* _pName, int _iSeq, fp4 _Time, CStr _Default) const;
-	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, fp4 _Time, int32 _Default) const;
-	fp4 Anim_GetIPValuef(const char* _pName, int _iSeq, fp4 _Time, fp4 _Default) const;
-	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, fp4 _Time, const TArray<uint8> &_Default) const;
+	CStr Anim_GetIPValue(const char* _pName, int _iSeq, fp32 _Time, CStr _Default) const;
+	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, fp32 _Time, int32 _Default) const;
+	fp32 Anim_GetIPValuef(const char* _pName, int _iSeq, fp32 _Time, fp32 _Default) const;
+	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, fp32 _Time, const TArray<uint8> &_Default) const;
 
-	void Anim_GetIPValuea(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
-	void Anim_GetIPValueai(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const int32 *_Default) const;
-	void Anim_GetIPValueaf(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const fp4 *_Default) const;
-	void Anim_GetIPValuead(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest, const TArray<uint8> *_Default) const;
+	void Anim_GetIPValuea(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const CStr *_Default) const;
+	void Anim_GetIPValueai(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const int32 *_Default) const;
+	void Anim_GetIPValueaf(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const fp32 *_Default) const;
+	void Anim_GetIPValuead(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest, const TArray<uint8> *_Default) const;
 
 	CStr Anim_GetIPValue(const char* _pName, int _iSeq, const CMTime &_Time) const;
 	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, const CMTime &_Time) const;
-	fp4 Anim_GetIPValuef(const char* _pName, int _iSeq, const CMTime &_Time) const;
+	fp32 Anim_GetIPValuef(const char* _pName, int _iSeq, const CMTime &_Time) const;
 	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, const CMTime &_Time) const;
 
 	void Anim_GetIPValuea(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest) const;
@@ -648,15 +648,15 @@ public:
 	void Anim_GetIPValueaf(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest) const;
 	void Anim_GetIPValuead(const char* _pName, int _iSeq, const CMTime &_Time, int _nDim, CStr *_pDest) const;
 
-	CStr Anim_GetIPValue(const char* _pName, int _iSeq, fp4 _Time) const;
-	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, fp4 _Time) const;
-	fp4 Anim_GetIPValuef(const char* _pName, int _iSeq, fp4 _Time) const;
-	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, fp4 _Time) const;
+	CStr Anim_GetIPValue(const char* _pName, int _iSeq, fp32 _Time) const;
+	int32 Anim_GetIPValuei(const char* _pName, int _iSeq, fp32 _Time) const;
+	fp32 Anim_GetIPValuef(const char* _pName, int _iSeq, fp32 _Time) const;
+	TArray<uint8> Anim_GetIPValued(const char* _pName, int _iSeq, fp32 _Time) const;
 
-	void Anim_GetIPValuea(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
-	void Anim_GetIPValueai(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
-	void Anim_GetIPValueaf(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
-	void Anim_GetIPValuead(const char* _pName, int _iSeq, fp4 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_GetIPValuea(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_GetIPValueai(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_GetIPValueaf(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
+	void Anim_GetIPValuead(const char* _pName, int _iSeq, fp32 _Time, int _nDim, CStr *_pDest) const;
 
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
@@ -669,13 +669,13 @@ public:
 
 	CStr GetValue(int _iKey) const;
 	int32 GetValuei(int _iKey) const;
-	fp4 GetValuef(int _iKey) const;
+	fp32 GetValuef(int _iKey) const;
 	const TArray<uint8> GetValued(int _iKey) const;
 	TArray<uint8> GetValued(int _iKey);
 
 	void GetValuea(int _iKey, int _nDim, CStr *_pDest) const;
 	void GetValueai(int _iKey, int _nDim, int32 *_pDest) const;
-	void GetValueaf(int _iKey, int _nDim, fp4 *_pDest) const;
+	void GetValueaf(int _iKey, int _nDim, fp32 *_pDest) const;
 	void GetValuead(int _iKey, int _nDim, TArray<uint8> *_pDest) const;
 
 	// Named Key
@@ -685,34 +685,34 @@ public:
 
 	CStr GetValue(const char* _pName) const;
 	int32 GetValuei(const char* _pName) const;
-	fp4 GetValuef(const char* _pName) const;
+	fp32 GetValuef(const char* _pName) const;
 	const TArray<uint8> GetValued(const char* _pName) const;
 	TArray<uint8> GetValued(const char* _pName);
 
 	void GetValuea(const char* _pName, int _nDim, CStr *_pDest) const;
 	void GetValueai(const char* _pName, int _nDim, int32 *_pDest) const;
-	void GetValueaf(const char* _pName, int _nDim, fp4 *_pDest) const;
+	void GetValueaf(const char* _pName, int _nDim, fp32 *_pDest) const;
 	void GetValuead(const char* _pName, int _nDim, TArray<uint8> *_pDest) const;
 
 	CStr GetValue(const char* _pName, CStr _Default) const;
 	int32 GetValuei(const char* _pName, int32 _Default) const;
-	fp4 GetValuef(const char* _pName, fp4 _Default) const;
+	fp32 GetValuef(const char* _pName, fp32 _Default) const;
 	const TArray<uint8> GetValued(const char* _pName, const TArray<uint8> &_Default) const;
 	TArray<uint8> GetValued(const char* _pName, TArray<uint8> &_Default);
 
 	void GetValuea(const char* _pName, int _nDim, CStr *_pDest, const CStr *_Default) const;
 	void GetValueai(const char* _pName, int _nDim, int32 *_pDest, const int32 *_Default) const;
-	void GetValueaf(const char* _pName, int _nDim, fp4 *_pDest, const fp4 *_Default) const;
+	void GetValueaf(const char* _pName, int _nDim, fp32 *_pDest, const fp32 *_Default) const;
 	void GetValuead(const char* _pName, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default);
 
 	CStr GetValue(const char* _pName, CStr _Default, bint _bAddValue);
 	int32 GetValuei(const char* _pName, int32 _Default, bint _bAddValue);
-	fp4 GetValuef(const char* _pName, fp4 _Default, bint _bAddValue);
+	fp32 GetValuef(const char* _pName, fp32 _Default, bint _bAddValue);
 	TArray<uint8> GetValued(const char* _pName, TArray<uint8> &_Default, bint _bAddValue);
 
 	void GetValue(const char* _pName, int _nDim, CStr *_pDest, const CStr *_Default, bint _bAddValue);
 	void GetValuei(const char* _pName, int _nDim, int32 *_pDest, const int32 *_Default, bint _bAddValue);
-	void GetValuef(const char* _pName, int _nDim, fp4 *_pDest, const fp4 *_Default, bint _bAddValue);
+	void GetValuef(const char* _pName, int _nDim, fp32 *_pDest, const fp32 *_Default, bint _bAddValue);
 	void GetValued(const char* _pName, int _nDim, TArray<uint8> *_pDest, const TArray<uint8> *_Default, bint _bAddValue);
 
 	// Destroying keys

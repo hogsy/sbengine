@@ -1,0 +1,91 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: ogg_dynamic - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\Temp1\Windows\RSP83.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /FR"Dynamic_Debug/" /Fo"Dynamic_Debug/" /Fd"Dynamic_Debug/" /FD /GZ /c 
+"S:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c"
+"S:\SOURCE\SDK\Vorbis\ogg\src\framing.c"
+]
+Creating command line "cl.exe @D:\Temp1\Windows\RSP83.tmp" 
+Creating temporary file "D:\Temp1\Windows\RSP84.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /pdb:"Dynamic_Debug/ogg_d.pdb" /debug /machine:I386 /def:".\ogg.def" /out:"Dynamic_Debug/ogg_d.dll" /implib:"Dynamic_Debug/ogg_d.lib" /pdbtype:sept 
+.\Dynamic_Debug\bitwise.obj
+.\Dynamic_Debug\framing.obj
+]
+Creating command line "link.exe @D:\Temp1\Windows\RSP84.tmp"
+<h3>Output Window</h3>
+Compiling...
+bitwise.c
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(118) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(120) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(122) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(125) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(194) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(226) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
+framing.c
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(381) : warning C4244: '=' : conversion from 'ogg_int64_t' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(389) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(404) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+Generating Code...
+Spawn Time 0:00.1
+Linking...
+LINK : warning LNK4224: /PDBTYPE is no longer supported;  ignored
+   Creating library Dynamic_Debug/ogg_d.lib and object Dynamic_Debug/ogg_d.exp
+bitwise.obj : error LNK2019: unresolved external symbol __RTC_CheckEsp referenced in function _oggpack_writeinit
+framing.obj : error LNK2001: unresolved external symbol __RTC_CheckEsp
+bitwise.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+framing.obj : error LNK2001: unresolved external symbol __RTC_Shutdown
+bitwise.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+framing.obj : error LNK2001: unresolved external symbol __RTC_InitBase
+framing.obj : error LNK2019: unresolved external symbol @_RTC_CheckStackVars@8 referenced in function _ogg_sync_pageseek
+Dynamic_Debug/ogg_d.dll : fatal error LNK1120: 4 unresolved externals
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+ogg_d.dll - 8 error(s), 10 warning(s)
+<h3>
+--------------------Configuration: ogg_static - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\Temp1\Windows\RSP88.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fp"Static_Debug/ogg_static.pch" /YX /Fo"Static_Debug/" /Fd"Static_Debug/" /FD /GZ /c 
+"S:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c"
+"S:\SOURCE\SDK\Vorbis\ogg\src\framing.c"
+]
+Creating command line "cl.exe @D:\Temp1\Windows\RSP88.tmp" 
+Creating command line "link.exe -lib /nologo /out:"Static_Debug\ogg_static_d.lib"  .\Static_Debug\bitwise.obj .\Static_Debug\framing.obj "
+<h3>Output Window</h3>
+Compiling...
+bitwise.c
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(118) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(120) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(122) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(125) : warning C4244: '=' : conversion from 'unsigned long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(194) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
+s:\SOURCE\SDK\Vorbis\ogg\src\bitwise.c(226) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
+framing.c
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(381) : warning C4244: '=' : conversion from 'ogg_int64_t' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(389) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+s:\SOURCE\SDK\Vorbis\ogg\src\framing.c(404) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+Spawn Time 0:00.2
+Creating library...
+Spawn Time 0:00.0
+
+
+
+<h3>Results</h3>
+ogg_static_d.lib - 0 error(s), 9 warning(s)
+Build Time 0:00.7
+</pre>
+</body>
+</html>

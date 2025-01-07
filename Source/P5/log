@@ -1,0 +1,634 @@
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: forcedusingfiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+
+warning unknown option: additionalincludedirectories
+
+
+warning unknown option: preprocessordefinitions
+
+
+warning unknown option: forcedincludefiles
+
+Warning file: .\MSystem.def has unknown extension
+../Classes/Miscellaneous/MMd5.cpp
+Shared/MOS/MSystem
+Shared/MOS/Classes/Miscellaneous/MMd5.cpp
+../MMain.cpp
+Shared/MOS/MSystem
+Shared/MOS/MMain.cpp
+./Input/MInput.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Input/MInput.cpp
+./Input/MInputEnvelope.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Input/MInputEnvelope.cpp
+./Input/MInputScankey.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Input/MInputScankey.cpp
+./Input/Ps3/MInput_PS3.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Input/Ps3/MInput_PS3.cpp
+./MSystem_Core.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/MSystem_Core.cpp
+./MSystem_PS3.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/MSystem_PS3.cpp
+./MSystem_Xenon.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/MSystem_Xenon.cpp
+./Misc/MConsole.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MConsole.cpp
+./Misc/MLocalizer.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MLocalizer.cpp
+./Misc/MPerfGraph.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MPerfGraph.cpp
+./Misc/MRegistry.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MRegistry.cpp
+./Misc/MRegistry_Compiled.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MRegistry_Compiled.cpp
+./Misc/MRegistry_Dynamic.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Misc/MRegistry_Dynamic.cpp
+./PCH/PCH.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/PCH/PCH.cpp
+./Raster/JPGLib/jcapimin.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcapimin.cpp
+./Raster/JPGLib/jcapistd.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcapistd.cpp
+./Raster/JPGLib/jccoefct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jccoefct.cpp
+./Raster/JPGLib/jccolor.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jccolor.cpp
+./Raster/JPGLib/jcdctmgr.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcdctmgr.cpp
+./Raster/JPGLib/jcfileread.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcfileread.cpp
+./Raster/JPGLib/jchuff.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jchuff.cpp
+./Raster/JPGLib/jcinit.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcinit.cpp
+./Raster/JPGLib/jcmainct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcmainct.cpp
+./Raster/JPGLib/jcmarker.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcmarker.cpp
+./Raster/JPGLib/jcmaster.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcmaster.cpp
+./Raster/JPGLib/jcomapi.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcomapi.cpp
+./Raster/JPGLib/jcparam.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcparam.cpp
+./Raster/JPGLib/jcphuff.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcphuff.cpp
+./Raster/JPGLib/jcprepct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcprepct.cpp
+./Raster/JPGLib/jcsample.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jcsample.cpp
+./Raster/JPGLib/jctrans.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jctrans.cpp
+./Raster/JPGLib/jdapimin.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdapimin.cpp
+./Raster/JPGLib/jdapistd.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdapistd.cpp
+./Raster/JPGLib/jdatadst.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdatadst.cpp
+./Raster/JPGLib/jdatasrc.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdatasrc.cpp
+./Raster/JPGLib/jdcoefct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdcoefct.cpp
+./Raster/JPGLib/jdcolor.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdcolor.cpp
+./Raster/JPGLib/jddctmgr.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jddctmgr.cpp
+./Raster/JPGLib/jdhuff.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdhuff.cpp
+./Raster/JPGLib/jdinput.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdinput.cpp
+./Raster/JPGLib/jdmainct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdmainct.cpp
+./Raster/JPGLib/jdmarker.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdmarker.cpp
+./Raster/JPGLib/jdmaster.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdmaster.cpp
+./Raster/JPGLib/jdmerge.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdmerge.cpp
+./Raster/JPGLib/jdphuff.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdphuff.cpp
+./Raster/JPGLib/jdpostct.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdpostct.cpp
+./Raster/JPGLib/jdsample.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdsample.cpp
+./Raster/JPGLib/jdtrans.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jdtrans.cpp
+./Raster/JPGLib/jerror.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jerror.cpp
+./Raster/JPGLib/jfdctflt.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jfdctflt.cpp
+./Raster/JPGLib/jfdctfst.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jfdctfst.cpp
+./Raster/JPGLib/jfdctint.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jfdctint.cpp
+./Raster/JPGLib/jidctflt.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jidctflt.cpp
+./Raster/JPGLib/jidctfst.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jidctfst.cpp
+./Raster/JPGLib/jidctint.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jidctint.cpp
+./Raster/JPGLib/jidctred.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jidctred.cpp
+./Raster/JPGLib/jmemmgr.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jmemmgr.cpp
+./Raster/JPGLib/jmemnobs.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jmemnobs.cpp
+./Raster/JPGLib/jquant1.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jquant1.cpp
+./Raster/JPGLib/jquant2.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jquant2.cpp
+./Raster/JPGLib/jutils.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/JPGLib/jutils.cpp
+./Raster/MDisplay.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MDisplay.cpp
+./Raster/MImage.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImage.cpp
+./Raster/MImageCompress3DC.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompress3DC.cpp
+./Raster/MImageCompressCTX.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompressCTX.cpp
+./Raster/MImageCompressJPG.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompressJPG.cpp
+./Raster/MImageCompressS3TC.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompressS3TC.cpp
+./Raster/MImageCompressSound.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompressSound.cpp
+./Raster/MImageCompressVQ.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageCompressVQ.cpp
+./Raster/MImageDxtLibWrappper.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageDxtLibWrappper.cpp
+./Raster/MImageIO.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageIO.cpp
+./Raster/MImagePalette.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImagePalette.cpp
+./Raster/MImageQuantize.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageQuantize.cpp
+./Raster/MImageScaler.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MImageScaler.cpp
+./Raster/MRender.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MRender.cpp
+./Raster/MTexture.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTexture.cpp
+./Raster/MTextureContainerBink.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerBink.cpp
+./Raster/MTextureContainerBinkDummy.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerBinkDummy.cpp
+./Raster/MTextureContainerMPEG.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerMPEG.cpp
+./Raster/MTextureContainerTheora.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerTheora.cpp
+./Raster/MTextureContainerVideoPS3.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerVideoPS3.cpp
+./Raster/MTextureContainerWMV.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerWMV.cpp
+./Raster/MTextureContainerXTC2.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerXTC2.cpp
+./Raster/MTextureContainers.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainers.cpp
+./Raster/MTextureContainersPostFilter.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainersPostFilter.cpp
+./Script/MScript.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript.cpp
+./Script/MScript_ConstantParsers.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_ConstantParsers.cpp
+./Script/MScript_Convert.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_Convert.cpp
+./Script/MScript_Language.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_Language.cpp
+./Script/MScript_MultiType.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_MultiType.cpp
+./Script/MScript_RegisterContext.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_RegisterContext.cpp
+./Script/MScript_Syntax.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Script/MScript_Syntax.cpp
+./Sound/ASIO/MSound_ASIO.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/ASIO/MSound_ASIO.cpp
+./Sound/Codecs/MSound_Codec_PS3.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/Codecs/MSound_Codec_PS3.cpp
+./Sound/LipSync/LipSyncAnno.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/LipSync/LipSyncAnno.cpp
+./Sound/LipSync/LipSyncFaceFX.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/LipSync/LipSyncFaceFX.cpp
+./Sound/LipSync/LipSyncTalkbackAndFaceFX.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/LipSync/LipSyncTalkbackAndFaceFX.cpp
+./Sound/MSound.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound.cpp
+./Sound/MSound_Codec.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Codec.cpp
+./Sound/MSound_Core.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Core.cpp
+./Sound/MSound_Mixer.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Mixer.cpp
+./Sound/MSound_Mixer_DSPEffects.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Mixer_DSPEffects.cpp
+./Sound/MSound_Mixer_Worker_CPUVPUAccess.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Mixer_Worker_CPUVPUAccess.cpp
+./Sound/MSound_SFXDesc.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_SFXDesc.cpp
+./Sound/MSound_WaveContainer_Plain.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_WaveContainer_Plain.cpp
+./Sound/MSound_Waveform.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_Waveform.cpp
+./Sound/PS3/MSound_PS3.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/PS3/MSound_PS3.cpp
+./Sound/SCMixer/MSound_SCMixer.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/SCMixer/MSound_SCMixer.cpp
+./Sound/Vorbis/MSound_Vorbis.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/Vorbis/MSound_Vorbis.cpp
+Raster/MTextureContainerXMV.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Raster/MTextureContainerXMV.cpp
+Sound/LipSync/LipSync.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/LipSync/LipSync.cpp
+Sound/LipSync/LipSyncTalkBack.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/LipSync/LipSyncTalkBack.cpp
+Sound/MSound_CoreDualStream.cpp
+Shared/MOS/MSystem
+Shared/MOS/MSystem/Sound/MSound_CoreDualStream.cpp
+
+Release
+..\..\..\Sdk\Png\pngwio.c = -w 
+..\..\..\Sdk\Png\pngget.c = -w 
+..\..\..\Sdk\Png\pngtrans.c = -w 
+..\..\..\Sdk\Png\pngrio.c = -w 
+..\..\..\Sdk\Png\pngmem.c = -w 
+..\..\..\Sdk\Png\pngwutil.c = -w 
+..\..\..\Sdk\Png\pngwrite.c = -w 
+..\..\..\Sdk\Png\pngrutil.c = -w 
+..\..\..\Sdk\Png\pnggccrd.c = -w 
+..\..\..\Sdk\Png\pngset.c = -w 
+..\..\..\Sdk\Png\pngerror.c = -w 
+..\..\..\Sdk\Png\pngread.c = -w 
+..\..\..\Sdk\Png\pngvcrd.c = -w 
+..\..\..\Sdk\Png\pngpread.c = -w 
+..\..\..\Sdk\Png\pngrtran.c = -w 
+..\..\..\Sdk\Png\pngwtran.c = -w 
+..\..\..\Sdk\Png\png.c = -w 
+
+Debug RTM
+..\..\..\Sdk\Png\pngwio.c = -w 
+..\..\..\Sdk\Png\pngget.c = -w 
+..\..\..\Sdk\Png\pngtrans.c = -w 
+..\..\..\Sdk\Png\pngrio.c = -w 
+..\..\..\Sdk\Png\pngmem.c = -w 
+..\..\..\Sdk\Png\pngwutil.c = -w 
+..\..\..\Sdk\Png\pngwrite.c = -w 
+..\..\..\Sdk\Png\pngrutil.c = -w 
+..\..\..\Sdk\Png\pnggccrd.c = -w 
+..\..\..\Sdk\Png\pngset.c = -w 
+..\..\..\Sdk\Png\pngerror.c = -w 
+..\..\..\Sdk\Png\pngread.c = -w 
+..\..\..\Sdk\Png\pngvcrd.c = -w 
+..\..\..\Sdk\Png\pngpread.c = -w 
+..\..\..\Sdk\Png\pngrtran.c = -w 
+..\..\..\Sdk\Png\pngwtran.c = -w 
+..\..\..\Sdk\Png\png.c = -w 
+
+Debug
+..\..\..\Sdk\Png\pngwio.c = -w 
+..\..\..\Sdk\Png\pngget.c = -w 
+..\..\..\Sdk\Png\pngtrans.c = -w 
+..\..\..\Sdk\Png\pngrio.c = -w 
+..\..\..\Sdk\Png\pngmem.c = -w 
+..\..\..\Sdk\Png\pngwutil.c = -w 
+..\..\..\Sdk\Png\pngwrite.c = -w 
+..\..\..\Sdk\Png\pngrutil.c = -w 
+..\..\..\Sdk\Png\pnggccrd.c = -w 
+..\..\..\Sdk\Png\pngset.c = -w 
+..\..\..\Sdk\Png\pngerror.c = -w 
+..\..\..\Sdk\Png\pngread.c = -w 
+..\..\..\Sdk\Png\pngvcrd.c = -w 
+..\..\..\Sdk\Png\pngpread.c = -w 
+..\..\..\Sdk\Png\pngrtran.c = -w 
+..\..\..\Sdk\Png\pngwtran.c = -w 
+..\..\..\Sdk\Png\png.c = -w 
+
+RTMD
+..\..\..\Sdk\Png\pngwio.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngget.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngtrans.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngrio.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngmem.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngwutil.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngwrite.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngrutil.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pnggccrd.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngset.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngerror.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngread.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngvcrd.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngpread.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngrtran.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\pngwtran.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+..\..\..\Sdk\Png\png.c = -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w 
+
+RTM
+..\..\..\Sdk\Png\pngwio.c = -w 
+..\..\..\Sdk\Png\pngget.c = -w 
+..\..\..\Sdk\Png\pngtrans.c = -w 
+..\..\..\Sdk\Png\pngrio.c = -w 
+..\..\..\Sdk\Png\pngmem.c = -w 
+..\..\..\Sdk\Png\pngwutil.c = -w 
+..\..\..\Sdk\Png\pngwrite.c = -w 
+..\..\..\Sdk\Png\pngrutil.c = -w 
+..\..\..\Sdk\Png\pnggccrd.c = -w 
+..\..\..\Sdk\Png\pngset.c = -w 
+..\..\..\Sdk\Png\pngerror.c = -w 
+..\..\..\Sdk\Png\pngread.c = -w 
+..\..\..\Sdk\Png\pngvcrd.c = -w 
+..\..\..\Sdk\Png\pngpread.c = -w 
+..\..\..\Sdk\Png\pngrtran.c = -w 
+..\..\..\Sdk\Png\pngwtran.c = -w 
+..\..\..\Sdk\Png\png.c = -w 
+
+RTMD Profile
+..\..\..\Sdk\Png\pngwio.c = -w 
+..\..\..\Sdk\Png\pngget.c = -w 
+..\..\..\Sdk\Png\pngtrans.c = -w 
+..\..\..\Sdk\Png\pngrio.c = -w 
+..\..\..\Sdk\Png\pngmem.c = -w 
+..\..\..\Sdk\Png\pngwutil.c = -w 
+..\..\..\Sdk\Png\pngwrite.c = -w 
+..\..\..\Sdk\Png\pngrutil.c = -w 
+..\..\..\Sdk\Png\pnggccrd.c = -w 
+..\..\..\Sdk\Png\pngset.c = -w 
+..\..\..\Sdk\Png\pngerror.c = -w 
+..\..\..\Sdk\Png\pngread.c = -w 
+..\..\..\Sdk\Png\pngvcrd.c = -w 
+..\..\..\Sdk\Png\pngpread.c = -w 
+..\..\..\Sdk\Png\pngrtran.c = -w 
+..\..\..\Sdk\Png\pngwtran.c = -w 
+..\..\..\Sdk\Png\png.c = -w 

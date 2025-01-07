@@ -15,7 +15,7 @@ CInputEnvelopePoint::CInputEnvelopePoint() : m_fValue( 0.0f ), m_fTime( 0.0 )
 //
 //
 //
-CInputEnvelopePoint::CInputEnvelopePoint(fp4 _fTime, fp4 _fValue) : m_fValue( _fValue ), m_fTime( _fTime )
+CInputEnvelopePoint::CInputEnvelopePoint(fp32 _fTime, fp32 _fValue) : m_fValue( _fValue ), m_fTime( _fTime )
 {
 }
 
@@ -26,7 +26,7 @@ CInputEnvelopePoint::CInputEnvelopePoint(fp4 _fTime, fp4 _fValue) : m_fValue( _f
 //
 //
 //
-fp4 CInputEnvelopeChannel::GetFeedbackForce(fp4 _fTime)
+fp32 CInputEnvelopeChannel::GetFeedbackForce(fp32 _fTime)
 {
 	if(!m_lPoints.Len())
 		return 0.0f;
@@ -50,16 +50,16 @@ fp4 CInputEnvelopeChannel::GetFeedbackForce(fp4 _fTime)
 		return m_lPoints[0]->m_fValue;
 
 	// Interpolate
-	fp4 fTimeSlice = m_lPoints[i]->m_fTime - m_lPoints[i-1]->m_fTime;
-	fp4 Amount = (_fTime - m_lPoints[i-1]->m_fTime) / fTimeSlice;
-	fp4 fForce = m_lPoints[i-1]->m_fValue + (m_lPoints[i]->m_fValue - m_lPoints[i-1]->m_fValue) * Amount;
+	fp32 fTimeSlice = m_lPoints[i]->m_fTime - m_lPoints[i-1]->m_fTime;
+	fp32 Amount = (_fTime - m_lPoints[i-1]->m_fTime) / fTimeSlice;
+	fp32 fForce = m_lPoints[i-1]->m_fValue + (m_lPoints[i]->m_fValue - m_lPoints[i-1]->m_fValue) * Amount;
 
 	return fForce;
 }
 
 
 // Called from CInputEnvelope, never call directly becouse CInputEnvelope need to process the point too
-void CInputEnvelopeChannel::AddPoint(const fp4 _fTime, const fp4 _fValue)
+void CInputEnvelopeChannel::AddPoint(const fp32 _fTime, const fp32 _fValue)
 {
 	spCInputEnvelopePoint spPoint = MNew2(CInputEnvelopePoint, _fTime, _fValue );
 	m_lPoints.Add(spPoint);
@@ -104,7 +104,7 @@ spCInputEnvelopeChannel CInputEnvelope::GetChannel(int32 _Channel)
 //
 // (JK?) No support for sustain or loop yet
 //
-fp4 CInputEnvelope::GetFeedbackForce(fp4 _fTime, int32 _Channel)
+fp32 CInputEnvelope::GetFeedbackForce(fp32 _fTime, int32 _Channel)
 {
 	if( _fTime < 0)
 		return 0.0f;
@@ -123,7 +123,7 @@ fp4 CInputEnvelope::GetFeedbackForce(fp4 _fTime, int32 _Channel)
 //
 //
 //
-void CInputEnvelope::AddPoint( const fp4 _fTime, const fp4 _fValue, int32 _Channel)
+void CInputEnvelope::AddPoint( const fp32 _fTime, const fp32 _fValue, int32 _Channel)
 {
 	if(_fTime < 0)
 		return;
@@ -154,7 +154,7 @@ CInputEnvelopeInstance::CInputEnvelopeInstance(CInputEnvelope *_pEnvelope ) : m_
 //
 //
 //
-fp4 CInputEnvelopeInstance::GetFeedbackForce(CMTime _fTime, int32 _Channel)
+fp32 CInputEnvelopeInstance::GetFeedbackForce(CMTime _fTime, int32 _Channel)
 {
 	spCInputEnvelopeChannel spChannel = m_pEnvelope->GetChannel(_Channel);
 	
@@ -246,9 +246,9 @@ void CInputEnvelopeInstanceList::RemoveEnvelope(CInputEnvelopeInstance *_pEnvelo
 //
 //
 
-fp4 CInputEnvelopeInstanceList::GetFeedbackForce(CMTime _fTime, int32 _Channel)
+fp32 CInputEnvelopeInstanceList::GetFeedbackForce(CMTime _fTime, int32 _Channel)
 {
-	fp4 fValue = 0.0f;
+	fp32 fValue = 0.0f;
 
 	for (int32 i = 0; i < m_Instances.Len(); i++)
 		fValue += m_Instances[i]->GetFeedbackForce(_fTime, _Channel);
@@ -373,7 +373,7 @@ void CPlayerInputEnvelopeInstanceList::RemoveEnvelope( const int _index, CInputE
 //
 //
 
-fp4 CPlayerInputEnvelopeInstanceList::GetFeedbackForce( int _index, CMTime _fTime, int32 _Channel)
+fp32 CPlayerInputEnvelopeInstanceList::GetFeedbackForce( int _index, CMTime _fTime, int32 _Channel)
 {
 	if (!m_PlayerLists.ValidPos(_index))
 		return 0.0f;
@@ -452,8 +452,8 @@ void CInputEnvelopeList::Create()
 
 						if(pPoint->GetThisName().Compare("POINT") == 0)
 						{
-							fp4 fTime = pPoint->GetValuef("TIME");
-							fp4 fForce = pPoint->GetValuef("FORCE");
+							fp32 fTime = pPoint->GetValuef("TIME");
+							fp32 fForce = pPoint->GetValuef("FORCE");
 
 							// We must add the points thru the Envelope so it can update it's endtime
 							pEnvelope->AddPoint(fTime, fForce, pChannel->m_ID);

@@ -23,6 +23,12 @@
 
 class MCCDLLEXPORT CXDF : public MRTC_Thread
 {
+protected:
+	const char* Thread_GetName() const
+	{
+		return "XDF Unpacker";
+	}
+
 public:
 
 	enum
@@ -109,7 +115,7 @@ public:
 	void Record_OpenFile(const char *_pFile);
 	void Record_CloseFile(const char *_pFile);	
 
-	void EnumFiles(TList_SortableVector<CDir_FileRec> &_Dest, CStr _Path);	
+	void EnumFiles(TArray_Sortable<CDir_FileRec> &_Dest, CStr _Path);	
 	
 
 	M_INLINE int GetFile(const char *_pFile)

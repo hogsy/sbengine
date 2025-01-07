@@ -1,0 +1,10 @@
+EXPORTS
+	DllEntryPoint
+	DllMain
+	MRTC_DLLAttachProcess
+	MRTC_DLLDetachProcess
+	MRTC_GetClassContainer
+	?Alloc_SkeletonInst@CXR_VBMHelper@@SAPAVCXR_SkeletonInstance@@PAVCXR_VBManager@@HHH@Z
+
+
+	

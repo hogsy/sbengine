@@ -1,0 +1,1537 @@
+
+Lib_MCCProjectName := Lib_MCC
+Lib_MCCOutputDir :=Shared/MCC/Output/$(PlatformName)/Lib_MCC/$(Config)
+
+Lib_MCCIncludes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Lib_MCCIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Lib_MCCIncludes += -I Shared/MCC/PCH
+Lib_MCCIncludes += -I Shared/MCC
+Lib_MCCPPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Lib_MCCDefs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Lib_MCCObjFilesCpp := $(Lib_MCCOutputDir)/MDA_3D.o $(Lib_MCCOutputDir)/MDA_Hash.o $(Lib_MCCOutputDir)/MDataFile.o $(Lib_MCCOutputDir)/MFile.o $(Lib_MCCOutputDir)/MFile_AsyncCopy.o $(Lib_MCCOutputDir)/MFile_DiskUtil.o $(Lib_MCCOutputDir)/MFile_MegaFile.o $(Lib_MCCOutputDir)/MFile_Misc.o $(Lib_MCCOutputDir)/MFile_RAM.o $(Lib_MCCOutputDir)/MFile_Stream.o $(Lib_MCCOutputDir)/MFile_StreamMgr.o $(Lib_MCCOutputDir)/MFile_Stream_Compressed.o $(Lib_MCCOutputDir)/MFile_Stream_Disk.o $(Lib_MCCOutputDir)/MFile_Stream_MegaFile.o $(Lib_MCCOutputDir)/MFile_Stream_Memory.o $(Lib_MCCOutputDir)/MFile_Stream_RAM.o $(Lib_MCCOutputDir)/MFile_Stream_SubFile.o $(Lib_MCCOutputDir)/MFile_Stream_XDF.o $(Lib_MCCOutputDir)/MFile_XDF.o $(Lib_MCCOutputDir)/MFloat.o $(Lib_MCCOutputDir)/MMath.o $(Lib_MCCOutputDir)/MMath_MIPS.o $(Lib_MCCOutputDir)/MMath_SSE_M4.o $(Lib_MCCOutputDir)/MMath_SSE_V3.o $(Lib_MCCOutputDir)/MMath_fp2.o $(Lib_MCCOutputDir)/MMemMgrHeap.o $(Lib_MCCOutputDir)/MMemMgrPool.o $(Lib_MCCOutputDir)/MMisc.o $(Lib_MCCOutputDir)/MNetwork.o $(Lib_MCCOutputDir)/MRTC_VPUManager.o $(Lib_MCCOutputDir)/MRTC_VPUManager_PS3.o $(Lib_MCCOutputDir)/MSIMD.o $(Lib_MCCOutputDir)/Mcomp.o $(Lib_MCCOutputDir)/Mda.o $(Lib_MCCOutputDir)/PCH.o 
+Lib_MCCObjFilesC := $(Lib_MCCOutputDir)/adler32.o $(Lib_MCCOutputDir)/compress.o $(Lib_MCCOutputDir)/crc32.o $(Lib_MCCOutputDir)/deflate.o $(Lib_MCCOutputDir)/gzio.o $(Lib_MCCOutputDir)/infback.o $(Lib_MCCOutputDir)/inffast.o $(Lib_MCCOutputDir)/inflate.o $(Lib_MCCOutputDir)/inftrees.o $(Lib_MCCOutputDir)/spu_printf_server.ppu.o $(Lib_MCCOutputDir)/trees.o $(Lib_MCCOutputDir)/uncompr.o $(Lib_MCCOutputDir)/zutil.o 
+
+Lib_MCCSpuElfFiles := $(Lib_MCCOutputDir)/VPUWorkers.elf 
+
+Lib_MCCSpursObjFiles := 
+
+Lib_MCCSrcFilesCpp := Shared/MCC/MDA_3D.CPP Shared/MCC/MDA_Hash.cpp Shared/MCC/MDataFile.cpp Shared/MCC/MFile.cpp Shared/MCC/MFile_AsyncCopy.cpp Shared/MCC/MFile_DiskUtil.cpp Shared/MCC/MFile_MegaFile.cpp Shared/MCC/MFile_Misc.cpp Shared/MCC/MFile_RAM.cpp Shared/MCC/MFile_Stream.cpp Shared/MCC/MFile_StreamMgr.cpp Shared/MCC/MFile_Stream_Compressed.cpp Shared/MCC/MFile_Stream_Disk.cpp Shared/MCC/MFile_Stream_MegaFile.cpp Shared/MCC/MFile_Stream_Memory.cpp Shared/MCC/MFile_Stream_RAM.cpp Shared/MCC/MFile_Stream_SubFile.cpp Shared/MCC/MFile_Stream_XDF.cpp Shared/MCC/MFile_XDF.cpp Shared/MCC/MFloat.cpp Shared/MCC/MMath.cpp Shared/MCC/MMath_MIPS.cpp Shared/MCC/MMath_SSE_M4.cpp Shared/MCC/MMath_SSE_V3.cpp Shared/MCC/MMath_fp2.cpp Shared/MCC/MMemMgrHeap.cpp Shared/MCC/MMemMgrPool.cpp Shared/MCC/MMisc.cpp Shared/MCC/MNetwork.cpp Shared/MCC/MRTC_VPUManager.cpp Shared/MCC/MRTC_VPUManager_PS3.cpp Shared/MCC/MSIMD.cpp Shared/MCC/Mcomp.cpp Shared/MCC/Mda.cpp Shared/MCC/PCH/PCH.cpp 
+Lib_MCCSrcFilesC := Sdk/ZLib/adler32.c Sdk/ZLib/compress.c Sdk/ZLib/crc32.c Sdk/ZLib/deflate.c Sdk/ZLib/gzio.c Sdk/ZLib/infback.c Sdk/ZLib/inffast.c Sdk/ZLib/inflate.c Sdk/ZLib/inftrees.c Sdk/ZLib/trees.c Sdk/ZLib/uncompr.c Sdk/ZLib/zutil.c Shared/MCC/PS3/spu_printf_server.ppu.c 
+
+
+ifeq ($(Config),Release)
+	Lib_MCCDefs += -DNDEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Lib_MCCDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O0 -g  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD)
+	Lib_MCCSrcFilesCpp += Shared/MCC/MMemMgrOverride.cpp 
+	Lib_MCCObjFilesCpp += $(Lib_MCCOutputDir)/MMemMgrOverride.o
+	Lib_MCCDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug)
+	Lib_MCCDefs += -D_DEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O0 -g  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Lib_MCCSrcFilesCpp += Shared/MCC/MMemMgrOverride.cpp 
+	Lib_MCCObjFilesCpp += $(Lib_MCCOutputDir)/MMemMgrOverride.o
+	Lib_MCCDefs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTM)
+	Lib_MCCSrcFilesCpp += Shared/MCC/MMemMgrOverride.cpp 
+	Lib_MCCObjFilesCpp += $(Lib_MCCOutputDir)/MMemMgrOverride.o
+	Lib_MCCDefs += -DM_RTM -DNDEBUG  
+	Lib_MCCPPU_CPP_OPTIONS := -O3 -finline-functions  $(Lib_MCCPPU_CPP_OPTIONS) 
+endif
+
+Lib_MCCclean: 
+	@echo Cleaning Lib_MCC $(Config)
+	@-rm -f $(Lib_MCCOutputDir)/*.*
+-include $(Lib_MCCObjFilesCpp:.o=.d) $(Lib_MCCObjFilesC:.o=.d) $(Lib_MCCSpuElfFiles:.elf=.d)$(Lib_MCCSpursObjFiles:.o=.d)
+$(Lib_MCCOutputDir)/VPUWorkers.elf: Shared/MCC/Vpu/VPUWorkers.cpp
+	@echo SPU-CC $<
+	$(SPU_VERBOSE)$(SPU_CC) $(COMPILE) -g -Os $(SPU_INCLUDES) $(SPU_DEFS) $(SPU_CPP_OPTIONS) -o $(basename $@).spu.o $< $(ERRORCONV)
+	$(SPU_VERBOSE)$(SPU_CC) $(DEPEND) $@ -g $(SPU_INCLUDES) $(SPU_DEFS) $< > $(basename $@).d
+	$(SPU_VERBOSE)$(SPU_CC) -g -o $@ $(basename $@).spu.o $(SPU_LIBS) -Wl,--gc-sections,$(SPU_MAP)
+
+
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/PCH.o: Shared/MCC/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/Mda.o: Shared/MCC/Mda.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MDA_3D.o: Shared/MCC/MDA_3D.CPP
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MDA_Hash.o: Shared/MCC/MDA_Hash.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MDataFile.o: Shared/MCC/MDataFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile.o: Shared/MCC/MFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_AsyncCopy.o: Shared/MCC/MFile_AsyncCopy.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_DiskUtil.o: Shared/MCC/MFile_DiskUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_MegaFile.o: Shared/MCC/MFile_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Misc.o: Shared/MCC/MFile_Misc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_RAM.o: Shared/MCC/MFile_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream.o: Shared/MCC/MFile_Stream.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_XDF.o: Shared/MCC/MFile_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_Compressed.o: Shared/MCC/MFile_Stream_Compressed.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_Disk.o: Shared/MCC/MFile_Stream_Disk.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_MegaFile.o: Shared/MCC/MFile_Stream_MegaFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_Memory.o: Shared/MCC/MFile_Stream_Memory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_RAM.o: Shared/MCC/MFile_Stream_RAM.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_SubFile.o: Shared/MCC/MFile_Stream_SubFile.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_Stream_XDF.o: Shared/MCC/MFile_Stream_XDF.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFile_StreamMgr.o: Shared/MCC/MFile_StreamMgr.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MFloat.o: Shared/MCC/MFloat.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMath.o: Shared/MCC/MMath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMath_fp2.o: Shared/MCC/MMath_fp2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMath_MIPS.o: Shared/MCC/MMath_MIPS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMath_SSE_M4.o: Shared/MCC/MMath_SSE_M4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMath_SSE_V3.o: Shared/MCC/MMath_SSE_V3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MSIMD.o: Shared/MCC/MSIMD.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/Mcomp.o: Shared/MCC/Mcomp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/adler32.o: Sdk/ZLib/adler32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/compress.o: Sdk/ZLib/compress.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/crc32.o: Sdk/ZLib/crc32.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/deflate.o: Sdk/ZLib/deflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/gzio.o: Sdk/ZLib/gzio.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/infback.o: Sdk/ZLib/infback.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/inffast.o: Sdk/ZLib/inffast.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/inflate.o: Sdk/ZLib/inflate.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/inftrees.o: Sdk/ZLib/inftrees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/trees.o: Sdk/ZLib/trees.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/uncompr.o: Sdk/ZLib/uncompr.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/zutil.o: Sdk/ZLib/zutil.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -w  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMisc.o: Shared/MCC/MMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMemMgrHeap.o: Shared/MCC/MMemMgrHeap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMemMgrOverride.o: Shared/MCC/MMemMgrOverride.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMemMgrOverride.o: Shared/MCC/MMemMgrOverride.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMemMgrOverride.o: Shared/MCC/MMemMgrOverride.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MMemMgrPool.o: Shared/MCC/MMemMgrPool.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MRTC_VPUManager.o: Shared/MCC/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MRTC_VPUManager_PS3.o: Shared/MCC/MRTC_VPUManager_PS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/MNetwork.o: Shared/MCC/MNetwork.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Release/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug_RTM/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) -g -Wall -fno-exceptions -O3 $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/Debug/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTMD_Profile/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MCC/Output/Ps3/Lib_MCC/RTM/spu_printf_server.ppu.o: Shared/MCC/PS3/spu_printf_server.ppu.c
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(Lib_MCCPPU_C_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_MCCDefs) $(Lib_MCCIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Lib_MCC_CreateOutputDir:
+	@mkdir -p $(Lib_MCCOutputDir)
+
+Lib_MCCTargetFileName := libLib_MCC.a
+Lib_MCCTargetPath := $(LinkDir)/$(Lib_MCCTargetFileName)
+
+$(Lib_MCCTargetPath): $(Lib_MCCObjFilesCpp) $(Lib_MCCObjFilesC) $(Lib_MCCSpursObjFiles) 
+	@echo Creating Lib_MCC
+	$(PPU_LN_VERBOSE)$(PPU_AR) rc $(Lib_MCCTargetPath) $(Lib_MCCObjFilesCpp) $(Lib_MCCObjFilesC) $(Lib_MCCSpursObjFiles) 
+	$(PPU_LN_VERBOSE)$(PPU_RANLIB) $(Lib_MCCTargetPath)
+
+Lib_MCCExtraTargets:  $(Lib_MCCOutputDir)/VPUWorkers.elf 

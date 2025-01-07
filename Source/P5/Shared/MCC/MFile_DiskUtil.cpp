@@ -116,12 +116,12 @@ CStr CDiskUtil::GetFullPath(CStr _Path, const char *_pRelative)
 			while(true)
 			{
 				int iDot = Res.Find("\\..\\");
-				if(iDot == -1)
+				if (iDot == -1 && (iDot = Res.Find("/../")) == -1)
 					break;
 				int i;
 				for(i = iDot - 1; i >= 0; i--)
 				{
-					if(Res[i] == '\\')
+					if (Res[i] == '\\' || Res[i] == '/')
 					{
 						Res = Res.Copy(0, i) + Res.Copy(iDot + 3, 1024);
 						break;
@@ -145,8 +145,8 @@ CStr CDiskUtil::GetRelativePath(CStr _Source, const char *_pRelative)
 	CStr St;
 	while(R != "" || S != "")
 	{
-		CStr R2 = R.GetStrSep("\\");
-		CStr S2 = S.GetStrSep("\\");
+		CStr R2 = R.GetStrMSep("\\/");
+		CStr S2 = S.GetStrMSep("\\/");
 		if(St == "" && R2 == S2)
 			continue;
 		if(R2 != "")
@@ -322,7 +322,8 @@ bool CDiskUtil::CreatePath(CStr _Name)
 
 #elif defined PLATFORM_PS2
 	Error_static("CDiskUtil::CreatePath", "Not supported.");
-#elif defined(PLATFORM_XBOX) || defined(PLATFORM_PS3)
+//#elif defined(PLATFORM_XBOX) || defined(PLATFORM_PS3)
+#else
 	M_TRY
 	{
 		CStr Path;
@@ -338,7 +339,7 @@ bool CDiskUtil::CreatePath(CStr _Name)
 
 		while(_Name != "")
 		{
-			CStr Dir = _Name.GetStrSep("\\");
+			CStr Dir = _Name.GetStrMSep("\\/");
 			CStr NewPath = Path + "\\" + Dir;
 			if(!DirectoryExists(NewPath))
 				MakeDir(Path, Dir);
@@ -352,55 +353,6 @@ bool CDiskUtil::CreatePath(CStr _Name)
 	}
 	)
 	
-	return true;
-#else
-	CStr OrgName = _Name;
-	CStr OrgDir = GetDir();
-	try
-	{
-//LogFile("Name1: " + _Name);
-
-		CStr Path;
-		if (_Name.GetDevice() != "")
-		{
-			Path = _Name.GetDevice();
-			Path = Path.Left(Path.Len()-1);
-			_Name = _Name.CopyFrom(Path.Len() +1);
-
-/*			int Pos = _Name.Find(":\\");
-			Path = _Name.Copy(0, Pos+1);	// No slash
-			_Name = _Name.Del(0, Pos+2);*/
-		}
-		else
-		{
-			Path = ".";
-		}
-
-//LogFile("Path2: " + Path); LogFile("Name2: " + _Name);
-
-		while(_Name.Len())
-		{
-//LogFile("Path3: " + Path); LogFile("Name3: " + _Name);
-			CStr Dir = _Name.GetStrSep("\\");
-			if (ChangeDir(Path + "\\" + Dir))
-			{
-			}
-			else if (!MakeDir(Path, Dir))
-			{
-//LogFile("Path: " + Path); LogFile("Dir: " + Dir);
-				Error_static("CreatePath", "Unable to create path: " + _Name);
-			}
-			Path += "\\" + Dir;
-		}
-	}
-	catch(CCException)
-	{
-		return false;
-	}
-
-	if (!ChangeDir(OrgDir))
-		Error_static("CreatePath", "Unable to switch back to original path.");
-		
 	return true;
 #endif
 }
@@ -671,7 +623,7 @@ bool CDiskUtil::CpyFile(CStr _Src, CStr _Dst, int _BufferSize)
 		Src.Open(_Src, CFILE_READ | CFILE_BINARY);
 		Dst.Open(_Dst, CFILE_WRITE | CFILE_BINARY);
 
-		TList_Vector<uint8> lBuffer;
+		TArray<uint8> lBuffer;
 		lBuffer.SetLen(_BufferSize);
 
 		int Len = Src.Length();

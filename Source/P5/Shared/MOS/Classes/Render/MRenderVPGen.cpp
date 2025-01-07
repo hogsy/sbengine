@@ -7,56 +7,46 @@
 | CRC_VPFormat
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
+uint8 CRC_VPFormat::ms_lnTexGenParams[CRC_TEXGENMODE_MAX];
+uint32 CRC_VPFormat::ms_lTexGenFmtFlags[CRC_TEXGENMODE_MAX];
 
-int CRC_VPFormat::SetRegisters_Init(CVec4Dfp4* _pRegisters, int _Base, int _iReg)
+uint32 CRC_VPFormat::SetRegisters_Init(CVec4Dfp32* _pRegisters, uint32 _iReg)
 {
-	m_iConstant_Base = _Base;
-
 	(*_pRegisters).k[0] = 0;
 	(*_pRegisters).k[1] = 1.0;
 	(*_pRegisters).k[2] = 0.5;
-/*
-#ifdef PLATFORM_XENON
-	if (m_bUseQuatMatrixPallette)
-		(*_pRegisters).k[3] = 2.0f;	// 0.0001 added to avoid precision problems when floor()ing
-	else
-		(*_pRegisters).k[3] = 3.0f;	// 0.0001 added to avoid precision problems when floor()ing
-#else*/
-	if (m_bUseQuatMatrixPallette)
-		(*_pRegisters).k[3] = 2.0f*255.0001f;	// 0.0001 added to avoid precision problems when floor()ing
-	else
-		(*_pRegisters).k[3] = 3.0f*255.0001f;	// 0.0001 added to avoid precision problems when floor()ing
-//#endif
+#ifdef CRC_QUATMATRIXPALETTE
+	(*_pRegisters).k[3] = 2.0f*255.0001f;	// 0.0001 added to avoid precision problems when floor()ing
+#else
+	(*_pRegisters).k[3] = 3.0f*255.0001f;	// 0.0001 added to avoid precision problems when floor()ing
+#endif
 
 	++_pRegisters;
 
-	(*_pRegisters).k[0] = 2.0f*255.0001f; // MP cube special multiply
-	(*_pRegisters).k[1] = 255.0001f; // MP cube special scale 2
-	(*_pRegisters).k[2] = 1/20.0f; // Cube scale
-	(*_pRegisters).k[3] = 2.0f/512.0f; // Free
-
-//	_pRegisters[_iReg].k[3] = 2.0f*255.0001f;	// 0.0001 added to avoid precision problems when floor()ing
-//	_pRegisters[_iReg].k[3] = -2.0f*254.9999f;	// 0.0001 added to avoid precision problems when floor()ing
+	(*_pRegisters).k[0] = 2.0f*255.0001f;	// MP cube special multiply
+	(*_pRegisters).k[1] = 255.0001f;		// MP cube special scale 2
+	(*_pRegisters).k[2] = 1/20.0f;			// Cube scale
+	(*_pRegisters).k[3] = 2.0f/512.0f;		// Free
 
 	return 2;
 }
 
 
 /*
-int CRC_VPFormat::SetRegisters_MatrixPalette_Quat(CVec4Dfp4* _pRegisters, int _iReg, int _iMaxReg, const uint8 *_pValidRegMap, const CMat4Dfp4* _pMatrices, int _nMatrices)
+int CRC_VPFormat::SetRegisters_MatrixPalette_Quat(CVec4Dfp32* _pRegisters, int _iReg, int _iMaxReg, const uint8 *_pValidRegMap, const CMat4Dfp32* _pMatrices, int _nMatrices)
 {
 	m_iConstant_MP = _iReg;
 
 	// Store 4x3 matrix as quaternion and translation.
 	int MaxMat = (_iMaxReg) / 2;
 
-	CVec4Dfp4* pReg = _pRegisters;
-	const CMat4Dfp4* pMat = _pMatrices;
+	CVec4Dfp32* pReg = _pRegisters;
+	const CMat4Dfp32* pMat = _pMatrices;
 	int nMat = Min(MaxMat, _nMatrices);
 	for(int i = 0; i < nMat; i++)
 	{
-		CQuatfp4 Q;
-		CMat4Dfp4 Tmp(pMat[i]);
+		CQuatfp32 Q;
+		CMat4Dfp32 Tmp(pMat[i]);
 		Tmp.Transpose3x3();
 		Q.Create(Tmp);
 
@@ -271,10 +261,10 @@ static bool SubstTexture(const char*& _pVPSrc, const char* _pConst, CFStr& _Dst,
 		return false;
 }
 
-#ifndef PLATFORM_XBOX1
-#define ActiveVertices _Format.m_ProgramGenFormat.m_ActiveVertices
+#ifdef PLATFORM_XENON
+	#define ActiveVertices _Format.m_ProgramGenFormat.m_ActiveVertices
 #else
-#define ActiveVertices 0xffffffff
+	#define ActiveVertices 0xffffffff
 #endif
 
 int CRC_VPGenerator::SubstituteConstants(char* _pVPDst, int _MaxDstSize, const char* _pVPSrc, const CRC_VPFormat& _Format)
@@ -301,9 +291,11 @@ int CRC_VPGenerator::SubstituteConstants(char* _pVPDst, int _MaxDstSize, const c
 			if (SubstConstant(_pVPSrc, "BASE", Subst, _Format.m_iConstant_Base, Neg)) break;
 			if (SubstConstant(_pVPSrc, "CONSTANTCOLOR", Subst, _Format.m_iConstant_Base + _Format.m_iConstant_ConstantColor, Neg)) break;
 			if (SubstConstant(_pVPSrc, "POSTRANS", Subst, _Format.m_iConstant_Base + _Format.m_iConstant_PosTransform, Neg)) break;
-#ifndef PLATFORM_XENON
+#ifdef CRC_SUPPORTVERTEXLIGHTING
 			if (SubstConstant(_pVPSrc, "LIGHT", Subst, _Format.m_iConstant_Base + _Format.m_iConstant_Lights, Neg)) break;
+#endif
 			if (SubstConstant(_pVPSrc, "FOGDEPTH", Subst, _Format.m_iConstant_Base + _Format.m_iConstant_FogDepth, Neg)) break;
+#ifndef PLATFORM_XENON
 			if (SubstConstant(_pVPSrc, "CLIPPLANES", Subst, _Format.m_iConstant_Base + _Format.m_iConstant_ClipPlanes, Neg)) break;
 #endif
 				
@@ -408,12 +400,12 @@ void CRC_VPGenerator::Create(spCRegistry _spReg)
 }
 
 
-void CRC_VPGenerator::Create(CStr _FileName, CStr _FileNameDef, bool _bLowerCase, int _MaxTextures)
+void CRC_VPGenerator::Create(CStr _FileName, CStr _FileNameDef, bool _bLowerCase, int _MaxTexCoords)
 {
 	CCFile File;
 	File.Open(_FileName, CFILE_BINARY | CFILE_READ);
 
-	m_MaxTextures = _MaxTextures;
+	m_MaxTexCoords = _MaxTexCoords;
 
 	CStr FileStrIn = CStr(' ', File.Length());
 	
@@ -434,7 +426,7 @@ void CRC_VPGenerator::Create(CStr _FileName, CStr _FileNameDef, bool _bLowerCase
 	
 	
 	{
-		for (int i = 0; i < _MaxTextures; ++i)
+		for (int i = 0; i < _MaxTexCoords; ++i)
 		{
 			CFStr Def = CFStrF("V_TEX%d",i);
 			
@@ -512,79 +504,82 @@ CStr CRC_VPGenerator::CreateVP(const CRC_VPFormat& _Format)
 
 	// ----------------------------------------------------------------
 	// Create defines
-	CFStr DefMWComp = CFStrF("MWCOMP%d", _Format.m_ProgramGenFormat.m_nMWComp);
+	CFStr DefMWComp = CFStrF("MWCOMP%d", _Format.m_ProgramGenFormat.GetMWComp());
 	lpDefines[nDefines++] = DefMWComp.Str();
 
 	CFStr TexCoordIn[CRC_MAXTEXCOORDS];
 	CFStr TexCoordOut[CRC_MAXTEXCOORDS];
 
-	int MaxTexcoord;
-#if DEF_CRC_MAXTEXTURES > 4
-	MaxTexcoord = _Format.m_ProgramGenFormat.m_MultiTexture?_Format.m_ProgramGenFormat.m_MultiTexture:m_MaxTextures;
+#ifndef	DEF_CRC_HARDCODEMULTITEXTURE
+	uint MaxTexCoords = m_MaxTexCoords;
 #else
-	MaxTexcoord = CRC_MAXTEXCOORDS;
+	uint MaxTexCoords = CRC_MAXTEXCOORDS;
 #endif
 	for( int i = 0; i < CRC_MAXTEXCOORDS; i++ )
 	{
 		TexCoordIn[i].CaptureFormated( "TEXCOORDIN%d", i );
 		lpDefines[nDefines++] = TexCoordIn[i].Str();
 	}
-	for( int i = 0; i < MaxTexcoord; i++ )
+	for( int i = 0; i < MaxTexCoords; i++ )
 	{
 		TexCoordOut[i].CaptureFormated( "TEXCOORDOUT%d", i );
 		lpDefines[nDefines++] = TexCoordOut[i].Str();
 	}
 
-	if (_Format.m_bUseQuatMatrixPallette)
-		lpDefines[nDefines++] = "MPQuat";
+#ifdef CRC_QUATMATRIXPALETTE
+	lpDefines[nDefines++] = "MPQuat";
+#endif
 		
 
+	uint32 FmtBF0 = _Format.m_ProgramGenFormat.m_FmtBF0;
+
 	// Lights
-#ifndef PLATFORM_XENON
-	if (_Format.m_ProgramGenFormat.m_Lighting)
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_VERTEXLIGHTING)
 		lpDefines[nDefines++] = "LIGHTING";
 #endif
 
 	// Colorvertex
-	if (!_Format.m_ProgramGenFormat.m_bNoVertexColorComponent)
+	if (!(FmtBF0 & CRC_VPFormat::FMTBF0_NOVERTEXCOLOR))
 		lpDefines[nDefines++] = "COLORVERTEX";
 
 	// Colorvertex
-	if (!_Format.m_ProgramGenFormat.m_bNoColorOutput)
+	if (!(FmtBF0 & CRC_VPFormat::FMTBF0_NOCOLOROUTPUT))
 		lpDefines[nDefines++] = "COLOROUTPUT";	
 
-#ifndef PLATFORM_XBOX1
+/*#ifndef PLATFORM_XBOX1 wtf is nonormal anyway
 	if (_Format.m_ProgramGenFormat.m_bNoNormal)
 		lpDefines[nDefines++] = "NONORMAL";
-#endif
+#endif*/
 	
 	// UseNormal
-	if (_Format.m_ProgramGenFormat.m_bUseNormal)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_USENORMAL)
 		lpDefines[nDefines++] = "USENORMAL";
 
 	// UseTangents
-	if (_Format.m_ProgramGenFormat.m_bUseTangents)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_USETANGENTS)
 		lpDefines[nDefines++] = "USETANGENTS";
 
 	// Normalize normal
-	if (_Format.m_ProgramGenFormat.m_bNormalizeNormal)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_NORMALIZENORMAL)
 		lpDefines[nDefines++] = "NORMALIZENORMAL";
-#ifndef PLATFORM_XENON
+//#ifndef PLATFORM_XENON
 	// DepthFog
-	if (_Format.m_ProgramGenFormat.m_FogDepth)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_DEPTHFOG)
 		lpDefines[nDefines++] = "FOGDEPTH";
-#endif
+//#endif
 
 	// VertexTransform
-	if (_Format.m_ProgramGenFormat.m_VertexTransform)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_VERTEXINPUTSCALE)
 		lpDefines[nDefines++] = "POSTRANS";
 #ifndef PLATFORM_XENON
 
 	// ClipPlanes
-	if (_Format.m_ProgramGenFormat.m_bClipPlanes)
+	if (FmtBF0 & CRC_VPFormat::FMTBF0_CLIPPLANES)
 		lpDefines[nDefines++] = "CLIPPLANES";
 #endif
 
+#ifdef CRC_SUPPORTCUBEVP
 	if (_Format.m_ProgramGenFormat.m_MPFlags & EMPFlags_SpecialCubeVec)
 		lpDefines[nDefines++] = "CubeVec";
 
@@ -596,10 +591,9 @@ CStr CRC_VPGenerator::CreateVP(const CRC_VPFormat& _Format)
 
 	if (_Format.m_ProgramGenFormat.m_MPFlags & EMPFlags_SpecialCubeTexScale2)
 		lpDefines[nDefines++] = "CubeTexScl2";
-
+#endif
 	
-#ifndef PLATFORM_XENON
-
+#ifdef CRC_SUPPORTVERTEXLIGHTING
 	CFStr LightTypes[CRC_MAXLIGHTS];
 	{
 		for(int i = 0; i < _Format.m_ProgramGenFormat.m_nLights; i++)
@@ -631,9 +625,10 @@ CStr CRC_VPGenerator::CreateVP(const CRC_VPFormat& _Format)
 	CFStr TexTransform[CRC_MAXTEXCOORDS];
 	CFStr TexGenComp[CRC_MAXTEXCOORDS][4];
 	{
-		for(int i = 0; i < MaxTexcoord; i++)
+		for(int i = 0; i < MaxTexCoords; i++)
 		{
-			uint32 Components = _Format.m_ProgramGenFormat.GetTexGenComponents(i);
+			uint32 Components = 0xf;
+			
 			for (int j = 0; j < 4;++j)
 			{
 				if (Components & (1 << j))
@@ -674,6 +669,14 @@ CStr CRC_VPGenerator::CreateVP(const CRC_VPFormat& _Format)
 
 			case CRC_TEXGENMODE_LIGHTING :
 				TexGenMode[i].CaptureFormated("TEXGEN%d_LIGHTING", i);
+				break;
+
+			case CRC_TEXGENMODE_LIGHTING_NONORMAL :
+				TexGenMode[i].CaptureFormated("TEXGEN%d_LIGHTING_NONORMAL", i);
+				break;
+
+			case CRC_TEXGENMODE_LIGHTFIELD :
+				TexGenMode[i].CaptureFormated("TEXGEN%d_LIGHTFIELD", i);
 				break;
 
 			case CRC_TEXGENMODE_TSLV :
@@ -743,20 +746,22 @@ CStr CRC_VPGenerator::CreateVP(const CRC_VPFormat& _Format)
 			}
 			lpDefines[nDefines++] = TexGenMode[i];
 
-			if (_Format.m_ProgramGenFormat.m_TexMatrix & (1 << i))
+			uint TexMatrixMask = _Format.m_ProgramGenFormat.GetTexMatrixMask();
+			if (TexMatrixMask & M_BitD(i))
 			{
 				TexMatrix[i].CaptureFormated("TEXMATRIX%d", i);
 				lpDefines[nDefines++] = TexMatrix[i];
 			}
 
-			if (_Format.m_ProgramGenFormat.m_TextureTransform & (1 << _Format.m_ProgramGenFormat.GetRename(i)))
+			uint TexCoordInputScale = _Format.m_ProgramGenFormat.GetTexCoordInputScaleMask();
+			if (TexCoordInputScale & M_BitD(_Format.m_ProgramGenFormat.GetRename(i)))
 			{
 				TexTransform[i].CaptureFormated("TEXTURETRANS%d", i);
 				lpDefines[nDefines++] = TexTransform[i];
 			}
 		}
 #ifndef PLATFORM_CONSOLE
-		for( int iTexCoord = _Format.m_ProgramGenFormat.m_MultiTexture; iTexCoord < CRC_MAXTEXCOORDS; iTexCoord++ )
+		for( int iTexCoord = MaxTexCoords; iTexCoord < CRC_MAXTEXCOORDS; iTexCoord++ )
 		{
 			TexGenMode[iTexCoord].CaptureFormated("TEXGEN%d_VOID", iTexCoord );
 			lpDefines[nDefines++]	= TexGenMode[iTexCoord];

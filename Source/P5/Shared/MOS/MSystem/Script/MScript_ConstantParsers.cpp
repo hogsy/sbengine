@@ -38,7 +38,14 @@ namespace NScript
 			const char *pStr = _ParseContext.m_pStr;
 			ParseWhiteSpace(pStr);
 
-			if ((*pStr) != '"')
+			char EndChar = '"';
+			if ((*pStr) == '"')
+				;
+			else if ((*pStr) == '\'')
+			{
+				EndChar = '\'';
+			}
+			else
 				return 0;
 
 			const char *pStrStart = pStr;
@@ -46,12 +53,12 @@ namespace NScript
 			++pStr;
 			while (*pStr)
 			{
-				if (*pStr == '\\' && *(pStr + 1) == '"')
+				if (*pStr == '\\' && *(pStr + 1) == EndChar)
 				{
-					Str += '"';
+					Str += EndChar;
 					pStr += 2;
 				}
-				if (*pStr == '"')
+				if (*pStr == EndChar)
 				{
 					++pStr;
 					break;
@@ -326,13 +333,13 @@ namespace NScript
 			CStr Symbol;
 			Symbol.Capture(pNumberStart, pStr - pNumberStart);
 
-			const char *pSymbolName = "fp8";
+			const char *pSymbolName = "fp64";
 			if (Symbol == "f")
-				pSymbolName = "fp4";
-			else if (Symbol == "fp4")
-				pSymbolName = "fp4";
-			else if (Symbol == "fp8")
-				pSymbolName = "fp8";
+				pSymbolName = "fp32";
+			else if (Symbol == "fp32")
+				pSymbolName = "fp32";
+			else if (Symbol == "fp64")
+				pSymbolName = "fp64";
 			else if (Symbol != "")
 			{
 				_ParseContext.SetError(CStrF("Unrecognized floating point suffix (%s) while parsing a float constanst", Symbol.Str()), pStrStart);
@@ -350,16 +357,16 @@ namespace NScript
 
 			TPtr<CSymbol_Constant> spConstant;
 			
-			if (strcmp(pSymbolName, "fp4") == 0)
+			if (strcmp(pSymbolName, "fp32") == 0)
 			{
-				TPtr<CSymbol_ConstantFloat<fp4> > spC = MNew2(CSymbol_ConstantFloat<fp4>, (CSymbol *)NULL, "Constant");
-				spC->m_Data = NStr::StrToFloat(Number.Str(), (fp4)0.0f);
+				TPtr<CSymbol_ConstantFloat<fp32> > spC = MNew2(CSymbol_ConstantFloat<fp32>, (CSymbol *)NULL, "Constant");
+				spC->m_Data = NStr::StrToFloat(Number.Str(), (fp32)0.0f);
 				spConstant = spC;
 			}
-			else // if (strcmp(pSymbolName, "fp8") == 0)
+			else // if (strcmp(pSymbolName, "fp64") == 0)
 			{
-				TPtr<CSymbol_ConstantFloat<fp8> > spC = MNew2(CSymbol_ConstantFloat<fp8>, (CSymbol *)NULL, "Constant");
-				spC->m_Data = NStr::StrToFloat(Number.Str(), (fp8)0.0);
+				TPtr<CSymbol_ConstantFloat<fp64> > spC = MNew2(CSymbol_ConstantFloat<fp64>, (CSymbol *)NULL, "Constant");
+				spC->m_Data = NStr::StrToFloat(Number.Str(), (fp64)0.0);
 				spConstant = spC;
 			}
 

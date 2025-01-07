@@ -421,7 +421,7 @@ void TSVQ::GLA_iter( unsigned char *_vqimage, unsigned char *image, int w, int h
 	VQVector book[256];						// input codebook
 	VQVector cb[256];						// new codebook
 	VQVector *vim = DNew(VQVector) VQVector[w*h/4];	// uncompressed image in VQVector format
-	fp4 dist[256];
+	fp32 dist[256];
 
 	if( !vim ) Error_static( "TSVQ::TwiddleImage", "Out of memory" );
 
@@ -430,8 +430,8 @@ void TSVQ::GLA_iter( unsigned char *_vqimage, unsigned char *image, int w, int h
 
 	w >>= 1; h >>= 1;						// 2x2 pixels for each entry
 
-	fp4 olddist = 999999999.f;
-	fp4 newdist;
+	fp32 olddist = 999999999.f;
+	fp32 newdist;
 
 
 	while( 1 )
@@ -463,7 +463,7 @@ void TSVQ::GLA_iter( unsigned char *_vqimage, unsigned char *image, int w, int h
 			int iMin = 0;
 			float fMin = ~(v - book[iMin]);
 
-			fp4 diff;
+			fp32 diff;
 			for( k = 0; k < 256; k++ )
 			{ // find best match in codebook
 				diff = ~(v - book[k]);
@@ -605,7 +605,7 @@ void CImage::ClutVQ( unsigned char *clut )
 
 
 
-void CImage::Compress_VQ(fp4 _Quality, CImage* _pDestImg, CTexture *_pTexture)
+void CImage::Compress_VQ(fp32 _Quality, CImage* _pDestImg, CTexture *_pTexture)
 {
 
 #ifdef IMAGE_IO_NOVQ

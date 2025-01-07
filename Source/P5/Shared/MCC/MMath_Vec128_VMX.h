@@ -31,29 +31,84 @@ typedef vector signed int __vec128i32;
 typedef vector unsigned int __vec128u32;
 
 // -------------------------------------------------------------------
-M_FORCEINLINE vec128 builtin_altivec_lvlx(void* _p, size_t _Offset)
+/*
+M_FORCEINLINE vec128 __lvlx( const void *a1,int a2 )
 {
-	vec128 ret;
-	asm("lvlx %0, %1, %2" : "=v"(ret) : "r"(_p), "r"(_Offset));
-	return ret;
+vec128 ret;
+__asm__ volatile( "nop" );
+__asm__( ".long 0x7c00040e+(%0<<21)+(%1<<16)+(%2<<11)" : "=v"(ret) :"b"(a1),"r"(a2) );
+return ret;
 }
+
+
+M_FORCEINLINE vec128 __lvrx( const void *a1,int a2 )
+{
+vec128 ret;
+__asm__ volatile( "nop" );
+__asm__( ".long 0x7c00044e+(%0<<21)+(%1<<16)+(%2<<11)" : "=v"(ret) :"b"(a1),"r"(a2) );
+return ret;
+}
+
+M_FORCEINLINE void __stvlx( vec128 v,void *a1,int a2 )
+{
+__asm__ volatile( "nop" );
+__asm__( ".long 0x7c00050e+(%0<<21)+(%1<<16)+(%2<<11)" : : "v"(v),"b"(a1),"r"(a2) : "memory" );
+}
+
+M_FORCEINLINE void __stvrx( vec128 v,void *a1,int a2 )
+{
+__asm__ volatile( "nop" );
+__asm__( ".long 0x7c00054e+(%0<<21)+(%1<<16)+(%2<<11)" : : "v"(v),"b"(a1),"r"(a2) : "memory" );
+}
+*/
 
 // -------------------------------------------------------------------
 #define __vspltw(_a, _iComp) vec_vspltw(_a, _iComp)
 //#define __vpermwi(_a, _Mask) vec_vperm(_a, _a, (vec128)TVec128Perm<_Mask & 3, (_Mask>>2) & 3, (_Mask>>4) & 3, (_Mask>>6) & 3>::m_Perm)
-#define __vpermwi(_a, _Mask) ((vec128)__builtin_altivec_vperm_4si((__vec128i32)_a, (__vec128i32)_a, *(__vec128i8*)&TVec128Perm<(_Mask) & 3, ((_Mask)>>2) & 3, ((_Mask)>>4) & 3, ((_Mask)>>6) & 3>::m_Perm))
+#define __vpermwi(_a, _Mask) ((vec128)__builtin_altivec_vperm_4si((__vec128i32)_a, (__vec128i32)_a, *(__vec128i8*)&TVec128Perm<((_Mask) >> 6) & 3, ((_Mask) >> 4) & 3, ((_Mask)>>2) & 3, (_Mask) & 3>::m_Perm))
+#define __vperm(_a, _b, _perm) ((vec128)__builtin_altivec_vperm_16qi((__vec128i8)(_a), (__vec128i8)(_b), (__vec128i8)(_perm)))
 
 #define __vmrghw(a, b) (vec128)__builtin_altivec_vmrghw((__vec128i32)(a), (__vec128i32)(b))
 #define __vmrglw(a, b) (vec128)__builtin_altivec_vmrglw((__vec128i32)(a), (__vec128i32)(b))
+#define __vmrghh(a, b) (vec128)__builtin_altivec_vmrghh((__vec128i16)(a), (__vec128i16)(b))
+#define __vmrglh(a, b) (vec128)__builtin_altivec_vmrglh((__vec128i16)(a), (__vec128i16)(b))
+#define __vmrghb(a, b) (vec128)__builtin_altivec_vmrghb((__vec128i8)(a), (__vec128i8)(b))
+#define __vmrglb(a, b) (vec128)__builtin_altivec_vmrglb((__vec128i8)(a), (__vec128i8)(b))
+
+#define __vupklsh(a) (vec128)__builtin_altivec_vupklsh((__vec128i16)(a))
+#define __vupkhsh(a) (vec128)__builtin_altivec_vupkhsh((__vec128i16)(a))
+#define __vupklsb(a) (vec128)__builtin_altivec_vupklsb((__vec128i8)(a))
+#define __vupkhsb(a) (vec128)__builtin_altivec_vupkhsb((__vec128i8)(a))
+
+#define __vpkuwum(a, b) (vec128)__builtin_altivec_vpkuwum((__vec128i32)(a), (__vec128i32)(b))
+#define __vpkuwus(a, b) (vec128)__builtin_altivec_vpkuwus((__vec128i32)(a), (__vec128i32)(b))
+#define __vpkswss(a, b) (vec128)__builtin_altivec_vpkswss((__vec128i32)(a), (__vec128i32)(b))
+#define __vpkswus(a, b) (vec128)__builtin_altivec_vpkswus((__vec128i32)(a), (__vec128i32)(b))
+
+#define __vpkuhum(a, b) (vec128)__builtin_altivec_vpkuhum((__vec128i16)(a), (__vec128i16)(b))
+#define __vpkuhus(a, b) (vec128)__builtin_altivec_vpkuhus((__vec128i16)(a), (__vec128i16)(b))
+#define __vpkshss(a, b) (vec128)__builtin_altivec_vpkshss((__vec128i16)(a), (__vec128i16)(b))
+#define __vpkshus(a, b) (vec128)__builtin_altivec_vpkshus((__vec128i16)(a), (__vec128i16)(b))
+
+
 #define __lvx(a, b) (vec128)__builtin_altivec_lvx(a, (vec128*)(b))
-#define __lvlx(a, b) (vec128)builtin_altivec_lvlx((void*)(a), b)
+//#define __lvlx(a, b) (vec128)builtin_altivec_lvlx((void*)(a), b)
+#define __lvlx(a, b) (vec128)__builtin_altivec_lvlx(b, (void*)(a))
+#define __lvrx(a, b) (vec128)__builtin_altivec_lvrx(b, (void*)(a))
+#define __stvlx(a, b, c) __builtin_altivec_stvlx((__vec128i8)a, c, (b))
+#define __stvrx(a, b, c) __builtin_altivec_stvrx((__vec128i8)a, c, (b))
 
 #define __vrfin(a) (vec128)__builtin_altivec_vrfin(a)
 #define __vrfiz(a) (vec128)__builtin_altivec_vrfiz(a)
 #define __vcfsx(a, shift) ((vec128)__builtin_altivec_vcfsx((__vec128i32)a, shift))
 #define __vctsxs(a, shift) ((vec128)__builtin_altivec_vctsxs(a, shift))
 #define __stvx(_v, _pDst, _Offset) __builtin_altivec_stvx((__vec128i32)(_v), _Offset, _pDst)
+#define __stvewx(_v, _pDst, _Offset) __builtin_altivec_stvewx((__vec128i32)(_v), _Offset, _pDst)
+
+#define __vspltisb(a) __builtin_altivec_vspltisb(a)
+#define __vspltish(a) __builtin_altivec_vspltish(a)
 #define __vspltisw(a) __builtin_altivec_vspltisw(a)
+
 
 // -------------------------------------------------------------------
 #define __vaddfp(a, b) __builtin_altivec_vaddfp(a, b)
@@ -127,15 +182,27 @@ M_FORCEINLINE vec128 builtin_altivec_lvlx(void* _p, size_t _Offset)
 #define __vmaxuh(a, b) ((vec128)__builtin_altivec_vmaxuh((__vec128i16)(a), (__vec128i16)(b)))
 #define __vmaxuw(a, b) ((vec128)__builtin_altivec_vmaxuw((__vec128i32)(a), (__vec128i32)(b)))
 
+// -------------------------------------------------------------------
+#define __vsraw(a, b) ((vec128)__builtin_altivec_vsraw((__vec128i32)(a), (__vec128i32)(b)))
+#define __vsrw(a, b) ((vec128)__builtin_altivec_vsrw((__vec128i32)(a), (__vec128i32)(b)))
+#define __vslw(a, b) ((vec128)__builtin_altivec_vslw((__vec128i32)(a), (__vec128i32)(b)))
+
+#define __vsrah(a, b) ((vec128)__builtin_altivec_vsrah((__vec128i16)(a), (__vec128i16)(b)))
+#define __vsrh(a, b) ((vec128)__builtin_altivec_vsrh((__vec128i16)(a), (__vec128i16)(b)))
+#define __vslh(a, b) ((vec128)__builtin_altivec_vslh((__vec128i16)(a), (__vec128i16)(b)))
+
+#define __vsrab(a, b) ((vec128)__builtin_altivec_vsrab((__vec128i8)(a), (__vec128i8)(b)))
+#define __vsrb(a, b) ((vec128)__builtin_altivec_vsrb((__vec128i8)(a), (__vec128i8)(b)))
+#define __vslb(a, b) ((vec128)__builtin_altivec_vslb((__vec128i8)(a), (__vec128i8)(b)))
 
 
 #endif
 
 //typedef const vec128& vec128p;
-//typedef const CMat4Dfp4& CMat4Dfp4p;
+//typedef const CMat4Dfp32& CMat4Dfp32p;
 
 typedef vec128 vec128p;
-typedef CMat4Dfp4 CMat4Dfp4p;
+typedef CMat4Dfp32 CMat4Dfp32p;
 
 //----------------------------------------------------------
 // Performance hints for compound arithmetics implementations
@@ -143,8 +210,8 @@ typedef CMat4Dfp4 CMat4Dfp4p;
 
 
 #ifdef PLATFORM_XENON
-	#define M_V128HINT_NATIVE_DP3
-	#define M_V128HINT_NATIVE_DP4
+#define M_V128HINT_NATIVE_DP3
+#define M_V128HINT_NATIVE_DP4
 #endif
 
 //----------------------------------------------------------
@@ -161,11 +228,12 @@ typedef CMat4Dfp4 CMat4Dfp4p;
 #define M_V128IMP_LOGICOP
 #define M_V128IMP_COMPARE
 #define M_V128IMP_INTEGERARITHMETICS
+#define M_V128IMP_INTEGERCOMPARE
 //#define M_V128IMP_FLOAT_COMPAREOPERATORS
 #define M_V128IMP_FLOAT_OPERATORS
 
 #ifdef PLATFORM_XENON
-	#define M_V128IMP_FLOAT_DOTPROD
+#define M_V128IMP_FLOAT_DOTPROD
 #endif
 
 //#define M_V128IMP_FLOAT_XPROD
@@ -181,58 +249,196 @@ public:
 };
 
 template<int x, int y, int z, int w>
-uint8 TVec128Perm<x, y, z, w>::m_Perm[16] = 
+uint8 M_ALIGN(16) TVec128Perm<x, y, z, w>::m_Perm[16] = 
 { 
 	(x<<2),(x<<2)+1,(x<<2)+2,(x<<2)+3, 
-		(y<<2),(y<<2)+1,(y<<2)+2,(y<<2)+3, 
-		(z<<2),(z<<2)+1,(z<<2)+2,(z<<2)+3, 
-		(w<<2),(w<<2)+1,(w<<2)+2,(w<<2)+3
+	(y<<2),(y<<2)+1,(y<<2)+2,(y<<2)+3, 
+	(z<<2),(z<<2)+1,(z<<2)+2,(z<<2)+3, 
+	(w<<2),(w<<2)+1,(w<<2)+2,(w<<2)+3
 };
 
 
 // -------------------------------------------------------------------
 // Load, Store & Shuffle
 
+M_FORCEINLINE vec128 M_VZero() { return (vec128)__vspltisw(0); }										// { 0,0,0,0 }
+M_FORCEINLINE vec128 M_VOne_u8() {return (vec128)__vspltisb(1); }
+M_FORCEINLINE vec128 M_VOne_u16() {return (vec128)__vspltish(1); }
+M_FORCEINLINE vec128 M_VOne_u32() {return (vec128)__vspltisw(1); }
+//M_FORCEINLINE vec128 M_VNegOne_i8() {return (vec128)__vspltisb(-1); }
+//M_FORCEINLINE vec128 M_VNegOne_i16() {return (vec128)__vspltish(-1); }
+M_FORCEINLINE vec128 M_VNegOne_i32() {return (vec128)__vspltisw(-1); }
+M_FORCEINLINE vec128 M_VHalf();																			// { 0.5,0.5,0.5,0.5 }
+M_FORCEINLINE vec128 M_VOne();																			// { 1,1,1,1 }
 #define M_VShuf(_a, _Mask) __vpermwi(_a,((_Mask & 3)<<6) | ((_Mask & 12)<<2) | ((_Mask & 48)>>2) | ((_Mask & 192)>>6))														// { a[iComp0], a[iComp1], a[iComp2], a[iComp3] }
 #define M_VSplat(_a, _iComp) __vspltw(_a, _iComp)														// { a[iComp], a[iComp], a[iComp], a[iComp] }
 M_FORCEINLINE vec128 M_VSplatX(vec128 _a) { return __vspltw(_a, 0); }									// { x, x, x, x }
 M_FORCEINLINE vec128 M_VSplatY(vec128 _a) { return __vspltw(_a, 1); }									// { y, y, y, y }
 M_FORCEINLINE vec128 M_VSplatZ(vec128 _a) { return __vspltw(_a, 2); }									// { z, z, z, z }
 M_FORCEINLINE vec128 M_VSplatW(vec128 _a) { return __vspltw(_a, 3); }									// { w, w, w, w }
-M_FORCEINLINE vec128 M_VMrgXY(vec128 _a, vec128 _b) { return __vmrghw(_a, _b); }						// { a.x, b.x, a.y, b.y }
-M_FORCEINLINE vec128 M_VMrgZW(vec128 _a, vec128 _b) { return __vmrglw(_a, _b); }						// { a.z, b.z, a.w, b.w }
+M_FORCEINLINE vec128 M_VMrgL(vec128 _a, vec128 _b) { return __vmrghw(_a, _b); }						// { a.x, b.x, a.y, b.y }
+M_FORCEINLINE vec128 M_VMrgH(vec128 _a, vec128 _b) { return __vmrglw(_a, _b); }						// { a.z, b.z, a.w, b.w }
 
-M_FORCEINLINE vec128 M_VLd(fp4 _a) { return M_VSplat(__lvx(NULL, (int)&_a), 0); }
-M_FORCEINLINE vec128 M_VLd(fp4 _x, fp4 _y, fp4 _z, fp4 _w) { CVec128Access v; v.x = _x, v.y = _y; v.z = _z, v.w = _w; return v.v; }
+M_FORCEINLINE vec128 M_VMrgL_u16(vec128 _a, vec128 _b) { return __vmrghh(_a, _b); }
+M_FORCEINLINE vec128 M_VMrgH_u16(vec128 _a, vec128 _b) { return __vmrglh(_a, _b); }
+M_FORCEINLINE vec128 M_VMrgL_u8(vec128 _a, vec128 _b)  { return __vmrghb(_a, _b); }
+M_FORCEINLINE vec128 M_VMrgH_u8(vec128 _a, vec128 _b) { return __vmrglb(_a, _b); }
 
-M_FORCEINLINE vec128 M_VLdScalar(fp4 x)
+M_FORCEINLINE vec128 M_VMrgL_u16_u32(vec128 _a, vec128 _b) { return __vmrghh(_b, _a); }
+M_FORCEINLINE vec128 M_VMrgH_u16_u32(vec128 _a, vec128 _b) { return __vmrglh(_b, _a); }
+M_FORCEINLINE vec128 M_VMrgL_u8_u16(vec128 _a, vec128 _b)  { return __vmrghb(_b, _a); }
+M_FORCEINLINE vec128 M_VMrgH_u8_u16(vec128 _a, vec128 _b) { return __vmrglb(_b, _a); }
+
+
+M_FORCEINLINE vec128 M_VLd(fp32 _x, fp32 _y, fp32 _z, fp32 _w) { CVec128Access v; v.x = _x, v.y = _y; v.z = _z, v.w = _w; return v.v; }
+
+M_FORCEINLINE vec128 M_VLdScalar(const fp32& x)
 {
-	return M_VSplatX(__lvlx((vec128*)&x, 0));
+	return M_VSplatX(__lvlx((const vec128*)&x, 0));
 }
+
+M_FORCEINLINE vec128 M_VLdScalar_u8(const uint8& _Src) { vec128 a = __lvlx(&_Src, NULL); return __vperm(a, a, M_VZero()); }
+M_FORCEINLINE vec128 M_VLdScalar_i8(const uint8& _Src) { vec128 a = __lvlx(&_Src, NULL); return __vperm(a, a, M_VZero()); }
+M_FORCEINLINE vec128 M_VLdScalar_u16(const uint16& _Src) { vec128 a = __lvlx(&_Src, NULL); return __vperm(a, a, M_VScalar_u16(0x0001)); }
+M_FORCEINLINE vec128 M_VLdScalar_i16(const int16& _Src) { vec128 a = __lvlx(&_Src, NULL); return __vperm(a, a, M_VScalar_u16(0x0001)); }
+M_FORCEINLINE vec128 M_VLdScalar_u32(const uint32& x) { return M_VSplatX(__lvlx((const vec128*)&x, 0)); }
+M_FORCEINLINE vec128 M_VLdScalar_i32(const int32& x) { return M_VSplatX(__lvlx((const vec128*)&x, 0)); }
+
 
 M_FORCEINLINE vec128 M_VRound(vec128 _a) { return __vrfin(_a); }
 M_FORCEINLINE vec128 M_VTrunc(vec128 _a) { return __vrfiz(_a); }
 
-M_FORCEINLINE vec128 M_Vfp4toi32(vec128 _a) { return __vctsxs(_a, 0); }
-//M_FORCEINLINE vec128 M_Vfp4tou32(vec128 _a) { return __vctuxs(_a, 0); }
-M_FORCEINLINE vec128 M_Vi32tofp4(vec128 _a) { return __vcfsx(_a, 0); }
-//M_FORCEINLINE vec128 M_Vu32tofp4(vec128 _a) { return __vcfux(_a, 0); }
+M_FORCEINLINE vec128 M_VCnv_f32_i32(vec128 _a) { return __vctsxs(_a, 0); }
+//M_FORCEINLINE vec128 M_Vfp32tou32(vec128 _a) { return __vctuxs(_a, 0); }
+M_FORCEINLINE vec128 M_VCnv_i32_f32(vec128 _a) { return __vcfsx(_a, 0); }
+//M_FORCEINLINE vec128 M_Vu32tofp32(vec128 _a) { return __vcfux(_a, 0); }
 
-M_FORCEINLINE vec128 M_VLd(const CVec4Dfp4& _a) { return _a.v; }
-M_FORCEINLINE vec128 M_VLdMem(const void* _pSrc)
+M_FORCEINLINE vec128 M_VCnvM_u32_u16(vec128 a, vec128 b) { return __vpkuwum(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_u32_u16(vec128 a, vec128 b) { return __vpkuwus(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_i32_i16(vec128 a, vec128 b) { return __vpkswss(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_i32_u16(vec128 a, vec128 b) { return __vpkswus(a, b); };
+
+M_FORCEINLINE vec128 M_VCnvM_u16_u8(vec128 a, vec128 b) { return __vpkuhum(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_u16_u8(vec128 a, vec128 b) { return __vpkuhus(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_i16_i8(vec128 a, vec128 b) { return __vpkshss(a, b); };
+M_FORCEINLINE vec128 M_VCnvS_i16_u8(vec128 a, vec128 b) { return __vpkshus(a, b); };
+
+M_FORCEINLINE vec128 M_VCnvL_u8_u16(vec128 _a) { return __vmrghb(M_VZero(), _a); }
+M_FORCEINLINE vec128 M_VCnvH_u8_u16(vec128 _a) { return __vmrglb(M_VZero(), _a); }
+M_FORCEINLINE vec128 M_VCnvL_i8_i16(vec128 _a) { return __vupkhsb(_a); }
+M_FORCEINLINE vec128 M_VCnvH_i8_i16(vec128 _a) { return __vupklsb(_a); }
+M_FORCEINLINE vec128 M_VCnvL_u16_u32(vec128 _a) { return __vmrghh(M_VZero(), _a); }
+M_FORCEINLINE vec128 M_VCnvH_u16_u32(vec128 _a) { return __vmrglh(M_VZero(), _a); }
+M_FORCEINLINE vec128 M_VCnvL_i16_i32(vec128 _a) { return __vupkhsh(_a); }
+M_FORCEINLINE vec128 M_VCnvH_i16_i32(vec128 _a) { return __vupklsh(_a); }
+
+
+M_FORCEINLINE vec128 M_VPerm_Helper(vec128 _a, vec128 _b, vec128 _Perm) 
+{ 
+	return __vperm(_a, _b, _Perm);
+}
+
+#define M_VPerm(_a, _b, _0, _1, _2, _3) \
+	M_VPerm_Helper(_a, _b, M_VConst_u8(_0*4+0,_0*4+1,_0*4+2,_0*4+3, _1*4+0,_1*4+1,_1*4+2,_1*4+3, _2*4+0,_2*4+1,_2*4+2,_2*4+3, _3*4+0,_3*4+1,_3*4+2,_3*4+3));
+
+
+M_FORCEINLINE vec128 M_VLd(const void* _pSrc)
 {
-	return __lvlx (_pSrc, 0);
+	return *((vec128*)_pSrc);
+//	return __lvlx (_pSrc, 0);
 /*	vec128 a = __lvlx (_pSrc, 0);
 	a = __lvrx((void*)(16+(int)_pSrc), 0);
 	return a;*/
 }
-M_FORCEINLINE void M_VSt(vec128 _a, void* _pDest) { __stvx(_a, _pDest, 0); }
-M_FORCEINLINE CVec3Dfp4 M_VGetV3(vec128 _a) { CVec128Access v; v.v = _a; return *((CVec3Dfp4*)v.k); };
-M_FORCEINLINE CVec4Dfp4 M_VGetV4(vec128 _a) { CVec4Dfp4 v; v.v = _a; return v; };
 
-M_FORCEINLINE vec128 M_VZero() { return (vec128)__vspltisw(0); }												// { 0,0,0,0 }
-M_FORCEINLINE vec128 M_VHalf();																			// { 0.5,0.5,0.5,0.5 }
-M_FORCEINLINE vec128 M_VOne();																			// { 1,1,1,1 }
+M_FORCEINLINE vec128 M_VLdU(const void* _pMem)
+{
+	vec128 l = __lvlx((void*) _pMem, 0);
+	vec128 r = __lvrx((void*) _pMem, 16);
+	vec128 res = __vor(r,l);
+	return res;
+}
+
+
+M_FORCEINLINE vec128 M_VLd64(const void* _pSrc) { return M_VShuf(__lvlx(_pSrc, NULL), M_VSHUF(0,1,0,1)); }
+M_FORCEINLINE vec128 M_VLd32(const void* _pSrc) { return M_VSplatX(__lvlx(_pSrc, NULL)); }
+
+template<class T>
+M_FORCEINLINE void M_VStU_V3x2_Slow(vec128 _a, vec128 _b, T*M_RESTRICT _pDest)
+{
+	vec128 selmask = M_VConst_u32(0xffffffff, 0xffffffff, 0xffffffff, 0x00000000);
+	vec128 a = __vsel(M_VSplatX(_b), _a, selmask);
+
+	__stvlx(a, _pDest, 0);
+	__stvrx(a, _pDest, 16);
+	__stvewx(M_VSplatY(_b), _pDest, 16);
+	__stvewx(M_VSplatZ(_b), _pDest, 20);
+}
+
+M_FORCEINLINE void M_VLdU_V3x2_Slow(const void* _pSrc, vec128& _a, vec128& _b)
+{
+	vec128 selmask = M_VConst_u32(0xffffffff, 0xffffffff, 0xffffffff, 0x00000000);
+	vec128 zero = M_VZero();
+	uint8* pS = (uint8*)_pSrc;
+
+	vec128 a0 = __lvlx(pS, 0);
+	vec128 a1 = __lvrx(pS, 16);
+	vec128 b0 = __lvlx(pS, 12);
+	vec128 b1 = __lvrx(pS, 12 + 16);
+	_a = __vsel(zero, __vor(a0, a1), selmask);
+	_b = __vsel(zero, __vor(b0, b1), selmask);
+}
+
+template<class T>
+M_FORCEINLINE void M_VSt(vec128 _a, T*M_RESTRICT _pDest) { __stvx(_a, _pDest, 0); }
+
+template<class T>
+M_FORCEINLINE void M_VStAny64(vec128 _a, T*M_RESTRICT _pDest)
+{ 
+	__stvewx(_a, _pDest, 0); 
+	__stvewx(_a, _pDest, 4);
+}
+
+template<class T>
+M_FORCEINLINE void M_VStL64(vec128 _a, T*M_RESTRICT _pDest)
+{ 
+	vec128 a = M_VShuf(_a, M_VSHUF(0, 1, 0, 1));
+	__stvewx(a, _pDest, 0);
+	__stvewx(a, _pDest, 4);
+}
+
+template<class T>
+M_FORCEINLINE void M_VStH64(vec128 _a, T*M_RESTRICT _pDest)
+{ 
+	vec128 a = M_VShuf(_a, M_VSHUF(2, 3, 2, 3));
+	__stvewx(a, _pDest, 0);
+	__stvewx(a, _pDest, 4);
+}
+
+template<class T>
+M_FORCEINLINE void M_VStAny32(vec128 _a, T*M_RESTRICT _pDest) { __stvewx(_a, _pDest, 0); }
+
+template<class T>
+M_FORCEINLINE void M_VStAny32Ex(vec128 _a, T*M_RESTRICT _pDest, mint _Ofs) { __stvewx(_a, _pDest, _Ofs); }
+
+M_FORCEINLINE void M_VLdU_P3x2_Slow(const void* _pSrc, vec128& _a, vec128& _b)
+{
+	vec128 selmask = M_VConst_u32(0xffffffff, 0xffffffff, 0xffffffff, 0x00000000);
+	vec128 one = M_VOne();
+	uint8* pS = (uint8*)_pSrc;
+
+	vec128 a0 = __lvlx(pS, 0);
+	vec128 a1 = __lvrx(pS, 16);
+	vec128 b0 = __lvlx(pS, 12);
+	vec128 b1 = __lvrx(pS, 12 + 16);
+	_a = __vsel(one, __vor(a0, a1), selmask);
+	_b = __vsel(one, __vor(b0, b1), selmask);
+}
+
+#ifndef M_COMPILING_ON_VPU
+M_FORCEINLINE CVec3Dfp32 M_VGetV3(vec128 _a) { CVec128Access v; v.v = _a; return *((CVec3Dfp32*)v.k); };
+M_FORCEINLINE CVec4Dfp32 M_VGetV4(vec128 _a) { CVec4Dfp32 v; v.v = _a; return v; };
+#endif
 
 // -------------------------------------------------------------------
 // Floating point arithmetics
@@ -310,7 +516,7 @@ M_FORCEINLINE vec128 M_VRsqrt(vec128 _a);																// { 1/sqrt(x), 1/sqrt(
 M_FORCEINLINE vec128 M_VLog2(vec128 _a);																// { log2(x), log2(y), log2(z), log2(w) }
 M_FORCEINLINE vec128 M_VPow(vec128 _a, vec128 _b);														// exp2(log2(a) * b)
 */
-//M_FORCEINLINE vec128 M_VMulMat(vec128 _a, CMat4Dfp4 _Mat);
+//M_FORCEINLINE vec128 M_VMulMat(vec128 _a, CMat4Dfp32 _Mat);
 
 // -------------------------------------------------------------------
 // Floating point compare
@@ -340,6 +546,7 @@ M_FORCEINLINE vec128 M_VAndc(vec128 _a, vec128 _b) { return __vandc(_a, _b); }
 M_FORCEINLINE vec128 M_VOr(vec128 _a, vec128 _b) { return __vor(_a, _b); }
 M_FORCEINLINE vec128 M_VNor(vec128 _a, vec128 _b) { return __vnor(_a, _b); }
 M_FORCEINLINE vec128 M_VXor(vec128 _a, vec128 _b) { return __vxor(_a, _b); }
+M_FORCEINLINE vec128 M_VNot(vec128 _a) { return __vnor(_a,_a); }
 
 // -------------------------------------------------------------------
 // Signed Integer arithmetics
@@ -388,6 +595,40 @@ M_FORCEINLINE vec128 M_VMin_u32(vec128 _a, vec128 _b) { return __vminuw(_a, _b);
 M_FORCEINLINE vec128 M_VMax_u8(vec128 _a, vec128 _b) { return __vmaxub(_a, _b); }
 M_FORCEINLINE vec128 M_VMax_u16(vec128 _a, vec128 _b) { return __vmaxuh(_a, _b); }
 M_FORCEINLINE vec128 M_VMax_u32(vec128 _a, vec128 _b) { return __vmaxuw(_a, _b); }
+
+// -------------------------------------------------------------------
+// Integer shift
+
+
+M_FORCEINLINE vec128 M_VShl8_u128_Helper(vec128 _a, vec128 _Perm) 
+{ 
+	return __vperm(_a, M_VConst(0.0f,0.0f,0.0f,0.0f), _Perm);
+}
+
+#define M_VShl8_u128(_a, _n) \
+	M_VShl8_u128_Helper(_a, M_VConst_u8(0+_n,1+_n,2+_n,3+_n,4+_n,5+_n,6+_n,7+_n,8+_n,9+_n,10+_n,11+_n,12+_n,13+_n,14+_n,15+_n));
+
+
+M_FORCEINLINE vec128 M_VSar_i32(vec128 _a, vec128 _b) { return __vsraw(_a, _b); };
+#define M_VSarImm_i32(a, ImmShift) __vsraw(a, M_VScalar_u32(ImmShift))
+M_FORCEINLINE vec128 M_VShr_u32(vec128 _a, vec128 _b) { return __vsrw(_a, _b); };
+#define M_VShrImm_u32(a, ImmShift) __vsrw(a, M_VScalar_u32(ImmShift))
+M_FORCEINLINE vec128 M_VShl_u32(vec128 _a, vec128 _b) { return __vslw(_a, _b); };
+#define M_VShlImm_u32(a, ImmShift) __vslw(a, M_VScalar_u32(ImmShift))
+
+M_FORCEINLINE vec128 M_VSar_i16(vec128 _a, vec128 _b) { return __vsrah(_a, _b); };
+#define M_VSarImm_i16(a, ImmShift) __vsrah(a, M_VScalar_u16(ImmShift))
+M_FORCEINLINE vec128 M_VShr_u16(vec128 _a, vec128 _b) { return __vsrh(_a, _b); };
+#define M_VShrImm_u16(a, ImmShift) __vsrh(a, M_VScalar_u16(ImmShift))
+M_FORCEINLINE vec128 M_VShl_u16(vec128 _a, vec128 _b) { return __vslh(_a, _b); };
+#define M_VShlImm_u16(a, ImmShift) __vslh(a, M_VScalar_u16(ImmShift))
+
+M_FORCEINLINE vec128 M_VSar_i8(vec128 _a, vec128 _b) { return __vsrab(_a, _b); };
+#define M_VSarImm_i8(a, ImmShift) __vsrab(a, M_VScalar_u8(ImmShift))
+M_FORCEINLINE vec128 M_VShr_u8(vec128 _a, vec128 _b) { return __vsrb(_a, _b); };
+#define M_VShrImm_u8(a, ImmShift) __vsrb(a, M_VScalar_u8(ImmShift))
+M_FORCEINLINE vec128 M_VShl_u8(vec128 _a, vec128 _b) { return __vslb(_a, _b); };
+#define M_VShlImm_u8(a, ImmShift) __vslb(a, M_VScalar_u8(ImmShift))
 
 // -------------------------------------------------------------------
 // Integer shift
@@ -447,7 +688,7 @@ M_FORCEINLINE vec128 M_VDp3x2(vec128 _a0, vec128 _b0, vec128 _a1, vec128 _b1)
 	return M_VMrgXY(dp0, dp1);
 }
 
-M_FORCEINLINE vec128 M_VDp3x4(vec128 _a0, vec128 _b0, vec128 _a1, vec128 _b1, vec128 _a2, vec128 _b2)
+M_FORCEINLINE vec128 M_VDp3x3(vec128 _a0, vec128 _b0, vec128 _a1, vec128 _b1, vec128 _a2, vec128 _b2)
 {
 	vec128 dp0 = __vmsum3fp(_a0, _b0);
 	vec128 dp1 = __vmsum3fp(_a1, _b1);
@@ -538,6 +779,79 @@ M_FORCEINLINE vec128 M_VCmpLTMskCR(vec128 _a, vec128 _b, unsigned int* _pCR) { u
 #define M_VCmpAnyLE(a, b) vec_any_le(a, b)
 #define M_VCmpAnyLT(a, b) vec_any_lt(a, b)
 
+#define M_VCmpAnyEq_u32(a, b) vec_any_eq((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpAnyGE_u32(a, b) vec_any_ge((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpAnyGT_u32(a, b) vec_any_gt((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpAnyLE_u32(a, b) vec_any_le((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpAnyLT_u32(a, b) vec_any_lt((__vec128u32)a, (__vec128u32)b)
+
+#define M_VCmpAnyEq_u16(a, b) vec_any_eq((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpAnyGE_u16(a, b) vec_any_ge((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpAnyGT_u16(a, b) vec_any_gt((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpAnyLE_u16(a, b) vec_any_le((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpAnyLT_u16(a, b) vec_any_lt((__vec128u16)a, (__vec128u16)b)
+
+#define M_VCmpAnyEq_u8(a, b) vec_any_eq((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpAnyGE_u8(a, b) vec_any_ge((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpAnyGT_u8(a, b) vec_any_gt((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpAnyLE_u8(a, b) vec_any_le((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpAnyLT_u8(a, b) vec_any_lt((__vec128u8)a, (__vec128u8)b)
+
+#define M_VCmpAnyEq_i32(a, b) vec_any_eq((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpAnyGE_i32(a, b) vec_any_ge((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpAnyGT_i32(a, b) vec_any_gt((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpAnyLE_i32(a, b) vec_any_le((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpAnyLT_i32(a, b) vec_any_lt((__vec128i32)a, (__vec128i32)b)
+
+#define M_VCmpAnyEq_i16(a, b) vec_any_eq((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpAnyGE_i16(a, b) vec_any_ge((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpAnyGT_i16(a, b) vec_any_gt((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpAnyLE_i16(a, b) vec_any_le((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpAnyLT_i16(a, b) vec_any_lt((__vec128i16)a, (__vec128i16)b)
+
+#define M_VCmpAnyEq_i8(a, b) vec_any_eq((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpAnyGE_i8(a, b) vec_any_ge((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpAnyGT_i8(a, b) vec_any_gt((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpAnyLE_i8(a, b) vec_any_le((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpAnyLT_i8(a, b) vec_any_lt((__vec128i8)a, (__vec128i8)b)
+
+
+#define M_VCmpEqMsk_u32(a, b) (vec128)vec_vcmpequw((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpGTMsk_u32(a, b) (vec128)vec_vcmpgtuw((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpLTMsk_u32(a, b) (vec128)vec_vcmpgtuw((__vec128u32)b, (__vec128u32)a)
+#define M_VCmpGEMsk_u32(a, b) (vec128)vec_vcmpgeuw((__vec128u32)a, (__vec128u32)b)
+#define M_VCmpLEMsk_u32(a, b) (vec128)vec_vcmpgeuw((__vec128u32)b, (__vec128u32)a)
+
+#define M_VCmpEqMsk_u16(a, b) (vec128)vec_vcmpequh((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpGTMsk_u16(a, b) (vec128)vec_vcmpgtuh((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpLTMsk_u16(a, b) (vec128)vec_vcmpgtuh((__vec128u16)b, (__vec128u16)a)
+#define M_VCmpGEMsk_u16(a, b) (vec128)vec_vcmpgeuh((__vec128u16)a, (__vec128u16)b)
+#define M_VCmpLEMsk_u16(a, b) (vec128)vec_vcmpgeuh((__vec128u16)b, (__vec128u16)a)
+
+#define M_VCmpEqMsk_u8(a, b) (vec128)vec_vcmpequb((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpGTMsk_u8(a, b) (vec128)vec_vcmpgtub((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpLTMsk_u8(a, b) (vec128)vec_vcmpgtub((__vec128u8)b, (__vec128u8)a)
+#define M_VCmpGEMsk_u8(a, b) (vec128)vec_vcmpgeub((__vec128u8)a, (__vec128u8)b)
+#define M_VCmpLEMsk_u8(a, b) (vec128)vec_vcmpgeub((__vec128u8)b, (__vec128u8)a)
+
+#define M_VCmpEqMsk_i32(a, b) (vec128)vec_vcmpeqsw((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpGTMsk_i32(a, b) (vec128)vec_vcmpgtsw((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpLTMsk_i32(a, b) (vec128)vec_vcmpgtsw((__vec128i32)b, (__vec128i32)a)
+#define M_VCmpGEMsk_i32(a, b) (vec128)vec_vcmpgesw((__vec128i32)a, (__vec128i32)b)
+#define M_VCmpLEMsk_i32(a, b) (vec128)vec_vcmpgesw((__vec128i32)b, (__vec128i32)a)
+
+#define M_VCmpEqMsk_i16(a, b) (vec128)vec_vcmpeqsh((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpGTMsk_i16(a, b) (vec128)vec_vcmpgtsh((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpLTMsk_i16(a, b) (vec128)vec_vcmpgtsh((__vec128i16)b, (__vec128i16)a)
+#define M_VCmpGEMsk_i16(a, b) (vec128)vec_vcmpgesh((__vec128i16)a, (__vec128i16)b)
+#define M_VCmpLEMsk_i16(a, b) (vec128)vec_vcmpgesh((__vec128i16)b, (__vec128i16)a)
+
+#define M_VCmpEqMsk_i8(a, b) (vec128)vec_vcmpeqsb((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpGTMsk_i8(a, b) (vec128)vec_vcmpgtsb((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpLTMsk_i8(a, b) (vec128)vec_vcmpgtsb((__vec128i8)b, (__vec128i8)a)
+#define M_VCmpGEMsk_i8(a, b) (vec128)vec_vcmpgesb((__vec128i8)a, (__vec128i8)b)
+#define M_VCmpLEMsk_i8(a, b) (vec128)vec_vcmpgesb((__vec128i8)b, (__vec128i8)a)
+
 #else
 
 M_FORCEINLINE unsigned int M_VCmpAllEq(vec128 _a, vec128 _b)
@@ -609,6 +923,309 @@ M_FORCEINLINE unsigned int M_VCmpAnyLT(vec128 _a, vec128 _b)
 	unsigned int CR;
 	__vcmpgtfpR(_b, _a, &CR);
 	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE vec128 M_VCmpEqMsk_u32(vec128 _a, vec128 _b) { return __vcmpequw(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_u32(vec128 _a, vec128 _b) { return __vor(__vcmpequw(_a, _b), __vcmpgtuw(_a, _b)); }	// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_u32(vec128 _a, vec128 _b) { return __vcmpgtuw(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_u32(vec128 _a, vec128 _b) { return __vor(__vcmpequw(_a, _b), __vcmpgtuw(_b, _a)); }	// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_u32(vec128 _a, vec128 _b) { return __vcmpgtuw(_b, _a); }								// Lesser-Than
+
+M_FORCEINLINE vec128 M_VCmpEqMsk_u16(vec128 _a, vec128 _b) { return __vcmpequh(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_u16(vec128 _a, vec128 _b) { return __vor(__vcmpequh(_a, _b), __vcmpgtuh(_a, _b)); }	// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_u16(vec128 _a, vec128 _b) { return __vcmpgtuh(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_u16(vec128 _a, vec128 _b) { return __vor(__vcmpequh(_a, _b), __vcmpgtuh(_b, _a)); }	// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_u16(vec128 _a, vec128 _b) { return __vcmpgtuh(_b, _a); }								// Lesser-Than
+
+M_FORCEINLINE vec128 M_VCmpEqMsk_u8(vec128 _a, vec128 _b) { return __vcmpequb(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_u8(vec128 _a, vec128 _b) { return __vor(__vcmpequb(_a, _b), __vcmpgtub(_a, _b)); }		// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_u8(vec128 _a, vec128 _b) { return __vcmpgtub(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_u8(vec128 _a, vec128 _b) { return __vor(__vcmpequb(_a, _b), __vcmpgtub(_b, _a)); }		// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_u8(vec128 _a, vec128 _b) { return __vcmpgtub(_b, _a); }								// Lesser-Than
+
+M_FORCEINLINE vec128 M_VCmpEqMsk_i32(vec128 _a, vec128 _b) { return __vcmpequw(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_i32(vec128 _a, vec128 _b) { return __vor(__vcmpeqsw(_a, _b), __vcmpgtsw(_a, _b)); }	// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_i32(vec128 _a, vec128 _b) { return __vcmpgtsw(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_i32(vec128 _a, vec128 _b) { return __vor(__vcmpeqsw(_a, _b), __vcmpgtsw(_b, _a)); }	// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_i32(vec128 _a, vec128 _b) { return __vcmpgtsw(_b, _a); }								// Lesser-Than
+
+M_FORCEINLINE vec128 M_VCmpEqMsk_i16(vec128 _a, vec128 _b) { return __vcmpequh(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_i16(vec128 _a, vec128 _b) { return __vor(__vcmpeqsh(_a, _b), __vcmpgtsh(_a, _b)); }	// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_i16(vec128 _a, vec128 _b) { return __vcmpgtsh(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_i16(vec128 _a, vec128 _b) { return __vor(__vcmpeqsh(_a, _b), __vcmpgtsh(_b, _a)); }	// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_i16(vec128 _a, vec128 _b) { return __vcmpgtsh(_b, _a); }								// Lesser-Than
+
+M_FORCEINLINE vec128 M_VCmpEqMsk_i8(vec128 _a, vec128 _b) { return __vcmpequb(_a, _b); }								// Equal
+//M_FORCEINLINE vec128 M_VCmpGEMsk_i8(vec128 _a, vec128 _b) { return __vor(__vcmpeqsb(_a, _b), __vcmpgtsb(_a, _b)); }		// Greater-Equal
+M_FORCEINLINE vec128 M_VCmpGTMsk_i8(vec128 _a, vec128 _b) { return __vcmpgtsb(_a, _b); }								// Greater Than
+//M_FORCEINLINE vec128 M_VCmpLEMsk_i8(vec128 _a, vec128 _b) { return __vor(__vcmpeqsb(_a, _b), __vcmpgtsb(_b, _a)); }		// Lesser-Equal
+M_FORCEINLINE vec128 M_VCmpLTMsk_i8(vec128 _a, vec128 _b) { return __vcmpgtsb(_b, _a); }								// Lesser-Than
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequwR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuwR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuwR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequwR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtswR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtswR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequhR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuhR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuhR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequhR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtshR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtshR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequbR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtubR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtubR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAnyEq_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequbR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyGT_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtsbR(_a, _b, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAnyLT_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtsbR(_b, _a, &CR);
+	return (CR & 32) ? 0 : 1;
+}
+
+// -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequwR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuwR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_u32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuwR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequwR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtswR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_i32(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtswR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequhR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuhR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_u16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtuhR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequhR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtshR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_i16(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtshR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequbR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtubR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_u8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtubR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+// -------------------------------------------------------------------
+M_FORCEINLINE unsigned int M_VCmpAllEq_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpequbR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllGT_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtsbR(_a, _b, &CR);
+	return (CR & 128) ? 1 : 0;
+}
+
+M_FORCEINLINE unsigned int M_VCmpAllLT_i8(vec128 _a, vec128 _b)
+{
+	unsigned int CR;
+	__vcmpgtsbR(_b, _a, &CR);
+	return (CR & 128) ? 1 : 0;
 }
 
 #endif // Xenon

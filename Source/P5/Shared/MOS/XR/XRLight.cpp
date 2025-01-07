@@ -7,8 +7,8 @@
 #include "MSIMD.h"
 #include "XRVBManager.h"
 
-int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, const CMat4Dfp4& _WMat, const CXR_RenderInfo* _pRenderInfo );
-int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, const CMat4Dfp4& _WMat, const CXR_RenderInfo* _pRenderInfo )
+int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, const CMat4Dfp32& _WMat, const CXR_RenderInfo* _pRenderInfo );
+int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, const CMat4Dfp32& _WMat, const CXR_RenderInfo* _pRenderInfo )
 {
 	MAUTOSTRIP( FindMostContributingLights, 0 );
 	int nLights = 0;
@@ -22,15 +22,16 @@ int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, con
 	{
 		// All light didn't fit.. do some setup and then start evaluating which lights we should actually use
 		// Should weigh in intensity of light here aswell.. not just falloff...
-		fp4 aAttenuation[32];
+		fp32 aAttenuation[32];
 		
 		for( int i = 0; i < _MaxLights; i++ )
 		{
 			const CXR_Light* pL = _pRenderInfo->m_pLightInfo[i].m_pLight;
 
-			CVec3Dfp4 LightVec = pL->GetPosition() - CVec3Dfp4::GetRow( _WMat, 3 );
+			CVec3Dfp32 LightVec = pL->GetPosition() - CVec3Dfp32::GetRow( _WMat, 3 );
 
-			fp4 Intensity = ( pL->m_Intensity[0] + pL->m_Intensity[1] + pL->m_Intensity[2] ) * ( 1.0f / 3.0f );
+			CVec4Dfp32 LightColor = pL->GetIntensityv();
+			fp32 Intensity = ( LightColor[0] + LightColor[1] + LightColor[2] ) * ( 1.0f / 3.0f );
 			aAttenuation[i] = Intensity * Clamp01( 1.0f - ( LightVec.LengthSqr() * Sqr(pL->m_RangeInv) ) );
 		}
 		
@@ -43,7 +44,7 @@ int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, con
 			{
 				if( aAttenuation[i-1] < aAttenuation[i] )
 				{
-					fp4 t = aAttenuation[i-1];
+					fp32 t = aAttenuation[i-1];
 					aAttenuation[i-1]	= aAttenuation[i];
 					aAttenuation[i]	= t;
 					
@@ -62,10 +63,11 @@ int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, con
 		{
 			const CXR_Light* pL = _pRenderInfo->m_pLightInfo[i].m_pLight;
 
-			CVec3Dfp4 LightVec = pL->GetPosition() - CVec3Dfp4::GetRow( _WMat, 3 );
+			CVec3Dfp32 LightVec = pL->GetPosition() - CVec3Dfp32::GetRow( _WMat, 3 );
 
-			fp4 Intensity = ( pL->m_Intensity[0] + pL->m_Intensity[1] + pL->m_Intensity[2] ) * ( 1.0f / 3.0f );
-			fp4 Attenuation = Intensity * Clamp01( 1.0f - ( LightVec.LengthSqr() * Sqr(pL->m_RangeInv) ) );
+			CVec4Dfp32 LightColor = pL->GetIntensityv();
+			fp32 Intensity = ( LightColor[0] + LightColor[1] + LightColor[2] ) * ( 1.0f / 3.0f );
+			fp32 Attenuation = Intensity * Clamp01( 1.0f - ( LightVec.LengthSqr() * Sqr(pL->m_RangeInv) ) );
 			
 			for( int j = 0; j < _MaxLights; j++ )
 			{
@@ -91,8 +93,8 @@ int FindMostContributingLights( const int _MaxLights, uint8* _pLightIndices, con
 	return nLights;
 }
 
-int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Light*& _pLights, fp4 _LightScale);
-int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Light*& _pLights, fp4 _LightScale)
+int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Light*& _pLights, fp32 _LightScale);
+int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Light*& _pLights, fp32 _LightScale)
 {
 	MAUTOSTRIP(ConvertWLSToCRCLight, 0);
 	int nLights = 0;
@@ -110,7 +112,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 	CRC_Light* pLights = _VBM.Alloc_Lights(nLights);
 	if (!pLights) return 0;
 
-//				CMat4Dfp4 WMatInv;
+//				CMat4Dfp32 WMatInv;
 //				_WMat.InverseOrthogonal(WMatInv);
 
 	int iL = 0;
@@ -119,7 +121,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 		CRC_Light& L = pLights[iL];
 		L.m_Type = CRC_LIGHTTYPE_PARALLELL;
 		L.m_Color = 0x00383838;
-		L.m_Direction = CVec3Dfp4(0,0,1);
+		L.m_Direction = CVec3Dfp32(0,0,1);
 
 		iL++;
 	}*/
@@ -135,7 +137,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 			{
 				CRC_Light L;
 				L.m_Type = CRC_LIGHTTYPE_POINT;
-				L.m_Color = pL->m_IntensityInt32;
+				M_VSt_V4f32_Pixel32(M_VMul(M_VScalar(255.0f), pL->GetIntensityv().v), (uint32*)&L.m_Color);
 				L.m_Ambient = 0x00000000;
 				L.m_Attenuation[0] = 0;
 				L.m_Attenuation[1] = pL->m_RangeInv;
@@ -157,7 +159,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 			{
 				CRC_Light L;
 				L.m_Type = CRC_LIGHTTYPE_PARALLELL;
-				L.m_Color = pL->m_IntensityInt32;
+				M_VSt_V4f32_Pixel32(M_VMul(M_VScalar(255.0f), pL->GetIntensityv().v), (uint32*)&L.m_Color);
 				L.m_Ambient = 0x00000000;
 				L.m_Attenuation[0] = 0;
 				L.m_Attenuation[1] = 0;
@@ -173,7 +175,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 			{
 				CRC_Light L;
 				L.m_Type = CRC_LIGHTTYPE_AMBIENT;
-				L.m_Color = pL->m_IntensityInt32;
+				M_VSt_V4f32_Pixel32(M_VMul(M_VScalar(255.0f), pL->GetIntensityv().v), (uint32*)&L.m_Color);
 				L.m_Ambient = 0x00000000;
 				L.m_Attenuation[0] = 0;
 				L.m_Attenuation[1] = 0;
@@ -189,17 +191,19 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 			{
 //							ConOut("CXR_LIGHTTYPE_LIGHTVOLUME");
 
-				fp4 LightScale = _LightScale;
-				fp4 CompCap = Max3(pL->m_Intensity[0], pL->m_Intensity[1], pL->m_Intensity[2]) * 2.0f * (1.0f + 2*pL->m_Range) * _LightScale;
+				fp32 LightScale = _LightScale;
+				CVec4Dfp32 LightColor = pL->GetIntensityv();
+				fp32 CompCap = Max3(LightColor[0], LightColor[1], LightColor[2]) * 2.0f * (1.0f + 2*pL->m_Range) * _LightScale;
 				if (CompCap > 1.5f)
 					LightScale *= 1.5f / CompCap;
 
-//				fp4 BiasScale = pL->m_Range * LightScale * 2.0f;
-//				ConOut(CStrF("%f, %s, %f, %f->%f, %s, %f", CompCap, pL->m_Intensity.GetString().Str(), pL->m_Range, _LightScale, LightScale, pL->m_LightVec.GetString().Str(), BiasScale));
+//				fp32 BiasScale = pL->m_Range * LightScale * 2.0f;
+//				ConOut(CStrF("%f, %s, %f, %f->%f, %s, %f", CompCap, LightColor.GetString().Str(), pL->m_Range, _LightScale, LightScale, pL->m_LightVec.GetString().Str(), BiasScale));
 
 				CRC_Light L;
 				L.m_Type = CRC_LIGHTTYPE_PARALLELL;
-				L.m_Color = pL->m_IntensityInt32 * LightScale * 2.0f;
+				M_VSt_V4f32_Pixel32(M_VMul(M_VMul(M_VScalar(2.0f*255.0f), M_VLdScalar(LightScale)), LightColor.v), (uint32*)&L.m_Color);
+//				L.m_Color = pL->m_IntensityInt32 * LightScale * 2.0f;
 				L.m_Ambient = 0x00000000;
 				L.m_Direction = pL->GetDirection();
 				L.m_Attenuation[0] = 0;
@@ -212,7 +216,9 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 
 				CRC_Light L2;
 				L2.m_Type = 3;
-				L2.m_Color = pL->m_IntensityInt32 * Clamp01(pL->m_Range * LightScale * 4.0f);
+				vec128 Scale = M_VMin(M_VOne(), M_VMul(M_VMul(M_VLdScalar(pL->m_Range), M_VLdScalar(LightScale)), M_VScalar(4.0f*255.0f)));
+				M_VSt_V4f32_Pixel32(M_VMul(LightColor.v, Scale), (uint32*)&L2.m_Color);
+//				L2.m_Color = pL->m_IntensityInt32 * Clamp01(pL->m_Range * LightScale * 4.0f);
 				Light2 = L2;
 			}
 			break;
@@ -235,7 +241,7 @@ int ConvertWLSToCRCLight(CXR_WorldLightState& _WLS, CXR_VBManager& _VBM, CRC_Lig
 	return nLights;
 }
 
-void CXR_WorldLightState::Optimize(const CVec3Dfp4 _Pos, fp4 _Radius, fp4 _ParallellTresh, const CMat43fp4* _pMat)
+void CXR_WorldLightState::Optimize(const CVec3Dfp32 _Pos, fp32 _Radius, fp32 _ParallellTresh, const CMat4Dfp32* _pMat)
 {
 	MAUTOSTRIP(CXR_WorldLightState_Optimize, MAUTOSTRIP_VOID);
 	CXR_Light* pL = GetFirst();
@@ -243,9 +249,9 @@ void CXR_WorldLightState::Optimize(const CVec3Dfp4 _Pos, fp4 _Radius, fp4 _Paral
 	{
 		if (pL->m_Type == CXR_LIGHTTYPE_POINT)
 		{
-			CVec3Dfp4 LVec;
+			CVec3Dfp32 LVec;
 			pL->GetPosition().Sub(_Pos, LVec);
-//			fp4 Dist = LVec.Length();
+//			fp32 Dist = LVec.Length();
 			
 /*	#ifndef ALWAYS_PARALLELL
 			if ((Dist > 4.0f*_Radius) && (((Dist - _Radius) / (Dist + _Radius)) > _ParallellTresh))
@@ -263,12 +269,12 @@ void CXR_WorldLightState::Optimize(const CVec3Dfp4 _Pos, fp4 _Radius, fp4 _Paral
 
 		if (pL->m_Type == CXR_LIGHTTYPE_FAKESKYRADIOSITY)
 		{
-			pL->SetDirection(CVec3Dfp4(0,0,1));
+			pL->SetDirection(CVec3Dfp32(0,0,1));
 		}
 
 		if (_pMat) 
 		{
-			CMat43fp4 M;
+			CMat4Dfp32 M;
 			pL->m_Pos.Multiply(*_pMat, M);
 			pL->m_Pos = M;
 		}
@@ -278,7 +284,7 @@ void CXR_WorldLightState::Optimize(const CVec3Dfp4 _Pos, fp4 _Radius, fp4 _Paral
 }
 
 // -------------------------------------------------------------------
-void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN, int _bOmni, CPixel32* _pVLight, int _Alpha, fp4 _Scale)
+void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN, int _bOmni, CPixel32* _pVLight, int _Alpha, fp32 _Scale)
 {
 	MAUTOSTRIP(CXR_WorldLightState_LightDiffuse, MAUTOSTRIP_VOID);
 	const int MaxVertices = 256;
@@ -302,22 +308,22 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 	}
 
 //	CMathAccel* pMathAccel = GetMathAccel();
-	const CVec3Dfp4* pVV = _pV;
-	const CVec3Dfp4* pVN = _pN;
+	const CVec3Dfp32* pVV = _pV;
+	const CVec3Dfp32* pVN = _pN;
 //	CPixel32* pVL = _pVLight;
 //	int nV = _nV;
 
-	uint8 Data[MaxVertices*(sizeof(CVec4Dfp4) + 3*4) + 16];
+	uint8 Data[MaxVertices*(sizeof(CVec4Dfp32) + 3*4) + 16];
 	uint8* p = (uint8*)(((mint)&Data+15) & 0xfffffff0);
-	CVec4Dfp4* pLight = (CVec4Dfp4*) p;
-	p += MaxVertices*sizeof(CVec4Dfp4);
-	fp4* pSqrt = (fp4*)p;
-	p += MaxVertices*sizeof(fp4);
-//	fp4* pRecp = (fp4*)p;
-	p += MaxVertices*sizeof(fp4);
-	fp4* pDot = (fp4*)p;
+	CVec4Dfp32* pLight = (CVec4Dfp32*) p;
+	p += MaxVertices*sizeof(CVec4Dfp32);
+	fp32* pSqrt = (fp32*)p;
+	p += MaxVertices*sizeof(fp32);
+//	fp32* pRecp = (fp32*)p;
+	p += MaxVertices*sizeof(fp32);
+	fp32* pDot = (fp32*)p;
 
-	FillChar(pLight, sizeof(CVec4Dfp4)*_nV, 0);
+	FillChar(pLight, sizeof(CVec4Dfp32)*_nV, 0);
 
 	const CXR_Light* pL = _pLights;
 	while(pL)
@@ -330,13 +336,14 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			{
 			case CXR_LIGHTTYPE_FAKESKYRADIOSITY :
 				{
-					fp4 s = 256.0f*_Scale;
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
+					fp32 s = 256.0f*_Scale;
 					for(int v = 0; v < _nV; v++)
 					{
 						// Sky
-						pLight[v][0] += pL->m_Intensity.k[0] * s;
-						pLight[v][1] += pL->m_Intensity.k[1] * s;
-						pLight[v][2] += pL->m_Intensity.k[2] * s;
+						pLight[v][0] += LightColor[0] * s;
+						pLight[v][1] += LightColor[1] * s;
+						pLight[v][2] += LightColor[2] * s;
 					}
 					break;
 				}
@@ -344,12 +351,13 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			case CXR_LIGHTTYPE_PARALLELL :
 				{
 					// Parallell light
-					fp4 s = 256.0f*_Scale;
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
+					fp32 s = 256.0f*_Scale;
 					for(int v = 0; v < _nV; v++)
 					{
-						pLight[v][0] += pL->m_Intensity.k[0] * s;
-						pLight[v][1] += pL->m_Intensity.k[1] * s;
-						pLight[v][2] += pL->m_Intensity.k[2] * s;
+						pLight[v][0] += LightColor[0] * s;
+						pLight[v][1] += LightColor[1] * s;
+						pLight[v][2] += LightColor[2] * s;
 					}
 					break;
 				}
@@ -357,8 +365,9 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			case CXR_LIGHTTYPE_AMBIENT :
 				{
 					// Ambient light-source.
-					CVec3Dfp4 Offset;
-					pL->m_Intensity.Scale(256.0f*_Scale, Offset);
+					CVec4Dfp32 Offset;
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
+					LightColor.Scale(256.0f*_Scale, Offset);
 					for(int v = 0; v < _nV; v++)
 					{
 						pLight[v][0] += Offset[0];
@@ -370,10 +379,11 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 
 			case CXR_LIGHTTYPE_LIGHTVOLUME :
 				{
-					fp4 Bias = pL->m_Range;
-					fp4 dotp = 2.0f*256.0f*(Bias + pL->GetDirection().Length()) * _Scale;
-					CVec3Dfp4 Offset;
-					pL->m_Intensity.Scale(dotp, Offset);
+					fp32 Bias = pL->m_Range;
+					fp32 dotp = 2.0f*256.0f*(Bias + pL->GetDirection().Length()) * _Scale;
+					CVec4Dfp32 Offset;
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
+					LightColor.Scale(dotp, Offset);
 					for(int v = 0; v < _nV; v++)
 					{
 						pLight[v][0] += Offset[0];
@@ -389,12 +399,12 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 				{
 					// Point light-source.
 					{
-						CVec3Dfp4 Pos = pL->GetPosition();
+						CVec3Dfp32 Pos = pL->GetPosition();
 						for(int v = 0; v < _nV; v++)
 						{
-							fp4 vlx = Pos.k[0] - pVV[v].k[0];
-							fp4 vly = Pos.k[1] - pVV[v].k[1];
-							fp4 vlz = Pos.k[2] - pVV[v].k[2];
+							fp32 vlx = Pos.k[0] - pVV[v].k[0];
+							fp32 vly = Pos.k[1] - pVV[v].k[1];
+							fp32 vlz = Pos.k[2] - pVV[v].k[2];
 							pSqrt[v] = Sqr(vlx) + Sqr(vly) + Sqr(vlz);
 						}
 					}
@@ -402,16 +412,17 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 					SIMD_Sqrt8(pSqrt, NULL, _nV);
 
 					{
-						fp4 s = 256.0f * pL->m_RangeInv * _Scale;
+						fp32 s = 256.0f * pL->m_RangeInv * _Scale;
+						CVec4Dfp32 LightColor = pL->GetIntensityv();
 						for(int v = 0; v < _nV; v++)
 						{
-							fp4 ld = pSqrt[v];
+							fp32 ld = pSqrt[v];
 							if (ld > pL->m_Range) continue;
 
-							fp4 dotp = (pL->m_Range - ld) * s;
-							pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-							pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-							pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+							fp32 dotp = (pL->m_Range - ld) * s;
+							pLight[v][0] += LightColor[0] * dotp;
+							pLight[v][1] += LightColor[1] * dotp;
+							pLight[v][2] += LightColor[2] * dotp;
 						}
 					}
 				}
@@ -424,19 +435,20 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			{
 			case CXR_LIGHTTYPE_FAKESKYRADIOSITY :
 				{
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < _nV; v++)
 					{
-						fp4 dotp = pVN[v] * LightVec;
+						fp32 dotp = pVN[v] * LightVec;
 						if (dotp > 0.0f)
 							dotp = ((0.655757f-0.203727f)*dotp + 0.203727f) * 256.0f;
 						else
 							dotp = (1.0f+dotp)*0.203727f*256.0f;
 
 						dotp *= _Scale;
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 					break;
 				}
@@ -444,16 +456,17 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			case CXR_LIGHTTYPE_PARALLELL :
 				{
 					// Parallell light
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < _nV; v++)
 					{
-						fp4 dotp = 256.0f*(pVN[v] * LightVec);
+						fp32 dotp = 256.0f*(pVN[v] * LightVec);
 						if (FloatIsNeg(dotp)) continue;
 						dotp *= _Scale;
 
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 					break;
 				}
@@ -461,8 +474,9 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 			case CXR_LIGHTTYPE_AMBIENT :
 				{
 					// Ambient light-source.
-					CVec3Dfp4 Offset;
-					pL->m_Intensity.Scale(256.0f*_Scale, Offset);
+					CVec4Dfp32 Offset;
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
+					LightColor.Scale(256.0f*_Scale, Offset);
 					for(int v = 0; v < _nV; v++)
 					{
 						pLight[v][0] += Offset[0];
@@ -474,17 +488,18 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 
 			case CXR_LIGHTTYPE_LIGHTVOLUME :
 				{
-					fp4 Bias = pL->m_Range;
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					fp32 Bias = pL->m_Range;
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < _nV; v++)
 					{
-						fp4 dotp = 2.0f*256.0f*((pVN[v] * LightVec) + Bias);
+						fp32 dotp = 2.0f*256.0f*((pVN[v] * LightVec) + Bias);
 						if (FloatIsNeg(dotp)) continue;
 						dotp *= _Scale;
 
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 
 					break;
@@ -495,12 +510,12 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 				{
 					// Point light-source.
 					{
-						CVec3Dfp4 Pos = pL->GetPosition();
+						CVec3Dfp32 Pos = pL->GetPosition();
 						for(int v = 0; v < _nV; v++)
 						{
-							fp4 vlx = Pos.k[0] - pVV[v].k[0];
-							fp4 vly = Pos.k[1] - pVV[v].k[1];
-							fp4 vlz = Pos.k[2] - pVV[v].k[2];
+							fp32 vlx = Pos.k[0] - pVV[v].k[0];
+							fp32 vly = Pos.k[1] - pVV[v].k[1];
+							fp32 vlz = Pos.k[2] - pVV[v].k[2];
 							pSqrt[v] = Sqr(vlx) + Sqr(vly) + Sqr(vlz);
 							pDot[v] = (pVN[v].k[0]*vlx + pVN[v].k[1]*vly + pVN[v].k[2]*vlz);
 	//						if (lDot[v] < 0.0f) lSqrt[v] = 0;
@@ -510,19 +525,20 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 					SIMD_RecpSqrt8(pSqrt, NULL, _nV);
 
 					{
-						fp4 s = 256.0f * pL->m_RangeInv * _Scale;
+						CVec4Dfp32 LightColor = pL->GetIntensityv();
+						fp32 s = 256.0f * pL->m_RangeInv * _Scale;
 						for(int v = 0; v < _nV; v++)
 						{
-							fp4 dotp = pDot[v];
+							fp32 dotp = pDot[v];
 							if (FloatIsNeg(dotp)) continue;
 
-							fp4 lRecp = pSqrt[v];
+							fp32 lRecp = pSqrt[v];
 							if (lRecp < pL->m_RangeInv) continue;
 							dotp *= s * (pL->m_Range*lRecp - 1);
 
-							pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-							pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-							pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+							pLight[v][0] += LightColor[0] * dotp;
+							pLight[v][1] += LightColor[1] * dotp;
+							pLight[v][2] += LightColor[2] * dotp;
 						}
 					}
 				}
@@ -537,7 +553,7 @@ void CXR_WorldLightState::LightDiffuse(CXR_Light* _pLights, int _nV, const CVec3
 
 
 // -------------------------------------------------------------------
-void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec3Dfp4* _pV, const CVec3Dfp4* _pN, int _Power, CPixel32* _pVLight, const CVec3Dfp4& _Eye, int _Alpha, fp4 _Scale)
+void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec3Dfp32* _pV, const CVec3Dfp32* _pN, int _Power, CPixel32* _pVLight, const CVec3Dfp32& _Eye, int _Alpha, fp32 _Scale)
 {
 	MAUTOSTRIP(CXR_WorldLightState_LightSpecular, MAUTOSTRIP_VOID);
 	const int MaxVertices = 256;
@@ -562,29 +578,29 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 
 //	CMathAccel* pMathAccel = GetMathAccel();
 	int nV = _nV;
-	const CVec3Dfp4* pVV = _pV;
-	const CVec3Dfp4* pVN = _pN;
+	const CVec3Dfp32* pVV = _pV;
+	const CVec3Dfp32* pVN = _pN;
 //	CPixel32* pVL = _pVLight;
 //	int Alpha = _Alpha << 24;
 
-	uint8 Data[MaxVertices*(sizeof(CVec4Dfp4) + 3*4) + 16];
+	uint8 Data[MaxVertices*(sizeof(CVec4Dfp32) + 3*4) + 16];
 	uint8* p = (uint8*)(((mint)&Data+15) & 0xfffffff0);
-	CVec4Dfp4* pLight = (CVec4Dfp4*) p;
-	p += MaxVertices*sizeof(CVec4Dfp4);
-	fp4* pSqrt = (fp4*)p;
-	p += MaxVertices*sizeof(fp4);
-	fp4* pRecp = (fp4*)p;
-	p += MaxVertices*sizeof(fp4);
-	fp4* pDot = (fp4*)p;
+	CVec4Dfp32* pLight = (CVec4Dfp32*) p;
+	p += MaxVertices*sizeof(CVec4Dfp32);
+	fp32* pSqrt = (fp32*)p;
+	p += MaxVertices*sizeof(fp32);
+	fp32* pRecp = (fp32*)p;
+	p += MaxVertices*sizeof(fp32);
+	fp32* pDot = (fp32*)p;
 
-	FillChar(pLight, sizeof(CVec4Dfp4)*_nV, 0);
+	FillChar(pLight, sizeof(CVec4Dfp32)*_nV, 0);
 
-	CVec3Dfp4 lReflect[MaxVertices];
+	CVec3Dfp32 lReflect[MaxVertices];
 
 
 	for(int v = 0; v < nV; v++)
 	{
-		CVec3Dfp4 VCam;
+		CVec3Dfp32 VCam;
 		pVV[v].Sub(_Eye, VCam);
 		VCam.Combine(pVN[v], -2.0f * (VCam*pVN[v]), lReflect[v]);
 		pSqrt[v] = lReflect[v].LengthSqr();
@@ -606,10 +622,11 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 			{
 			case CXR_LIGHTTYPE_FAKESKYRADIOSITY :
 				{
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < nV; v++)
 					{
-						fp4 dotp = (LightVec * lReflect[v]) * pSqrt[v];
+						fp32 dotp = (LightVec * lReflect[v]) * pSqrt[v];
 						if (FloatIsNeg(dotp)) continue;
 
 						int Pow = _Power;// >> 1;
@@ -622,9 +639,9 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 						}
 						dotp *= _Scale;
 						dotp *= 0.5f;
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 
 					break;
@@ -632,10 +649,11 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 
 			case CXR_LIGHTTYPE_PARALLELL :
 				{
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < nV; v++)
 					{
-						fp4 dotp = (LightVec * lReflect[v]) * pSqrt[v];
+						fp32 dotp = (LightVec * lReflect[v]) * pSqrt[v];
 						if (FloatIsNeg(dotp)) continue;
 						if (_Power)
 						{
@@ -646,9 +664,9 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 							if (Pow & 8) dotp = Sqr(Sqr(Sqr(Sqr(dotp))));
 						}
 						dotp *= _Scale;
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 
 					break;
@@ -661,11 +679,12 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 
 			case CXR_LIGHTTYPE_LIGHTVOLUME :
 				{
-					fp4 Bias = pL->m_Range;
-					CVec3Dfp4 LightVec = pL->GetDirection();
+					fp32 Bias = pL->m_Range;
+					CVec3Dfp32 LightVec = pL->GetDirection();
+					CVec4Dfp32 LightColor = pL->GetIntensityv();
 					for(int v = 0; v < nV; v++)
 					{
-						fp4 dotp = (LightVec * lReflect[v] + Bias) * pSqrt[v];
+						fp32 dotp = (LightVec * lReflect[v] + Bias) * pSqrt[v];
 						if (FloatIsNeg(dotp)) continue;
 						if (_Power)
 						{
@@ -676,9 +695,9 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 							if (Pow & 8) dotp = Sqr(Sqr(Sqr(Sqr(dotp))));
 						}
 						dotp *= _Scale;
-						pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-						pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-						pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+						pLight[v][0] += LightColor[0] * dotp;
+						pLight[v][1] += LightColor[1] * dotp;
+						pLight[v][2] += LightColor[2] * dotp;
 					}
 					break;
 				}
@@ -687,10 +706,10 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 			default :
 				{
 					{
-						CVec3Dfp4 Pos = pL->GetPosition();
+						CVec3Dfp32 Pos = pL->GetPosition();
 						for(int v = 0; v < nV; v++)
 						{
-							CVec3Dfp4 VLight;
+							CVec3Dfp32 VLight;
 							Pos.Sub(pVV[v], VLight);
 							pRecp[v] = VLight.LengthSqr();
 							pDot[v] = VLight * lReflect[v];
@@ -700,10 +719,11 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 					SIMD_RecpSqrt8(pRecp, NULL, _nV);
 
 					{
+						CVec4Dfp32 LightColor = pL->GetIntensityv();
 						for(int v = 0; v < nV; v++)
 						{
 							if (pRecp[v] < pL->m_RangeInv) continue;
-							fp4 dotp = pDot[v] * pSqrt[v] * pRecp[v];
+							fp32 dotp = pDot[v] * pSqrt[v] * pRecp[v];
 							if (FloatIsNeg(dotp)) continue;
 
 							if (_Power)
@@ -717,9 +737,9 @@ void CXR_WorldLightState::LightSpecular(CXR_Light* _pLights, int _nV, const CVec
 
 							dotp *= (pL->m_Range*pRecp[v] - 1.0f) * _Scale;
 
-							pLight[v][0] += pL->m_Intensity.k[0] * dotp;
-							pLight[v][1] += pL->m_Intensity.k[1] * dotp;
-							pLight[v][2] += pL->m_Intensity.k[2] * dotp;
+							pLight[v][0] += LightColor[0] * dotp;
+							pLight[v][1] += LightColor[1] * dotp;
+							pLight[v][2] += LightColor[2] * dotp;
 						}
 					}
 				}

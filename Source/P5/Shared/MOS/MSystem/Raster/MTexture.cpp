@@ -27,7 +27,7 @@ const char* CTC_TextureProperties::ms_TxtPropMIPTranslate[] =
 
 const char* CTC_TextureProperties::ms_TxtConvertTranslate[] = 
 {
-	"none", "afromrgb", "bump", "bumpenv", "alpha", "$$$", "normalmap2", "anisotropicdirection", "cubefromcylinder", (char*)NULL
+	"none", "afromrgb", "bump", "bumpenv", "alpha", "$$$", "normalmap2", "anisotropicdirection", "cubefromcylinder", "$$$", "cubefromsphere", (char*)NULL
 };
 
 // ----------------------------------------------------------------
@@ -413,12 +413,12 @@ int CTextureContainer::GetTextureParam(int _iLocal, int _Param)
 	return 0;
 }
 
-void CTextureContainer::SetTextureParamfv(int _iLocal, int _Param, const fp4* _pValues)
+void CTextureContainer::SetTextureParamfv(int _iLocal, int _Param, const fp32* _pValues)
 {
 	MAUTOSTRIP(CTextureContainer_SetTextureParamfv, MAUTOSTRIP_VOID);
 }
 
-void CTextureContainer::GetTextureParamfv(int _iLocal, int _Param, fp4* _pRetValues)
+void CTextureContainer::GetTextureParamfv(int _iLocal, int _Param, fp32* _pRetValues)
 {
 	MAUTOSTRIP(CTextureContainer_GetTextureParamfv, MAUTOSTRIP_VOID);
 }
@@ -432,10 +432,100 @@ void CTextureContainer::GetTextureProperties(int _iLocal, CTC_TextureProperties&
 
 int CTextureContainer::EnumTextureVersions(int _iLocal, uint8* _pDestVersion, int _nMaxVersions)
 {
-	_pDestVersion[0] = CTC_TEXTUREVERSION_RAW;
+	if(_pDestVersion) _pDestVersion[0] = CTC_TEXTUREVERSION_RAW;
 	return 1;
 }
 
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| CTextureCache
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+uint64 CTextureCache::ReadCheckSum(const char* _pFilename)
+{
+	m_CheckSum = 0;
+	if (CDiskUtil::FileExists(_pFilename))
+	{
+		CDataFile DFile;
+		DFile.Open(_pFilename);
+		if (DFile.GetNext("CHECKSUM"))
+			DFile.GetFile()->ReadLE(m_CheckSum);
+	}
+	return m_CheckSum;
+}
+
+
+bool CTextureCache::ReadCache(const char* _pFilename)
+{
+	CDataFile DFile;
+	DFile.Open(_pFilename);
+	if (!DFile.GetNext("CONTAINERS"))
+		return false;
+
+	uint nEntries = DFile.GetUserData();
+	if (!DFile.GetSubDir())
+		return false;
+
+	CCFile* pFile = DFile.GetFile();
+	DFile.PushPosition();
+	for (uint i = 0; i < nEntries; i++)
+	{
+		DFile.PopPosition();
+		CFStr Class = DFile.GetNext();
+		DFile.PushPosition();
+		if (!DFile.GetSubDir() || !DFile.GetNext("FILENAME"))
+			continue;
+
+		CStr ContainerFileName;
+		ContainerFileName.Read(pFile);
+
+		if (Class == "VirtualXTC")
+		{
+			spCTextureContainer_VirtualXTC spTC = MNew(CTextureContainer_VirtualXTC);
+			spTC->Create(&DFile, ContainerFileName);
+			m_lspTC.Add((CTextureContainer*)spTC);
+		}
+	}
+	return true;
+}
+
+void CTextureCache::WriteCache(const char* _pFilename)
+{
+#ifndef PLATFORM_CONSOLE
+	CDataFile DFile;
+	DFile.Create(_pFilename);
+
+	DFile.BeginEntry("CHECKSUM");
+	DFile.GetFile()->WriteLE(m_CheckSum);
+	DFile.EndEntry(0);
+
+	DFile.BeginEntry("CONTAINERS");
+	uint nContainers = m_lspTC.Len();
+	DFile.EndEntry(nContainers);
+	DFile.BeginSubDir();
+	for (uint i = 0; i < nContainers; i++)
+	{
+		CTextureContainer* pTC = m_lspTC[i];
+		CTextureContainer_VirtualXTC* pVirtualXTC = TDynamicCast<CTextureContainer_VirtualXTC>(pTC);
+		if (!pVirtualXTC)
+			Error_static("CTextureCache::WriteCache", "Unsupported texture class!");
+
+		DFile.BeginEntry("VirtualXTC");
+		DFile.EndEntry(0);
+		DFile.BeginSubDir();
+		{
+			DFile.BeginEntry("FILENAME");
+			pVirtualXTC->m_FileName.Write(DFile.GetFile());
+			DFile.EndEntry(0);
+			pVirtualXTC->WriteXTC(&DFile, false);
+		}
+		DFile.EndSubDir();
+	}
+	DFile.EndSubDir();
+	DFile.Close();
+#endif
+}
 
 // ----------------------------------------------------------------
 //  CTextureContext
@@ -488,6 +578,11 @@ CTextureContext::CTextureContext()
 	MAUTOSTRIP(CTextureContext_ctor, MAUTOSTRIP_VOID);
 	m_IDCapacity = 0;
 	m_pRefreshFirst = NULL;
+#ifdef PLATFORM_CONSOLE
+	m_lpTC.SetGrow(32);
+#else
+	m_lpTC.SetGrow(256);
+#endif
 #ifdef USE_HASHED_TEXTURENAME
 	m_pHash = DNew(CIDHash) CIDHash;
 #endif
@@ -768,7 +863,7 @@ int CTextureContext::GetTextureParam(int _ID, int _Param)
 }
 
 
-void CTextureContext::SetTextureParamfv(int _ID, int _Param, const fp4* _pValues)
+void CTextureContext::SetTextureParamfv(int _ID, int _Param, const fp32* _pValues)
 {
 	MAUTOSTRIP(CTextureContext_SetTextureParamfv, MAUTOSTRIP_VOID);
 	int iTC = m_lTxtIDInfo[_ID].GetTxtClass();
@@ -778,7 +873,7 @@ void CTextureContext::SetTextureParamfv(int _ID, int _Param, const fp4* _pValues
 }
 
 
-void CTextureContext::GetTextureParamfv(int _ID, int _Param, fp4* _pRetValues)
+void CTextureContext::GetTextureParamfv(int _ID, int _Param, fp32* _pRetValues)
 {
 	MAUTOSTRIP(CTextureContext_GetTextureParamfv, MAUTOSTRIP_VOID);
 	int iTC = m_lTxtIDInfo[_ID].GetTxtClass();
@@ -857,7 +952,10 @@ int CTextureContext::GetTextureID(uint32 _TxtNameID)
 	if (TextureID != -1)
 		return TextureID;
 #else
-	Error("CTextureContext::GetTextureID", "Can't use TxtNameID. Use TxtName instead!");
+	int TextureID = m_Hash.GetIndex(_TxtNameID);
+	if (TextureID != -1)
+		return TextureID;
+//	Error("CTextureContext::GetTextureID", "Can't use TxtNameID. Use TxtName instead!");
 #endif
 	return 0;
 }
@@ -1116,4 +1214,4 @@ int CTextureContext::EnumTextureVersions(int _ID, uint8* _pDest, int _nMax)
 
 	return nVersions;
 #endif
-}
+	}

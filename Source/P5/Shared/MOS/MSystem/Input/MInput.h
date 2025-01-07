@@ -30,23 +30,22 @@ typedef TPtr<CInputEnvelopeInstance> spCInputEnvelopeInstance;
 // -------------------------------------------------------------------
 class SYSTEMDLLEXPORT CInputContext : public CConsoleClient, public CSubSystem
 {
+protected:
+	// Input device interface
+	virtual void AddScanKey(CScanKey) pure;
+	virtual void DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0) pure;
+	virtual void UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice = 0) pure;
+
 public:
 	virtual void Create(const char* _pParams) pure;
 	virtual void Update() pure;
 
-	// Input device interface
-	virtual void AddScanKey(CScanKey) pure;
-	virtual void DownKey(int _ScanCode, wchar _Char, fp8 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0) pure;
-	virtual void UpKey(int _ScanCode, fp8 _Time, int _Data0, int _Data1, int _iDevice = 0) pure;
-
 	// Scankey polling
 	virtual bool KeyPressed() pure;
-	virtual CScanKey ScanKey() pure;
+	virtual int GetScanKeys(CScanKey* _pDest, uint _nMax) pure;
 
 	virtual bool IsPressed(int _skey) pure;
 	virtual bool IsNotPressed(int _skey) pure;
-	virtual bool IsPressed(int8 first, ... ) pure;		// Test state of multiple keys, terminate with 0
-	virtual bool IsNotPressed(int8 first, ... ) pure;	// Test state of multiple keys, terminate with 0
 
 	virtual bool AddShiftKey(int8 scancode) pure;		// Add user shiftkeys, not implemented.
 	virtual bool RemoveShiftKey(int8 scancode) pure;
@@ -68,12 +67,16 @@ public:
 	virtual void SetMouseArea(CRct _Area) pure;
 
 	// Feedback envelope interface
-	virtual void SetFeedbackAmount(fp4 _Amount) pure;
+	virtual void SetFeedbackAmount(fp32 _Amount) pure;
 	virtual void FlushEnvelopes(  ) pure;
 	virtual void FlushEnvelopes( int _index ) pure;
 	virtual void RemoveEnvelope( int _index, CInputEnvelopeInstance *_pEnvelopeInstance ) pure;
 	virtual spCInputEnvelopeInstance AppendEnvelope( int _index, const CStr &_name ) pure;
 	virtual spCInputEnvelopeInstance SetEnvelope( int _index, const CStr &_name ) pure;
+
+	// Used by remotedebugger to insert input
+	virtual void RD_DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0) pure;
+	virtual void RD_UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice = 0) pure;
 
 	// Memory Card interface
 	// Only one of these can be active at once. Arguments are specified in

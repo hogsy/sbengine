@@ -129,6 +129,12 @@ public:
 	virtual const CCExceptionInfo& GetExceptionInfo() const;
 
 	static CFStr GetSourcePosStr(int _Line, const char* _pFileName);
+
+#ifdef M_NOEXCEPTIONINFO
+	static void DoThrow();
+#else
+	static void DoThrow(const CObj* _pObj, const char* _pLocation, const char* _pSourcePos, const char* _pMessage, int _ErrCode = 0);
+#endif
 };
 
 // -------------------------------------------------------------------
@@ -144,30 +150,36 @@ public:
 
 #ifdef M_NOEXCEPTIONINFO
 #define Error(_Location, _Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(); }
 
 #define Error_static(_Location, _Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(); }
 
 #define DbgErr(_Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(); }
 
 #else
 #define Error(_Location, _Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(this, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(this, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg); }
 
 #define Error_static(_Location, _Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(NULL, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(NULL, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg); }
 
 #define DbgErr(_Msg) \
-{ DTraceCurrentFilePos("Exception"); throw CCException(this, "?", MACRO_EXCEPT_SOURCE_POS, _Msg); }
+{ DTraceCurrentFilePos("Exception"); CCException::DoThrow(this, "?", MACRO_EXCEPT_SOURCE_POS, _Msg); }
 #endif
 
+#elif defined(M_Profile)
+# define Error(_Location, _Msg) { M_TRACEALWAYS("Exception! Location: %s, Message: %s\n", (const char*)(_Location), (const char*)(_Msg)); M_BREAKPOINT; }
+# define Error_static(_Location, _Msg)  { M_TRACEALWAYS("Exception! Location: %s, Message: %s\n", (const char*)(_Location), (const char*)(_Msg)); M_BREAKPOINT; }
+# define DbgErr(_Msg)  { M_TRACEALWAYS("Debug Error! Message: %s\n", (const char*)(_Msg)); M_BREAKPOINT; }
 #else
-#define Error(_Location, _Msg) {M_BREAKPOINT;}
-#define Error_static(_Location, _Msg)  {M_BREAKPOINT;}
-#define DbgErr(_Msg)  {M_BREAKPOINT;}
+# define Error(_Location, _Msg) {M_BREAKPOINT;}
+# define Error_static(_Location, _Msg)  {M_BREAKPOINT;}
+# define DbgErr(_Msg)  {M_BREAKPOINT;}
 #endif
+
+#define ThrowError(_Msg)  Error_static(M_FUNCTION, _Msg)
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -186,24 +198,30 @@ public:
 #else
 	CCExceptionMemory(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr);
 #endif
+
+#ifdef M_NOEXCEPTIONINFO
+	static void DoThrow();
+#else
+	static void DoThrow(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr);
+#endif
 };
 
 #if M_EXCEPTIONS
 //|| !defined(M_RTM)
 #ifdef M_NOEXCEPTIONINFO
 #define MemError(_Location) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionMemory();}
+{DTraceCurrentFilePos("Exception"); CCExceptionMemory::DoThrow();}
 
 #define MemError_static(_Location) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionMemory();}
+{DTraceCurrentFilePos("Exception"); CCExceptionMemory::DoThrow();}
 
 #else
 
 #define MemError(_Location) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionMemory(this, _Location, MACRO_EXCEPT_SOURCE_POS);}
+{DTraceCurrentFilePos("Exception"); CCExceptionMemory::DoThrow(this, _Location, MACRO_EXCEPT_SOURCE_POS);}
 
 #define MemError_static(_Location) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionMemory(NULL, _Location, MACRO_EXCEPT_SOURCE_POS);}
+{DTraceCurrentFilePos("Exception"); CCExceptionMemory::DoThrow(NULL, _Location, MACRO_EXCEPT_SOURCE_POS);}
 
 #endif
 #else
@@ -227,6 +245,12 @@ public:
 #else
 	CCExceptionFile(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr, const char* _pMessageStr, int _ErrCode);
 #endif
+
+#ifdef M_NOEXCEPTIONINFO
+	static void DoThrow();
+#else
+	static void DoThrow(const CObj* _pObj, const char* _pLocationStr, const char* _pSourcePosStr, const char* _pMessageStr, int _ErrCode);
+#endif
 };
 
 #if M_EXCEPTIONS
@@ -234,14 +258,14 @@ public:
 
 #ifdef M_NOEXCEPTIONINFO
 #define FileError(_Location, _Msg, _ErrCode) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionFile();}
+{DTraceCurrentFilePos("Exception"); CCExceptionFile::DoThrow();}
 #define FileError_static(_Location, _Msg, _ErrCode) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionFile();}
+{DTraceCurrentFilePos("Exception"); CCExceptionFile::DoThrow();}
 #else
 #define FileError(_Location, _Msg, _ErrCode) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionFile(this, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg, _ErrCode);}
+{DTraceCurrentFilePos("Exception"); CCExceptionFile::DoThrow(this, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg, _ErrCode);}
 #define FileError_static(_Location, _Msg, _ErrCode) \
-{DTraceCurrentFilePos("Exception"); throw CCExceptionFile(NULL, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg, _ErrCode);}
+{DTraceCurrentFilePos("Exception"); CCExceptionFile::DoThrow(NULL, _Location, MACRO_EXCEPT_SOURCE_POS, _Msg, _ErrCode);}
 #endif
 
 #else

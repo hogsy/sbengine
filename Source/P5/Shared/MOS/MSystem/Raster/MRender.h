@@ -75,6 +75,12 @@ public:
 	DRenderPre CRC_Statistics Statistics_Get() DRenderPost;
 	DRenderPre void Flip_SetInterval(int _nFrames) DRenderPost;
 
+	// Performance query
+	DRenderPre uint PerfQuery_GetStride() DRenderPost;
+	DRenderPre void PerfQuery_Begin(int _MaxQueries, void* _pMem) DRenderPost;
+	DRenderPre void PerfQuery_Next() DRenderPost;
+	DRenderPre uint PerfQuery_End() DRenderPost;
+
 	// Viewport
 	DRenderPre void Viewport_Update() DRenderPost;
 	DRenderPre CRC_Viewport* Viewport_Get() DRenderPost;
@@ -83,10 +89,12 @@ public:
 	DRenderPre void Viewport_Pop() DRenderPost;
 
 	// Render target
-	DRenderPre void RenderTarget_Clear(CRct _ClearRect, int _WhatToClear, CPixel32 _Color, fp4 _ZBufferValue, int _StecilValue) DRenderPost;
-	DRenderPre void RenderTarget_SetNextClearParams(CRct _ClearRect, int _WhatToClear, CPixel32 _Color, fp4 _ZBufferValue, int _StecilValue) DRenderPost;
+	DRenderPre void RenderTarget_SetRenderTarget(const CRC_RenderTargetDesc& _RenderTarget) DRenderPost;
+	DRenderPre void RenderTarget_Clear(CRct _ClearRect, int _WhatToClear, CPixel32 _Color, fp32 _ZBufferValue, int _StecilValue) DRenderPost;
+	DRenderPre void RenderTarget_SetNextClearParams(CRct _ClearRect, int _WhatToClear, CPixel32 _Color, fp32 _ZBufferValue, int _StecilValue) DRenderPost;
 	DRenderPre void RenderTarget_Copy(CRct _SrcRect, CPnt _Dest, int _CopyType) DRenderPost;
-	DRenderPre void RenderTarget_CopyToTexture(int _TextureID, CRct _SrcRect, CPnt _Dest, bint _bContinueTiling, uint16 _Slice) DRenderPost;
+	DRenderPre void RenderTarget_CopyToTexture(int _TextureID, CRct _SrcRect, CPnt _Dest, bint _bContinueTiling, uint16 _Slice, int _iMRT = 0) DRenderPost;
+	DRenderPre void RenderTarget_SetEnableMasks(uint32 _And) DRenderPost;
 
 	// Caps
 	DRenderPre int Caps_Flags() DRenderPost;
@@ -95,6 +103,8 @@ public:
 	DRenderPre int Caps_StencilDepth() DRenderPost;
 
 	// Render Precache flush
+	DRenderPre void Render_SetOnlyAllowExternalMemory(bint _bEnabled) DRenderPost;
+	DRenderPre void Render_SetMainMemoryOverride(bint _bEnabled) DRenderPost;
 	DRenderPre void Render_PrecacheFlush( ) DRenderPost;
 	DRenderPre void Render_PrecacheEnd() DRenderPost;
 
@@ -116,6 +126,7 @@ public:
 	DRenderPre void Texture_Copy(int _SourceTexID, int _DestTexID, CRct _SrcRgn, CPnt _DstPos) DRenderPost;	// Not implemented.
 	DRenderPre CRC_TextureMemoryUsage Texture_GetMem(int _TextureID) DRenderPost;
 	DRenderPre int Texture_GetPicmipFromGroup(int _iPicmip) DRenderPost;
+	DRenderPre void Texture_Flush(int _TextureID) DRenderPost;
 
 	DRenderPre int Texture_GetBackBufferTextureID() DRenderPost;
 	DRenderPre int Texture_GetZBufferTextureID() DRenderPost;
@@ -154,11 +165,12 @@ public:
 	DRenderPre void Attrib_SourceBlend(int _Blend) DRenderPost;
 	DRenderPre void Attrib_DestBlend(int _Blend) DRenderPost;
 	DRenderPre void Attrib_FogColor(CPixel32 _FogColor) DRenderPost;
-	DRenderPre void Attrib_FogStart(fp4 _FogStart) DRenderPost;
-	DRenderPre void Attrib_FogEnd(fp4 _FogEnd) DRenderPost;
-	DRenderPre void Attrib_FogDensity(fp4 _FogDensity) DRenderPost;
-	DRenderPre void Attrib_PolygonOffset(fp4 _Scale, fp4 _Offset) DRenderPost;
-	DRenderPre void Attrib_Scissor(const CRect2Duint16& _Scissor) DRenderPost;
+	DRenderPre void Attrib_FogStart(fp32 _FogStart) DRenderPost;
+	DRenderPre void Attrib_FogEnd(fp32 _FogEnd) DRenderPost;
+	DRenderPre void Attrib_FogDensity(fp32 _FogDensity) DRenderPost;
+	DRenderPre void Attrib_PolygonOffset(fp32 _Scale, fp32 _Offset) DRenderPost;
+//	DRenderPre void Attrib_Scissor(const CRect2Duint16& _Scissor) DRenderPost;
+	DRenderPre void Attrib_Scissor(const CScissorRect& _Scissor) DRenderPost;
 
 	// Light state
 	DRenderPre void Attrib_Lights(const CRC_Light* _pLights, int _nLights) DRenderPost;	// _pLights must be valid as long as the light-state is in use.
@@ -169,58 +181,66 @@ public:
 //	DRenderPre void Attrib_TexEnvColor(int _iTxt, CPixel32 _TexEnvColor) DRenderPost;
 
 	DRenderPre void Attrib_TexGen(int _iTxt, int _TexGen, int _Comp) DRenderPost;
-	DRenderPre void Attrib_TexGenAttr(fp4* _pAttr) DRenderPost;
+	DRenderPre void Attrib_TexGenAttr(fp32* _pAttr) DRenderPost;
 
 	// Global attributes
 	DRenderPre void Attrib_GlobalEnable(int _Flags) DRenderPost;
 	DRenderPre void Attrib_GlobalDisable(int _Flags) DRenderPost;
 	DRenderPre void Attrib_GlobalSwitch(int _Flags) DRenderPost;
 	DRenderPre void Attrib_GlobalSetVar(int _Var, int _Value) DRenderPost;
-	DRenderPre void Attrib_GlobalSetVarfv(int _Var, const fp4* _pValues) DRenderPost;
+	DRenderPre void Attrib_GlobalSetVarfv(int _Var, const fp32* _pValues) DRenderPost;
 	DRenderPre int Attrib_GlobalGetVar(int _Var) DRenderPost;
-	DRenderPre int Attrib_GlobalGetVarfv(int _Var, fp4* _pValues) DRenderPost;
+	DRenderPre int Attrib_GlobalGetVarfv(int _Var, fp32* _pValues) DRenderPost;
 
 	// Transform
-	DRenderPre void Matrix_SetMode(int _iMode) DRenderPost;
+	DRenderPre void Matrix_SetMode(int _iMode, uint32 _ModeMask) DRenderPost;
+	M_INLINE void Matrix_SetMode(int _iMode) { Matrix_SetMode(_iMode, 1 << _iMode); }
 	DRenderPre void Matrix_Push() DRenderPost;
 	DRenderPre void Matrix_Pop() DRenderPost;
+
 	DRenderPre void Matrix_SetUnit() DRenderPost;
-	DRenderPre void Matrix_Set(const CMat4Dfp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_Get(CMat4Dfp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_Multiply(const CMat4Dfp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_MultiplyInverse(const CMat4Dfp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_PushMultiply(const CMat4Dfp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_PushMultiplyInverse(const CMat4Dfp4& _Matrix) DRenderPost;
+	DRenderPre void Matrix_SetUnitInternal(uint _iMode, uint _ModeMask) DRenderPost;
+	M_INLINE void Matrix_SetUnit(uint _iMode) { Matrix_SetUnitInternal(_iMode, 1 << _iMode); }
+
+	DRenderPre void Matrix_Set(const CMat4Dfp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_SetInternal(const CMat4Dfp32& _Matrix, uint _iMode, uint _ModeMask) DRenderPost;
+	M_INLINE void Matrix_Set(const CMat4Dfp32& _Matrix, uint _iMode) { Matrix_SetInternal(_Matrix, _iMode, 1 << _iMode); }
+
+	DRenderPre void Matrix_SetModelAndTexture(const CMat4Dfp32* _pModel, const CMat4Dfp32** _ppTextures) DRenderPost;
+
+	DRenderPre void Matrix_Get(CMat4Dfp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_Multiply(const CMat4Dfp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_MultiplyInverse(const CMat4Dfp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_PushMultiply(const CMat4Dfp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_PushMultiplyInverse(const CMat4Dfp32& _Matrix) DRenderPost;
 	DRenderPre void Matrix_SetPalette(const CRC_MatrixPalette* _pMatrixPaletteArgs) DRenderPost;
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-	DRenderPre void Matrix_Set(const CMat43fp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_Multiply(const CMat43fp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_MultiplyInverse(const CMat43fp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_PushMultiply(const CMat43fp4& _Matrix) DRenderPost;
-	DRenderPre void Matrix_PushMultiplyInverse(const CMat43fp4& _Matrix) DRenderPost;
-#endif
+	DRenderPre void Matrix_Set(const CMat43fp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_Multiply(const CMat43fp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_MultiplyInverse(const CMat43fp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_PushMultiply(const CMat43fp32& _Matrix) DRenderPost;
+	DRenderPre void Matrix_PushMultiplyInverse(const CMat43fp32& _Matrix) DRenderPost;
 
 	// Clipping
 	DRenderPre void Clip_Push() DRenderPost;
 	DRenderPre void Clip_Pop() DRenderPost;
 	DRenderPre void Clip_Clear() DRenderPost;
-	DRenderPre void Clip_Set(const CPlane3Dfp4* _pPlanes, int _nPlanes) DRenderPost;
-	DRenderPre void Clip_AddPlane(const CPlane3Dfp4& _Plane, const CMat4Dfp4* _pTransform = NULL, bool _bClipBack = true) DRenderPost;
+	DRenderPre void Clip_Set(const CPlane3Dfp32* _pPlanes, int _nPlanes) DRenderPost;
+	DRenderPre void Clip_AddPlane(const CPlane3Dfp32& _Plane, const CMat4Dfp32* _pTransform = NULL, bool _bClipBack = true) DRenderPost;
 
 	// Index-array rendering.
-	DRenderPre void Geometry_VertexArray(const CVec3Dfp4* _pV, int _nVertices = 0, int _bAllUsed = true) DRenderPost;
-	DRenderPre void Geometry_NormalArray(const CVec3Dfp4* _pN) DRenderPost;
-	DRenderPre void Geometry_TVertexArray(const fp4* _pTV, int _TxtChannel = 0, int _nComp = 2) DRenderPost;
-	DRenderPre void Geometry_TVertexArray(const CVec2Dfp4* _pTV, int _TxtChannel = 0) DRenderPost;
-	DRenderPre void Geometry_TVertexArray(const CVec3Dfp4* _pTV, int _TxtChannel = 0) DRenderPost;
-	DRenderPre void Geometry_TVertexArray(const CVec4Dfp4* _pTV, int _TxtChannel = 0) DRenderPost;
+	DRenderPre void Geometry_VertexArray(const CVec3Dfp32* _pV, int _nVertices = 0, int _bAllUsed = true) DRenderPost;
+	DRenderPre void Geometry_NormalArray(const CVec3Dfp32* _pN) DRenderPost;
+	DRenderPre void Geometry_TVertexArray(const fp32* _pTV, int _TxtChannel = 0, int _nComp = 2) DRenderPost;
+	DRenderPre void Geometry_TVertexArray(const CVec2Dfp32* _pTV, int _TxtChannel = 0) DRenderPost;
+	DRenderPre void Geometry_TVertexArray(const CVec3Dfp32* _pTV, int _TxtChannel = 0) DRenderPost;
+	DRenderPre void Geometry_TVertexArray(const CVec4Dfp32* _pTV, int _TxtChannel = 0) DRenderPost;
 	DRenderPre void Geometry_ColorArray(const CPixel32* _pCol) DRenderPost;
 	DRenderPre void Geometry_SpecularArray(const CPixel32* _pCol) DRenderPost;
-//	DRenderPre void Geometry_FogArray(const fp4* _pFog) DRenderPost;					// No longer supported. /mh
+//	DRenderPre void Geometry_FogArray(const fp32* _pFog) DRenderPost;					// No longer supported. /mh
 	DRenderPre void Geometry_MatrixIndexArray(const uint32* _pMI) DRenderPost;
-	DRenderPre void Geometry_MatrixWeightArray(const fp4* _pMW, int _nComp) DRenderPost;
-	DRenderPre void Geometry_Color(CPixel32 _Col) DRenderPost;
+	DRenderPre void Geometry_MatrixWeightArray(const fp32* _pMW, int _nComp) DRenderPost;
+	DRenderPre void Geometry_Color(uint32 _Col) DRenderPost;
 
 	DRenderPre void Geometry_VertexBuffer(const CRC_VertexBuffer& _VB, int _bAllUsed) DRenderPost;
 	DRenderPre void Geometry_VertexBuffer(int _VBID, int _bAllUsed) DRenderPost;
@@ -242,11 +262,12 @@ public:
  	DRenderPre void Render_IndexedPrimitives(uint16* _pPrimStream, int _StreamLen) DRenderPost;
 
 	DRenderPre void Render_VertexBuffer(int _VBID) DRenderPost;
+	DRenderPre void Render_VertexBuffer_IndexBufferTriangles(uint _VBID, uint _IBID, uint _nPrim, uint _PrimOffset) DRenderPost;
 
 	// Wire
-	DRenderPre void Render_Wire(const CVec3Dfp4& _v0, const CVec3Dfp4& _v1, CPixel32 _Color) DRenderPost;
-	DRenderPre void Render_WireStrip(const CVec3Dfp4* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color) DRenderPost;
-	DRenderPre void Render_WireLoop(const CVec3Dfp4* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color) DRenderPost;
+	DRenderPre void Render_Wire(const CVec3Dfp32& _v0, const CVec3Dfp32& _v1, CPixel32 _Color) DRenderPost;
+	DRenderPre void Render_WireStrip(const CVec3Dfp32* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color) DRenderPost;
+	DRenderPre void Render_WireLoop(const CVec3Dfp32* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color) DRenderPost;
 
 	// Occlusion query
 	DRenderPre void OcclusionQuery_Begin(int _QueryID) DRenderPost;
@@ -254,10 +275,10 @@ public:
 	DRenderPre int OcclusionQuery_GetVisiblePixelCount(int _QueryID) DRenderPost;			// This may be a high latency operation and it is expected that this operation is performed one frame after OcclusionQuery_End has been performed.
 
 	// Occlusion query helper
-	DRenderPre int OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp4 _Depth) DRenderPost;
+	DRenderPre int OcclusionQuery_Rect(int _QueryID, CRct _Rct, fp32 _Depth) DRenderPost;
 
 	// Depth-buffer read
-	DRenderPre bool ReadDepthPixels(int _x, int _y, int _w, int _h, fp4* _pBuffer) DRenderPost;
+	DRenderPre bool ReadDepthPixels(int _x, int _y, int _w, int _h, fp32* _pBuffer) DRenderPost;
 
 //	DRenderPre void Register(CScriptRegisterContext & _RegContext) DRenderPost;
 };

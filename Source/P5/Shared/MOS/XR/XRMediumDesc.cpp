@@ -10,24 +10,24 @@
 // -------------------------------------------------------------------
 void CXR_MediumDesc::Clear()
 {
+	m_FogResolution = 128;
 	m_MediumFlags = XW_MEDIUM_SOLID;
 	m_CSGPriority = 0;
 	m_Density = 1.0f;
 	m_Thickness = 1.0f;
 	m_Color = 0xffffffff;
-	m_Velocity = 0;
-	m_RotationPivot = 0;
-	m_RotationAxis = 0;
-	m_Rotation = 0;
-	m_FogPlane.n = 0;
-	m_FogPlane.d = 0;
+	m_Velocity.SetScalar(0.0f);
+	m_RotationPivot.SetScalar(0.0f);
+	m_RotationAxis.SetScalar(0.0f);
+	m_Rotation = 0.0f;
+	m_FogPlane.n.SetScalar(0.0f);
+	m_FogPlane.d = 0.0f;
 	m_FogDensity = 1.0f;
-	m_FogAttenuation = 0;
+	m_FogAttenuation = 0.0f;
 	m_FogColor = 0xffffffff;
-	m_FogResolution = 128;
-	m_iPhysGroup = 0;
 	m_User1 = 0;
 	m_User2 = 0;
+	m_iPhysGroup = 0;
 }
 
 CXR_MediumDesc::CXR_MediumDesc()
@@ -35,7 +35,7 @@ CXR_MediumDesc::CXR_MediumDesc()
 	Clear();
 }
 
-CXR_MediumDesc::CXR_MediumDesc(int _MediumFlags, fp4 _Density, fp4 _Thickness, CVec3Dfp4 _Velocity)
+CXR_MediumDesc::CXR_MediumDesc(int _MediumFlags, fp32 _Density, fp32 _Thickness, CVec3Dfp32 _Velocity)
 {
 	Clear();
 	m_MediumFlags = _MediumFlags;
@@ -85,7 +85,7 @@ void CXR_MediumDesc::SetAir()
 	m_RotationPivot = 0;
 	m_RotationAxis = 0;
 	m_Rotation = 0;
-	m_FogPlane.CreateND(CVec3Dfp4(1,0,0), 0);
+	m_FogPlane.CreateND(CVec3Dfp32(1,0,0), 0);
 	m_FogDensity = 1.0f;
 	m_FogAttenuation = 0;
 	m_FogColor = 0xffffffff;
@@ -156,14 +156,14 @@ bool CXR_MediumDesc::ParseKey(CStr _Key, CStr _Value)
 	const char* g_MediumFlagsTranslate[] = 
 	{
 		"solid", "physsolid", "playersolid", "glass", 
-		"aisolid", "camerasolid", "liquid", "rain", 
+		"aisolid", "dynamicssolid", "liquid", "camerasolid", 
 		"air", "vis", "dualsided", "fog", "litfog", 
 		"invisible", "clipfog", "navigation", "addfog", 
 		"fognotess", "sky", "navgridflags", "nomerge", 
 		"nostructuremerge", "depthfog", (char*)NULL
 	};
 
-	const fp4 Valuef = _Value.Val_fp8();
+	const fp32 Valuef = _Value.Val_fp64();
 
 	if (!_Key.CompareNoCase("MEDIUM_FLAGS"))
 	{
@@ -193,22 +193,22 @@ bool CXR_MediumDesc::ParseKey(CStr _Key, CStr _Value)
 		m_Rotation = Valuef;
 	else if (!_Key.CompareNoCase("MEDIUM_FOGPLANE"))
 	{
-		CVec3Dfp4 n, p;
+		CVec3Dfp32 n, p;
 //	LogFile("FogPlane: " + _Key + " = " + _Value);
-		n.k[0] = _Value.Getfp8Sep(",");
-		n.k[1] = _Value.Getfp8Sep(",");
-		n.k[2] = _Value.Getfp8Sep(",");
-		p.k[0] = _Value.Getfp8Sep(",");
-		p.k[1] = _Value.Getfp8Sep(",");
-		p.k[2] = _Value.Getfp8Sep(",");
-		m_FogPlane = CPlane3Dfp4(n, p);
+		n.k[0] = _Value.Getfp64Sep(",");
+		n.k[1] = _Value.Getfp64Sep(",");
+		n.k[2] = _Value.Getfp64Sep(",");
+		p.k[0] = _Value.Getfp64Sep(",");
+		p.k[1] = _Value.Getfp64Sep(",");
+		p.k[2] = _Value.Getfp64Sep(",");
+		m_FogPlane = CPlane3Dfp32(n, p);
 //	LogFile("FogPlane: " + m_FogPlane.GetString());
 	}
 	else if (!_Key.CompareNoCase("MEDIUM_FOGDENSITY"))
 		m_FogDensity = Valuef;
 	else if (!_Key.CompareNoCase("MEDIUM_FOGATTENUATION"))
 	{
-		m_FogAttenuation = (Valuef != 0.0f) ? (1.0f / Valuef) : fp4( 0 );
+		m_FogAttenuation = (Valuef != 0.0f) ? (1.0f / Valuef) : fp32( 0 );
 	}
 	else if (!_Key.CompareNoCase("MEDIUM_FOGCOLOR"))
 	{

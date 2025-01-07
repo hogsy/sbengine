@@ -4,25 +4,46 @@
 
 int CStr::CStrData::MRTC_AddRef()
 {
-	MAUTOSTRIP(CStr_CStrData_MRTC_AddRef, 0);
-	M_LOCK(*(MRTC_GOM()->m_pGlobalStrLock));
-	int nRet = f_MRTC_ReferenceCount() + 1;
-	f_MRTC_ReferenceCount(nRet);
-	return nRet;
+	while (1)
+	{
+		M_IMPORTBARRIER;
+		uint32 OldValue = *((uint32 *)this);
+#ifdef CPU_BIGENDIAN
+		int nRet = ((OldValue & DBitRange(0+16, 12+16)) >> 16) + 1;
+		uint32 NewValue = ((nRet) << 16) | (OldValue & (~DBitRangeTyped(0+16, 12+16, uint32)));
+#else
+		int nRet = (OldValue & DBitRange(0, 12)) + 1;
+		uint32 NewValue = ((nRet)) | (OldValue & (~DBitRangeTyped(0, 12, uint32)));
+#endif
+		if (MRTC_SystemInfo::Atomic_IfEqualExchange((volatile int32 *)this, OldValue, NewValue) == OldValue)
+			return nRet;
+	}
 }
 int CStr::CStrData::MRTC_DelRef()
 {
 	MAUTOSTRIP(CStr_CStrData_MRTC_DelRef, 0);
-	M_LOCK(*(MRTC_GOM()->m_pGlobalStrLock));
-	int nRet = f_MRTC_ReferenceCount() - 1;
-	f_MRTC_ReferenceCount(nRet);
-	return nRet;
+//	M_LOCK(*(MRTC_GOM()->m_pGlobalStrLock));
+	while (1)
+	{
+		M_IMPORTBARRIER;
+		uint32 OldValue = *((uint32 *)this);
+#ifdef CPU_BIGENDIAN
+		int nRet = ((OldValue & DBitRange(0+16, 12+16)) >> 16) - 1;
+		uint32 NewValue = ((nRet) << 16) | (OldValue & (~DBitRangeTyped(0+16, 12+16, uint32)));
+#else
+		int nRet = (OldValue & DBitRange(0, 12)) - 1;
+		uint32 NewValue = ((nRet)) | (OldValue & (~DBitRangeTyped(0, 12, uint32)));
+#endif
+		if (MRTC_SystemInfo::Atomic_IfEqualExchange((volatile int32 *)this, OldValue, NewValue) == OldValue)
+			return nRet;
+	}
 }
 
 int CStr::CStrData::MRTC_ReferenceCount() const 
 {
 	MAUTOSTRIP(CStr_CStrData_MRTC_ReferenceCount, 0);
-	M_LOCK(*(MRTC_GOM()->m_pGlobalStrLock));
+//	M_LOCK(*(MRTC_GOM()->m_pGlobalStrLock));
+	M_IMPORTBARRIER;
 	return f_MRTC_ReferenceCount();
 };
 
@@ -709,20 +730,6 @@ CStr::~CStr()
 	m_spD = NULL;
 };
 
-CStr& CStr::operator=(const char* s)
-{
-	MAUTOSTRIP(CStr_operator_assign, *this);
-	Capture(s);
-	return *this;
-};
-
-CStr& CStr::operator=(const wchar* s)
-{
-	MAUTOSTRIP(CStr_operator_assign_2, *this);
-	Capture(s);
-	return *this;
-};
-
 CStr& CStr::operator=(const CStrBase& x)
 {
 	MAUTOSTRIP(CStr_operator_assign_3, *this);
@@ -836,12 +843,6 @@ CStr CStr::Left(int len) const
 	return Tmp;
 }
 
-CStr CStr::CopyFrom(int start) const
-{
-	MAUTOSTRIP(CStr_CopyFrom, CStr());
-	return Copy(start, 100000000);
-}
-
 CStr CStr::Right(int len) const
 {
 	MAUTOSTRIP(CStr_Right, CStr());
@@ -853,35 +854,6 @@ CStr CStr::Right(int len) const
 
 	if (len) Tmp.Capture(StrAny(orglen-len), len, GetFmt());
 	return Tmp;
-}
-
-// Inclusive
-CStr CStr::LeftTo(int pos) const
-{
-	return Left(pos + 1);
-}
-
-// Inclusive
-CStr CStr::RightFrom(int pos) const
-{
-	return Right(Len() - pos);
-}
-
-CStr CStr::SubStr(int pos, int len) const
-{
-	return Copy(pos, len);
-}
-
-// Inclusive
-CStr CStr::DelTo(int pos) const
-{
-	return Del(0, pos + 1);
-}
-
-// Inclusive
-CStr CStr::DelFrom(int pos) const
-{
-	return Del(pos, Len() - pos);
 }
 
 CStr CStr::Del(int start, int len) const
@@ -1198,7 +1170,7 @@ int CStr::Scan(const wchar* _pFormat, ...) const
 }
 */
 // -------------------------------------------------------------------
-CStr CStr::GetFilteredString(fp8 _f, int _iDecimals)
+CStr CStr::GetFilteredString(fp64 _f, int _iDecimals)
 {
 	MAUTOSTRIP(CStr_GetFilteredString, CStr());
 	CStr s;

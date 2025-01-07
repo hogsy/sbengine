@@ -22,32 +22,7 @@
 #include "MCC.h"
 #ifdef M_Profile
 
-class MRTC_CallGraphEntry;
-class MRTC_CallGraph_ThreadLocalData
-{
-public:
-	MRTC_CallGraph_ThreadLocalData();
-	~MRTC_CallGraph_ThreadLocalData();
-
-	DLinkD_Link(MRTC_CallGraph_ThreadLocalData, m_Link);
-	TDA_Pool<MRTC_CallGraphEntry> m_EntryPool;
-	MRTC_CallGraphEntry* m_pRoot;
-	MRTC_CallGraphEntry* m_pCurrent;
-	int32 m_nDisable;
-	int m_Depth;
-	int m_State;
-	CStr m_ThreadName;
-
-	void Push(const char* _pFunction);
-	void AddClocks(int64 _Clocks);
-	void AddWaste(int64 _Clocks);
-	void Pop(int64 _ClocksWasted);
-	void Clear();
-	void Start();
-	void Stop();
-	void Disable();
-	void Enable();
-};
+class MRTC_CallGraph_ThreadLocalData;
 
 class MRTC_CallGraphEntry
 {
@@ -58,12 +33,12 @@ public:
 	public:
 		DIdsPInlineS static aint Compare(const MRTC_CallGraphEntry *_pFirst, const MRTC_CallGraphEntry *_pSecond, void *_pContext)
 		{
-			return CStrBase::stricmp(_pFirst->m_pName, _pSecond->m_pName);
+			return CStrBase::stricmp(_pFirst->m_Name.Str(), _pSecond->m_Name.Str());
 		}
 
 		DIdsPInlineS static aint Compare(const MRTC_CallGraphEntry *_pTest, const char * _pKey, void *_pContext)
 		{
-			return CStrBase::stricmp(_pTest->m_pName, _pKey);
+			return CStrBase::stricmp(_pTest->m_Name.Str(), _pKey);
 		}
 	};
 	DIdsTreeAVLAligned_Link(MRTC_CallGraphEntry, m_AVLLink, const char *, CCompare);
@@ -76,7 +51,7 @@ public:
 	typedef DIdsTreeAVLAligned_Iterator(MRTC_CallGraphEntry, m_AVLLink, const char *, CCompare) CChildIterator;
 
 	aint m_nCalls;
-	const char * m_pName;
+	CStr m_Name;
 	MRTC_CallGraphEntry* m_pParent;
 	MRTC_CallGraph_ThreadLocalData *m_pThreadLocal;
 
@@ -96,9 +71,35 @@ public:
 
 	int64 AccumalateClockWaste_r();
 	void Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks);	// Returns accumulated clockwaste
-	void Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TList_Vector<CStr> &_StrList);
-	void Log2_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TList_Vector<CStr> &_StrList);
+	void Log_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TArray<CStr> &_StrList);
+	void Log2_r(int _Depth, int64 _ParentClocks, int64 _TotalClocks, TArray<CStr> &_StrList);
 	void Write_r(CCFile* _pFile, int _Depth);
+};
+
+class MRTC_CallGraph_ThreadLocalData
+{
+public:
+	MRTC_CallGraph_ThreadLocalData();
+	~MRTC_CallGraph_ThreadLocalData();
+
+	DLinkD_Link(MRTC_CallGraph_ThreadLocalData, m_Link);
+	TCPool<MRTC_CallGraphEntry> m_EntryPool;
+	MRTC_CallGraphEntry* m_pRoot;
+	MRTC_CallGraphEntry* m_pCurrent;
+	int32 m_nDisable;
+	int m_Depth;
+	int m_State;
+	CStr m_ThreadName;
+
+	void Push(const char* _pFunction);
+	void AddClocks(int64 _Clocks);
+	void AddWaste(int64 _Clocks);
+	void Pop(int64 _ClocksWasted);
+	void Clear();
+	void Start();
+	void Stop();
+	void Disable();
+	void Enable();
 };
 
 enum
@@ -133,7 +134,7 @@ public:
 	void LogTimes();
 	void TraceTimes();
 
-	void Start(const fp8 _dTime, bool _bLog = true);
+	void Start(const fp64 _dTime, bool _bLog = true);
 
 	// Start a measure that lasts only till root is Reached
 	void Start();
@@ -141,8 +142,8 @@ public:
 	void Disable();
 	void Enable();
 
-	void GetStrList(TList_Vector<CStr> &_StrList);
-	void GetStrList2(TList_Vector<CStr>& _StrList);
+	void GetStrList(TArray<CStr> &_StrList);
+	void GetStrList2(TArray<CStr>& _StrList);
 
 	void Clear();
 };

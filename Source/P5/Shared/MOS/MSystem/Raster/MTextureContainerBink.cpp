@@ -1198,12 +1198,12 @@ int CTextureContainer_Video_Bink::GetNumFrames(int _iLocal)
 }
 
 
-fp4 CTextureContainer_Video_Bink::GetTime(int _iLocal)
+fp32 CTextureContainer_Video_Bink::GetTime(int _iLocal)
 {
 	ValidateLocalID(_iLocal);
 	HBINK hBink = m_lspVideos[_iLocal]->m_hBink;
 	if (hBink)
-		return hBink->FrameNum / fp4(hBink->FrameRate);
+		return hBink->FrameNum / fp32(hBink->FrameRate);
 	else
 		return 0.0f;
 }
@@ -1250,7 +1250,7 @@ void CTextureContainer_Video_Bink::CloseVideo(int _iLocal)
 #endif
 }
 
-void CTextureContainer_Video_Bink::SetVolume(int _iLocal, fp4 fpVol)
+void CTextureContainer_Video_Bink::SetVolume(int _iLocal, fp32 fpVol)
 {
 	MAUTOSTRIP(CTextureContainer_Video_Bink_SetVolume, MAUTOSTRIP_VOID);
 	ValidateLocalID(_iLocal);

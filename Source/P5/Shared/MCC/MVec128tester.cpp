@@ -38,14 +38,14 @@ M_FORCEINLINE __m128i M128Convi(__m128 a)
 	return r.i;
 }
 
-M_FORCEINLINE vec128 M_Vfp4toi32(vec128 a) { return M128Convf(_mm_cvttps_epi32(a)); }
-M_FORCEINLINE vec128 M_Vi32tofp4(vec128 a) { return _mm_cvtepi32_ps(M128Convi(a)); }
-M_FORCEINLINE vec128 M_VTrunc(vec128 a) { return M_Vi32tofp4(M_Vfp4toi32(a)); }
+M_FORCEINLINE vec128 M_Vfp32toi32(vec128 a) { return M128Convf(_mm_cvttps_epi32(a)); }
+M_FORCEINLINE vec128 M_Vi32tofp32(vec128 a) { return _mm_cvtepi32_ps(M128Convi(a)); }
+M_FORCEINLINE vec128 M_VTrunc(vec128 a) { return M_Vi32tofp32(M_Vfp32toi32(a)); }
 M_FORCEINLINE vec128 M_VNMSub(vec128 a, vec128 b, vec128 c) { return M_VSub(c, M_VMul(a, b)); }
 #else
 
-M_FORCEINLINE vec128 M_Vfp4toi32(vec128 a) { return M_VLd(0,0,0,0); }
-M_FORCEINLINE vec128 M_Vi32tofp4(vec128 a) { return M_VLd(0,0,0,0); }
+M_FORCEINLINE vec128 M_Vfp32toi32(vec128 a) { return M_VLd(0,0,0,0); }
+M_FORCEINLINE vec128 M_Vi32tofp32(vec128 a) { return M_VLd(0,0,0,0); }
 M_FORCEINLINE vec128 M_VTrunc(vec128 a) { return M_VLd(0,0,0,0); }
 M_FORCEINLINE vec128 M_VNMSub(vec128 a, vec128 b, vec128 c) { return M_VLd(0,0,0,0); }
 
@@ -69,7 +69,7 @@ M_FORCEINLINE vec128 M_VAddh(vec128 _a)
 {
 	CVec128Access a(_a);
 	CVec128Access ret;
-	fp4 sum = a.k[0] + a.k[1] + a.k[2] + a.k[3];
+	fp32 sum = a.k[0] + a.k[1] + a.k[2] + a.k[3];
 	ret.k[0] = sum;
 	ret.k[1] = sum;
 	ret.k[2] = sum;
@@ -119,8 +119,8 @@ CFStr u32toNaN(uint32 _Num)
 
 void out(const char * _pDesc,const vec128 & _Vec)
 {
-	//CVec4Dfp4 v4 = M_VGetV4_Slow(_Vec);
-	CVec4Dfp4 v4;
+	//CVec4Dfp32 v4 = M_VGetV4_Slow(_Vec);
+	CVec4Dfp32 v4;
 	uint32 *pK = (uint32*)v4.k;
 	M_VSt(_Vec,v4.k);
 	gFile.Writeln(CStrF("%d (%s): %f %f %f %f",giLine,_pDesc,v4.k[0],v4.k[1],v4.k[2],v4.k[3]));
@@ -147,9 +147,9 @@ void out(const char * _pDesc,const CStr &_String)
 
 void DumpV128tests(const char *_FileName)
 {
-	const fp4 NumZero = 0.0f;
+	const fp32 NumZero = 0.0f;
 	//*
-	const fp4 lValues[10] = 
+	const fp32 lValues[10] = 
 		{ 0.0f / NumZero, 0.0f,
 		  1.0f / NumZero, -1.0f / NumZero,
 		  FLT_MAX, -FLT_MAX,
@@ -161,7 +161,7 @@ void DumpV128tests(const char *_FileName)
 	};
 		//  */
 	/*
-	const fp4 lValues[10] =
+	const fp32 lValues[10] =
 	{
 		1.0f,22.0f,333.0f,4444.0f,55555.0f,
 		6.0f,77.0f,88.0f,99.0f,1000.0f
@@ -174,7 +174,7 @@ void DumpV128tests(const char *_FileName)
 
 	{
 		vec128 tst = M_VLd(lValues[0],lValues[2],lValues[3],lValues[1]);
-		CVec4Dfp4 v; M_VSt(tst,v.k);
+		CVec4Dfp32 v; M_VSt(tst,v.k);
 		glNaNVal[0] = ((uint32*)v.k)[0];
 		glNaNVal[1] = ((uint32*)v.k)[1];
 		glNaNVal[2] = ((uint32*)v.k)[2];
@@ -229,7 +229,7 @@ void DumpV128tests(const char *_FileName)
 		dst = M_VLdScalar_u32(4012331334); out("LdScalar_u32",dst);
 		*/
 
-		CVec4Dfp4 vec4(1.0f,2.0f,3.0f,4.0f);
+		CVec4Dfp32 vec4(1.0f,2.0f,3.0f,4.0f);
 		dst = M_VLd(vec4.k[0],vec4.k[1],vec4.k[2],vec4.k[3]); out("Ld",dst);
 		// dst = M_VLd(vec4.k); out("Ld (vec)",dst);
 	}
@@ -253,8 +253,8 @@ void DumpV128tests(const char *_FileName)
 		dst = M_VSplatW(src); out("SplatW",dst);
 
 		dst = M_VTrunc(src); out("Trunc",dst);
-		dst = M_Vfp4toi32(src); out("fp4toi32",dst);
-		dst = M_Vi32tofp4(src); out("i32tofp4",dst);
+		dst = M_Vfp32toi32(src); out("fp32toi32",dst);
+		dst = M_Vi32tofp32(src); out("i32tofp32",dst);
 
 		dst = M_VNot(src); out("Not",dst);
 

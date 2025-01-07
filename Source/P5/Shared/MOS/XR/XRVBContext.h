@@ -35,9 +35,9 @@
 // ----------------------------------------------------------------
 //  CXR_VBContext
 // ----------------------------------------------------------------
-#define CXR_VBINFO_CLASSMASK		0x0fff
-#define CXR_VBINFO_FLAGSMASK		0xf000
-#define CXR_VBINFO_FLAGSSHIFT		12
+#define CXR_VBINFO_CLASSMASK		0x3fff
+#define CXR_VBINFO_FLAGSMASK		0xc000
+#define CXR_VBINFO_FLAGSSHIFT		14
 
 #define CXR_VBFLAGS_PRECACHE		1
 #define CXR_VBFLAGS_ALLOCATED		2
@@ -69,7 +69,7 @@ class CXR_VBContext : public CReferenceCount
 	int m_IDCapacity;
 	TPtr<CIDHeap> m_spIDHeap;
 
-	TList_Vector<CRenderContext*> m_lpRC;
+	TArray<CRenderContext*> m_lpRC;
 
 	int AllocRCID(int _iRC, int _tnr);
 	void FreeRCID(int _iRC, int _ID);
@@ -117,6 +117,8 @@ public:
 	virtual CRenderContext* GetRenderContext(int _iRC);
 
 	virtual void Precache_Flush();
+
+	virtual void LogUsed(CStr _Filename);
 };
 
 class CPrecacheVBCompare

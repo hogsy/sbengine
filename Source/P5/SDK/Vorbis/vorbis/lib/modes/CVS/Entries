@@ -1,0 +1,23 @@
+/.cvsignore/1.2/Mon Nov 06 00:07:24 2000//Tvorbis1_0_public_release_candidate_2
+/Makefile.am/1.6/Mon Aug 13 11:38:34 2001//Tvorbis1_0_public_release_candidate_2
+/maskadj_A.h/1.2/Mon Aug 13 08:38:30 2001//Tvorbis1_0_public_release_candidate_2
+/maskadj_X.h/1.1/Mon Aug 13 06:15:14 2001//Tvorbis1_0_public_release_candidate_2
+/maskadj_Z.h/1.2/Mon Aug 13 01:37:13 2001//Tvorbis1_0_public_release_candidate_2
+/mode_22c_Z.h/1.1/Wed Oct 17 15:43:18 2001//Tvorbis1_0_public_release_candidate_2
+/mode_32c_Z.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_A.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_B.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_C.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_X.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_Y.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44_Z.h/1.1/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_A.h/1.1/Wed Oct 17 15:43:18 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_B.h/1.1/Mon Aug 13 07:43:15 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_C.h/1.3/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_D.h/1.2/Mon Aug 13 11:30:59 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_E.h/1.1/Mon Aug 13 08:38:30 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_X.h/1.1/Mon Aug 13 06:04:24 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_Y.h/1.1/Mon Aug 13 06:04:24 2001//Tvorbis1_0_public_release_candidate_2
+/mode_44c_Z.h/1.6/Mon Aug 13 07:43:15 2001//Tvorbis1_0_public_release_candidate_2
+/modes.h/1.13/Wed Oct 17 15:43:18 2001//Tvorbis1_0_public_release_candidate_2
+D

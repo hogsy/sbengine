@@ -313,6 +313,8 @@ namespace NScript
 			TMeasureProfile(Timer)
 			spScript = MNew1(CScriptInstance,this);
 
+//			TraceSymbolTree(true);
+
 			{	
 				spCSymbol spNameSpace = m_spRootNameSpace->GetSymbol(_pNameSpace, false);
 

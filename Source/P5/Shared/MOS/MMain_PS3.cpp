@@ -18,7 +18,11 @@
 void InputContextPS3_InitLibs();
 void InputContextPS3_ShutdownLibs();
 
-int PS3_MainThread(const char* _pAppClassName)
+#ifdef MRTC_ENABLE_REMOTEDEBUGGER
+const char* g_pModuleName = NULL;
+#endif
+
+int PS3_MainThread(int _argc, char** _argv, const char* _pAppClassName)
 {
 	InputContextPS3_InitLibs();
 	MRTC_GetObjectManager()->SetDllLoading(false);
@@ -32,6 +36,15 @@ int PS3_MainThread(const char* _pAppClassName)
 //	}
 
 	MRTC_ObjectManager* pObjMgr = MRTC_GetObjectManager();
+
+#ifdef MRTC_ENABLE_REMOTEDEBUGGER
+	{
+		g_pModuleName = _argv[0];
+		MRTC_GetRD()->ModuleFinish();
+		MRTC_GetRD()->Create(15888);
+	}
+
+#endif
 
 	// -------------------------------------------------------------------
 	// Create exception-log
@@ -137,24 +150,9 @@ int PS3_MainThread(const char* _pAppClassName)
 	return 0;
 }
 
-class CPS3_MainThread : public MRTC_Thread_Core
+int PS3_Main(int argc, char**argv, const char* _pAppClassName)
 {
-public:
-	NThread::CEventAutoReset m_Event;
-	virtual int Thread_Main()
-	{
-		PS3_MainThread((const char*)m_Thread_pContext);
-		m_Event.Signal();
-		return 0;
-	}
-};
-
-int PS3_Main(const char* _pAppClassName)
-{
-//	CPS3_MainThread MainThread;
-//	MainThread.Thread_Create(const_cast<char*>(_pAppClassName), 256 * 1024);
-//	MainThread.m_Event.Wait();
-	return PS3_MainThread(_pAppClassName);
+	return PS3_MainThread(argc, argv, _pAppClassName);
 }
 
 #endif

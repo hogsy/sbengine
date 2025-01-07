@@ -15,7 +15,7 @@
 	
 		template class	TLinkSP				000423	Ok			Generalized link-code from CSolid
 		template class	TThinArray			010214	Ok			May not be DLL memory handling safe.
-		template class	TList_Vector		9609??	Ok			Impl. vector, last revision jan 2000
+		template class	TArray		9609??	Ok			Impl. vector, last revision jan 2000
 		template class	TList_BitVector		99????	Incomplete	May not be DLL memory handling safe.
 		template class	TList_Linked		9609??	Ok
 		template class	TQueue				960914	Ok
@@ -192,530 +192,33 @@ public:
 	}
 };
 
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TArrayPtr
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-/*
-	// Range-check modes:				Debug	Release	RTM/RTMD
-	TAP								//	No		No		No
-	TAP_RCD							//	Yes		No		No
-	TAP_RCNRTM						//  Yes		Yes		No
-	TAP_RCA							//	Yes		Yes		Yes
-*/
-
-#ifdef _DEBUG
-	#define TAP TArrayPtr
-	#define TAP_RCA TArrayPtrRC
-	#define TAP_RCD TArrayPtrRC
-	#define TAP_RCNRTM TArrayPtrRC
-#elif defined M_RTM
-	#define TAP TArrayPtr
-	#define TAP_RCA TArrayPtrRC
-	#define TAP_RCD TArrayPtr
-	#define TAP_RCNRTM TArrayPtr
-#else
-	#define TAP TArrayPtr
-	#define TAP_RCA TArrayPtrRC
-	#define TAP_RCD TArrayPtrRC
-	#define TAP_RCNRTM TArrayPtr
-#endif
-
-template<class T>
-class TArrayPtr
-{
-public:
-	T* m_pArray;
-	int m_Len;
-
-	int Len() const
-	{ 
-		return m_Len;
-	};
-
-	TArrayPtr()
-	{
-		m_pArray = NULL;
-		m_Len = 0;
-	}
-
-
-	template<class t_CType>
-	TArrayPtr(TArrayPtr<t_CType>& _Array)
-	{
-		m_pArray = _Array.m_pArray;
-		m_Len = _Array.m_Len;
-	}
-
-	template<class t_CType>
-	TArrayPtr& operator= (TArrayPtr<t_CType>& _Array)
-	{
-		m_pArray = _Array.m_pArray;
-		m_Len = _Array.m_Len;
-		return *this;
-	}
-
-	template<class TArray>
-	M_FORCEINLINE TArrayPtr(TArray& _Array)
-	{
-		m_pArray = _Array.GetBasePtr();
-		m_Len = _Array.Len();
-	}
-
-	template<class TArray>
-	M_FORCEINLINE TArrayPtr& operator= (TArray& _Array)
-	{
-		m_pArray = _Array.GetBasePtr();
-		m_Len = _Array.Len();
-		return *this;
-	}
-
-	M_FORCEINLINE T& operator[](int _iElem)
-	{
-		return m_pArray[_iElem];
-	}
-	M_FORCEINLINE const T& operator[](int _iElem) const
-	{
-		return m_pArray[_iElem];
-	}
-};
-
-template<class T>
-class TArrayPtrRC
-{
-public:
-	T* m_pArray;
-	int m_Len;
-
-	int Len() const
-	{ 
-		return m_Len;
-	};
-
-	TArrayPtrRC()
-	{
-		m_pArray = NULL;
-		m_Len = 0;
-	}
-
-
-	template<class TArray>
-	TArrayPtrRC(TArray& _Array)
-	{
-		m_pArray = _Array.GetBasePtr();
-		m_Len = _Array.Len();
-	}
-
-	template<class TArray>
-	TArrayPtrRC& operator= (TArray& _Array)
-	{
-		m_pArray = _Array.GetBasePtr();
-		m_Len = _Array.Len();
-		return *this;
-	}
-
-	template<class t_CType>
-	TArrayPtrRC(TArrayPtrRC<t_CType>& _Array)
-	{
-		m_pArray = _Array.m_pArray;
-		m_Len = _Array.m_Len;
-	}
-
-	template<class t_CType>
-	TArrayPtrRC& operator= (TArrayPtrRC<t_CType>& _Array)
-	{
-		m_pArray = _Array.m_pArray;
-		m_Len = _Array.m_Len;
-		return *this;
-	}
-
-	T& operator[](int _iElem)
-	{
-		if (uint(_iElem) >= m_Len)
-			Error_static("TArrayPtr::operator[]", CStrF("Index out of range. %d/%d", _iElem, m_Len));
-		return m_pArray[_iElem];
-	}
-	const T& operator[](int _iElem) const
-	{
-		if (uint(_iElem) >= m_Len)
-			Error_static("TArrayPtr::operator[]", CStrF("Index out of range. %d/%d", _iElem, m_Len));
-		return m_pArray[_iElem];
-	}
-};
-
+#include "VPUShared/MDA_VPUShared.h"
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TThinArray
+| CArrayCore
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-/*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
-	TemplateClass:		Extremely lightweight array class.
-						
-	Parameters:			
-		T:				Class
-						
-	Comments:			Consumes 4 bytes when array len is zero.
-						Consumes (16 + sizeof(T) * len) if len > 0.
-                        (8 bytes memory manager overhead included)
-\*____________________________________________________________________*/
-template <class T, int TAlign, int TExtraSpace = 0>
-class TThinArrayDataAligned
-{
-public:
-	enum
-	{
-		ALIGN = (TAlign + 3) & ~3,				// Round to dwords
-		ALIGNDWORDS = ALIGN >> 2,				// Below we assume sizeof(*this) is 4
-	};
+#define TArray_DEFAULTGROW 16
 
-	uint32 m_Len;
+#define TArray_MEMORYLOG		1
+#define TArray_RECURSIONPROT	2
 
-	M_INLINE void Clear()
-	{
-		m_Len = 0;
-	}
-
-	M_INLINE TThinArrayDataAligned()
-	{
-		Clear();
-	}
-
-	M_INLINE T* Data()
-	{
-		return (T*)(this + ALIGNDWORDS);
-	}
-
-	M_INLINE const T* Data() const
-	{
-		return (T*)(this + ALIGNDWORDS);
-	}
-
-	static void Destroy(TThinArrayDataAligned* _pArray)
-	{
-		if (!_pArray)
-			return;
-
-		// Destruct all elements
-		T* pT = _pArray->Data();
-		for(int i = _pArray->m_Len-1; i >= 0; i--)
-			pT[i].~T();
-
-		delete[] (uint8*)_pArray;
-	}
-
-	static TThinArrayDataAligned* Create(int _Len)
-	{
-		if (!_Len)
-			return NULL;
-
-		int Size = sizeof(TThinArrayDataAligned) * ALIGNDWORDS + sizeof(T) * _Len + TExtraSpace;
-		TThinArrayDataAligned* pArray = (TThinArrayDataAligned*) M_ALLOCALIGN(Size, ALIGN);
-//		TThinArrayDataAligned* pArray = (TThinArrayDataAligned*) DNew(uint8) uint8[Size];		// Replace this with an alloc that takes alignment as a parameter
-		if (!pArray) Error_static("TThinArrayDataAligned::Create", "Out of memory.");
-
-		pArray->Clear();
-
-		// Construct all elements
-		M_TRY
-		{
-			T* pT = pArray->Data();
-			for(int i = 0; i < _Len; i++)
-			{
-
-				new (&pT[i]) T;
-
-				pArray->m_Len++;
-			}
-		}
-		M_CATCH(
-		catch(CCException)
-		{
-			Destroy(pArray);
-			throw;
-		}
-		)
-
-		return pArray;
-	}
-};
-
-template <class T, int TExtraSpace = 0>
-class CThinArrayDataAutoAligned : public TThinArrayDataAligned<T, M_ALIGNMENTOF(T)>
-{
-public:
-	static void Destroy(CThinArrayDataAutoAligned* _pArray)
-	{
-		TThinArrayDataAligned<T, M_ALIGNMENTOF(T)>::Destroy((TThinArrayDataAligned<T, M_ALIGNMENTOF(T), TExtraSpace>*) _pArray);
-	}
-
-	static CThinArrayDataAutoAligned* Create(int _Len)
-	{
-		return (CThinArrayDataAutoAligned*) TThinArrayDataAligned<T, M_ALIGNMENTOF(T), TExtraSpace>::Create(_Len);
-	}
-};
-
-// -------------------------------------------------------------------
-template <class T, class TArrayData = CThinArrayDataAutoAligned<T> >
-class TThinArray
-{
-protected:
-
-	/*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
-		Class:				Holds array len and data in a single memory block.
-							
-		Comments:			Dynamic length structure
-	\*____________________________________________________________________*/
-
-
-	// -------------------------------------------------------------------
-	TArrayData* m_pArray;
-
-	void CopyElements(T*,const T*,int);
-
-public:
-	M_INLINE TThinArray();
-	M_INLINE TThinArray(const TThinArray&);
-	M_INLINE ~TThinArray();
-	const TThinArray& operator=(const TThinArray&);
-
-	void Clear();						// Set length to zero. All data is freed.
-	void Destroy() { Clear(); }
-	void SetLen(int _Len);				// Set array length. Overlapping indices are copied to the new data-block.
-
-	void Add(const TThinArray<T, TArrayData> &_Src);
-
-	M_INLINE int Len() const;					// Returns length of array.
-	M_INLINE int ListSize() const;				// Returns sizeof(T) * Length
-	M_INLINE bool ValidPos(int _Pos) const;		// Returns true if _Pos is a valid index.
-
-	M_INLINE T* GetBasePtr();					// Returns pointer to element 0
-	M_INLINE const T* GetBasePtr() const;		// Returns pointer to element 0
-	M_INLINE T& operator[](int);					// Return reference to element x
-	M_INLINE const T& operator[](int) const;		// Return const reference to element x
-
-//	void WriteEntry(class CDataFile& _DFile, const char* _pEntryName, int _Version);
-//	bool ReadEntry(class CDataFile& _DFile, const char* _pEntryName, int _CurrentVersion);
-};
-
-template <class T, int TAlign> 
-class TThinArrayAlign : public TThinArray<T, TThinArrayDataAligned<T, TAlign> >
-{
-};
-
-// -------------------------------------------------------------------
-//  Implementation:
-// -------------------------------------------------------------------
-
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::CopyElements(T* _pDst, const T* _pSrc, int _n)
-{
-	for(int i = 0; i < _n; i++)
-		_pDst[i] = _pSrc[i];
-}
-
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::Add(const TThinArray<T, TArrayData> &_Src)
-{
-	int nStart = Len();
-	int nNeeded = nStart + _Src.Len();
-	if (nNeeded != Len())
-	{
-		SetLen(nNeeded);
-	}
-
-	CopyElements(GetBasePtr() + nStart, _Src.GetBasePtr(), _Src.Len());
-    
-}
-
-template <class T, class TArrayData>
-M_INLINE TThinArray<T, TArrayData>::TThinArray()
-{
-	m_pArray = NULL;
-}
-
-template <class T, class TArrayData>
-M_INLINE TThinArray<T, TArrayData>::TThinArray(const TThinArray& _Array)
-{
-	m_pArray = NULL;
-	*this = _Array;
-}
-
-template <class T, class TArrayData>
-M_INLINE TThinArray<T, TArrayData>::~TThinArray()
-{
-	Clear();
-}
-
-template <class T, class TArrayData>
-const TThinArray<T, TArrayData>& TThinArray<T, TArrayData>::operator=(const TThinArray<T, TArrayData>& _Array)
-{
-	if (Len() != _Array.Len())
-	{
-		Clear();
-		SetLen(_Array.Len());
-	}
-
-	CopyElements(GetBasePtr(), _Array.GetBasePtr(), Len());
-
-	return *this;
-}
-
-// -------------------------------------------------------------------
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::Clear()
-{
-	if (m_pArray)
-		TArrayData::Destroy(m_pArray);
-	m_pArray = NULL;
-}
-
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::SetLen(int _Len)
-{
-	if (Len() == _Len) return;
-
-	if (!_Len)
-	{
-		Clear();
-		return;
-	}
-
-	TArrayData* pNew = TArrayData::Create(_Len);
-	if (!pNew) Error_static("SetLen", "Out of memory.");
-
-	M_TRY
-	{
-		int nCopy = Min(Len(), _Len);
-		if (nCopy) CopyElements(pNew->Data(), m_pArray->Data(), nCopy);
-
-		Clear();
-	}
-	M_CATCH(
-	catch(CCException)
-	{
-		TArrayData::Destroy(pNew);
-		throw;
-	}
-	)
-	m_pArray = pNew;
-}
-
-// -------------------------------------------------------------------
-template <class T, class TArrayData>
-M_INLINE int TThinArray<T, TArrayData>::Len() const
-{
-	return (m_pArray) ? m_pArray->m_Len : 0;
-}
-
-template <class T, class TArrayData>
-M_INLINE int TThinArray<T, TArrayData>::ListSize() const
-{
-	return (m_pArray) ? m_pArray->m_Len * sizeof(T) : 0;
-}
-
-template <class T, class TArrayData>
-M_INLINE bool TThinArray<T, TArrayData>::ValidPos(int _Pos) const
-{
-	return (_Pos < Len()) && (_Pos >= 0);
-}
-
-// -------------------------------------------------------------------
-template <class T, class TArrayData>
-M_INLINE T* TThinArray<T, TArrayData>::GetBasePtr()
-{
-	return (m_pArray) ? m_pArray->Data() : NULL;
-}
-
-template <class T, class TArrayData>
-M_INLINE const T* TThinArray<T, TArrayData>::GetBasePtr() const
-{
-	return (m_pArray) ? m_pArray->Data() : NULL;
-}
-
-template <class T, class TArrayData>
-M_INLINE T& TThinArray<T, TArrayData>::operator[](int _Pos)
-{
-#ifdef M_BOUNDCHECK
-	if (!ValidPos(_Pos))
-		Error_static("TThinArray::operator[]", CStrF("Index out of range. %d/%d", _Pos, Len()));
-#endif
-
-	return m_pArray->Data()[_Pos];
-}
-
-template <class T, class TArrayData>
-M_INLINE const T& TThinArray<T, TArrayData>::operator[](int _Pos) const
-{
-#ifdef M_BOUNDCHECK
-	if (!ValidPos(_Pos))
-		Error_static("TThinArray::operator[] const", CStrF("Index out of range. %d/%d", _Pos, Len()));
-#endif
-
-	return m_pArray->Data()[_Pos];
-}
-
-/*
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::Write(CCFile& _File)
-{
-	T* pArray = GetBasePtr();
-	int Len = Length();
-
-	for(int i = 0; i < Len; i++)
-		
-}
-
-template <class T, class TArrayData>
-void TThinArray<T, TArrayData>::WriteEntry(CDataFile& _DFile, const char* _pEntryName, int _Version)
-{
-	_DFile.WriteArrayEntry(_pEntryName, GetBasePtr(), Length(), _Version);
-}
-
-template <class T, class TArrayData>
-bool TThinArray<T, TArrayData>::ReadEntry(CDataFile& _DFile, const char* _pEntryName, int _CurrentVersion)
-{
-	bool bRes = true;
-	_pDFile->PushPosition();
-
-	if (_pDFile->GetNext("SOLID_PLANES"))
-	{
-		int Len = _DFile.GetUserData();
-		SetLen(Len);
-		_DFile.ReadArray(GetBasePtr(), _CurrentVersion);
-	}
-	else
-		bRes = false;
-
-	_pDFile->PopPosition();
-	return bRes;
-}
-*/
-
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| CListVectorCore
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-
-#define TLIST_VECTOR_DEFAULTGROW 16
-
-#define TLIST_VECTOR_MEMORYLOG		1
-#define TLIST_VECTOR_RECURSIONPROT	2
-
-class MCCDLLEXPORT CListVectorData
+class MCCDLLEXPORT CArrayData
 {
 public:
 	int m_Len;
 	int m_AllocLen;
 	int m_nGrow;
+#ifndef M_RTM
+	int m_nAllocCount;	// Number of times this array has been allocated
+#endif
 	int m_ElemSize;
 	int32 m_nRef;
 	void* m_pList;
 
-	CListVectorData();
+	CArrayData();
 	dllvirtual void Delete() { if (this) delete this; };
 
 	virtual void* AllocObjects(int _nObjects) pure;
@@ -725,16 +228,16 @@ public:
 	virtual const char* ClassName() const pure;
 };
 
-class CListVectorCoreDummy
+class CArrayCoreDummy
 {
 public:
 };
 
 template <typename TParent>
-class MCCDLLEXPORT CListVectorCore : public TParent
+class MCCDLLEXPORT CArrayCore : public TParent
 {
 protected:
-	CListVectorData* m_pData;
+	CArrayData* m_pData;
 
 	void* GetElement(void* m_pList, int _iElem);
 	void CopyElements(const void* _pSrc, void* _pDest, int _nElems) const;
@@ -746,8 +249,8 @@ protected:
 #endif
 
 public:
-	CListVectorCore();
-	~CListVectorCore();
+	CArrayCore();
+	~CArrayCore();
 
 	static int m_GlobalFlags;
 
@@ -792,12 +295,12 @@ public:
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TList_Vector (TArray)
+| TArray (TArray)
 | Denna är "referens-säker". Alltså, en lista med CStr'ar eller TPtr<> fungerar.
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 /*
-class TList_Vector_CNonAligned
+class TArray_CNonAligned
 {
 public:
 	template <class t_CData>
@@ -814,7 +317,7 @@ public:
 };
 
 template <int t_Align = 4>
-class TList_Vector_CAligned
+class TArray_CAligned
 {
 public:
 	template <class t_CData>
@@ -847,15 +350,20 @@ public:
 };
 */
 template <int TExtraSpace = 0>
-class TList_Vector_AutoAlign
+class TArray_AutoAlign
 {
 public:
 	template <class T>
 	static void *AllocObjects(int _nObjects, T* _Type)
 	{
 		int Size = _nObjects * sizeof(T) + TExtraSpace;
-//		void *pOrg = M_ALLOC(Size);
 		void *pOrg = M_ALLOCALIGN(Size, M_ALIGNMENTOF(T));
+		if (!pOrg)
+		{
+			M_TRACE("(TArray_AutoAlign::AllocObjects) Failed allocation of %d objects, %d bytes.\n", _nObjects, Size);
+			return NULL;
+		}
+
 		T *pAligned = (T *)pOrg;
 		for (int i = 0; i < _nObjects; ++i)
 		{
@@ -879,15 +387,51 @@ public:
 	}
 };
 
-template <class T, class TAlignClass = TList_Vector_AutoAlign<>, class TCoreParent = CObj>
-class TList_Vector : public CListVectorCore<TCoreParent>
+template <class T,int TAlign,int TExtraSpace = 0>
+class TArray_DataAlign
+{
+public:
+	static void *AllocObjects(int _nObjects, T* _Type)
+	{
+		int Size = _nObjects * sizeof(T) + TExtraSpace;
+		void *pOrg = M_ALLOCALIGN(Size, TAlign);
+		if (!pOrg)
+		{
+			M_TRACE("(TArray_AutoAlign::AllocObjects) Failed allocation of %d objects, %d bytes.\n", _nObjects, Size);
+			return NULL;
+		}
+
+		T *pAligned = (T *)pOrg;
+		for (int i = 0; i < _nObjects; ++i)
+		{
+
+			new((pAligned+i)) T;
+
+		}
+
+		return pAligned;
+	}
+
+	static void FreeScalar(void* _pObj, int _nElem, T* _Type)
+	{
+		for (int i = 0; i < _nElem; ++i)
+		{
+			(((T *)_pObj)+i)->~T();
+		}
+
+		MRTC_MemFree(_pObj);
+	}
+};
+
+template <class T, class TAlignClass = TArray_AutoAlign<>, class TCoreParent = CObj>
+class TArray : public CArrayCore<TCoreParent>
 {
 	// -------------------------------------------------------------------
-	class CListData : public CListVectorData
+	class CListData : public CArrayData
 	{
 		void* AllocObjects(int _nObjects)
 		{
-			CListVectorData::AllocObjects(_nObjects);
+			CArrayData::AllocObjects(_nObjects);
 			return TAlignClass::AllocObjects(_nObjects, (T*)NULL);
 		}
 
@@ -904,7 +448,7 @@ class TList_Vector : public CListVectorCore<TCoreParent>
 		{
 			if (_pObj)
 			{
-				CListVectorData::FreeScalar(_pObj, _nElem);
+				CArrayData::FreeScalar(_pObj, _nElem);
 				TAlignClass::FreeScalar(_pObj, _nElem, (T*)NULL);
 			}
 		}
@@ -926,18 +470,19 @@ class TList_Vector : public CListVectorCore<TCoreParent>
 
 	// -------------------------------------------------------------------
 public:
-	typedef CListVectorCore<TCoreParent> CSuper;
+	typedef T TElement;
+	typedef CArrayCore<TCoreParent> CSuper;
 
-	TList_Vector();
-	~TList_Vector();
+	TArray();
+	~TArray();
 
 	//dllvirtual 
 		void Init();
 	//dllvirtual 
 		void Destroy();
 
-	TList_Vector(const TList_Vector& _List);	// Does not duplicate!, makes a reference.
-	void operator= (const TList_Vector& _List);
+	TArray(const TArray& _List);	// Does not duplicate!, makes a reference.
+	void operator= (const TArray& _List);
 
 	// Additional class specific
 	int Add(const T& _Elem);
@@ -949,26 +494,23 @@ public:
 
 	M_INLINE T* GetBasePtr();
 	M_INLINE const T* GetBasePtr() const;
-	void Duplicate(TList_Vector* _pDestList) const;
-	void Add(const TList_Vector* _pList);
-	void Add(const TList_Vector &_pList)
+	void Duplicate(TArray* _pDestList) const;
+	void Add(const TArray* _pList);
+	void Add(const TArray &_pList)
 	{
 		Add(&_pList);
 	}
-	void Insert(int _Pos, const TList_Vector* _pList);
+	void Insert(int _Pos, const TArray* _pList);
 
 	void SetLen(int _Len);
 	void GrowLen(int _Len);					// Set length of array but realloc using grow size if needed
 	void SetGrow(int _nGrow);
 	int GetGrow();
 	void QuickSetLen(int _Len);				// No adjustment of allocated-size if possible.
+	void SetMinLen(uint _Len);				// Utility function that makes sure list is at least '_Len' elements long
 
 
-	// Utility function that makes sure list is at least '_Len' elements long
-	void SetMinLen(uint _Len)				
-	{
-		QuickSetLen( Max(_Len, (uint)CListVectorCore<TCoreParent>::Len()) );
-	}
+	void ListSwap(TArray& _Src) { Swap(CSuper::m_pData, _Src.CSuper::m_pData); };
 
 	static void Private_QSortSwap(TAP_RCNRTM<T> &_List, int _i0, int _i1)
 	{
@@ -1037,9 +579,9 @@ public:
 	{
 		TAP_RCNRTM<T> Tap(*this);
 		if (_nMax < 0)
-			Private_QSortHash_r<t_CSort, const void * > (Tap, 0, CSuper::Len()-1, (const void *)NULL);
+			Private_QSortHash_r<t_CSort, const void> (Tap, 0, CSuper::Len()-1, (const void *)NULL);
 		else
-			Private_QSortHash_r<t_CSort, const void * > (Tap, 0, MinMT(_nMax, CSuper::Len())-1, (const void *)NULL);
+			Private_QSortHash_r<t_CSort, const void> (Tap, 0, MinMT(_nMax, CSuper::Len())-1, (const void *)NULL);
 	}
 
 	template <typename t_CSort, typename t_CContext, typename t_CFind>
@@ -1075,208 +617,224 @@ public:
 	}
 };
 
-#define TArray TList_Vector
+template <class T, int TAlign, int TExtraSpace = 0> 
+class TArrayAlign : public TArray<T, TArray_DataAlign<T, TAlign, TExtraSpace> >
+{
+};
+
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TList_Vector (TArray), Implementation
+| TArray (TArray), Implementation
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
 /*
 template <class T>
-void* TList_Vector<T>::Alloc(int _nObjects)
+void* TArray<T>::Alloc(int _nObjects)
 {
 	return DNew(T) T[_nObjects];
 }
 
 template <class T>
-void TList_Vector<T>::Free(void* _pObj)
+void TArray<T>::Free(void* _pObj)
 {
 	delete ((T*)_pObj);
 }
 
 template <class T>
-void TList_Vector<T>::FreeScalar(void* _pObj)
+void TArray<T>::FreeScalar(void* _pObj)
 {
 	delete[] ((T*)_pObj);
 }
 
 template <class T>
-void TList_Vector<T>::Copy(const void* _pSrc, void* _pDest) const
+void TArray<T>::Copy(const void* _pSrc, void* _pDest) const
 {
 	*((T*)_pDest) = *((T*)_pSrc);
 }
 */
 // -------------------------------------------------------------------
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Init()
+void TArray<T, TAlignClass, TCoreParent>::Init()
 {
 	Destroy();
 
-	CListVectorCore<TCoreParent>::m_pData = DNew(CListData) CListData;
-	if (!CListVectorCore<TCoreParent>::m_pData) MemError_static("Init");
-	CListVectorCore<TCoreParent>::m_pData->m_nRef = 1;
-	CListVectorCore<TCoreParent>::m_pData->m_ElemSize = sizeof(T);
+	CArrayCore<TCoreParent>::m_pData = DNew(CListData) CListData;
+	if (!CArrayCore<TCoreParent>::m_pData) MemError_static("Init");
+	CArrayCore<TCoreParent>::m_pData->m_nRef = 1;
+	CArrayCore<TCoreParent>::m_pData->m_ElemSize = sizeof(T);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Destroy()
+void TArray<T, TAlignClass, TCoreParent>::Destroy()
 {
-	if (CListVectorCore<TCoreParent>::m_pData && CListVectorCore<TCoreParent>::m_pData->m_nRef)
+	if (CArrayCore<TCoreParent>::m_pData && CArrayCore<TCoreParent>::m_pData->m_nRef)
 	{
 //		m_pData->m_nRef--;
 //		if (!m_pData->m_nRef)
-		if (!(MRTC_SystemInfo::Atomic_Decrease(&CListVectorCore<TCoreParent>::m_pData->m_nRef) - 1))
+		if (!(MRTC_SystemInfo::Atomic_Decrease(&CArrayCore<TCoreParent>::m_pData->m_nRef) - 1))
 		{
-			if (CListVectorCore<TCoreParent>::m_pData->m_pList) CListVectorCore<TCoreParent>::m_pData->FreeScalar(CListVectorCore<TCoreParent>::m_pData->m_pList, CListVectorCore<TCoreParent>::m_pData->m_AllocLen);
-			CListVectorCore<TCoreParent>::m_pData->m_pList = NULL;
-			CListVectorCore<TCoreParent>::m_pData->Delete();
+			if (CArrayCore<TCoreParent>::m_pData->m_pList) CArrayCore<TCoreParent>::m_pData->FreeScalar(CArrayCore<TCoreParent>::m_pData->m_pList, CArrayCore<TCoreParent>::m_pData->m_AllocLen);
+			CArrayCore<TCoreParent>::m_pData->m_pList = NULL;
+			CArrayCore<TCoreParent>::m_pData->Delete();
 		}
-		CListVectorCore<TCoreParent>::m_pData = NULL;
+		CArrayCore<TCoreParent>::m_pData = NULL;
 	}
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-TList_Vector<T, TAlignClass, TCoreParent>::TList_Vector()
+TArray<T, TAlignClass, TCoreParent>::TArray()
 {
-	CListVectorCore<TCoreParent>::m_pData = NULL;
+	CArrayCore<TCoreParent>::m_pData = NULL;
 //	Init();
 //	m_pData->m_ElemSize = sizeof(T);
 };
 
 template <class T, class TAlignClass, class TCoreParent>
-TList_Vector<T, TAlignClass, TCoreParent>::~TList_Vector()
+TArray<T, TAlignClass, TCoreParent>::~TArray()
 {
 	Destroy();
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-TList_Vector<T, TAlignClass, TCoreParent>::TList_Vector(const TList_Vector<T, TAlignClass, TCoreParent>& _List)
+TArray<T, TAlignClass, TCoreParent>::TArray(const TArray<T, TAlignClass, TCoreParent>& _List)
 {
 	operator=(_List);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::operator= (const TList_Vector<T, TAlignClass, TCoreParent>& _List)
+void TArray<T, TAlignClass, TCoreParent>::operator= (const TArray<T, TAlignClass, TCoreParent>& _List)
 {
-	if (!_List.m_pData) const_cast<TList_Vector<T, TAlignClass, TCoreParent>&>(_List).Init();
+	if (!_List.m_pData) const_cast<TArray<T, TAlignClass, TCoreParent>&>(_List).Init();
 	MRTC_SystemInfo::Atomic_Increase(&_List.m_pData->m_nRef);
 //	_List.m_pData->m_nRef++;
 	Destroy();
-	CListVectorCore<TCoreParent>::m_pData = _List.m_pData;
+	CArrayCore<TCoreParent>::m_pData = _List.m_pData;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-int TList_Vector<T, TAlignClass, TCoreParent>::Add(const T& _Elem)
+int TArray<T, TAlignClass, TCoreParent>::Add(const T& _Elem)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	InsertxElements(CListVectorCore<TCoreParent>::m_pData->m_Len, &_Elem, 1, true);
-	return CListVectorCore<TCoreParent>::m_pData->m_Len-1;
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	InsertxElements(CArrayCore<TCoreParent>::m_pData->m_Len, &_Elem, 1, true);
+	return CArrayCore<TCoreParent>::m_pData->m_Len-1;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Insertx(int _Pos, const T* _pElem, int _nElem)
+void TArray<T, TAlignClass, TCoreParent>::Insertx(int _Pos, const T* _pElem, int _nElem)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
 	InsertxElements(_Pos, _pElem, _nElem, false);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Insert(int _Pos, const T& _Elem)
+void TArray<T, TAlignClass, TCoreParent>::Insert(int _Pos, const T& _Elem)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
 	InsertxElements(_Pos, &_Elem, 1, true);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-M_INLINE T& TList_Vector<T, TAlignClass, TCoreParent>::operator[] (int _Pos)
+M_INLINE T& TArray<T, TAlignClass, TCoreParent>::operator[] (int _Pos)
 {
 #ifdef M_BOUNDCHECK
-	if (!CListVectorCore<TCoreParent>::m_pData || (_Pos < 0) || (_Pos >= CListVectorCore<TCoreParent>::m_pData->m_Len)) CListVectorCore<TCoreParent>::RangeCheckError(_Pos);
+	if (!CArrayCore<TCoreParent>::m_pData || (_Pos < 0) || (_Pos >= CArrayCore<TCoreParent>::m_pData->m_Len)) CArrayCore<TCoreParent>::RangeCheckError(_Pos);
 #endif
-	return ((T*)CListVectorCore<TCoreParent>::m_pData->m_pList)[_Pos]; 
+	return ((T*)CArrayCore<TCoreParent>::m_pData->m_pList)[_Pos]; 
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-M_INLINE const T& TList_Vector<T, TAlignClass, TCoreParent>::operator[] (int _Pos) const
+M_INLINE const T& TArray<T, TAlignClass, TCoreParent>::operator[] (int _Pos) const
 {
 #ifdef M_BOUNDCHECK
-	if (!CListVectorCore<TCoreParent>::m_pData || (_Pos < 0) || (_Pos >= CListVectorCore<TCoreParent>::m_pData->m_Len)) CListVectorCore<TCoreParent>::RangeCheckError(_Pos);
+	if (!CArrayCore<TCoreParent>::m_pData || (_Pos < 0) || (_Pos >= CArrayCore<TCoreParent>::m_pData->m_Len)) CArrayCore<TCoreParent>::RangeCheckError(_Pos);
 #endif
-	return ((T*)CListVectorCore<TCoreParent>::m_pData->m_pList)[_Pos]; 
+	return ((T*)CArrayCore<TCoreParent>::m_pData->m_pList)[_Pos]; 
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-M_INLINE T* TList_Vector<T, TAlignClass, TCoreParent>::GetBasePtr()
+M_INLINE T* TArray<T, TAlignClass, TCoreParent>::GetBasePtr()
 {
-	return (CListVectorCore<TCoreParent>::m_pData) ? (T*) CListVectorCore<TCoreParent>::m_pData->m_pList : NULL;
+	return (CArrayCore<TCoreParent>::m_pData) ? (T*) CArrayCore<TCoreParent>::m_pData->m_pList : NULL;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-M_INLINE const T* TList_Vector<T, TAlignClass, TCoreParent>::GetBasePtr() const
+M_INLINE const T* TArray<T, TAlignClass, TCoreParent>::GetBasePtr() const
 {
-	return (CListVectorCore<TCoreParent>::m_pData) ? (T*) CListVectorCore<TCoreParent>::m_pData->m_pList : NULL;
+	return (CArrayCore<TCoreParent>::m_pData) ? (T*) CArrayCore<TCoreParent>::m_pData->m_pList : NULL;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Duplicate(TList_Vector* _pDestList) const
+void TArray<T, TAlignClass, TCoreParent>::Duplicate(TArray* _pDestList) const
 {
-	_pDestList->SetLen(CListVectorCore<TCoreParent>::Len());
-	if (CListVectorCore<TCoreParent>::m_pData && CListVectorCore<TCoreParent>::Len()) CopyElements(CListVectorCore<TCoreParent>::m_pData->m_pList, _pDestList->m_pData->m_pList, CListVectorCore<TCoreParent>::m_pData->m_Len);
+	_pDestList->SetLen(CArrayCore<TCoreParent>::Len());
+	if (CArrayCore<TCoreParent>::m_pData && CArrayCore<TCoreParent>::Len()) CopyElements(CArrayCore<TCoreParent>::m_pData->m_pList, _pDestList->m_pData->m_pList, CArrayCore<TCoreParent>::m_pData->m_Len);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Add(const TList_Vector* _pList)
+void TArray<T, TAlignClass, TCoreParent>::Add(const TArray* _pList)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	Insertx(CListVectorCore<TCoreParent>::Len(), _pList->GetBasePtr(), _pList->Len());
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	Insertx(CArrayCore<TCoreParent>::Len(), _pList->GetBasePtr(), _pList->Len());
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::Insert(int _Pos, const TList_Vector* _pList)
+void TArray<T, TAlignClass, TCoreParent>::Insert(int _Pos, const TArray* _pList)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
 	Insertx(_Pos, _pList->GetBasePtr(), _pList->Len());
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::SetLen(int _Len)
+void TArray<T, TAlignClass, TCoreParent>::SetLen(int _Len)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData && !_Len) return;
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	CListVectorCore<TCoreParent>::Core_SetLen(_Len);
+	if (!CArrayCore<TCoreParent>::m_pData && !_Len) return;
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	CArrayCore<TCoreParent>::Core_SetLen(_Len);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::GrowLen(int _Len)
+void TArray<T, TAlignClass, TCoreParent>::GrowLen(int _Len)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData && !_Len) return;
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	CListVectorCore<TCoreParent>::Core_GrowLen(_Len);
+	if (!CArrayCore<TCoreParent>::m_pData && !_Len) return;
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	CArrayCore<TCoreParent>::Core_GrowLen(_Len);
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::SetGrow(int _nGrow)
+void TArray<T, TAlignClass, TCoreParent>::SetGrow(int _nGrow)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	CListVectorCore<TCoreParent>::m_pData->m_nGrow = _nGrow;
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	CArrayCore<TCoreParent>::m_pData->m_nGrow = _nGrow;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-int TList_Vector<T, TAlignClass, TCoreParent>::GetGrow()
+int TArray<T, TAlignClass, TCoreParent>::GetGrow()
 {
-	if (!CListVectorCore<TCoreParent>::m_pData) return TLIST_VECTOR_DEFAULTGROW;
-	return CListVectorCore<TCoreParent>::m_pData->m_nGrow;
+	if (!CArrayCore<TCoreParent>::m_pData) return TArray_DEFAULTGROW;
+	return CArrayCore<TCoreParent>::m_pData->m_nGrow;
 }
 
 template <class T, class TAlignClass, class TCoreParent>
-void TList_Vector<T, TAlignClass, TCoreParent>::QuickSetLen(int _Len)
+void TArray<T, TAlignClass, TCoreParent>::QuickSetLen(int _Len)
 {
-	if (!CListVectorCore<TCoreParent>::m_pData && !_Len) return;
-	if (!CListVectorCore<TCoreParent>::m_pData) Init();
-	CListVectorCore<TCoreParent>::Core_QuickSetLen(_Len);
+	if (!CArrayCore<TCoreParent>::m_pData && !_Len) return;
+	if (!CArrayCore<TCoreParent>::m_pData) Init();
+	CArrayCore<TCoreParent>::Core_QuickSetLen(_Len);
 }
+
+template <class T, class TAlignClass, class TCoreParent>
+void TArray<T, TAlignClass, TCoreParent>::SetMinLen(uint _Len)
+{
+	uint CurrLen = CArrayCore<TCoreParent>::Len();
+	if (_Len > CurrLen)
+	{
+		if (!CArrayCore<TCoreParent>::m_pData) Init();
+		CArrayCore<TCoreParent>::InsertxBlank(CurrLen, _Len - CurrLen, true);
+	}
+}
+
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -1284,12 +842,12 @@ void TList_Vector<T, TAlignClass, TCoreParent>::QuickSetLen(int _Len)
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-//typedef TList_Vector<CVec3Dfp4> lCVec3Dfp4;
-//typedef TList_Vector<CVec3Dfp8> lCVec3Dfp8;
+//typedef TArray<CVec3Dfp32> lCVec3Dfp32;
+//typedef TArray<CVec3Dfp64> lCVec3Dfp64;
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TList_SortableVector
+| TArray_Sortable
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
@@ -1306,7 +864,7 @@ void TList_Vector<T, TAlignClass, TCoreParent>::QuickSetLen(int _Len)
 \*____________________________________________________________________*/
 
 template<class T, class TIndex = uint16>
-class TList_SortableVector : public TList_Vector<T>
+class TArray_Sortable : public TArray<T>
 {
 	class CTreeNode
 	{
@@ -1316,7 +874,7 @@ class TList_SortableVector : public TList_Vector<T>
 		uint16 m_iNodeGreater;
 	};
 
-	TList_Vector<CTreeNode> m_lNodes;
+	TArray<CTreeNode> m_lNodes;
 
 	static int M_ARGLISTCALL QSortCompare(const void* _pElem1, const void* _pElem2);
 
@@ -1331,50 +889,50 @@ public:
 
 //----------------------------------------------------------------
 template<class T, class TIndex>
-int M_ARGLISTCALL TList_SortableVector<T, TIndex>::QSortCompare(const void* _pElem1, const void* _pElem2)
+int M_ARGLISTCALL TArray_Sortable<T, TIndex>::QSortCompare(const void* _pElem1, const void* _pElem2)
 {
 	const T* pE1 = (T*)_pElem1;
 	return pE1->Compare(*(const T*) _pElem2);
 }
 
 template<class T, class TIndex>
-void TList_SortableVector<T, TIndex>::Sort(bool _bDecreasing)
+void TArray_Sortable<T, TIndex>::Sort(bool _bDecreasing)
 {
-	if (TList_SortableVector<T, TIndex>::Len()) qsort(TList_SortableVector<T, TIndex>::GetBasePtr(), TList_SortableVector<T, TIndex>::Len(), TList_SortableVector<T, TIndex>::ElementSize(), QSortCompare);
+	if (TArray_Sortable<T, TIndex>::Len()) qsort(TArray_Sortable<T, TIndex>::GetBasePtr(), TArray_Sortable<T, TIndex>::Len(), TArray_Sortable<T, TIndex>::ElementSize(), QSortCompare);
 }
 
 template<class T, class TIndex>
-void TList_SortableVector<T, TIndex>::Sort(int _iStart, int _iStop, bool _bDecreasing)
+void TArray_Sortable<T, TIndex>::Sort(int _iStart, int _iStop, bool _bDecreasing)
 {
-	if (TList_SortableVector<T, TIndex>::Len()) qsort(TList_SortableVector<T, TIndex>::GetBasePtr() + _iStart, _iStop - _iStart + 1, TList_SortableVector<T, TIndex>::ElementSize(), QSortCompare);
+	if (TArray_Sortable<T, TIndex>::Len()) qsort(TArray_Sortable<T, TIndex>::GetBasePtr() + _iStart, _iStop - _iStart + 1, TArray_Sortable<T, TIndex>::ElementSize(), QSortCompare);
 }
 
 template<class T, class TIndex>
-int TList_SortableVector<T, TIndex>::Find(const T& _Elem, int _iLastElement)
+int TArray_Sortable<T, TIndex>::Find(const T& _Elem, int _iLastElement)
 {
 	if (m_lNodes.Len())
 	{
 		// Not implemented.
-		Error_static("TList_SortableVector<T, TIndex>::Find", "Not implemented.");
+		Error_static("TArray_Sortable<T, TIndex>::Find", "Not implemented.");
 		return -1;
 	}
 	else
 	{
 		// Brute force.
-		for(int i = _iLastElement+1; i < TList_SortableVector<T, TIndex>::Len(); i++)
+		for(int i = _iLastElement+1; i < TArray_Sortable<T, TIndex>::Len(); i++)
 			if ((*this)[i].Compare(_Elem) == 0) return i;
 		return -1;
 	}
 }
 
 template<class T, class TIndex>
-void TList_SortableVector<T, TIndex>::BuildSearchTree(bool _bAllowScramble)
+void TArray_Sortable<T, TIndex>::BuildSearchTree(bool _bAllowScramble)
 {
 	// Not implemented.
 }
 
 template<class T, class TIndex>
-void TList_SortableVector<T, TIndex>::DestroySearchTree()
+void TArray_Sortable<T, TIndex>::DestroySearchTree()
 {
 	// Not implemented.
 }
@@ -1384,16 +942,16 @@ void TList_SortableVector<T, TIndex>::DestroySearchTree()
 | Some predefined lists.
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-typedef TList_SortableVector<CStr> lCStr;
+typedef TArray_Sortable<CStr> lCStr;
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TList_SimpleSortableVector
+| TArray_SimpleSortable
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
 template<class T>
-class TList_SimpleSortableVector : public TList_Vector<T>
+class TArray_SimpleSortable : public TArray<T>
 {
 	static int M_ARGLISTCALL QSortCompare(const void* _pElem1, const void* _pElem2);
 
@@ -1404,7 +962,7 @@ public:
 
 //----------------------------------------------------------------
 template<class T>
-int M_ARGLISTCALL TList_SimpleSortableVector<T>::QSortCompare(const void* _pElem1, const void* _pElem2)
+int M_ARGLISTCALL TArray_SimpleSortable<T>::QSortCompare(const void* _pElem1, const void* _pElem2)
 {
 	if((*(const T*)_pElem1) > (*(const T*)_pElem2))
 		return 1;
@@ -1415,17 +973,17 @@ int M_ARGLISTCALL TList_SimpleSortableVector<T>::QSortCompare(const void* _pElem
 }
 
 template<class T>
-void TList_SimpleSortableVector<T>::Sort(bool _bDecrease)
+void TArray_SimpleSortable<T>::Sort(bool _bDecrease)
 {
-	if(TList_SimpleSortableVector<T>::Len() > 0)
-		qsort(TList_SimpleSortableVector<T>::GetBasePtr(), TList_SimpleSortableVector<T>::Len(), TList_SimpleSortableVector<T>::ElementSize(), QSortCompare);
+	if(TArray_SimpleSortable<T>::Len() > 0)
+		qsort(TArray_SimpleSortable<T>::GetBasePtr(), TArray_SimpleSortable<T>::Len(), TArray_SimpleSortable<T>::ElementSize(), QSortCompare);
 }
 
 template<class T>
-int TList_SimpleSortableVector<T>::BinarySearch(const T& _Elem)
+int TArray_SimpleSortable<T>::BinarySearch(const T& _Elem)
 {
 	int Low = 0;
-	int High = TList_SimpleSortableVector<T>::Len();
+	int High = TArray_SimpleSortable<T>::Len();
 
 	while(Low < High)
 	{
@@ -1674,7 +1232,7 @@ template<class T>
 class TQueue : public CReferenceCount
 {
 protected:
-	TList_Vector<T> m_lBuffer;
+	TArray<T> m_lBuffer;
 	int m_iHead;
 	int m_iTail;
 
@@ -1779,11 +1337,11 @@ public:
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| CStr_List_Vector
+| CStr_Array
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-class CStr_List_Vector : public TList_Vector<CStr>
+class CStr_Array : public TArray<CStr>
 {
 public:
 	void AddSeparatedString(CStr s, const CStr& separator)
@@ -2134,7 +1692,7 @@ class TTNode_Var {
 	T Element;
 
 	typedef TTNode_Var<T> __TN_V;
-	TList_Vector<__TN_V*> Children;
+	TArray<__TN_V*> Children;
 
 	TTNode_Var* Parent;
 
@@ -2174,7 +1732,7 @@ public:
 		return Index;
 	}
 
-	TList_Vector<__TN_V*>& GetChildren() { return Children; };
+	TArray<__TN_V*>& GetChildren() { return Children; };
 	__TN_V* GetChild(uint16 Index) const { return Children[Index]; };
 	void SetChild(uint16 Index,__TN_V* Child)
 	{
@@ -2584,7 +2142,7 @@ class CCFile;
 
 class MCCDLLEXPORT CIDHeap : public CReferenceCount
 {
-	TList_Vector<int32> m_lIDAlloc;
+	TArray<int32> m_lIDAlloc;
 	int32* m_pIDAlloc;
 	int m_LenMinusOne;
 
@@ -2627,8 +2185,8 @@ typedef TPtr<CKeyContainer> spCKeyContainer;
 
 class MCCDLLEXPORT CKeyContainer : public CReferenceCount
 {
-	TList_Vector<CStr> m_lKeyNames;
-	TList_Vector<CStr> m_lKeyValues;
+	TArray<CStr> m_lKeyNames;
+	TArray<CStr> m_lKeyValues;
 
 public:
 	
@@ -2637,7 +2195,7 @@ public:
 
 	CKeyContainer();
 	~CKeyContainer();
-	void Create(const TList_Vector<CStr>& _lKeyNames, const TList_Vector<CStr>& _lKeyValues);
+	void Create(const TArray<CStr>& _lKeyNames, const TArray<CStr>& _lKeyValues);
 	spCKeyContainer Duplicate() const;
 
 	void operator= (const CKeyContainer& _KC);
@@ -2672,7 +2230,7 @@ typedef TPtr<CKeyContainerNode> spCKeyContainerNode;
 
 class MCCDLLEXPORT CKeyContainerNode : public CReferenceCount
 {
-	TList_Vector<spCKeyContainerNode> m_lspSubKeys;
+	TArray<spCKeyContainerNode> m_lspSubKeys;
 	spCKeyContainer m_spKeys;
 	spCKeyContainer m_spData;
 
@@ -2696,7 +2254,8 @@ public:
 	int AddChild(CKeyContainerNode *_pNode);
 
 	// IO
-	int ReadFromMemory_r(const char* _pStr, int _Size, bool _bEnterScope);
+	int ReadFromMemory(const char* _pStr, int _Size, bool _bEnterScope);
+	int ReadFromMemory_r(const char* _pStr, int _Size, bool _bEnterScope, uint& _Line);
 	void ReadFromScript(CCFile* _pFile, bool _bEnterScope = true);
 	void ReadFromScript(CStr _Filename, bool _bEnterScope = true);
 
@@ -2743,7 +2302,7 @@ class TObjectPool : public CReferenceCount
 	TThinArray<T> m_lObj;
 	TThinArray<uint16> m_liFreeObjs;
 	uint16 m_nFreeObj;
-	MRTC_CriticalSection m_Lock;
+	NThread::CSpinLock m_Lock;
 
 protected:
 	uint32 Alloc()
@@ -2834,12 +2393,6 @@ T* TObjectPoolAllocator<T>::GetObject()
 }
 
 
-
-template<int _Size> class intsize { public: };
-template<> class intsize<8>  { public: typedef uint8  Type; };
-template<> class intsize<16> { public: typedef uint16 Type; };
-template<> class intsize<32> { public: typedef uint32 Type; };
-template<> class intsize<64> { public: typedef uint64 Type; };
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -2942,6 +2495,18 @@ public:
 		return 0;
 	}
 
+	int Add(T& _Elem)
+	{
+		if(m_Len < GetMax())
+		{
+			m_Data[m_Len] = _Elem;
+			return m_Len++;
+		}
+		else
+			Error_static("TStaticArray::Add", "Reached maximum length");
+		return 0;
+	}
+
 	int Add(const T* _pElem, int _nElem)
 	{
 		if(m_Len + _nElem >= GetMax())
@@ -2967,61 +2532,6 @@ public:
 };
 
 
-/*************************************************************************************************\
-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-| TBitArray
-|
-| Static array of bits. Smallest possible Elemsize is automatically chosen..
-|__________________________________________________________________________________________________
-\*************************************************************************************************/
-template<int NumBits>
-class TBitArray
-{
-	enum { 
-		ElemSize = (NumBits < 16 ? 1 : NumBits < 32 ? 2 : NumBits < 64 ? 4 : 8),
-		ElemBits = ElemSize * 8,
-		ElemMask = ElemBits - 1,
-		ElemShift = DNumBits(((NumBits < 16 ? 1 : NumBits < 32 ? 2 : NumBits < 64 ? 4 : 8)) * 8 - 1),
-		BufferLen = (NumBits + ElemMask) / ElemBits,
-	};
-	typedef typename intsize<ElemBits>::Type ElemType;
-
-public:
-	ElemType m_Buffer[BufferLen];
-
-	void Clear()
-	{
-		for (uint i = 0; i < BufferLen; i++)
-			m_Buffer[i] = 0;
-	}
-
-#define DBitArrayCheckIndex(i) M_ASSERT(((i) >> ElemShift) < BufferLen, "TBitArray: Index out of range!");
-
-	uint8 Get(uint _iBit) const
-	{
-		DBitArrayCheckIndex(_iBit);
-		return (m_Buffer[_iBit >> ElemShift] >> (_iBit & ElemMask)) & 1;
-	}
-
-	void Set1(uint _iBit)
-	{
-		DBitArrayCheckIndex(_iBit);
-		m_Buffer[_iBit >> ElemShift] |= (ElemType(1) << (_iBit & ElemMask));
-	}
-
-	void Set0(uint _iBit)
-	{
-		DBitArrayCheckIndex(_iBit);
-		m_Buffer[_iBit >> ElemShift] &= ~(ElemType(1) << (_iBit & ElemMask));
-	}
-
-	void Set(uint _iBit, uint8 _Value)
-	{
-		DBitArrayCheckIndex(_iBit);
-		m_Buffer[_iBit >> ElemShift] = 
-			(m_Buffer[_iBit >> ElemShift] & ~(ElemType(1) << (_iBit & ElemMask))) | (ElemType(_Value) << (_iBit & ElemMask));
-	}
-};
 
 
 // -------------------------------------------------------------------

@@ -29,9 +29,9 @@ class CXR_ViewContext;
 class CXR_FogInterface
 {
 public:
-//	virtual bool Fog_NeedFog(const CBox3Dfp4& _Box, int _iNode = 0) pure;
-	virtual int Fog_InitTraceBound(const CBox3Dfp4& _Box) pure;			// Returns a hAccelerator, 0 => No fog.
-	virtual void Fog_Trace(int _hAccelerator, const CVec3Dfp4& _POV, const CVec3Dfp4* _pV, int _nV, CPixel32* _pFog) pure;
+//	virtual bool Fog_NeedFog(const CBox3Dfp32& _Box, int _iNode = 0) pure;
+	virtual int Fog_InitTraceBound(const CBox3Dfp32& _Box) pure;			// Returns a hAccelerator, 0 => No fog.
+	virtual void Fog_Trace(int _hAccelerator, const CVec3Dfp32& _POV, const CVec3Dfp32* _pV, int _nV, CPixel32* _pFog) pure;
 	virtual void Fog_ReleaseTraceBound(int _hAccelerator) pure;
 };
 
@@ -43,11 +43,11 @@ class CXR_FogState;
 class CXR_FogSphere
 {
 public:
-	CVec3Dfp4 m_Pos;
-	fp4 m_Radius;
-	fp4 m_RSqr;
+	CVec3Dfp32 m_Pos;
+	fp32 m_Radius;
+	fp32 m_RSqr;
 	CPixel32 m_Color;
-	fp4 m_Thickness;
+	fp32 m_Thickness;
 };
 
 // -------------------------------------------------------------------
@@ -87,55 +87,55 @@ public:
 	bool m_bAllowVertexFog;
 	bool m_bAllowNHF;
 
-	TList_Vector<uint8> m_FogBuffer;
+	TArray<uint8> m_FogBuffer;
 	int m_BufferSize;
-	fp4* m_pSqrtBuffer;
-	fp4* m_pAddBuffer;
+	fp32* m_pSqrtBuffer;
+	fp32* m_pAddBuffer;
 
 //	spCXR_FogTextureContainer m_spFogTxt;
 
 	CXR_FogInterface* m_pFogModel;
 	int m_hFogModelAccelerator;
 	int m_FogTableWidth;
-	fp4 m_FogTableWidthInv;
+	fp32 m_FogTableWidthInv;
 	int m_FogTableTextureID;
 	int m_DepthFogTableTextureID;
 	int m_LinearFogTableTextureID;
 	int m_Special000000TextureID;
-	TList_Vector<int> m_lFogTable;
+	TArray<int> m_lFogTable;
 
-	TList_Vector<CXR_FogInterface*> m_lpFogModels;
-//	TList_Vector<int> m_lpFogModels;
+	TArray<CXR_FogInterface*> m_lpFogModels;
+//	TArray<int> m_lpFogModels;
 	int m_nFogModels;
 
-	TList_Vector<CXR_FogSphere> m_lVolumes;
+	TArray<CXR_FogSphere> m_lVolumes;
 	int m_nVolumes;
 
-	CPlane3Dfp4 m_WFrontPlane;
+	CPlane3Dfp32 m_WFrontPlane;
 
 	int m_bClipFront;
 	int m_bTransform;
 	int m_bTranslate;
-	CMat43fp4 m_Transform;
-	CMat43fp4 m_Eye;
-	fp4 m_EyeFrontPlaneDist;
+	CMat4Dfp32 m_Transform;
+	CMat4Dfp32 m_Eye;
+	fp32 m_EyeFrontPlaneDist;
 
 	// Depthfog
 	bool m_DepthFogEnable;
-	fp4 m_DepthFogStart;
-	fp4 m_DepthFogEnd;
-	fp4 m_DepthFogIntervalK;
+	fp32 m_DepthFogStart;
+	fp32 m_DepthFogEnd;
+	fp32 m_DepthFogIntervalK;
 	CPixel32 m_DepthFogColor;
-	fp4 m_DepthFogDensity;
+	fp32 m_DepthFogDensity;
 
 	// Vertexfog
 	bool m_VtxFog_Enable;
 	CPixel32 m_VtxFog_Color;
-	fp4 m_VtxFog_End;
-	fp4 m_VtxFog_HeightAttn;
-	fp4 m_VtxFog_RelHeight;
-	fp4 m_VtxFog_ReferenceHeight;
-	CPlane3Dfp4 m_VtxFog_EndPlane;
+	fp32 m_VtxFog_End;
+	fp32 m_VtxFog_HeightAttn;
+	fp32 m_VtxFog_RelHeight;
+	fp32 m_VtxFog_ReferenceHeight;
+	CPlane3Dfp32 m_VtxFog_EndPlane;
 
 	int m_VtxFog_VertexCount;
 
@@ -148,54 +148,54 @@ public:
 	virtual void OnPrecache();
 	virtual void InitFogBuffer(int _nV);
 
-	virtual bool DepthFogEnable();
-	virtual bool VertexFogEnable();
-	virtual bool NHFEnable();
+	M_FORCEINLINE bool DepthFogEnable() { return m_DepthFogEnable && m_bAllowDepthFog; };
+	M_FORCEINLINE bool VertexFogEnable() { return m_VtxFog_Enable && m_bAllowVertexFog; };
+	M_FORCEINLINE bool NHFEnable() { return m_bAllowNHF; };
 
-	virtual bool NeedFog_Sphere(const CVec3Dfp4& _Pos, fp4 _Raidius);
-	virtual bool NeedFog_Box(const CBox3Dfp4& _Box, int _iNode = -1);
+	virtual bool NeedFog_Sphere(const CVec3Dfp32& _Pos, fp32 _Raidius);
+	virtual bool NeedFog_Box(const CBox3Dfp32& _Box, int _iNode = -1);
 
-	virtual void PrepareFrame(CXR_ViewContext* _pView, const CPlane3Dfp4& _WFrontPlane);
+	virtual void PrepareFrame(CXR_ViewContext* _pView, const CPlane3Dfp32& _WFrontPlane);
 	virtual void ClearVBMDependencies();
 
-	virtual void AddSphere(const CVec3Dfp4& _Pos, fp4 _Radius = 256.0f, CPixel32 _Color = 0x3f7f7f7f, fp4 _Thickness = 0.5f);
-	virtual void AddModel(CXR_FogInterface* _pFogModel, const CVec3Dfp4& _Pos);
-	virtual void SetTransform(const CMat43fp4* _pMat);
-	virtual void SetEye(const CMat43fp4& _Pos);
+	virtual void AddSphere(const CVec3Dfp32& _Pos, fp32 _Radius = 256.0f, CPixel32 _Color = 0x3f7f7f7f, fp32 _Thickness = 0.5f);
+	virtual void AddModel(CXR_FogInterface* _pFogModel, const CVec3Dfp32& _Pos);
+	virtual void SetTransform(const CMat4Dfp32* _pMat);
+	virtual void SetEye(const CMat4Dfp32& _Pos);
 
-	virtual void TraceBound(const CBox3Dfp4& _Box);
+	virtual void TraceBound(const CBox3Dfp32& _Box);
 	virtual void TraceBoundRelease();
-	virtual CPixel32 Trace(const CVec3Dfp4& _v);
+	virtual CPixel32 Trace(const CVec3Dfp32& _v);
 
-	virtual bool TraceBox(const CBox3Dfp4& _BoundBox, CPixel32* _pFog);
-	virtual bool InterpolateBox(const CBox3Dfp4& _BoundBox, const CPixel32* _pBoxFog, int _nV, const CVec3Dfp4* _pV, CPixel32* _pFog, CVec2Dfp4* _pFogUV, const CMat43fp4* _pTransform = NULL);
+	virtual bool TraceBox(const CBox3Dfp32& _BoundBox, CPixel32* _pFog);
+	virtual bool InterpolateBox(const CBox3Dfp32& _BoundBox, const CPixel32* _pBoxFog, int _nV, const CVec3Dfp32* _pV, CPixel32* _pFog, CVec2Dfp32* _pFogUV, const CMat4Dfp32* _pTransform = NULL);
 
-	virtual bool Trace(const CBox3Dfp4& _BoundBox, int _nV, const CVec3Dfp4* _pV, CPixel32* _pFog, CVec2Dfp4* _pFogUV, bool _bFast = false);
+	virtual bool Trace(const CBox3Dfp32& _BoundBox, int _nV, const CVec3Dfp32* _pV, CPixel32* _pFog, CVec2Dfp32* _pFogUV, bool _bFast = false);
 
 	virtual CPixel32 TranslateFogTable(CPixel32 _Fog);
 
-	virtual void DepthFog_Init(fp4 _Start, fp4 _End, CPixel32 _Color, fp4 _Density = 1.0f);
+	virtual void DepthFog_Init(fp32 _Start, fp32 _End, CPixel32 _Color, fp32 _Density = 1.0f);
 
-	virtual void SetDepthFog(CRenderContext* _pRC, int _iPass = 0, int _RasterMode = CRC_RASTERMODE_NONE, fp4 _DepthScale = 1.0f);
-	virtual void SetDepthFogBlack(CRenderContext* _pRC, fp4 _DepthScale = 1.0f);
+	virtual void SetDepthFog(CRenderContext* _pRC, int _iPass = 0, int _RasterMode = CRC_RASTERMODE_NONE, fp32 _DepthScale = 1.0f);
+	virtual void SetDepthFogBlack(CRenderContext* _pRC, fp32 _DepthScale = 1.0f);
 
-	virtual void SetDepthFog(CRC_Attributes* _pAttr, int _iPass = 0, fp4 _DepthScale = 1.0f);
-	virtual void SetDepthFogBlack(CRC_Attributes* _pAttr, fp4 _DepthScale = 1.0f);
-	virtual void SetDepthFogNone(CRC_Attributes* _pAttr, fp4 _DepthScale = 1.0f);
+	virtual void SetDepthFog(CRC_Attributes* _pAttr, int _iPass = 0, fp32 _DepthScale = 1.0f);
+	virtual void SetDepthFogBlack(CRC_Attributes* _pAttr, fp32 _DepthScale = 1.0f);
+	virtual void SetDepthFogNone(CRC_Attributes* _pAttr, fp32 _DepthScale = 1.0f);
 
 	// Vertex-fog
 protected:
 	virtual CRC_Attributes* VertexFog_GetAttrib(CXR_VBManager* _pVBM, bool _Transparent);
 public:
-	virtual void VertexFog_Init(const CMat43fp4& _POV, fp4 _EndDistance, fp4 _HeightAttenuation, CPixel32 _Color, fp4 _ReferenceHeight);
-	virtual bool VertexFog_Eval(int _nV, const CVec3Dfp4* _pV, const CPixel32* _pSrcCol, CPixel32* _pDstCol, int _Oper, bool _Transparent = false);	// N/A
+	virtual void VertexFog_Init(const CMat4Dfp32& _POV, fp32 _EndDistance, fp32 _HeightAttenuation, CPixel32 _Color, fp32 _ReferenceHeight);
+	virtual bool VertexFog_Eval(int _nV, const CVec3Dfp32* _pV, const CPixel32* _pSrcCol, CPixel32* _pDstCol, int _Oper, bool _Transparent = false);	// N/A
 	virtual bool VertexFog_Eval(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, bool _Transparent = false);
-	virtual fp4* VertexFog_EvalCoord(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB);
+	virtual fp32* VertexFog_EvalCoord(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB);
 	virtual void VertexFog_SetFogCoord(CRC_Attributes* _pAttr);
 
-	virtual int ConvertFogColors(int _nV, CPixel32* _pFog, CVec2Dfp4* _pTV);
+	virtual int ConvertFogColors(int _nV, CPixel32* _pFog, CVec2Dfp32* _pTV);
 
-	virtual void RenderPolygon(const CVec3Dfp4* _pV, const uint32* _piV = NULL);
+	virtual void RenderPolygon(const CVec3Dfp32* _pV, const uint32* _piV = NULL);
 };
 
 // -------------------------------------------------------------------
@@ -209,12 +209,12 @@ public:
 	CXR_Model_FogVolume();
 
 	// Bounding volumes in model-space
-	virtual fp4 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
-	virtual void GetBound_Box(CBox3Dfp4& _Box, const CXR_AnimState* _pAnimState = NULL);
+	virtual fp32 GetBound_Sphere(const CXR_AnimState* _pAnimState = NULL);
+	virtual void GetBound_Box(CBox3Dfp32& _Box, const CXR_AnimState* _pAnimState = NULL);
 
 	// Render
 	virtual void OnRender(CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_VBManager* _pVBM, CXR_ViewClipInterface* _pViewClip, spCXR_WorldLightState _spWLS, 
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags);
+		const CXR_AnimState* _pAnimState, const CMat4Dfp32& _WMat, const CMat4Dfp32& _VMat, int _Flags);
 
 	MACRO_OPERATOR_TPTR(CXR_Model_FogVolume);
 };

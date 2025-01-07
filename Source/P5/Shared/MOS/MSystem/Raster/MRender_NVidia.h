@@ -443,9 +443,9 @@ class CNV_TextureShader_Stage
 public:
 	uint16 m_Operation;
 	uint16 m_Previous;
-	fp4* m_pTextureMatrix;
+	fp32* m_pTextureMatrix;
 
-	void Set(int _Op, int _Prev, fp4* _pTextureMatrix = NULL)
+	void Set(int _Op, int _Prev, fp32* _pTextureMatrix = NULL)
 	{
 		m_Operation = _Op;
 		m_Previous = _Prev;
@@ -472,7 +472,7 @@ protected:
 	bool m_bTexShaderEnable;
 
 	char* m_pProgramName;			// Vertex program name, such as "NV20_GenEnv" (no path or extension)
-	CVec4Dfp4* m_pProgramParams;	// Pointer to parameter array
+	CVec4Dfp32* m_pProgramParams;	// Pointer to parameter array
 	int m_iProgramParams;			// Start program parameter index to copy m_pProgramParams to.
 	int m_nProgramParams;			// Number of parameters in m_pProgramParams
 
@@ -509,7 +509,7 @@ public:
 		m_bTexShaderEnable = true;
 	}
 
-	M_INLINE void SetTextureShaderMatrix(int _iStage, fp4* _pMat)
+	M_INLINE void SetTextureShaderMatrix(int _iStage, fp32* _pMat)
 	{
 		m_TexShaderStages[_iStage].m_pTextureMatrix = _pMat;
 	}

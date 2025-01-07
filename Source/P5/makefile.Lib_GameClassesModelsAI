@@ -1,0 +1,1270 @@
+
+Lib_GameClassesModelsAIProjectName := Lib_GameClassesModelsAI
+Lib_GameClassesModelsAIOutputDir :=Projects/Main/GameClasses/Output/$(PlatformName)/Lib_GameClassesModelsAI/$(Config)
+
+Lib_GameClassesModelsAIIncludes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Lib_GameClassesModelsAIIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Lib_GameClassesModelsAIIncludes += -I Projects/Main/GameClasses/PCH
+Lib_GameClassesModelsAIIncludes += -I Shared/MCC
+Lib_GameClassesModelsAIIncludes += -I Projects/Main/GameClasses
+Lib_GameClassesModelsAIPPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Lib_GameClassesModelsAIDefs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Lib_GameClassesModelsAIObjFilesCpp := $(Lib_GameClassesModelsAIOutputDir)/AICore.o $(Lib_GameClassesModelsAIOutputDir)/AICore_Darkling.o $(Lib_GameClassesModelsAIOutputDir)/AICore_Turret.o $(Lib_GameClassesModelsAIOutputDir)/AI_Action.o $(Lib_GameClassesModelsAIOutputDir)/AI_Action_Custom.o $(Lib_GameClassesModelsAIOutputDir)/AI_Auxiliary.o $(Lib_GameClassesModelsAIOutputDir)/AI_DeviceHandler.o $(Lib_GameClassesModelsAIOutputDir)/AI_EventHandler.o $(Lib_GameClassesModelsAIOutputDir)/AI_ItemHandler.o $(Lib_GameClassesModelsAIOutputDir)/AI_KnowledgeBase.o $(Lib_GameClassesModelsAIOutputDir)/AI_Pathfinder.o $(Lib_GameClassesModelsAIOutputDir)/AI_Personality.o $(Lib_GameClassesModelsAIOutputDir)/AI_ResourceHandler.o $(Lib_GameClassesModelsAIOutputDir)/AI_ScriptHandler.o $(Lib_GameClassesModelsAIOutputDir)/CDynamicVB.o $(Lib_GameClassesModelsAIOutputDir)/CEnvelope.o $(Lib_GameClassesModelsAIOutputDir)/CModelHistory.o $(Lib_GameClassesModelsAIOutputDir)/CModelHistory2.o $(Lib_GameClassesModelsAIOutputDir)/CSinRandTable.o $(Lib_GameClassesModelsAIOutputDir)/CSurfaceKey.o $(Lib_GameClassesModelsAIOutputDir)/MSIMDTemp.o $(Lib_GameClassesModelsAIOutputDir)/PCH.o $(Lib_GameClassesModelsAIOutputDir)/WModel_BloodEffect.o $(Lib_GameClassesModelsAIOutputDir)/WModel_Chain.o $(Lib_GameClassesModelsAIOutputDir)/WModel_Debris.o $(Lib_GameClassesModelsAIOutputDir)/WModel_Drain.o $(Lib_GameClassesModelsAIOutputDir)/WModel_EffectSystem.o $(Lib_GameClassesModelsAIOutputDir)/WModel_ExplosionSystem.o $(Lib_GameClassesModelsAIOutputDir)/WModel_FocusFrame.o $(Lib_GameClassesModelsAIOutputDir)/WModel_GlassSystem.o $(Lib_GameClassesModelsAIOutputDir)/WModel_InstantTrail.o $(Lib_GameClassesModelsAIOutputDir)/WModel_LaserBeam.o $(Lib_GameClassesModelsAIOutputDir)/WModel_ParticlesOpt.o $(Lib_GameClassesModelsAIOutputDir)/WModel_Primitives.o $(Lib_GameClassesModelsAIOutputDir)/WModel_Sprite2.o $(Lib_GameClassesModelsAIOutputDir)/WModel_WirePath.o $(Lib_GameClassesModelsAIOutputDir)/WObj_AreaInfo.o $(Lib_GameClassesModelsAIOutputDir)/WObj_NavNode.o $(Lib_GameClassesModelsAIOutputDir)/WObj_Team.o $(Lib_GameClassesModelsAIOutputDir)/WPartcls.o 
+Lib_GameClassesModelsAIObjFilesC := 
+
+Lib_GameClassesModelsAISpuElfFiles := 
+
+Lib_GameClassesModelsAISpursObjFiles := 
+
+Lib_GameClassesModelsAISrcFilesCpp := Projects/Main/GameClasses/Models/MSIMDTemp.cpp Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp Projects/Main/GameClasses/Models/WModel_Chain.cpp Projects/Main/GameClasses/Models/WModel_Debris.cpp Projects/Main/GameClasses/Models/WModel_Drain.cpp Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp Projects/Main/GameClasses/Models/WModel_Primitives.cpp Projects/Main/GameClasses/Models/WModel_Sprite2.cpp Projects/Main/GameClasses/Models/WModel_WirePath.cpp Projects/Main/GameClasses/Models/WPartcls.cpp Projects/Main/GameClasses/PCH/PCH.cpp Projects/Main/GameClasses/WObj_AI/AICore.cpp Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp Projects/Main/GameClasses/Models/CDynamicVB.cpp Projects/Main/GameClasses/Models/CEnvelope.cpp Projects/Main/GameClasses/Models/CModelHistory.cpp Projects/Main/GameClasses/Models/CModelHistory2.cpp Projects/Main/GameClasses/Models/CSinRandTable.cpp Projects/Main/GameClasses/Models/CSurfaceKey.cpp Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp 
+Lib_GameClassesModelsAISrcFilesC := 
+
+
+ifeq ($(Config),Release)
+	Lib_GameClassesModelsAIDefs += -DNDEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Lib_GameClassesModelsAIDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS := -O0 -g  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD)
+	Lib_GameClassesModelsAIDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS :=  -O3 -finline-functions -g  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug)
+	Lib_GameClassesModelsAIDefs += -D_DEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS := -O0 -g  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Lib_GameClassesModelsAIDefs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTM)
+	Lib_GameClassesModelsAIDefs += -DM_RTM -DNDEBUG  
+	Lib_GameClassesModelsAIPPU_CPP_OPTIONS :=  -O3 -finline-functions  $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) 
+endif
+
+Lib_GameClassesModelsAIclean: 
+	@echo Cleaning Lib_GameClassesModelsAI $(Config)
+	@-rm -f $(Lib_GameClassesModelsAIOutputDir)/*.*
+-include $(Lib_GameClassesModelsAIObjFilesCpp:.o=.d) $(Lib_GameClassesModelsAIObjFilesC:.o=.d) $(Lib_GameClassesModelsAISpuElfFiles:.elf=.d)$(Lib_GameClassesModelsAISpursObjFiles:.o=.d)
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_Auxiliary.o: Projects/Main/GameClasses/WObj_AI/AI_Auxiliary.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_DeviceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_DeviceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_EventHandler.o: Projects/Main/GameClasses/WObj_AI/AI_EventHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_ItemHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ItemHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_KnowledgeBase.o: Projects/Main/GameClasses/WObj_AI/AI_KnowledgeBase.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_Pathfinder.o: Projects/Main/GameClasses/WObj_AI/AI_Pathfinder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_Personality.o: Projects/Main/GameClasses/WObj_AI/AI_Personality.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_ResourceHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ResourceHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_ScriptHandler.o: Projects/Main/GameClasses/WObj_AI/AI_ScriptHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AICore.o: Projects/Main/GameClasses/WObj_AI/AICore.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AICore_Darkling.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Darkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AICore_Turret.o: Projects/Main/GameClasses/WObj_AI/AI_Custom/AICore_Turret.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WObj_AreaInfo.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_AreaInfo.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WObj_NavNode.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_NavNode.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WObj_Team.o: Projects/Main/GameClasses/WObj_AI/WObj_Aux/WObj_Team.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_Action.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/AI_Action_Custom.o: Projects/Main/GameClasses/WObj_AI/AI_Action/AI_Action_Custom/AI_Action_Custom.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CDynamicVB.o: Projects/Main/GameClasses/Models/CDynamicVB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CEnvelope.o: Projects/Main/GameClasses/Models/CEnvelope.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CModelHistory.o: Projects/Main/GameClasses/Models/CModelHistory.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CModelHistory2.o: Projects/Main/GameClasses/Models/CModelHistory2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CSinRandTable.o: Projects/Main/GameClasses/Models/CSinRandTable.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/CSurfaceKey.o: Projects/Main/GameClasses/Models/CSurfaceKey.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/MSIMDTemp.o: Projects/Main/GameClasses/Models/MSIMDTemp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_BloodEffect.o: Projects/Main/GameClasses/Models/WModel_BloodEffect.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_Chain.o: Projects/Main/GameClasses/Models/WModel_Chain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_Debris.o: Projects/Main/GameClasses/Models/WModel_Debris.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_Drain.o: Projects/Main/GameClasses/Models/WModel_Drain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_EffectSystem.o: Projects/Main/GameClasses/Models/WModel_EffectSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_ExplosionSystem.o: Projects/Main/GameClasses/Models/WModel_ExplosionSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_FocusFrame.o: Projects/Main/GameClasses/Models/WModel_FocusFrame.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_GlassSystem.o: Projects/Main/GameClasses/Models/WModel_GlassSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_InstantTrail.o: Projects/Main/GameClasses/Models/WModel_InstantTrail.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_LaserBeam.o: Projects/Main/GameClasses/Models/WModel_LaserBeam.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_ParticlesOpt.o: Projects/Main/GameClasses/Models/WModel_ParticlesOpt.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_Primitives.o: Projects/Main/GameClasses/Models/WModel_Primitives.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_Sprite2.o: Projects/Main/GameClasses/Models/WModel_Sprite2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WModel_WirePath.o: Projects/Main/GameClasses/Models/WModel_WirePath.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Release/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug_RTM/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/Debug/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTMD_Profile/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesModelsAI/RTM/WPartcls.o: Projects/Main/GameClasses/Models/WPartcls.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(Lib_GameClassesModelsAIPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesModelsAIDefs) $(Lib_GameClassesModelsAIIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Lib_GameClassesModelsAI_CreateOutputDir:
+	@mkdir -p $(Lib_GameClassesModelsAIOutputDir)
+
+Lib_GameClassesModelsAITargetFileName := libLib_GameClassesModelsAI.a
+Lib_GameClassesModelsAITargetPath := $(LinkDir)/$(Lib_GameClassesModelsAITargetFileName)
+
+$(Lib_GameClassesModelsAITargetPath): $(Lib_GameClassesModelsAIObjFilesCpp) $(Lib_GameClassesModelsAIObjFilesC) $(Lib_GameClassesModelsAISpursObjFiles) 
+	@echo Creating Lib_GameClassesModelsAI
+	$(PPU_LN_VERBOSE)$(PPU_AR) rc $(Lib_GameClassesModelsAITargetPath) $(Lib_GameClassesModelsAIObjFilesCpp) $(Lib_GameClassesModelsAIObjFilesC) $(Lib_GameClassesModelsAISpursObjFiles) 
+	$(PPU_LN_VERBOSE)$(PPU_RANLIB) $(Lib_GameClassesModelsAITargetPath)
+
+Lib_GameClassesModelsAIExtraTargets: 

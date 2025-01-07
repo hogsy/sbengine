@@ -13,43 +13,43 @@
 
 enum
 {
-	VB_GETFLAGS_BUILD			= DBit(0),		// Get is called from render for VB build.	(Single call)
-	VB_GETFLAGS_FALLBACK		= DBit(1),	// Get is called from rendersurface.		(Frequent calls)
-	VB_GETFLAGS_ONLYPRIMITIVES	= DBit(2),	// Get is called from rendersurface.		(Frequent calls)
+	VB_GETFLAGS_BUILD			= M_Bit(0),		// Get is called from render for VB build.	(Single call)
+	VB_GETFLAGS_FALLBACK		= M_Bit(1),	// Get is called from rendersurface.		(Frequent calls)
+	VB_GETFLAGS_ONLYPRIMITIVES	= M_Bit(2),	// Get is called from rendersurface.		(Frequent calls)
 
 };
 
 #if 0
 enum EXR_VBGetFlags
 {
-	EXR_VBGetFlags_Compress0to1_Position = DBit(0),
-	EXR_VBGetFlags_Compress0to1_Tex0 = DBit(1),
-	EXR_VBGetFlags_Compress0to1_Tex1 = DBit(2),
-	EXR_VBGetFlags_Compress0to1_Tex2 = DBit(3),
-	EXR_VBGetFlags_Compress0to1_Tex3 = DBit(4),
-	EXR_VBGetFlags_Compress0to1_MatrixWeights = DBit(5),
+	EXR_VBGetFlags_Compress0to1_Position = M_Bit(0),
+	EXR_VBGetFlags_Compress0to1_Tex0 = M_Bit(1),
+	EXR_VBGetFlags_Compress0to1_Tex1 = M_Bit(2),
+	EXR_VBGetFlags_Compress0to1_Tex2 = M_Bit(3),
+	EXR_VBGetFlags_Compress0to1_Tex3 = M_Bit(4),
+	EXR_VBGetFlags_Compress0to1_MatrixWeights = M_Bit(5),
 
-	EXR_VBGetFlags_CompressMinus1to1_Position = DBit(6),
-	EXR_VBGetFlags_CompressMinus1to1_Normal = DBit(7),
-	EXR_VBGetFlags_CompressMinus1to1_Tex0 = DBit(8),
-	EXR_VBGetFlags_CompressMinus1to1_Tex1 = DBit(9),
-	EXR_VBGetFlags_CompressMinus1to1_Tex2 = DBit(10),
-	EXR_VBGetFlags_CompressMinus1to1_Tex3 = DBit(11),
+	EXR_VBGetFlags_CompressMinus1to1_Position = M_Bit(6),
+	EXR_VBGetFlags_CompressMinus1to1_Normal = M_Bit(7),
+	EXR_VBGetFlags_CompressMinus1to1_Tex0 = M_Bit(8),
+	EXR_VBGetFlags_CompressMinus1to1_Tex1 = M_Bit(9),
+	EXR_VBGetFlags_CompressMinus1to1_Tex2 = M_Bit(10),
+	EXR_VBGetFlags_CompressMinus1to1_Tex3 = M_Bit(11),
 
-	EXR_VBGetFlags_Compress0to255_MatrixIndex = DBit(12),
+	EXR_VBGetFlags_Compress0to255_MatrixIndex = M_Bit(12),
 
-	EXR_VBGetFlags_CompressBox_Position = DBit(13),
-	EXR_VBGetFlags_CompressBox_Tex0 = DBit(14),
-	EXR_VBGetFlags_CompressBox_Tex1 = DBit(15),
-	EXR_VBGetFlags_CompressBox_Tex2 = DBit(16),
-	EXR_VBGetFlags_CompressBox_Tex3 = DBit(17)
+	EXR_VBGetFlags_CompressBox_Position = M_Bit(13),
+	EXR_VBGetFlags_CompressBox_Tex0 = M_Bit(14),
+	EXR_VBGetFlags_CompressBox_Tex1 = M_Bit(15),
+	EXR_VBGetFlags_CompressBox_Tex2 = M_Bit(16),
+	EXR_VBGetFlags_CompressBox_Tex3 = M_Bit(17)
 
 };
 class CXR_TexCoordBox
 {
 public:
-	CVec4Dfp4 m_Min;
-	CVec4Dfp4 m_Max;
+	CVec4Dfp32 m_Min;
+	CVec4Dfp32 m_Max;
 };
 
 class CXR_VBGetOptions
@@ -64,7 +64,7 @@ public:
 
 	uint32 m_Flags;
 
-	CBox3Dfp4 m_Bound_Vertex;
+	CBox3Dfp32 m_Bound_Vertex;
 
 	CXR_TexCoordBox m_Bound_Texture0;
 	CXR_TexCoordBox m_Bound_Texture1;
@@ -79,7 +79,7 @@ public:
 
 enum
 {
-	VBF_DUAL_MATRIX_LISTS	= DBit(0),
+	VBF_DUAL_MATRIX_LISTS	= M_Bit(0),
 };
 
 class CXR_VBContainer

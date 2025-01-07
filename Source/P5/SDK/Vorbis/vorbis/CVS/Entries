@@ -1,0 +1,19 @@
+D/debian////
+D/doc////
+D/examples////
+D/include////
+D/lib////
+D/mac////
+D/vq////
+D/win32////
+/.cvsignore/1.5/Mon Feb 26 06:20:22 2001//Tvorbis1_0_public_release_candidate_2
+/AUTHORS/1.1/Wed Nov 08 08:36:35 2000//Tvorbis1_0_public_release_candidate_2
+/COPYING/1.4/Mon Feb 26 03:50:37 2001//Tvorbis1_0_public_release_candidate_2
+/Makefile.am/1.6/Sat Nov 18 05:02:34 2000//Tvorbis1_0_public_release_candidate_2
+/README/1.11/Thu Mar 22 01:33:20 2001//Tvorbis1_0_public_release_candidate_2
+/acinclude.m4/1.4/Wed Oct 17 15:43:08 2001//Tvorbis1_0_public_release_candidate_2
+/autogen.sh/1.3/Wed Oct 17 15:43:08 2001//Tvorbis1_0_public_release_candidate_2
+/configure.in/1.44/Mon Aug 13 05:57:37 2001//Tvorbis1_0_public_release_candidate_2
+/libvorbis.spec/1.12/Wed Oct 17 15:43:08 2001//Tvorbis1_0_public_release_candidate_2
+/todo.txt/1.6/Wed Jul 12 09:36:16 2000//Tvorbis1_0_public_release_candidate_2
+/vorbis.m4/1.4/Wed Oct 17 15:43:08 2001//Tvorbis1_0_public_release_candidate_2

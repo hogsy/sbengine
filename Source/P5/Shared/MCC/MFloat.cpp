@@ -2,8 +2,8 @@
 #include "../Platform/Platform.h"
 #include "MFloat.h"
 
-fp4 g_SinTable[MFLOAT_SINETABLESIZE+4];
-fp4 g_RandTable[MFLOAT_RANDTABLESIZE+4];
+fp32 g_SinTable[MFLOAT_SINETABLESIZE+4];
+fp32 g_RandTable[MFLOAT_RANDTABLESIZE+4];
 
 
 void MCCDLLEXPORT MFloat_Init()
@@ -15,7 +15,7 @@ void MCCDLLEXPORT MFloat_Init()
 	// Init sine table
 	{
 		for (int i = 0; i < MFLOAT_SINETABLESIZE; i++)
-			g_SinTable[i] = M_Sin(fp4(i)/fp4(MFLOAT_SINETABLESIZE)*2.0f*_PI);
+			g_SinTable[i] = M_Sin(fp32(i)/fp32(MFLOAT_SINETABLESIZE)*2.0f*_PI);
 
 		for(int k = 0; k < 4; k++)
 			g_SinTable[k+MFLOAT_SINETABLESIZE] = g_SinTable[k];
@@ -33,15 +33,15 @@ void MCCDLLEXPORT MFloat_Init()
 
 #ifndef CPU_INTEL_P5
 
-static fp4 g_lAsyncRecp[8];
+static fp32 g_lAsyncRecp[8];
 static int g_iAsyncRecp = -1;
 
-void MCCDLLEXPORT AsyncRecp(fp4 _v)
+void MCCDLLEXPORT AsyncRecp(fp32 _v)
 {
 	g_lAsyncRecp[++g_iAsyncRecp] = 1.0f / _v;
 }
 
-fp4 MCCDLLEXPORT AsyncRecpGet()
+fp32 MCCDLLEXPORT AsyncRecpGet()
 {
 	return g_lAsyncRecp[g_iAsyncRecp];
 }
@@ -53,7 +53,7 @@ void MCCDLLEXPORT AsyncRecpFree()
 
 #endif
 
-void MCCDLLEXPORT MFloat_GetSineTable(const fp4*& _pSin)
+void MCCDLLEXPORT MFloat_GetSineTable(const fp32*& _pSin)
 {
 	_pSin = g_SinTable;
 }
@@ -63,12 +63,12 @@ void MCCDLLEXPORT MFloat_GetSineTable(const fp4*& _pSin)
 return g_SinTable;
 }*/
 
-MCCDLLEXPORT const fp4 *MFloat_GetRandTable()
+MCCDLLEXPORT const fp32 *MFloat_GetRandTable()
 {
 	return g_RandTable;
 }
 
-MCCDLLEXPORT fp4 MFloat_GetRand(int _iIndex)
+MCCDLLEXPORT fp32 MFloat_GetRand(int _iIndex)
 {
 	return g_RandTable[_iIndex &(MFLOAT_RANDTABLESIZE - 1)];
 }

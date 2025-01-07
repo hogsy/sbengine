@@ -1,0 +1,35 @@
+
+// -------------------------------------------------------------------
+//  XR Stencil lighting
+// -------------------------------------------------------------------
+
+RenderViewContext()
+{
+	ClearBuffers
+	Priority -2, Disable sissor
+
+	for( each lightsource)
+	{
+		Priority iLight, Set sissor to light's bounding area
+		Priority iLight, Clear stencil buffer
+	}
+
+	Priority -2, Disable sissor
+
+	for( each model )
+	{
+		Priority -1, Render into z-buffer
+
+		for( each lightsource within bounding volume )
+		{
+			Priority iLight+0.1, Render shadowvolume into stencilbuffer
+			Priority iLight+0.2, Render model with lighting, stencil test, add to colorbuffer, z-write disable
+		}
+
+		Priority TexturePass, Render model's surface
+		Priority TexturePass+10, Render fog
+	}
+
+}
+
+

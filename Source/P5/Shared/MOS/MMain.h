@@ -25,7 +25,23 @@
 #endif
 
 
-#ifdef PLATFORM_XBOX
+#ifdef PLATFORM_XENON
+
+	int Win32_Main(void* this_inst, void* prev_inst, char* cmdline, int cmdshow, const char* _pAppClassName, const char *_pSystemClassName = NULL);
+
+	#define MACRO_MAIN(AppClassName)													\
+	int M_CDECL main()																	\
+	{																					\
+		return Win32_Main(NULL, NULL, NULL, 0, AppClassName, "CSystemXenon");			\
+	};
+
+	#define MACRO_MAINEX(AppClassName, SystemClassName)									\
+	int M_CDECL main()																	\
+	{																					\
+		return Win32_Main(NULL, NULL, NULL, 0, AppClassName, SystemClassName);			\
+	};
+
+#elif defined PLATFORM_XBOX
 
 	int Win32_Main(void* this_inst, void* prev_inst, char* cmdline, int cmdshow, const char* _pAppClassName, const char *_pSystemClassName = NULL);
 
@@ -117,12 +133,12 @@
 	}
 
 #elif defined(PLATFORM_PS3)
-	int PS3_Main(const char* _pAppClassName);
+	int PS3_Main(int argc, char** argv, const char* _pAppClassName);
 
 	#define MACRO_MAIN(AppClassName)\
 	int main(int argc, char** argv)\
 	{\
-		PS3_Main(AppClassName);\
+		PS3_Main(argc, argv, AppClassName);\
 	};
 #else
 

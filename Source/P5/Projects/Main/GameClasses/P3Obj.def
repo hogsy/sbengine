@@ -1,0 +1,7 @@
+
+EXPORTS 
+	DllEntryPoint
+	DllMain
+	MRTC_DLLAttachProcess
+	MRTC_DLLDetachProcess
+	MRTC_GetClassContainer

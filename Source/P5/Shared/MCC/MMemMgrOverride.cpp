@@ -29,7 +29,7 @@
 #endif
 
 #ifndef M_RTM
-void* operator new(mint _Size, int _Block, int Dummy, int Dummy2)
+void* operator new(size_t _Size, int _Block, int Dummy, int Dummy2)
 {
 # ifdef M_SUPPORTMEMORYDEBUG
 	return MACRO_GetDefaultMemoryManager()->AllocDebug(_Size, _Block, NULL, 0);
@@ -38,7 +38,7 @@ void* operator new(mint _Size, int _Block, int Dummy, int Dummy2)
 # endif
 }
 
-void* operator new[](mint _Size, int _Block, int Dummy, int Dummy2)
+void* operator new[](size_t _Size, int _Block, int Dummy, int Dummy2)
 {
 # ifdef M_SUPPORTMEMORYDEBUG
 	return MACRO_GetDefaultMemoryManager()->AllocDebug(_Size, _Block, NULL, 0);
@@ -54,7 +54,7 @@ void operator delete(void *Block, int _Block, int Dummy, int Dummy2)
 }
 # endif
 
-void* operator new(mint _Size, int _Block, const char *_File, int _FileNumber, SDA_Defraggable *_MakeThisUnique)
+void* operator new(size_t _Size, int _Block, const char *_File, int _FileNumber, SDA_Defraggable *_MakeThisUnique)
 {
 # ifdef M_SUPPORTMEMORYDEBUG
 	return MACRO_GetDefaultMemoryManager()->AllocDebug(_Size, _Block, _File, _FileNumber);
@@ -63,7 +63,7 @@ void* operator new(mint _Size, int _Block, const char *_File, int _FileNumber, S
 # endif
 }
 
-void* operator new[](mint _Size, int _Block, const char *_File, int _FileNumber, SDA_Defraggable *_MakeThisUnique)
+void* operator new[](size_t _Size, int _Block, const char *_File, int _FileNumber, SDA_Defraggable *_MakeThisUnique)
 {
 # ifdef M_SUPPORTMEMORYDEBUG
 	return MACRO_GetDefaultMemoryManager()->AllocDebug(_Size, _Block, _File, _FileNumber);
@@ -87,9 +87,9 @@ void operator delete(void *Block, int _Block, const char *_File, int _FileNumber
 #ifndef PLATFORM_WIN32_PC
 # ifndef _AFX6
 #  ifdef COMPILER_GNU
-void * M_CDECL operator new (mint size) throw(std::bad_alloc)
+void * M_CDECL operator new (size_t size) throw(std::bad_alloc)
 #  else
-void * M_CDECL operator new (mint size)
+void * M_CDECL operator new (size_t size)
 #  endif
 {
 	return MACRO_GetDefaultMemoryManager()->Alloc(size);
@@ -107,9 +107,9 @@ void M_CDECL operator delete (void * ptr)
 # endif
 
 #ifdef COMPILER_GNU
-void * M_CDECL operator new[] (mint size) throw(std::bad_alloc)
+void * M_CDECL operator new[] (size_t size) throw(std::bad_alloc)
 #else
-void * M_CDECL operator new[] (mint size)
+void * M_CDECL operator new[] (size_t size)
 #endif
 {
 	return MACRO_GetDefaultMemoryManager()->Alloc(size);
@@ -678,7 +678,153 @@ extern "C"
 
 #ifdef MRTC_MEMMANAGEROVERRIDE
 
+__declspec(thread) g_XOverrideReadWritePhysical = 0;
 
+
+
+WINBASEAPI
+LPVOID
+WINAPI
+VirtualAlloc(
+    IN LPVOID lpAddress,
+    IN SIZE_T dwSize,
+    IN DWORD flAllocationType,
+    IN DWORD flProtect
+    )
+{
+	if (lpAddress)
+		M_BREAKPOINT;
+	if (flAllocationType & MEM_RESERVE)
+		M_BREAKPOINT;
+	if ((flProtect) != PAGE_READWRITE)
+		M_BREAKPOINT;
+
+	XALLOC_ATTRIBUTES Attribs;
+    Attribs.dwObjectType = 0;
+    Attribs.dwHeapTracksAttributes = 0;
+    Attribs.dwMustSucceed = 1;
+    Attribs.dwFixedSize = 0;
+    Attribs.dwAllocatorId = eXALLOCAllocatorId_GameMin;
+    Attribs.dwAlignment = XALLOC_PHYSICAL_ALIGNMENT_16;
+    Attribs.dwMemoryProtect = XALLOC_MEMPROTECT_READWRITE;
+    Attribs.dwZeroInitialize = 0;
+    Attribs.dwMemoryType = XALLOC_MEMTYPE_PHYSICAL;
+	return XMemAlloc(dwSize, (DWORD &)Attribs);
+}
+
+WINBASEAPI
+BOOL
+WINAPI
+VirtualFree(
+    IN LPVOID lpAddress,
+    IN SIZE_T dwSize,
+    IN DWORD dwFreeType
+    )
+{
+	if (dwFreeType != MEM_RELEASE)
+		M_BREAKPOINT;
+
+	XALLOC_ATTRIBUTES Attribs;
+    Attribs.dwObjectType = 0;
+    Attribs.dwHeapTracksAttributes = 0;
+    Attribs.dwMustSucceed = 1;
+    Attribs.dwFixedSize = 0;
+    Attribs.dwAllocatorId = eXALLOCAllocatorId_GameMin;
+    Attribs.dwAlignment = XALLOC_PHYSICAL_ALIGNMENT_16;
+    Attribs.dwMemoryProtect = XALLOC_MEMPROTECT_READWRITE;
+    Attribs.dwZeroInitialize = 0;
+    Attribs.dwMemoryType = XALLOC_MEMTYPE_PHYSICAL;
+
+	XMemFree(lpAddress, (DWORD &)Attribs);
+
+	return true;
+}
+/*
+WINBASEAPI
+BOOL
+WINAPI
+VirtualProtect(
+    IN  LPVOID lpAddress,
+    IN  SIZE_T dwSize,
+    IN  DWORD flNewProtect,
+    OUT PDWORD lpflOldProtect
+    )
+{
+	M_BREAKPOINT;
+	return 0;
+}
+
+WINBASEAPI
+DWORD
+WINAPI
+VirtualQuery(
+    IN LPCVOID lpAddress,
+    OUT PMEMORY_BASIC_INFORMATION lpBuffer,
+    IN DWORD dwLength
+    )
+{
+	M_BREAKPOINT;
+	return 0;
+}
+
+WINBASEAPI
+LPVOID
+WINAPI
+VirtualAllocEx(
+    IN HANDLE hProcess,
+    IN LPVOID lpAddress,
+    IN SIZE_T dwSize,
+    IN DWORD flAllocationType,
+    IN DWORD flProtect
+    )
+{
+	M_BREAKPOINT;
+	return 0;
+}
+
+WINBASEAPI
+BOOL
+WINAPI
+VirtualFreeEx(
+    IN HANDLE hProcess,
+    IN LPVOID lpAddress,
+    IN SIZE_T dwSize,
+    IN DWORD dwFreeType
+    )
+{
+	M_BREAKPOINT;
+	return 0;
+}
+
+WINBASEAPI
+BOOL
+WINAPI
+VirtualProtectEx(
+    IN  HANDLE hProcess,
+    IN  LPVOID lpAddress,
+    IN  SIZE_T dwSize,
+    IN  DWORD flNewProtect,
+    OUT PDWORD lpflOldProtect
+	)
+{
+	M_BREAKPOINT;
+	return 0;
+}
+
+WINBASEAPI
+DWORD
+WINAPI
+VirtualQueryEx(
+    IN HANDLE hProcess,
+    IN LPCVOID lpAddress,
+    OUT PMEMORY_BASIC_INFORMATION lpBuffer,
+    IN DWORD dwLength
+    )
+{
+	M_BREAKPOINT;
+	return 0;
+}
+*/
 extern "C" LPVOID WINAPI XMemAlloc(SIZE_T dwSize, DWORD dwAllocAttributes)
 {
 	XALLOC_ATTRIBUTES Attr = (XALLOC_ATTRIBUTES &)dwAllocAttributes;
@@ -695,12 +841,12 @@ extern "C" LPVOID WINAPI XMemAlloc(SIZE_T dwSize, DWORD dwAllocAttributes)
 #endif
 			if (pMem)
 			{
-				mint Size = MemMan->MemorySize(pMem);
+				size_t Size = MemMan->MemorySize(pMem);
 				if (Attr.dwZeroInitialize)
 					memset(pMem, 0, Size);
 //				gf_RDSendHeapAlloc(pMem, Size, MemMan, 0);
 				*((uint32 *)pMem) = dwAllocAttributes;
-				return (void *)((mint)pMem + 16);
+				return (void *)((size_t)pMem + 16);
 			}
 			else
 				return NULL;
@@ -714,7 +860,7 @@ extern "C" LPVOID WINAPI XMemAlloc(SIZE_T dwSize, DWORD dwAllocAttributes)
 #endif
 			if (pMem)
 			{
-				mint Size = MemMan->MemorySize(pMem);
+				size_t Size = MemMan->MemorySize(pMem);
 				if (Attr.dwZeroInitialize)
 					memset(pMem, 0, Size);
 //				gf_RDSendHeapAlloc(pMem, Size, MemMan, 0);
@@ -727,19 +873,49 @@ extern "C" LPVOID WINAPI XMemAlloc(SIZE_T dwSize, DWORD dwAllocAttributes)
 	else
 	{
 		M_ASSERT(Attr.dwMemoryType == XALLOC_MEMTYPE_PHYSICAL, "");
-		void *pMem = XMemAllocDefault(dwSize, dwAllocAttributes);
-		if (pMem)
-		{
-			uint32 Size = XMemSizeDefault(pMem, dwAllocAttributes);
-	//		if ((mint)pMem & 0x80000000)
-			gf_RDSendPhysicalAlloc(pMem, Size, 1, gf_RDGetSequence(), 0);
-	//		else
-	//			gf_RDSendPhysicalAlloc(pData, dwSize, 0, 0);
 
-			return pMem;
+		if (Attr.dwHeapTracksAttributes)
+			M_BREAKPOINT;
+
+		if (Attr.dwMemoryProtect == XALLOC_MEMPROTECT_READWRITE || g_XOverrideReadWritePhysical)
+		{
+			CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
+
+			mint Align = 1 << Attr.dwAlignment;
+			dwSize = AlignUp(dwSize, Align);
+
+	#ifdef M_SUPPORTMEMORYDEBUG
+			void *pMem = MemMan->AllocDebugAlign(dwSize, Align, 1, __FILE__, __LINE__);
+	#else
+			void *pMem = MemMan->AllocAlign(dwSize, Align);
+	#endif
+			if (pMem)
+			{
+				size_t Size = MemMan->MemorySize(pMem);
+				if (Attr.dwZeroInitialize)
+					memset(pMem, 0, Size);
+	//				gf_RDSendHeapAlloc(pMem, Size, MemMan, 0);
+				return pMem;
+			}
+			else
+				return NULL;
 		}
 		else
-			return NULL;
+		{
+			void *pMem = XMemAllocDefault(dwSize, dwAllocAttributes);
+			if (pMem)
+			{
+				uint32 Size = XMemSizeDefault(pMem, dwAllocAttributes);
+		//		if ((size_t)pMem & 0x80000000)
+				gf_RDSendPhysicalAlloc(pMem, Size, 1, gf_RDGetSequence(), 0);
+		//		else
+		//			gf_RDSendPhysicalAlloc(pData, dwSize, 0, 0);
+
+				return pMem;
+			}
+			else
+				return NULL;
+		}
 	}
     
 }
@@ -753,7 +929,7 @@ extern "C" VOID WINAPI XMemFree(PVOID pAddress, DWORD dwAllocAttributes)
 		CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
 		if (Attr.dwHeapTracksAttributes)
 		{
-			void *pMem = (void *)((mint)pAddress - 16);
+			void *pMem = (void *)((size_t)pAddress - 16);
 			MemMan->Free(pMem);
 //			if (pMem)
 //				gf_RDSendHeapFree(pMem, MemMan);
@@ -769,9 +945,22 @@ extern "C" VOID WINAPI XMemFree(PVOID pAddress, DWORD dwAllocAttributes)
 	else
 	{
 		M_ASSERT(Attr.dwMemoryType == XALLOC_MEMTYPE_PHYSICAL, "");
-		XMemFreeDefault(pAddress, dwAllocAttributes);
-		if (pAddress)
-			gf_RDSendPhysicalFree(pAddress, 1, gf_RDGetSequence());
+		if (Attr.dwHeapTracksAttributes)
+			M_BREAKPOINT;
+
+		
+		if (Attr.dwMemoryProtect == XALLOC_MEMPROTECT_READWRITE || g_XOverrideReadWritePhysical)
+		{
+			CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
+			void *pMem = pAddress;
+			MemMan->Free(pMem);
+		}
+		else
+		{
+			XMemFreeDefault(pAddress, dwAllocAttributes);
+			if (pAddress)
+				gf_RDSendPhysicalFree(pAddress, 1, gf_RDGetSequence());
+		}
 	}
 }
 
@@ -784,7 +973,7 @@ extern "C" SIZE_T WINAPI XMemSize(PVOID pAddress,DWORD dwAllocAttributes)
 		CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
 		if (Attr.dwHeapTracksAttributes)
 		{
-			void *pMem = (void *)((mint)pAddress - 16);
+			void *pMem = (void *)((size_t)pAddress - 16);
 			return MemMan->MemorySize(pMem) - 16;
 		}
 		else
@@ -794,7 +983,18 @@ extern "C" SIZE_T WINAPI XMemSize(PVOID pAddress,DWORD dwAllocAttributes)
 		}
 	}
 	else
-		return XMemSizeDefault(pAddress, dwAllocAttributes);
+	{
+		if (Attr.dwMemoryProtect == XALLOC_MEMPROTECT_READWRITE || g_XOverrideReadWritePhysical)
+		{
+			CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
+			void *pMem = pAddress;
+			return MemMan->MemorySize(pMem);
+		}
+		else
+		{
+			return XMemSizeDefault(pAddress, dwAllocAttributes);
+		}
+	}
 }
 
 /*
@@ -807,7 +1007,7 @@ extern "C" VOID WINAPI XSetAttributesOnHeapAlloc(PVOID pBaseAddress, DWORD dwAll
 		CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
 		if (Attr.dwHeapTracksAttributes)
 		{
-			void *pMem = (void *)((mint)pBaseAddress - 4);
+			void *pMem = (void *)((size_t)pBaseAddress - 4);
 			*((uint32 *)pMem) = dwAllocAttributes;
 		}
 	}
@@ -816,18 +1016,26 @@ extern "C" VOID WINAPI XSetAttributesOnHeapAlloc(PVOID pBaseAddress, DWORD dwAll
 extern "C" DWORD WINAPI XGetAttributesOnHeapAlloc(PVOID pBaseAddress)
 {
 	CDA_MemoryManager * MemMan = MRTC_GetMemoryManager();
-	void *pMem = (void *)((mint)pBaseAddress - 4);
+	void *pMem = (void *)((size_t)pBaseAddress - 4);
 	return *((uint32 *)pMem);
 }
 */
 
 #endif
 
-#else
+#endif
 
 
 #ifdef MRTC_MEMMANAGEROVERRIDE //Enables DA_ memory manager
 
+
+#if _MSC_VER >= 1400
+#define MemDeclNaR __declspec(noalias) __declspec(restrict)
+#define MemDeclNa __declspec(noalias)
+#else
+#define MemDeclNaR 
+#define MemDeclNa 
+#endif
 
 
 
@@ -887,39 +1095,38 @@ namespace std
 		
 #endif
 	
-#ifndef _CRTNOALIAS
-#define _CRTNOALIAS
-#endif
-#ifndef _CRTRESTRICT
-#define _CRTRESTRICT
-#endif
+	MemDeclNaR void * M_CDECL malloc(size_t);
+	MemDeclNa void M_CDECL free(void *);
+	MemDeclNaR void * M_CDECL realloc(void *, size_t);
+	MemDeclNaR void * M_CDECL calloc(size_t, size_t);
+	MemDeclNaR void * M_CDECL memalign(size_t, size_t);
 
-	_CRTIMP _CRTNOALIAS _CRTRESTRICT void * M_CDECL malloc(mint );
-	_CRTIMP _CRTNOALIAS void M_CDECL free(void *);
-	_CRTIMP _CRTNOALIAS _CRTRESTRICT void * M_CDECL realloc(void *, mint);
-	_CRTIMP _CRTNOALIAS _CRTRESTRICT void * M_CDECL calloc(mint, mint);
-	_CRTIMP _CRTNOALIAS _CRTRESTRICT void * M_CDECL memalign(mint, mint);
-	
+//	MemDeclNaR void * M_CDECL malloc(size_t );
+//	MemDeclNa void M_CDECL free(void *);
+//	MemDeclNaR void * M_CDECL realloc(void *, size_t);
+//	MemDeclNaR void * M_CDECL calloc(size_t, size_t);
+//	MemDeclNaR void * M_CDECL memalign(size_t, size_t);
+
 	/*************************************************************************************************\
 	|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 	| malloc
 	|__________________________________________________________________________________________________
 	\*************************************************************************************************/
 	
-	_CRTIMP _CRTNOALIAS _CRTRESTRICT void * M_CDECL malloc (mint sz)
+	MemDeclNaR void * M_CDECL malloc (size_t sz)
 	{		
 		void * addr = M_ALLOC(sz);		
 		return addr;
 	}
 
-	void * M_CDECL _malloc_base (mint sz)
+	void * M_CDECL _malloc_base (size_t sz)
 	{		
 		void * addr = M_ALLOC(sz);		
 		return addr;
 	}
 
 #ifndef M_RTM
-	void * M_CDECL _malloc_dbg (mint sz, int BlockType, const char *Filename, int Line) 
+	void * M_CDECL _malloc_dbg (size_t sz, int BlockType, const char *Filename, int Line) 
 	{
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
 #ifdef M_SUPPORTMEMORYDEBUG
@@ -930,6 +1137,7 @@ namespace std
 		return addr;
 	}
 #endif
+
 
 /*
 _GetProcessHeap@0 
@@ -1021,8 +1229,7 @@ _XSetAttributesOnHeapAlloc@8
 */
 	
 
-#ifdef PLATFORM_XBOX1
-
+#ifdef PLATFORM_XBOX
 
 // Fixed this.... This should only be active on the XBOX, as its not working on PC due to these functions beeing linked as dll linkage
 #ifndef MRTC_DEFAULTMAINHEAP
@@ -1033,7 +1240,7 @@ _XSetAttributesOnHeapAlloc@8
 		MRTC_CreateObjectManager();
 		static int Dummy = 0;
 //		if (Dummy == 1)
-//			M_ASSERT(0,"");
+//					M_BREAKPOINT;
 
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
 		++Dummy;
@@ -1044,7 +1251,7 @@ _XSetAttributesOnHeapAlloc@8
 	HLOCAL WINAPI LocalAlloc(UINT uFlags,SIZE_T uBytes)
 	{
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
-		void * addr = MemMan->Alloc(uBytes);	
+		void * addr = M_ALLOC(uBytes);	
 		if (uFlags & LMEM_ZEROINIT)
 			memset(addr, 0, uBytes);
 		return addr;
@@ -1084,7 +1291,8 @@ _XSetAttributesOnHeapAlloc@8
 
 		if (uFlags & LMEM_MOVEABLE)
 		{
-			hMem = MemMan->Realloc(hMem, uBytes);
+			
+			hMem = M_REALLOC(hMem, uBytes);
 		}
 		else
 		{
@@ -1128,64 +1336,64 @@ _XSetAttributesOnHeapAlloc@8
 	
 	BOOL WINAPI RtlDestroyHeap(IN OUT HANDLE hHeap)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return true;
 	}
 	
 	SIZE_T WINAPI RtlCompactHeap(IN HANDLE hHeap,IN DWORD dwFlags)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return 0;
 	}	
 	
 	SIZE_T WINAPI RtlDebugCompactHeap(IN HANDLE hHeap,IN DWORD dwFlags)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return 0;
 	}	
 	
 	BOOL WINAPI RtlLockHeap(IN HANDLE hHeap)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 	
 	BOOL WINAPI RtlUnlockHeap(IN HANDLE hHeap)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 
 	BOOL WINAPI RtlValidateHeap(HANDLE hHeap,DWORD dwFlags,LPCVOID lpMem)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 
 	
 	BOOL WINAPI RtlWalkHeap(IN HANDLE hHeap, IN OUT LPPROCESS_HEAP_ENTRY lpEntry)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 
 	BOOL WINAPI RtlDebugWalkHeap(IN HANDLE hHeap, IN OUT LPPROCESS_HEAP_ENTRY lpEntry)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 
 	BOOL WINAPI RtlZeroHeap(IN HANDLE hHeap, IN DWORD Testar)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return false;
 	}
 	
 	LPVOID WINAPI RtlAllocateHeap( IN HANDLE hHeap, IN DWORD dwFlags, IN SIZE_T dwBytes)
 	{
-		//M_ASSERT(0,"");
+		//M_BREAKPOINT;
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
-		void * addr = MemMan->Alloc(dwBytes);
+		void * addr = M_ALLOC(dwBytes);
 
 		if(dwFlags&HEAP_ZERO_MEMORY)
 			memset(addr, 0, dwBytes);
@@ -1194,13 +1402,13 @@ _XSetAttributesOnHeapAlloc@8
 	
 	LPVOID WINAPI RtlReAllocateHeap(IN HANDLE hHeap,IN DWORD dwFlags,IN LPVOID lpMem,IN SIZE_T dwBytes)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return NULL;
 	}
 	
 	BOOL WINAPI RtlFreeHeap(IN HANDLE hHeap,IN DWORD dwFlags,IN LPVOID lpMem)
 	{
-		//M_ASSERT(0,"");
+		//M_BREAKPOINT;
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
 		MemMan->Free(lpMem);
 		
@@ -1209,28 +1417,24 @@ _XSetAttributesOnHeapAlloc@8
 	
 	BOOL WINAPI RtlFreeHeapSlowly(IN HANDLE hHeap,IN DWORD dwFlags,IN LPVOID lpMem)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		
 		return false;
 	}
 
 	SIZE_T WINAPI RtlSizeHeap(IN HANDLE hHeap,IN DWORD dwFlags,IN LPCVOID lpMem)
 	{
-		M_ASSERT(0,"");
+		M_BREAKPOINT;
 		return NULL;
 	}
 
-
+#if 0
 	
 	SIZE_T WINAPI HeapCompact(HANDLE hHeap, DWORD dwFlags)
 	{
 		return RtlCompactHeap(hHeap, dwFlags);
 	}
 
-	BOOL WINAPI HeapDestroy(HANDLE hHeap)
-	{
-		return RtlDestroyHeap(hHeap);
-	}
 
 	BOOL WINAPI HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem)
 	{
@@ -1251,6 +1455,11 @@ _XSetAttributesOnHeapAlloc@8
 	{
 		return RtlValidateHeap(hHeap, dwFlags, lpMem);
 	}
+#endif
+	BOOL WINAPI HeapDestroy(HANDLE hHeap)
+	{
+		return RtlDestroyHeap(hHeap);
+	}
 
 	BOOL WINAPI HeapWalk(HANDLE hHeap, LPPROCESS_HEAP_ENTRY lpEntry)
 	{
@@ -1267,7 +1476,7 @@ _XSetAttributesOnHeapAlloc@8
 		Block = BlockFromMem(pBaseAddress);
 
 		if (!Block->IsDebug())
-		M_ASSERT(0,"");
+			M_BREAKPOINT;
 
 		int Size = MemMan->GetBlockSize(Block);
 		SDA_DefraggableDebug_Post *pPost = (SDA_DefraggableDebug_Post *)((uint32)Block + Size - sizeof(SDA_DefraggableDebug_Post));
@@ -1284,7 +1493,7 @@ _XSetAttributesOnHeapAlloc@8
 		Block = BlockFromMem(pBaseAddress);
 
 		if (!Block->IsDebug())
-		M_ASSERT(0,"");
+			M_BREAKPOINT;
 
 		int Size = MemMan->GetBlockSize(Block);
 		SDA_DefraggableDebug_Post *pPost = (SDA_DefraggableDebug_Post *)((uint32)Block + Size - sizeof(SDA_DefraggableDebug_Post));
@@ -1305,28 +1514,55 @@ _XSetAttributesOnHeapAlloc@8
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 	
-	void * M_CDECL calloc (mint nelem, mint elsize)
+	MemDeclNaR void * M_CDECL calloc (size_t nelem, size_t elsize)
 	{
+#ifdef PLATFORM_XENON
+		MRTC_CreateObjectManager();
+#endif
 		void * addr = M_ALLOC(nelem * elsize);
+
+		mint Size = MRTC_GetMemoryManager()->MemorySize(addr);
 		// Zero out the malloc'd block.
-		memset (addr, 0, nelem * elsize);
+		memset (addr, 0, Size);
 		return addr;
 	}
 
 #ifndef M_RTM
-	void * M_CDECL _calloc_dbg (mint nelem, mint elsize, int BlockType, const char *Filename, int Line) 
+	void * M_CDECL _calloc_dbg (size_t nelem, size_t elsize, int BlockType, const char *Filename, int Line) 
 	{
+#ifdef PLATFORM_XENON
+		MRTC_CreateObjectManager();
+#endif
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
 #ifdef M_SUPPORTMEMORYDEBUG
 		void * addr = MemMan->AllocDebug(nelem * elsize, BlockType, Filename, Line);
 #else
 		void * addr = MemMan->Alloc(nelem * elsize);
 #endif
+		mint Size = MRTC_GetMemoryManager()->MemorySize(addr);
 		// Zero out the malloc'd block.
-		memset (addr, 0, nelem * elsize);
+		memset (addr, 0, Size);
 		return addr;
 	}
 #endif
+
+int __crtDebugCheckCount = FALSE;
+#undef _CrtSetCheckCount
+#undef _CrtGetCheckCount
+
+int __cdecl _CrtSetCheckCount(int fCheckCount)
+{
+    int oldCheckCount = __crtDebugCheckCount;
+    return oldCheckCount;
+}
+
+int __cdecl _CrtGetCheckCount(
+        void
+        )
+{
+    return __crtDebugCheckCount;
+}
+
 		
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -1359,7 +1595,7 @@ _XSetAttributesOnHeapAlloc@8
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-	void * M_CDECL memalign (mint alignment, mint size)
+	void * M_CDECL memalign (size_t alignment, size_t size)
 	{
 		CDA_MemoryManager * MemMan = MACRO_GetDefaultMemoryManager();
 		void * addr = MemMan->AllocAlign(size, alignment);
@@ -1373,19 +1609,19 @@ _XSetAttributesOnHeapAlloc@8
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-	void * M_CDECL realloc (void * ptr, mint sz)
+	void * M_CDECL realloc (void * ptr, size_t sz)
 	{
 		return M_REALLOC(ptr, sz);
 	}
 	
-	void * M_CDECL _realloc_base (void * ptr, mint sz)
+	void * M_CDECL _realloc_base (void * ptr, size_t sz)
 	{
 		return M_REALLOC(ptr, sz);
 	}
 	
 	
 #ifndef M_RTM
-	void * M_CDECL _realloc_dbg (void * ptr, mint sz, int BlockType, const char *Filename, int Line) 
+	void * M_CDECL _realloc_dbg (void * ptr, size_t sz, int BlockType, const char *Filename, int Line) 
 	{
 		CDA_MemoryManager *MemMan = MACRO_GetDefaultMemoryManager();
 
@@ -1403,19 +1639,19 @@ _XSetAttributesOnHeapAlloc@8
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 	
-	mint M_CDECL _msize(void *mem)
+	size_t M_CDECL _msize(void *mem)
 	{
 		CDA_MemoryManager *MemMan = MACRO_GetDefaultMemoryManager();
 		return MemMan->MemorySize(mem);
 	}
 
-	mint M_CDECL _msize_base(void *mem)
+	size_t M_CDECL _msize_base(void *mem)
 	{
 		CDA_MemoryManager *MemMan = MACRO_GetDefaultMemoryManager();
 		return MemMan->MemorySize(mem);
 	}
 
-	mint M_CDECL _msize_dbg (void * ptr, int blockType) 
+	size_t M_CDECL _msize_dbg (void * ptr, int blockType) 
 	{
 		CDA_MemoryManager *MemMan = MACRO_GetDefaultMemoryManager();
 		return MemMan->MemorySize(ptr);
@@ -1427,18 +1663,18 @@ _XSetAttributesOnHeapAlloc@8
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 	
-	void* M_CDECL _expand(void *mem , mint size)
+	void* M_CDECL _expand(void *mem , size_t size)
 	{
 		return M_REALLOC(mem, size);
 	}
 	
-	void* M_CDECL _expand_base(void *mem , mint size)
+	void* M_CDECL _expand_base(void *mem , size_t size)
 	{
 		return M_REALLOC(mem, size);
 	}
 	
 #ifndef M_RTM
-	void* M_CDECL _expand_dbg(void *userData, mint newSize, int blockType, const char *filename, int linenumber)
+	void* M_CDECL _expand_dbg(void *userData, size_t newSize, int blockType, const char *filename, int linenumber)
 	{
 		CDA_MemoryManager *MemMan = MACRO_GetDefaultMemoryManager();
 
@@ -1457,7 +1693,7 @@ _XSetAttributesOnHeapAlloc@8
 \*************************************************************************************************/
 	
 	void * M_CDECL _nh_malloc (
-        mint nSize,
+        size_t nSize,
         int nhFlag
         )
 	{
@@ -1465,7 +1701,7 @@ _XSetAttributesOnHeapAlloc@8
 	}
 	
 	void * M_CDECL _nh_malloc_base (
-        mint nSize,
+        size_t nSize,
         int nhFlag
         )
 	{
@@ -1474,7 +1710,7 @@ _XSetAttributesOnHeapAlloc@8
 	
 #ifndef M_RTM
 	void * M_CDECL _nh_malloc_dbg (
-        mint nSize,
+        size_t nSize,
         int nhFlag,
         int nBlockUse,
         const char * szFileName,
@@ -1492,14 +1728,14 @@ _XSetAttributesOnHeapAlloc@8
 \*************************************************************************************************/
 	
 	void * M_CDECL _heap_alloc(
-        mint nSize
+        size_t nSize
         )
 	{
 		return malloc (nSize);
 	}
 	
 	void * M_CDECL _heap_alloc_base(
-        mint nSize
+        size_t nSize
         )
 	{
 		return malloc (nSize);
@@ -1507,7 +1743,7 @@ _XSetAttributesOnHeapAlloc@8
 	
 #ifndef M_RTM
 	void * M_CDECL _heap_alloc_dbg(
-        mint nSize,
+        size_t nSize,
         int nBlockUse,
         const char * szFileName,
         int nLine
@@ -1565,7 +1801,7 @@ _XSetAttributesOnHeapAlloc@8
 	{
 	}
 	
-	typedef int (M_CDECL * _CRT_ALLOC_HOOK)(int, void *, mint, int, long, const unsigned char *, int);
+	typedef int (M_CDECL * _CRT_ALLOC_HOOK)(int, void *, size_t, int, long, const unsigned char *, int);
 	
 	_CRT_ALLOC_HOOK M_CDECL _CrtSetAllocHook(
         _CRT_ALLOC_HOOK pfnNewHook
@@ -1578,7 +1814,7 @@ _XSetAttributesOnHeapAlloc@8
 	int M_CDECL CheckBytes(
         unsigned char * pb,
         unsigned char bCheck,
-        mint nSize
+        size_t nSize
         )
 	{
         return 1;
@@ -1622,7 +1858,7 @@ _XSetAttributesOnHeapAlloc@8
 	{
         return (
             pv != NULL
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(PLATFORM_XENON)
             && !IsBadReadPtr(pv, nBytes) &&
             (!bReadWrite || !IsBadWritePtr((LPVOID)pv, nBytes))
 #endif  /* _WIN32 */
@@ -1657,7 +1893,7 @@ _XSetAttributesOnHeapAlloc@8
 		return 0;
 	}
 	
-	typedef void (M_CDECL * _CRT_DUMP_CLIENT)(void *, mint);
+	typedef void (M_CDECL * _CRT_DUMP_CLIENT)(void *, size_t);
 	
 	_CRT_DUMP_CLIENT M_CDECL _CrtSetDumpClient(
         _CRT_DUMP_CLIENT pfnNewDump
@@ -1697,21 +1933,24 @@ _XSetAttributesOnHeapAlloc@8
 		
 		int Ref = pOM->m_ModuleCount;
 
+		// We need to remove any threads here because they are zonked otherwise
 #ifndef MRTC_DLL
-		if (MRTC_GetObjectManager()->m_pThreadPoolManagerInternal)
+		if (pOM->m_pThreadPoolManagerInternal)
 		{
-			delete MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
-			MRTC_GetObjectManager()->m_pThreadPoolManagerInternal = NULL;
+			pOM->m_pThreadPoolManagerInternal->~MRTC_ThreadPoolManagerInternal();
+			MRTC_GetMemoryManager()->Free(pOM->m_pThreadPoolManagerInternalMem);
+			pOM->m_pThreadPoolManagerInternal = NULL;
 		}
-		if (MRTC_GetObjectManager()->m_pForgiveContextInternal)
+		if (pOM->m_pForgiveContextInternal)
 		{
-			delete MRTC_GetObjectManager()->m_pForgiveContextInternal;
-			MRTC_GetObjectManager()->m_pForgiveContextInternal = NULL;
+			pOM->m_pForgiveContextInternal->~MRTC_ForgiveDebugNewInternal();
+			MRTC_GetMemoryManager()->Free(pOM->m_pForgiveContextInternal );
+			pOM->m_pForgiveContextInternal = NULL;
 		}
 
 		#ifdef MRTC_ENABLE_REMOTEDEBUGGER
 		#ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
-			if (MRTC_GetObjectManager()->m_pRemoteDebugger && mint(MRTC_GetObjectManager()->m_pRemoteDebugger) != 1)
+			if (MRTC_GetObjectManager()->m_pRemoteDebugger && size_t(MRTC_GetObjectManager()->m_pRemoteDebugger) != 1)
 			{
 				MRTC_GetObjectManager()->m_pRemoteDebugger->Destroy();
 				MRTC_GetObjectManager()->m_pRemoteDebugger->~MRTC_RemoteDebug();
@@ -1727,7 +1966,7 @@ _XSetAttributesOnHeapAlloc@8
 #ifdef M_SUPPORTMEMORYDEBUG
 			#ifdef MRTC_ENABLE_REMOTEDEBUGGER
 			#ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
-			if (MRTC_GetObjectManager()->m_pRemoteDebugger && mint(MRTC_GetObjectManager()->m_pRemoteDebugger) != 1)
+			if (MRTC_GetObjectManager()->m_pRemoteDebugger && size_t(MRTC_GetObjectManager()->m_pRemoteDebugger) != 1)
 				{
 					MRTC_GetObjectManager()->m_pRemoteDebugger->Destroy();
 					MRTC_GetObjectManager()->m_pRemoteDebugger->~MRTC_RemoteDebug();
@@ -1764,5 +2003,158 @@ _XSetAttributesOnHeapAlloc@8
 #endif
 }
 
+	extern "C"
+	{
+size_t __crtDebugFillThreshold = 0xFFFFFFFF;
+	
+	MemDeclNaR void * M_CDECL malloc(size_t);
+	MemDeclNa void M_CDECL free(void *);
+	MemDeclNaR void * M_CDECL realloc(void *, size_t);
+	MemDeclNaR void * M_CDECL calloc(size_t, size_t);
+	MemDeclNaR void * M_CDECL memalign(size_t, size_t);
+	
+	/*************************************************************************************************\
+	|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+	| malloc
+	|__________________________________________________________________________________________________
+	\*************************************************************************************************/
+
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| calloc
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+	
+	void * M_CDECL _calloc_impl (size_t nelem, size_t elsize, int * errno_tmp)
+	{
+		void * addr = malloc(nelem * elsize);
+		memset (addr, 0, nelem * elsize);
+		return addr;
+	}
+
+	void * M_CDECL _calloc_base (size_t nelem, size_t elsize)
+	{
+		void * addr = malloc(nelem * elsize);
+		memset (addr, 0, nelem * elsize);
+		return addr;
+	}
+
+		
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| free
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| memalign
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| realloc
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+
+	MemDeclNaR void * M_CDECL _recalloc(void * memblock,size_t count,size_t size)
+	{
+		return realloc(memblock, size * count);
+
+	}
+
+#undef _recalloc_dbg
+//#ifndef Dx86_64
+//	MemDeclNaR
+//#endif
+#ifndef M_RTM
+
+	void * M_CDECL _recalloc_dbg
+	(
+		void * memblock,
+		size_t count,
+		size_t size,
+		int nBlockUse,
+		const char * szFileName,
+		int nLine
+	)
+	{
+		size_t  size_orig=0;
+
+		size_orig = size * count;
+
+		return _realloc_dbg(memblock, size_orig, nBlockUse, szFileName, nLine);
+	}
 #endif
+
+
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| _msize
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+	
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| _expand
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+	
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| _nh_malloc
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+	
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| _heap_alloc
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+	
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| _free_lk
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+#ifndef PLATFORM_XENON
+	__declspec(noalias) void M_CDECL _freea_s(void *ptr)
+	{
+//		DIdsPDebugBreak;
+		if (ptr != NULL)
+		{
+			ptr = (char*)ptr - _ALLOCA_S_MARKER_SIZE;
+			if (*((size_t*)ptr) == _ALLOCA_S_HEAP_MARKER)
+			{
+				free(ptr);
+			}
+		}
+	}
+
 #endif
+				
+
+	
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| Debug routines
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+
+	
+	
+	
+	
+}
+
+
+#endif
+//#endif

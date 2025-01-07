@@ -26,6 +26,7 @@
 class SYSTEMDLLEXPORT CInputContextCore : public CInputContext
 {
 protected:
+	MRTC_CriticalSection m_InputLock;	// Sync-object for entire input system
 	static bool ms_bInputSysCreated;
 
 	uint32 m_KBState[512];
@@ -35,19 +36,17 @@ protected:
 
 	TPtr< TQueue<CScanKey> > m_spKBB;
 
-	CScanKey TmpDown;
-
 	//
-	fp4 m_FeedbackAmount;
+	fp32 m_FeedbackAmount;
 
 	// Mouse status
 	CRct m_MouseArea;
 	CPnt m_MousePos;
 	CPnt m_MouseMove;
-	CVec2Dfp4 m_MouseSensitivity;
+	CVec2Dfp32 m_MouseSensitivity;
 
 	int m_MouseWheel;
-	fp4 m_WheelSensitivity;
+	fp32 m_WheelSensitivity;
 
 	int m_MouseButtons;
 	int m_MouseButtonsAcc;
@@ -75,11 +74,13 @@ public:
 	// Input device interface
 private:
 	virtual bool QueueScanKey(CScanKey);
-public:
-	virtual void AddScanKey(CScanKey);
-	virtual void DownKey(int _ScanCode, wchar _Char, fp8 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0);
-	virtual void UpKey(int _ScanCode, fp8 _Time, int _Data0, int _Data1, int _iDevice = 0);
 
+protected:
+	virtual void AddScanKey(CScanKey);
+	virtual void DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0);
+	virtual void UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice = 0);
+
+public:
 	virtual bool IsGamepadValid(int _iPad) { return true; }
 	virtual bool IsGamepadActive(int _iPad);
 	virtual void SetGamepadMapping(int _iPadPhysical, int _iPadScanCode);
@@ -88,12 +89,10 @@ public:
 public:
 	// Scankey polling
 	virtual bool KeyPressed();
-	virtual CScanKey ScanKey();
+	virtual int GetScanKeys(CScanKey* _pDest, uint _nMax);
 
 	virtual bool IsPressed(int _skey);
 	virtual bool IsNotPressed(int _skey);
-	virtual bool IsPressed(int8 first, ... );		// Test state of multiple keys, terminate with 0
-	virtual bool IsNotPressed(int8 first, ... );	// Test state of multiple keys, terminate with 0
 
 	virtual bool AddShiftKey(int8 scancode);		// Add user shiftkeys, not implemented.
 	virtual bool RemoveShiftKey(int8 scancode);
@@ -113,6 +112,10 @@ public:
 	virtual void OnRefresh(int _Context);
 	virtual void OnBusy(int _Context);
 
+	// Remotedebugger inputs
+	virtual void RD_DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep = 1, int _Data0 = 0, int _Data1 = 0, int _iDevice = 0);
+	virtual void RD_UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice = 0);
+
 	// Force feedback
 public:
 	virtual int GetPhysicalPad(int _iPadMapped);
@@ -121,7 +124,7 @@ public:
 	virtual void RemoveEnvelope( int _index, CInputEnvelopeInstance *_pEnvelopeInstance );
 	virtual spCInputEnvelopeInstance AppendEnvelope( int _index, const CStr &_name );
 	virtual spCInputEnvelopeInstance SetEnvelope( int _index, const CStr &_name );
-	virtual void SetFeedbackAmount(fp4 _Amount) { m_FeedbackAmount = _Amount; }
+	virtual void SetFeedbackAmount(fp32 _Amount) { m_FeedbackAmount = _Amount; }
 
 	void Register(CScriptRegisterContext &_RegContext);
 

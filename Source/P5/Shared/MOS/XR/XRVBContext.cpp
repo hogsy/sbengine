@@ -23,6 +23,9 @@ int CXR_VBInfo::GetVBClass()
 void CXR_VBInfo::SetVBClass(int _iClass) 
 { 
 	MAUTOSTRIP(CXR_VBInfo_SetVBClass, MAUTOSTRIP_VOID);
+
+	M_ASSERT(_iClass <= CXR_VBINFO_CLASSMASK, "Too many VBClasses");
+
 	m_Stuff = 
 		(m_Stuff & CXR_VBINFO_FLAGSMASK) + 
 		(_iClass & CXR_VBINFO_CLASSMASK); 
@@ -37,6 +40,8 @@ int CXR_VBInfo::GetFlags()
 void CXR_VBInfo::SetFlags(int _Flags) 
 { 
 	MAUTOSTRIP(CXR_VBInfo_SetFlags, MAUTOSTRIP_VOID);
+
+	M_ASSERT((_Flags << CXR_VBINFO_FLAGSSHIFT) <= CXR_VBINFO_FLAGSMASK, "Too many VBFlags");
 	m_Stuff = 
 		((_Flags << CXR_VBINFO_FLAGSSHIFT) & CXR_VBINFO_FLAGSMASK) + 
 		(m_Stuff & CXR_VBINFO_CLASSMASK); 
@@ -304,3 +309,33 @@ void CXR_VBContext::Precache_Flush()
 		}
 }
 
+
+void CXR_VBContext::LogUsed(CStr _FileName)
+{
+	MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
+	if (pSys)
+	{
+		// Write resourse log
+		CCFile ResourceLog;
+		
+		if (!_FileName.Len())
+			_FileName = pSys->m_ExePath + "\\VBs.vul";
+
+		ResourceLog.Open(_FileName, CFILE_WRITE);
+
+		uint32 NumFound = 0;
+		ResourceLog.WriteLE(NumFound);
+		
+		for (int i = 0; i < GetIDCapacity(); ++i)
+		{
+			if(VB_GetFlags(i) & CXR_VBFLAGS_PRECACHE)
+			{
+				CStr str = VB_GetName(i);
+				str.Write(&ResourceLog);
+			}
+		}
+		// Rewrite num found
+		ResourceLog.Seek(0);
+		ResourceLog.WriteLE(NumFound);
+	}
+}

@@ -1,0 +1,122 @@
+
+
+Stub:
+	EMPTY=
+	SPACE=$(EMPTY) $(EMPTY)
+
+	LEFTPAR=$(EMPTY)($(EMPTY)
+	RIGHTPAR=$(EMPTY))$(EMPTY)
+	FIXED_SCE_PS3_ROOT :=  $(subst $(LEFTPAR),\$(LEFTPAR),$(subst $(RIGHTPAR),\$(RIGHTPAR),$(subst $(SPACE),\$(SPACE),$(subst \,/,$(SCE_PS3_ROOT)))))
+	FIXED_SN_PS3_PATH :=  $(subst $(LEFTPAR),\$(LEFTPAR),$(subst $(RIGHTPAR),\$(RIGHTPAR),$(subst $(SPACE),\$(SPACE),$(subst \,/,$(SN_PS3_PATH)))))
+
+	BIN_LIB := $(FIXED_SCE_PS3_ROOT)/host-win32/bin
+	PPU_BIN_LIB := $(FIXED_SCE_PS3_ROOT)/host-win32/ppu/bin
+	SPU_BIN_LIB := $(FIXED_SCE_PS3_ROOT)/host-win32/spu/bin
+	SN_BIN := $(FIXED_SN_PS3_PATH)/bin
+	
+	CCACHE :=
+	DISTCC := distcc
+	PPU_CC := $(PPU_BIN_LIB)/ppu-lv2-gcc
+	PPU_AR := $(PPU_BIN_LIB)/ppu-lv2-ar
+	PPU_RANLIB := $(PPU_BIN_LIB)/ppu-lv2-ranlib
+	PPU_LD := $(PPU_BIN_LIB)/ppu-lv2-ld
+	PPU_OBJCOPY := $(PPU_BIN_LIB)/ppu-lv2-objcopy
+
+	MAKE_SELF := $(BIN_LIB)/make_fself
+	COPY := cp
+	MAdditionalPS3Compile := -Wno-non-virtual-dtor -Wno-sign-compare -Wno-conversion -Wno-multichar -Wno-unused -Werror
+
+	SPU_CC := $(SPU_BIN_LIB)/spu-lv2-gcc
+	SPU_MODGEN := $(SN_BIN)/spumodgen.exe
+	
+	
+	SPU_INCLUDES := -I $(FIXED_SN_PS3_PATH)/spu/include/sn -I $(SolutionDir)/Shared/MCC
+	SPU_DEFS := -DSN_TARGET_PS3_SPU -D__GCC__ -DSPU	
+	SPU_CPP_OPTIONS := -Wall -Wno-multichar -fno-exceptions -fcheck-new -fno-strict-aliasing -finline-functions -ffunction-sections -fdata-sections
+	SPU_OBJCOPY_OPTIONS := -I binary -O elf64-powerpc-celloslv2 -B powerpc --set-section-align .data=7 --set-section-pad .data=128
+	SPU_LIBS := -ldma -latomic -lsputhread
+
+	SPURS_CPP_OPTIONS := -fpic -fstack-check -Wall -Wno-multichar -fno-exceptions -fcheck-new -fno-strict-aliasing -finline-functions -ffunction-sections -fdata-sections
+	SPURS_LD_OPTIONS := -fpic -nostartfiles -Ttext=0 -Wl,-q -e cellSpursJobMain
+	SPURS_LIBS := -ldma -latomic -lsputhread -lspurs
+	SPURS_DEFS := -DSN_TARGET_PS3_SPU -D__GCC__ -DSPU
+
+	
+	PPU_LD_DEPS :=
+	
+	COMPILE := -c
+	DEPEND := -MP -MM -MQ
+	
+	ERRORCONV := 2>&1| xargs -0 perl $(SCRIPT_PATH)/gcc2vc.pl $(SolutionDir)
+	CC_ERRORCONV := $(ERRORCONV)
+	LINK_ERRORCONV :=
+	
+	PPU_LN_VERBOSE := @
+	PPU_CC_VERBOSE := @
+	SPU_VERBOSE := @
+	SPURS_VERBOSE := @
+	
+# Uncomment the line below if you want the map file
+#	SPU_MAP = -Map=$(basename $@).spu.map 
+	
+#	cp $< "$(basename $@)$(suffix $<)"
+	
+SpuBuild:
+	@echo SPU-CC $<
+	$(SPU_VERBOSE)$(SPU_CC) $(COMPILE) -g -Os $(SPU_INCLUDES) $(SPU_DEFS) $(SPU_CPP_OPTIONS) -o $(basename $@).spu.o $< $(ERRORCONV)
+	$(SPU_VERBOSE)$(SPU_CC) $(DEPEND) $@ -g $(SPU_INCLUDES) $(SPU_DEFS) $< > $(basename $@).d
+	$(SPU_VERBOSE)$(SPU_CC) -g -o $@ $(basename $@).spu.o $(SPU_LIBS) -Wl,--gc-sections,$(SPU_MAP)
+#	$(SPU_VERBOSE)cd S:/Projects/P5/ContentCompile/PS3/System/PS3Exes && $(SPU_CC) -g -o $(notdir $@) s:/Source/P5/$(basename $@).spu.o $(SPU_LIBS) -Wl,--gc-sections,$(SPU_MAP)
+#	$(SPU_VERBOSE)cd S:/Projects/P5/Build/System/PS3Exes && $(SPU_CC) -g -o $(notdir $@) s:/Source/P5/$(basename $@).spu.o $(SPU_LIBS) -Wl,--gc-sections,$(SPU_MAP) 
+#	$(SPU_MODGEN) -s $(basename $@).elf
+#	$(SPU_VERBOSE)PostCopy $@ $(SolutionName) $(basename $(notdir $@)).elf
+
+
+SpursBuild:
+	@echo SPURS-CC $<
+	$(SPURS_VERBOSE)$(SPU_CC) $(COMPILE) -g $(SPU_INCLUDES) $(SPURS_DEFS) $(SPURS_CPP_OPTIONS) -o $(basename $@).spu.o $< $(ERRORCONV)
+	$(SPURS_VERBOSE)$(SPU_CC) $(DEPEND) $@ -g $(SPU_INCLUDES) $(SPURS_DEFS) $< > $(basename $@).d
+	$(SPURS_VERBOSE)$(SPU_CC) -g -o $(basename $@).spu.elf $(basename $@).spu.o $(SPURS_LD_OPTIONS) $(SPURS_LIBS) -Wl,--gc-sections,$(SPU_MAP)
+	$(SPURS_VERBOSE)$(PPU_OBJCOPY) --debugging -I binary -O elf64-powerpc-celloslv2 -B powerpc --set-section-align .data=7 --set-section-pad .data=128 --rename-section .data=SPURS_SECTION --set-section-flags .bss=load,contents $(basename $@).spu.elf $@
+
+Translate:
+	Optimization = 4 							:: -O3
+	Optimization = 0 							:: -O0
+	InlineFunctionExpansion= 2					:: -finline-functions
+	InlineFunctionExpansion= 1					::
+	InlineFunctionExpansion= 0					::
+	WarnAsError = TRUE							:: -Werror
+	WarningLevel = 3							:: -Wall				#all warnings
+	WarningLevel = 0							:: -w					#no warnings
+	RuntimeTypeInfo = false							:: -fno-rtti
+	RuntimeTypeInfo = true							:: -frtti
+	
+Skip:
+	UsePrecompiledHeader
+	GlobalOptimizations
+	EnableIntrinsicFunctions
+	FavorSizeOrSpeed
+	OmitFramePointers
+	OptimizeForProcessor
+	StringPooling
+	RuntimeLibrary
+	EnableFunctionLevelLinking
+	TreatWChar_tAsBuiltInType
+	ForceConformanceInForLoopScope
+	ProgramDataBaseFileName
+	SuppressStartupBanner
+	Detect64BitPortabilityProblems
+	CompileAs
+	DebugInformationFormat
+	SmallerTypeCheck
+	BasicRuntimeChecks
+	BufferSecurityCheck
+	Name								# dummy these should go elsewhere
+	PrecompiledHeaderFile
+	PrecompiledHeaderThrough
+	AssemblerListingLocation
+	ObjectFile 
+	
+#Files:
+#	MMath.cpp		:: -O3 -funsafe-math-optimizaton
+#	Mrtc.cpp		:: -O1 -traditional

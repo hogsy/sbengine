@@ -17,6 +17,7 @@
 #include "PCH.h"
 #include "MFile.h"
 
+
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 | CDataFileNode
@@ -56,13 +57,16 @@ CDataFileNode2::CDataFileNode2()
 
 void CDataFileNode2::Read(CCFile* _pFile)
 {
-	_pFile->Read(&m_NodeName, sizeof(m_NodeName));
-	_pFile->ReadLE(m_OffsetNext);
-	_pFile->ReadLE(m_OffsetSubDir);
-	_pFile->ReadLE(m_OffsetData);
-	_pFile->ReadLE(m_Size);
-	_pFile->ReadLE(m_UserData);
-	_pFile->ReadLE(m_UserData2);
+	M_STATIC_ASSERT(sizeof(*this) == (sizeof(m_NodeName) + sizeof(m_OffsetNext) + sizeof(m_OffsetSubDir) 
+	                                + sizeof(m_OffsetData) + sizeof(m_Size) + sizeof(m_UserData) + sizeof(m_UserData2)));
+
+	_pFile->Read(this, sizeof(*this));
+	::SwapLE(m_OffsetNext);
+	::SwapLE(m_OffsetSubDir);
+	::SwapLE(m_OffsetData);
+	::SwapLE(m_Size);
+	::SwapLE(m_UserData);
+	::SwapLE(m_UserData2);
 }
 
 void CDataFileNode2::Write(CCFile* _pFile, bool _bPretend)
@@ -1100,6 +1104,7 @@ void CDataFile::EndEntry(int32 _UserData, int32 _UserData2)
 			pN->m_Node.m_Size = Pos - pN->m_Node.m_OffsetData;
 			pN->m_Node.m_UserData = _UserData;
 			pN->m_Node.m_UserData2 = _UserData2;
+			pN->m_lData.OptimizeMemory();
 		}
 		break;
 
@@ -1110,6 +1115,7 @@ void CDataFile::EndEntry(int32 _UserData, int32 _UserData2)
 			pN->m_Node.m_UserData = _UserData;
 			pN->m_Node.m_UserData2 = _UserData2;
 			m_CreateStream.Close();
+			pN->m_lData.OptimizeMemory();
 
 //			LogFile(CStrF("    Node %d, %d, %s", pN->m_Node.m_Size, pN->m_lData.Len(), &pN->m_Node.m_NodeName[0]));
 		}

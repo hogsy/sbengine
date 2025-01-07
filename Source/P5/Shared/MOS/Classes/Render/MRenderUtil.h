@@ -13,7 +13,7 @@ class CXR_VertexBuffer;
 class SYSTEMDLLEXPORT CRC_ConsoleViewport : public CRC_Viewport, public CConsoleClient
 {
 	bool m_bRegister;
-	fp4 m_TargetFOV;
+	fp32 m_TargetFOV;
 	CMTime m_LastRefresh;
 
 public:
@@ -29,11 +29,11 @@ public:
 	virtual void ReadSettings(CRegistry* _pReg);
 	virtual void WriteSettings(CRegistry* _pReg);
 
-	virtual void Con_SetFOV(fp4);
-	virtual void Con_Zoom(fp4);
-	virtual void Con_SetAspectRatio(fp4);
-	virtual void Con_SetFrontPlane(fp4);
-	virtual void Con_SetBackPlane(fp4);
+	virtual void Con_SetFOV(fp32);
+	virtual void Con_Zoom(fp32);
+	virtual void Con_SetAspectRatio(fp32);
+	virtual void Con_SetFrontPlane(fp32);
+	virtual void Con_SetBackPlane(fp32);
 
 	void Register(CScriptRegisterContext &_RegContext);
 };
@@ -45,14 +45,14 @@ typedef TPtr<CRC_ConsoleViewport> spCRC_ConsoleViewport;
 // -------------------------------------------------------------------
 #define CRC_CHARDESC_VERSION	0x0200
 
-class CRC_FontChar
+class M_ALIGN(8) CRC_FontChar
 {
 public:
+	CVec2Dfp32 m_TVec0;
+	CVec2Dfp32 m_TVec1;
+	CVec2Dfp32 m_Dimensions;
 	int16 m_xOfs;
 	int16 m_yOfs;
-	CVec2Dfp4 m_TVec0;
-	CVec2Dfp4 m_TVec1;
-	CVec2Dfp4 m_Dimensions;
 	int16 m_iLocal;
 	int16 m_Spacing;
 	wchar m_Char;
@@ -85,10 +85,12 @@ class SYSTEMDLLEXPORT CRC_Font : public CReferenceCount
 	};
 
 
-	TList_Vector<CRC_FontChar> m_lCharDesc;
+	TArray<CRC_FontChar> m_lCharDesc;
 	CRC_CharHash m_CharDescHash;
 
-	fp4 m_OriginalSize;
+	fp32 m_OriginalSize;
+	fp32 m_OriginalSizeRcp;
+	CVec2Dfp32 m_TexturePixelUV;
 	CStr m_TextureName;
 	int m_yOfs;
 
@@ -105,22 +107,22 @@ public:
 	void BuildCharDescHash();
 	CRC_FontChar& GetCharDesc(wchar _Char);		// Returns '?' on missing chars
 
-	virtual fp4 GetOriginalSize();
+	virtual fp32 GetOriginalSize();
 
-	virtual fp4 GetWidth(fp4 _Size, const char* _pStr);
-	virtual fp4 GetWidthOfCL(int CharLength, const char* _pStr);
-	virtual fp4 GetHeight(fp4 _Size, const char* _pStr);
-	virtual int GetFit(fp4 _Size, const char* _pStr, int _Width, bool _bWordWrap);
+	virtual fp32 GetWidth(fp32 _Size, const char* _pStr);
+	virtual fp32 GetWidthOfCL(int CharLength, const char* _pStr);
+	virtual fp32 GetHeight(fp32 _Size, const char* _pStr);
+	virtual int GetFit(fp32 _Size, const char* _pStr, int _Width, bool _bWordWrap);
 
-	virtual fp4 GetWidth(fp4 _Size, const wchar* _pStr);
-	virtual fp4 GetWidthOfCL(int CharLength, const wchar* _pStr);
-	virtual fp4 GetHeight(fp4 _Size, const wchar* _pStr);
-	virtual int GetFit(fp4 _Size, const wchar* _pStr, int _Width, bool _bWordWrap);
+	virtual fp32 GetWidth(fp32 _Size, const wchar* _pStr);
+	virtual fp32 GetWidthOfCL(int CharLength, const wchar* _pStr);
+	virtual fp32 GetHeight(fp32 _Size, const wchar* _pStr);
+	virtual int GetFit(fp32 _Size, const wchar* _pStr, int _Width, bool _bWordWrap);
 
-	virtual fp4 GetWidth(fp4 _Size, CStr _Str);
-	virtual fp4 GetHeight(fp4 _Size, CStr _Str);
-	virtual fp4 GetWidthOfCL(int CharLength, CStr _pStr);
-	virtual int GetFit(fp4 _Size, CStr _Str, int _Width, bool _bWordWrap);
+	virtual fp32 GetWidth(fp32 _Size, CStr _Str);
+	virtual fp32 GetHeight(fp32 _Size, CStr _Str);
+	virtual fp32 GetWidthOfCL(int CharLength, CStr _pStr);
+	virtual int GetFit(fp32 _Size, CStr _Str, int _Width, bool _bWordWrap);
 
 	static int IsControlCode(const char *_pStr, int _iPos);
 	static int IsControlCode(const wchar *_pStr, int _iPos);
@@ -143,30 +145,30 @@ public:
 #endif
 
 	// Rendering
-	virtual int Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol, uint16* _piPrim, 
-		CPixel32 _Color, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
-	virtual int Write(int _MaxV, CVec3Dfp4* _pV, CVec2Dfp4* _pTV, CPixel32* _pCol, uint16* _piPrim, 
-		CPixel32 _Color, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
+	virtual int Write(int _MaxV, CVec3Dfp32* _pV, CVec2Dfp32* _pTV, CPixel32* _pCol, uint16* _piPrim, 
+		CPixel32 _Color, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
+	virtual int Write(int _MaxV, CVec3Dfp32* _pV, CVec2Dfp32* _pTV, CPixel32* _pCol, uint16* _piPrim, 
+		CPixel32 _Color, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
 
 	// wchar, calls Write()
-	virtual void Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
-	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const wchar* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
+	virtual void Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
+	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const wchar* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
 
 	// char, convertes to UNICODE and calls wchar version.
-	virtual void Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
-	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, const char* _pStr, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
+	virtual void Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
+	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const char* _pStr, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
 
 	// CStr, calls either char or wchar version depending on format.
-	virtual void Write(CRenderContext* _pRC, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, CStr _Str, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
-	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp4& _Pos, const CVec3Dfp4& _Dir, const CVec3Dfp4& _VDown, CStr _Str, 
-		const CVec2Dfp4& _Size, CPixel32 _Color, const CVec2Dfp4& _MinLimit = 0, const CVec2Dfp4& _MaxLimit = 10000);
+	virtual void Write(CRenderContext* _pRC, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const CStr& _Str, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
+	virtual bool Write(CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, const CVec3Dfp32& _Pos, const CVec3Dfp32& _Dir, const CVec3Dfp32& _VDown, const CStr& _Str, 
+		const CVec2Dfp32& _Size, CPixel32 _Color, const CVec2Dfp32& _MinLimit = 0, const CVec2Dfp32& _MaxLimit = 10000);
 };
 
 typedef TPtr<CRC_Font> spCRC_Font;

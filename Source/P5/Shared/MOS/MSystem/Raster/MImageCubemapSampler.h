@@ -44,21 +44,21 @@ public:
 	void SmoothCubemapEdges();
 	static void SmoothCubemapEdges_SingleImage(CImage* _pImg);
 
-	static CVec3Dfp4 CreateSampleVector(int _iSide, fp4 _a, fp4 _b)
+	static CVec3Dfp32 CreateSampleVector(int _iSide, fp32 _a, fp32 _b)
 	{
 		switch(_iSide)
 		{
-		case IMAGE_CUBEMAPSIDE_POSX:	return CVec3Dfp4( 1.0f, -_a, _b);
-		case IMAGE_CUBEMAPSIDE_NEGX:	return CVec3Dfp4(-1.0f, _a, _b);
-		case IMAGE_CUBEMAPSIDE_POSY:	return CVec3Dfp4( _a,  1.0f, _b);
-		case IMAGE_CUBEMAPSIDE_NEGY:	return CVec3Dfp4(-_a, -1.0f, _b);
-		case IMAGE_CUBEMAPSIDE_POSZ:	return CVec3Dfp4(-_b,-_a, 1.0f);
-		case IMAGE_CUBEMAPSIDE_NEGZ:	return CVec3Dfp4( _b,-_a, -1.0f);
+		case IMAGE_CUBEMAPSIDE_POSX:	return CVec3Dfp32( 1.0f, -_a, _b);
+		case IMAGE_CUBEMAPSIDE_NEGX:	return CVec3Dfp32(-1.0f, _a, _b);
+		case IMAGE_CUBEMAPSIDE_POSY:	return CVec3Dfp32( _a,  1.0f, _b);
+		case IMAGE_CUBEMAPSIDE_NEGY:	return CVec3Dfp32(-_a, -1.0f, _b);
+		case IMAGE_CUBEMAPSIDE_POSZ:	return CVec3Dfp32(-_b,-_a, 1.0f);
+		case IMAGE_CUBEMAPSIDE_NEGZ:	return CVec3Dfp32( _b,-_a, -1.0f);
 		}
 
-		return CVec3Dfp4(0, 0, 0);
+		return CVec3Dfp32(0, 0, 0);
 	}
-	CPixel32 SampleVector(const CVec3Dfp4& _Vector) const;
+	CPixel32 SampleVector(const CVec3Dfp32& _Vector) const;
 };
 
 

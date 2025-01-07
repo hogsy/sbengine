@@ -70,11 +70,12 @@ public:
 class SYSTEMDLLEXPORT CConsole : public CConsoleClient
 {
 	friend class CXRealityApp;
+	friend class CConsoleDlg;
 	MRTC_DECLARE;
 
 	CStr m_ObjectName;
 
-	TList_Vector<CConsoleString> m_lOutput;
+	TArray<CConsoleString> m_lOutput;
 	int m_Head;
 	int m_Tail;
 	int m_DisplayPos;
@@ -85,14 +86,14 @@ class SYSTEMDLLEXPORT CConsole : public CConsoleClient
 	bool m_bEnableConsole;
 
 	CStrEdit m_CommandLineEdit;
-	TList_Vector<CConsoleClient*> m_lSubSystems;
+	TArray<CConsoleClient*> m_lSubSystems;
 	/* 
 	(i)		Console clients* can't be sp's.
 			Since CConsole is a client, CConsole would become undeletable since it's 
 			SubSystemList would own CConsole and thus itself. => "owner-loop"
 	*/
 
-	TList_Vector<CStr> m_lConHistory;
+	TArray<CStr> m_lConHistory;
 	int m_HistoryPos;
 	int m_ConMode;
 
@@ -106,7 +107,7 @@ class SYSTEMDLLEXPORT CConsole : public CConsoleClient
 		CStr m_Program;
 		TPtr<CScript> m_spScript;
 		spCScriptExecutionContext m_spExecutionContext;
-		fp8 m_Time;
+		fp64 m_Time;
 		int32 m_Args[CONSOLE_NUMBINDARGS];
 
 		CKeyBindScript();
@@ -154,10 +155,10 @@ class SYSTEMDLLEXPORT CConsole : public CConsoleClient
 	};
 
 	// ------------------------------------------
-	TList_Vector<CKeyBind> m_lKeyBind;
-	TList_Vector<CScriptInstance> m_lScriptInstances;
+	TArray<CKeyBind> m_lKeyBind;
+	TArray<CScriptInstance> m_lScriptInstances;
 
-	fp8 m_CurrentTimeStamp;
+	fp64 m_CurrentTimeStamp;
 
 	class CWriteCallback
 	{
@@ -190,7 +191,7 @@ class SYSTEMDLLEXPORT CConsole : public CConsoleClient
 
 	void ExecuteStringLooseSyntax(CStr _Str, const char *_pSourceFile = "CConsole::ExecuteString", int _LineOffset = 0);
 
-	void StartBinding(CKeyBind* pBind, int _Type, fp8 _Time, CScanKey _ScanKey);
+	void StartBinding(CKeyBind* pBind, int _Type, fp64 _Time, CScanKey _ScanKey);
 	void ExecuteBinding(CKeyBind* pBind, CKeyBindScript* pBindScript, int _Flags);
 	void ExecuteBinding(CKeyBind* pBind);
 	void StopBinding(CKeyBind* pBind);
@@ -225,6 +226,7 @@ public:
 public:
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
 	MRTC_RemoteDebugChannel *m_pRDChannel;
+	MRTC_RemoteDebugChannel *m_pRDChannelTrace;
 #endif
 
 	TPtr<CScriptContext> m_spParser;
@@ -232,7 +234,7 @@ public:
 
 	CConsoleString* GetOutputHead();
 	CConsoleString* GetOutputTail();
-//	TList_Vector<CStr>* GetOutput();
+//	TArray<CStr>* GetOutput();
 	CStrEdit* GetCommandLineEdit();
 
 
@@ -248,7 +250,7 @@ public:
 	void Write(const CStr& _Str);
 	void WriteExceptions();
 
-	fp8 GetBindingTimeStamp();				// -1 if invalid
+	fp64 GetBindingTimeStamp();				// -1 if invalid
 
 	void ExecuteString(CStr _Str, const char *_pSourceFile = "CConsole::ExecuteString", int _LineOffset = 0);
 
@@ -279,7 +281,7 @@ typedef TPtr<CConsole> spCConsole;
 class SYSTEMDLLEXPORT CConsoleRender : public CReferenceCount
 {
 protected:
-//	TList_Vector<CStr>* GetConsoleOutput(CConsole* pCon) { return &pCon->m_lOutput; }
+//	TArray<CStr>* GetConsoleOutput(CConsole* pCon) { return &pCon->m_lOutput; }
 
 public:
 	virtual void Render(CConsole* pCon, CClipRect cr, CImage* img, CPnt pos);

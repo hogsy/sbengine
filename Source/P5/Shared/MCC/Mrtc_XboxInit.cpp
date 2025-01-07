@@ -1,5 +1,5 @@
 
-
+#if 0
 extern void MRTC_CreateObjectManager();
 extern void MRTC_DestroyObjectManager();
 
@@ -20,3 +20,4 @@ public:
 };
 CInitFirst Init;
 
+#endif

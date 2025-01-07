@@ -17,9 +17,13 @@ class				CDisplayContext				9703??  -				Abstract CDisplayContext
 
 enum
 {
-	CDC_CLEAR_COLOR		=1,
-	CDC_CLEAR_ZBUFFER	=2,
-	CDC_CLEAR_STENCIL	=4,
+	CDC_CLEAR_COLOR		= 0x0001,
+	CDC_CLEAR_COLOR0	= CDC_CLEAR_COLOR,
+	CDC_CLEAR_COLOR1	= 0x0002,
+	CDC_CLEAR_COLOR2	= 0x0004,
+	CDC_CLEAR_COLOR3	= 0x0008,
+	CDC_CLEAR_ZBUFFER	= 0x0010,
+	CDC_CLEAR_STENCIL	= 0x0020,
 
 	CDC_WINFLAGS_SINGLEBUFFER =1,
 };
@@ -72,12 +76,12 @@ public:
 class SYSTEMDLLEXPORT CDisplayContext : public CConsoleClient, public CSubSystem
 {
 protected:
-	TList_SortableVector<spCDC_VideoMode> m_lspModes;		// This is a pointer list because CImage doesn't have operator=
+	TArray_Sortable<spCDC_VideoMode> m_lspModes;		// This is a pointer list because CImage doesn't have operator=
 
 	
 	int		m_DisplayModeNr;
-	fp4		m_fScreenAspect;	// Added by Talbot
-	fp4		m_fPixelAspect;	// Added by Talbot
+	fp32		m_fScreenAspect;	// Added by Talbot
+	fp32		m_fPixelAspect;	// Added by Talbot
 	int		m_iRefreshRate;			// Added by Talbot
 	int		m_bPendingScreenshot;
 	bool	m_bProgressiveScan;		// Added by Talbot
@@ -96,6 +100,7 @@ public:
 	virtual void* GetOwner();
 
 	virtual CPnt GetScreenSize() pure;
+	virtual CPnt GetMaxWindowSize() pure;
 
 	virtual void SetMode(int nr) pure;
 	virtual int GetMode();
@@ -104,10 +109,10 @@ public:
 	virtual bool IsWidescreen()				{ return (m_bIsWideSreen);}			// Added by Talbot
 	virtual void SetWidescreen(bool _bWide)				{ m_bIsWideSreen = _bWide;}			// Added by Talbot
 
-	virtual void SetScreenAspect(fp4 _aspect)	{ m_fScreenAspect = _aspect;}								// Added by Talbot
-	virtual fp4  GetScreenAspect()		{ return m_fScreenAspect;	}								// Added by Talbot
-	virtual void SetPixelAspect(fp4 _aspect)	{ m_fPixelAspect = _aspect;}								// Added by Talbot
-	virtual fp4  GetPixelAspect()		{ return m_fPixelAspect;	}								// Added by Talbot
+	virtual void SetScreenAspect(fp32 _aspect)	{ m_fScreenAspect = _aspect;}								// Added by Talbot
+	virtual fp32  GetScreenAspect()		{ return m_fScreenAspect;	}								// Added by Talbot
+	virtual void SetPixelAspect(fp32 _aspect)	{ m_fPixelAspect = _aspect;}								// Added by Talbot
+	virtual fp32  GetPixelAspect()		{ return m_fPixelAspect;	}								// Added by Talbot
 	
 	virtual bool IsProgressive()			{return m_bProgressiveScan;}									// Added by Talbot
 	virtual void SetProgressive(bool _scan) { m_bProgressiveScan = _scan;}									// Added by Talbot
@@ -115,7 +120,7 @@ public:
 	virtual int  GetRefreshRate()			{ return m_iRefreshRate;}										// Added by Talbot
 	virtual void SetRefreshRate(int _rate)	{ if(_rate != 60) _rate = 50; m_iRefreshRate = _rate;}			// Added by Talbot
 	
-	virtual void SetScreenRatio(int _Width, int _Height, fp4 _PixelAspect);
+	virtual void SetScreenRatio(int _Width, int _Height, fp32 _PixelAspect);
 
 	virtual int PageFlip();
 	virtual void Update() {}

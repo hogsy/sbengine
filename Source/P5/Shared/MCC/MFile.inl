@@ -8,9 +8,8 @@ M_INLINE fint CCFile::Pos()
 		return ((CStream_XDF *)m_pStream)->INL_Pos();
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.Pos();
-	default:
-		return m_pStream->Pos();
 	}
+	return m_pStream->Pos();
 };
 
 M_INLINE fint CCFile::Length()
@@ -22,9 +21,8 @@ M_INLINE fint CCFile::Length()
 		return ((CStream_XDF *)m_pStream)->INL_Length();
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.Len();
-	default:
-		return m_pStream->Length();
 	}
+	return m_pStream->Length();
 };
 
 M_INLINE void CCFile::Seek(fint pos)
@@ -85,11 +83,11 @@ M_INLINE bool CCFile::EndOfFile()
 	{
 	case ECCFile_Stream_XDF:
 		return ((CStream_XDF *)m_pStream)->INL_EndOfFile();
+
 	case ECCFile_Stream_Disk:
 		return ((CStream_Disk *)m_pStream)->m_Stream.EndOfFile();
-	default:
-		return m_pStream->EndOfFile();
 	}
+	return m_pStream->EndOfFile();
 };
 
 // --------------------------------
@@ -206,30 +204,30 @@ M_INLINE void CCFile::WriteLE(const int32* _pData, int _Count)
 	}
 }
 
-M_INLINE void CCFile::WriteLE(const fp4* _pData, int _Count)
+M_INLINE void CCFile::WriteLE(const fp32* _pData, int _Count)
 {
 	const int TSize = 4;
-	fp4 Buff[256];
+	fp32 Buff[256];
 	while(_Count)
 	{
 		int c2 = Min(256, _Count);
 		memcpy(Buff, _pData, c2*TSize);
-		SwitchArrayLE_fp4(Buff, c2);
+		SwitchArrayLE_fp32(Buff, c2);
 		Write(Buff, c2*TSize);
 		_pData += c2;
 		_Count -= c2;
 	}
 }
 
-M_INLINE void CCFile::WriteLE(const fp8* _pData, int _Count)
+M_INLINE void CCFile::WriteLE(const fp64* _pData, int _Count)
 {
 	const int TSize = 4;
-	fp8 Buff[256];
+	fp64 Buff[256];
 	while(_Count)
 	{
 		int c2 = Min(256, _Count);
 		memcpy(Buff, _pData, c2*TSize);
-		SwitchArrayLE_fp8(Buff, c2);
+		SwitchArrayLE_fp64(Buff, c2);
 		Write(Buff, c2*TSize);
 		_pData += c2;
 		_Count -= c2;
@@ -306,30 +304,30 @@ M_INLINE void CCFile::ReadLE(int32* _pData, int _Count)
 	}
 }
 
-M_INLINE void CCFile::ReadLE(fp4* _pData, int _Count)
+M_INLINE void CCFile::ReadLE(fp32* _pData, int _Count)
 {
 	const int TSize = 4;
-	fp4 Buff[256];
+	fp32 Buff[256];
 	while(_Count)
 	{
 		int c2 = Min(256, _Count);
 		Read(Buff, c2*TSize);
-		SwitchArrayLE_fp4(Buff, c2);
+		SwitchArrayLE_fp32(Buff, c2);
 		memcpy(_pData, Buff, c2*TSize);
 		_pData += c2;
 		_Count -= c2;
 	}
 }
 
-M_INLINE void CCFile::ReadLE(fp8* _pData, int _Count)
+M_INLINE void CCFile::ReadLE(fp64* _pData, int _Count)
 {
 	const int TSize = 8;
-	fp8 Buff[256];
+	fp64 Buff[256];
 	while(_Count)
 	{
 		int c2 = Min(256, _Count);
 		Read(Buff, c2*TSize);
-		SwitchArrayLE_fp8(Buff, c2);
+		SwitchArrayLE_fp64(Buff, c2);
 		memcpy(_pData, Buff, c2*TSize);
 		_pData += c2;
 		_Count -= c2;

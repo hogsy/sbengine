@@ -55,8 +55,8 @@ public:
 		bool m_bEOF;
 		int m_iCurrentFrame;
 
-		fp8 m_Time;
-		fp8 m_LastAddedTime;
+		fp64 m_Time;
+		fp64 m_LastAddedTime;
 
 		class CFrame
 		{
@@ -64,7 +64,7 @@ public:
 			CFrame() : m_Time(0), m_iFrame(0), m_bFrameShown(0) 
 			{
 			}
-			fp8 m_Time;
+			fp64 m_Time;
 			int m_iFrame;
 			CImage m_Y;
 			CImage m_UV;
@@ -78,9 +78,9 @@ public:
 		CFrame *m_pFinishedFrames[ENumFrames];
 		int m_iFinishedProduce;
 		int m_iFinishedConsume;
-		fp8 m_FrameTime;
-		fp8 m_OriginalFrameTime;
-		fp8 m_SoundOffset;
+		fp64 m_FrameTime;
+		fp64 m_OriginalFrameTime;
+		fp64 m_SoundOffset;
 
 		CTC_TheoraTexture *m_pTexture;
 
@@ -129,6 +129,7 @@ public:
 		void PauseSound();
 
 		bool DoWork();
+		const char* Thread_GetName() const;
 		int Thread_Main();
 		CFrame *GetFreeFrame();
 		CMTime GetNextFrameTime();
@@ -157,12 +158,11 @@ public:
 	//
 	CMTime m_TimeLastVisible;
 	CMTime m_VideoTimeStart;
-	int32 m_CloseTimeoutDelay;
 	bool m_bBroken;
 	bool m_bWasRendered;
 	int32 m_TextureWidth;
 	int32 m_TextureHeight;
-	fp8 m_FrameTime;
+	fp64 m_FrameTime;
 
 	MRTC_CriticalSection m_TextureLock;
 
@@ -192,7 +192,7 @@ class CTextureContainer_Video_Theora : public CTextureContainer_Video
 
 protected:
 	TArray<spCTC_TheoraTexture> m_lspVideos;
-	fp4 m_CloseTimeOut;
+	fp32 m_CloseTimeOut;
 
 	int m_iSoundChannel;
 	void ValidateLocalID(int _iLocal);
@@ -205,7 +205,7 @@ public:
 	virtual void CreateFromDirectory(CStr _Path);
 	
 	virtual void CloseVideo(int _iLocal);
-	virtual void SetVolume(int _iLocal, fp4 fpVol); // NOT SUPPORTED
+	virtual void SetVolume(int _iLocal, fp32 fpVol); // NOT SUPPORTED
 	virtual void Pause(int _iLocal, bool _Paused = true);  // NOT SUPPORTED
 	virtual void AutoRestart(int _iLocal, bool _EnableAutoRestart = true); // NOT SUPPORTED
 	virtual void Rewind(int _iLocal);
@@ -227,7 +227,7 @@ public:
 	virtual int GetWidth(int _iLocal);
 	virtual int GetHeight(int _iLocal);
 
-	virtual fp4 GetTime(int _iLocal);
+	virtual fp32 GetTime(int _iLocal);
 };
 
 #endif

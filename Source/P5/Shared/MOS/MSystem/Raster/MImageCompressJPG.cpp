@@ -2,7 +2,7 @@
 #include "MImage.h"
 #include "MImageIO.h"
 
-void CImage::Compress_JPG(fp4 _Quality, CImage* _pDestImg)
+void CImage::Compress_JPG(fp32 _Quality, CImage* _pDestImg)
 {
 #ifdef IMAGE_IO_NOJPG
 	Error("Compress_JPG", "JPG support disabled in this build.");
@@ -15,7 +15,7 @@ void CImage::Compress_JPG(fp4 _Quality, CImage* _pDestImg)
 //CImageIO_JPG IO;
 //IO.Write(GetRect(), "S:\\Test.jpg", this);
 
-	TList_Vector<uint8> lFile;
+	TArray<uint8> lFile;
 	CCFile File;
 	File.Open(lFile, CFILE_WRITE | CFILE_BINARY);
 

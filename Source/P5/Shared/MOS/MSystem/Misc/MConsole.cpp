@@ -346,6 +346,7 @@ CConsole::CConsole()
 	m_WriteCallbackRecurse = 0;
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
 	m_pRDChannel = MRTC_GetRD()->CreateDebugChannel(101);
+	m_pRDChannelTrace = MRTC_GetRD()->CreateDebugChannel(102);
 #endif
 }
 
@@ -394,8 +395,8 @@ CConsole::~CConsole()
 	MAUTOSTRIP(CConsole_dtor, MAUTOSTRIP_VOID);
 //		MRTC_GOM()->UnregisterObject(this, "SYSTEM.CONSOLE");
 
-	M_TRY
-	{
+//	M_TRY
+//	{
 		MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
 		CRegistry* pReg = (pSys) ? pSys->GetEnvironment() : NULL;
 		if(pReg)
@@ -409,13 +410,13 @@ CConsole::~CConsole()
 			}
 		}
 
-	}
+/*	}
 	M_CATCH(
 	catch(CCException)
 	{
 		// Ignore.. it's pretty unimportant this.
 	}
-	)
+	)*/
 
 	m_spLanguageCore->UnRegister(m_spParser);
 
@@ -534,7 +535,7 @@ void CConsole::WriteExceptions()
 //	while (CCException::ErrorAvail()) Write(CCException::ErrorMsg());
 };
 
-fp8 CConsole::GetBindingTimeStamp()
+fp64 CConsole::GetBindingTimeStamp()
 {
 	MAUTOSTRIP(CConsole_GetBindingTimeStamp, 0.0);
 	return m_CurrentTimeStamp;
@@ -702,11 +703,14 @@ TPtr<CScript> CConsole::CompileScript(CStr _Script, bool _bAddMain, bool _bResol
 	return NULL;
 }
 
-void CConsole::StartBinding(CKeyBind* pBind, int _Type, fp8 _Time, CScanKey _ScanKey)
+void CConsole::StartBinding(CKeyBind* pBind, int _Type, fp64 _Time, CScanKey _ScanKey)
 {
 	MAUTOSTRIP(CConsole_StartBinding, MAUTOSTRIP_VOID);
 	MSCOPE(CConsole::StartBinding, SYSTEMCONSOLE);
-	pBind->CompileAll(m_spParser);
+	{
+		M_LOCK(m_ScriptLock);
+		pBind->CompileAll(m_spParser);
+	}
 
 	if (_Type == 4)
 	{
@@ -775,7 +779,10 @@ void CConsole::ExecuteBinding(CKeyBind* _pBind)
 {
 	MAUTOSTRIP(CConsole_ExecuteBinding_2, MAUTOSTRIP_VOID);
 	if (!_pBind->m_Flags) return;
-	_pBind->CompileAll(m_spParser);
+	{
+		M_LOCK(m_ScriptLock);
+		_pBind->CompileAll(m_spParser);
+	}
 
 	if (_pBind->m_Flags & 1)
 		ExecuteBinding(_pBind, &_pBind->m_BindDown, 1);
@@ -788,6 +795,7 @@ void CConsole::ExecuteBinding(CKeyBind* _pBind)
 void CConsole::StopBinding(CKeyBind* pBind)
 {
 	MAUTOSTRIP(CConsole_StopBinding, MAUTOSTRIP_VOID);
+	M_LOCK(m_ScriptLock);
 	pBind->StopAll();
 }
 
@@ -1006,7 +1014,7 @@ bool CConsole::ProcessKey(const CScanKey& key, int _Mode)
 
 			case SKEY_TAB : 
 				{
-					TList_Vector<CStr> lCmd;
+					TArray<CStr> lCmd;
 					lCmd = m_spParser->GetRootNameSpace()->GetSymbols();
 
 					CStr Cmd = m_CommandLineEdit.GetStr();
@@ -1093,7 +1101,7 @@ bool CConsole::ProcessKey(const CScanKey& key, int _Mode)
 				break;
 			case SKEY_TAB + SKEY_MODIFIER_SHIFT: 
 				{
-					TList_Vector<CStr> lCmd;
+					TArray<CStr> lCmd;
 					lCmd = m_spParser->GetRootNameSpace()->GetSymbols();
 
 					CStr Cmd = m_CommandLineEdit.GetStr();
@@ -1252,7 +1260,7 @@ void CConsole::Parser_History()
 void CConsole::Parser_ListCommands()
 {
 	MAUTOSTRIP(CConsole_Parser_ListCommands, MAUTOSTRIP_VOID);
-	TList_Vector<CStr> StrList = m_spParser->GetRootNameSpace()->GetSymbols();
+	TArray<CStr> StrList = m_spParser->GetRootNameSpace()->GetSymbols();
 	
 
 	int l = StrList.Len();
@@ -1498,7 +1506,7 @@ void CConsole::Parser_BindListScan()
 void CConsole::Parser_GlobalArrayFlags(int _Flg)
 {
 	MAUTOSTRIP(CConsole_Parser_GlobalArrayFlags, MAUTOSTRIP_VOID);
-	CListVectorCore<CObj>::SetGlobalFlags(_Flg);
+	CArrayCore<CObj>::SetGlobalFlags(_Flg);
 }
 
 void CConsole::Parser_ExecuteScriptFile(CStr _FileName)
@@ -1543,6 +1551,7 @@ void CConsole::Parser_ExecuteScriptFile(CStr _FileName)
 
 //		m_spParser->TraceSymbolTree(false);
 		//Execute script
+		M_LOCK(m_ScriptLock);
 		TPtr<CScript> spScript = m_spParser->BuildScript(CStrF("NExecTemp0x%08x", &pFileName), Buffer.GetBasePtr(), FileNameTmp);
 
 		if (spScript)

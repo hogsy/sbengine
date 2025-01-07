@@ -3,8 +3,13 @@
 #include "XRSurfaceContext.h"
 #include "XRSurf.h"
 #include "../MOS.h"
-//#include "XREngineVar.h"
-//#include "XREngine.h"
+#include "XREngineVar.h"
+#include "XREngine.h"
+
+#ifndef PLATFORM_CONSOLE
+# define ENABLE_SURFACE_CACHE
+#endif
+
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -70,6 +75,7 @@ void CXR_SurfaceContext::CreateHashTableSafe()
 
 void CXR_SurfaceContext::CreateHashTable()
 {
+	MSCOPESHORT(CXR_SurfaceContext::CreateHashTable);
 	MAUTOSTRIP(CXR_SurfaceContext_CreateHashTable, MAUTOSTRIP_VOID);
 	if (m_spHash != NULL) return;
 
@@ -97,14 +103,13 @@ void CXR_SurfaceContext::Create()
 	// Create a default-surface
 	spCXW_Surface spSurf = MNew(CXW_Surface);
 	if (!spSurf) MemError("Create");
-	spCXW_SurfaceSequence spSeq = MNew(CXW_SurfaceSequence);
-	if (!spSeq) MemError("Create");
 
 	spSurf->m_Name = "$$$DEFAULT$$$";
-	spSurf->m_lspSequences.Add(spSeq);
-	spSeq->SetNumKeyFrames(1);
+	spSurf->SetNumSequences(1);
+	CXW_SurfaceSequence* pSeq = spSurf->GetSequence(0);
+	pSeq->SetNumKeyFrames(1);
 
-	CXW_SurfaceKeyFrame* pKey = spSeq->GetKey(0);
+	CXW_SurfaceKeyFrame* pKey = pSeq->GetKey(0);
 	pKey->m_lTextures.SetLen(1);
 
 	CXW_SurfaceLayer& Layer = pKey->m_lTextures[0];
@@ -128,6 +133,7 @@ int CXR_SurfaceContext::GetNumSurfaces()
 
 void CXR_SurfaceContext::UpdateTextureIDs(int _SurfaceID)
 {
+	MSCOPESHORT(CXR_SurfaceContext::UpdateTextureIDs);
 	MAUTOSTRIP(CXR_SurfaceContext_UpdateTextureIDs, MAUTOSTRIP_VOID);
 	M_LOCK(m_Lock);
 
@@ -216,7 +222,7 @@ TArray<spCXW_Surface> CXR_SurfaceContext::CreateSurfaces(CKeyContainerNode* _pNo
 	return lspExpanded;
 }
 
-void CXR_SurfaceContext::AddSurfaces(TList_Vector<spCXW_Surface> _lspSurfaces)
+void CXR_SurfaceContext::AddSurfaces(TArray<spCXW_Surface> _lspSurfaces)
 {
 	MAUTOSTRIP(CXR_SurfaceContext_AddSurfaces, MAUTOSTRIP_VOID);
 	MSCOPESHORT(CXR_SurfaceContext::AddSurfaces);
@@ -249,7 +255,7 @@ void CXR_SurfaceContext::AddSurfaces(CCFile* _pFile)
 {
 	MAUTOSTRIP(CXR_SurfaceContext_AddSurfaces_2, MAUTOSTRIP_VOID);
 	Error("AddSurfaces", "Not implemented.");
-//	TList_Vector<spCXW_Surface> lspSurf = CXW_Surface::ReadScript(Name.GetStrSep(";"));
+//	TArray<spCXW_Surface> lspSurf = CXW_Surface::ReadScript(Name.GetStrSep(";"));
 //	AddSurfaces(lspSurf);
 }
 
@@ -258,7 +264,7 @@ void CXR_SurfaceContext::AddSurfaces(CStr _FileName)
 	MAUTOSTRIP(CXR_SurfaceContext_AddSurfaces_3, MAUTOSTRIP_VOID);
 	while(_FileName != "")
 	{
-		TList_Vector<spCXW_Surface> lspSurf = CXW_Surface::ReadScript(_FileName.GetStrSep(";"));
+		TArray<spCXW_Surface> lspSurf = CXW_Surface::ReadScript(_FileName.GetStrSep(";"));
 		AddSurfaces(lspSurf);
 	}
 }
@@ -269,49 +275,93 @@ void CXR_SurfaceContext::AddSurfaces(CKeyContainerNode* _pRoot)
 	AddSurfaces(CreateSurfaces(_pRoot));
 }
 
-void CXR_SurfaceContext::AddDirectory(CStr _Path)
+
+TArray<spCXW_Surface> CXR_SurfaceContext::ScanDirectory(CStr _Path, bool _bIgnoreParseOption)
 {
-	MAUTOSTRIP(CXR_SurfaceContext_AddDirectory, MAUTOSTRIP_VOID);
-	MSCOPESHORT(CXR_SurfaceContext::AddDirectory);
-	M_LOCK(m_Lock);
+	TArray<spCXW_Surface> lResult;
+	lResult.SetGrow(4096);
+
+	bool bReadXSU = (_bIgnoreParseOption == false);	// _bIgnoreParseOption is used by XWC
 	bool bLoadNonCompiledSurfaces = true;
+	if (bReadXSU)
 	{
 		CDirectoryNode Dir;
 		Dir.ReadDirectory(_Path + "*.XSU");
 		int nFiles = Dir.GetFileCount();
-		for(int i = 0; i < nFiles; i++)
+		for (int i = 0; i < nFiles; i++)
 		{
 			bLoadNonCompiledSurfaces = false;
-			CDir_FileRec* pRec  = Dir.GetFileRec(i);
+			CDir_FileRec* pRec = Dir.GetFileRec(i);
 			CDataFile DFile;
 			DFile.Open(_Path + pRec->m_Name);
 			if (DFile.GetNext("SURFACES"))
 			{
 				TArray<spCXW_Surface> lspSurf;
 				CXW_Surface::Read(DFile.GetFile(), lspSurf, DFile.GetUserData());
-
-				AddSurfaces(lspSurf);
+				lResult.Add(&lspSurf);
 			}
 			DFile.Close();
 		}
 	}
 
-	if( bLoadNonCompiledSurfaces )
+	if (bLoadNonCompiledSurfaces)
 	{
+		bool bUseCache = false;
+#ifdef ENABLE_SURFACE_CACHE
+		// Create checksum from modify date of all .xtx files in current directory
+		uint64 CheckSum = 5381;
+		{
+			CDirectoryNode Dir;
+			Dir.ReadDirectory(_Path + "*.XTX");
+			uint nFiles = Dir.GetFileCount();
+			for (uint i = 0; i < nFiles; i++)
+			{
+				const CDir_FileRec* pRec = Dir.GetFileRec(i);
+				CheckSum = CheckSum*33 + uint64(pRec->m_WriteTime);
+			}
+		}
+
+		// Look for cache file and compare the checksum
+		CFStr CacheFile = CFStrF("%s_%sSurfaceCache.XSC", _Path.Str(), _bIgnoreParseOption ? "XWC" : "");
+		if (CDiskUtil::FileExists(CacheFile))
+		{
+			CDataFile DFile;
+			DFile.Open(CacheFile);
+			if (DFile.GetNext("CHECKSUM"))
+			{
+				uint64 x;
+				DFile.GetFile()->ReadLE(x);
+				if ((x == CheckSum) && DFile.GetNext("SURFACES"))
+				{
+					LogFile(CStrF("Reading cached surfaces: %s", CacheFile.Str()));
+					bUseCache = true;
+					TArray<spCXW_Surface> lspSurf;
+					CXW_Surface::Read(DFile.GetFile(), lspSurf, DFile.GetUserData());
+					lResult.Add(&lspSurf);
+				}
+			}
+		}
+#endif
+
+		TArray<spCXW_Surface> lspSurfaceCache;
 		CDirectoryNode Dir;
 		Dir.ReadDirectory(_Path + "*");
-		int nFiles = Dir.GetFileCount();
-		for(int i = 0; i < nFiles; i++)
+		uint nFiles = Dir.GetFileCount();
+		for (uint i = 0; i < nFiles; i++)
 		{
 			CDir_FileRec* pRec  = Dir.GetFileRec(i);
 			if (pRec->IsDirectory())
 			{
 				if (pRec->m_Name.Copy(0,1) != ".")
-					AddDirectory(_Path + pRec->m_Name + "\\");
+				{
+					TArray<spCXW_Surface> lspSurf;
+					lspSurf = ScanDirectory(_Path + pRec->m_Name + "\\", _bIgnoreParseOption);
+					lResult.Add(&lspSurf);
+				}
 			}
-			else
+			else if (!bUseCache)		// If checksum didn't match, read surfaces
 			{
-				if (pRec->m_Ext.CompareNoCase("XSU") == 0)
+				if (bReadXSU && (pRec->m_Ext.CompareNoCase("XSU") == 0))
 				{
 					CDataFile DFile;
 					DFile.Open(_Path + pRec->m_Name);
@@ -319,21 +369,57 @@ void CXR_SurfaceContext::AddDirectory(CStr _Path)
 					{
 						TArray<spCXW_Surface> lspSurf;
 						CXW_Surface::Read(DFile.GetFile(), lspSurf, DFile.GetUserData());
-
-						AddSurfaces(lspSurf);
+						lResult.Add(&lspSurf);
 					}
 					DFile.Close();
 				}
 				else
 				{
-					spCKeyContainerNode spRoot = LoadSurfaceScript(_Path + pRec->m_Name);
+					spCKeyContainerNode spRoot = LoadSurfaceScript(_Path + pRec->m_Name, _bIgnoreParseOption);
 					if (spRoot != NULL)
-						AddSurfaces(spRoot);
+					{
+						TArray<spCXW_Surface> lspSurf = CreateSurfaces(spRoot);
+						lResult.Add(&lspSurf);
+					}
 				}
 			}
 		}
+
+#ifdef ENABLE_SURFACE_CACHE
+		// Create cache file
+		if (!bUseCache && lResult.Len())
+		{
+			LogFile(CStrF("Creating surface cache: %s", CacheFile.Str()));
+			CDataFile DFile;
+			DFile.Create(CacheFile);
+			{
+				DFile.BeginEntry("CHECKSUM");
+				DFile.GetFile()->WriteLE(CheckSum);
+				DFile.EndEntry(0);
+			}
+			{
+				DFile.BeginEntry("SURFACES");
+				CXW_Surface::Write(DFile.GetFile(), lResult);
+				DFile.EndEntry(lResult.Len());
+			}
+			DFile.Close();
+		}
+#endif
 	}
+	return lResult;
 }
+
+
+void CXR_SurfaceContext::AddDirectory(CStr _Path)
+{
+	MAUTOSTRIP(CXR_SurfaceContext_AddDirectory, MAUTOSTRIP_VOID);
+	MSCOPESHORT(CXR_SurfaceContext::AddDirectory);
+	M_LOCK(m_Lock);
+
+	TArray<spCXW_Surface> lspSurf = ScanDirectory(_Path, false);
+	AddSurfaces(lspSurf);
+}
+
 
 void CXR_SurfaceContext::UpdateSurfaces(CStr _Path)
 {
@@ -453,7 +539,7 @@ CXW_SurfaceKeyFrame* CXR_SurfaceContext::GetSurfaceKey(int _SurfaceID, int _Surf
 	MAUTOSTRIP(CXR_SurfaceContext_GetSurfaceKey, NULL);
 	M_LOCK(m_Lock);
 	CXW_Surface* pSurf = GetSurfaceVersion(_SurfaceID, _SurfOptions, _SurfCaps);
-	CXW_SurfaceKeyFrame* pSurfKey = pSurf->GetFrame(_iSeq, _Time, *m_TempKeyFrame.Get());
+	CXW_SurfaceKeyFrame* pSurfKey = pSurf->GetFrame(_iSeq, _Time, m_TempKeyFrame.Get());
 	return pSurfKey;
 }
 

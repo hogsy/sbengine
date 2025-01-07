@@ -2,7 +2,7 @@
 #ifndef PLATFORM_PS2
 
 template <>
-void CQuatfp4::Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
+void CQuatfp32::Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
 {
 	float _a0 = k[0];
 	float _a1 = k[1];
@@ -12,7 +12,7 @@ void CQuatfp4::Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
 	float _b1 = _Quat2.k[1];
 	float _b2 = _Quat2.k[2];
 	float _b3 = _Quat2.k[3];
-	fp4 ret1, ret2, ret3, ret4;
+	fp32 ret1, ret2, ret3, ret4;
 	asm("
 			mula.s	_a3,_b0
 			madda.s	_a0,_b3
@@ -41,7 +41,7 @@ void CQuatfp4::Multiply(const TQuaternion& _Quat2, TQuaternion& _QDest) const
 }
 
 template <>
-void CQuatfp4::Multiply(const TQuaternion& _Quat2)
+void CQuatfp32::Multiply(const TQuaternion& _Quat2)
 {
 	float _a0 = k[0];
 	float _a1 = k[1];
@@ -51,7 +51,7 @@ void CQuatfp4::Multiply(const TQuaternion& _Quat2)
 	float _b1 = _Quat2.k[1];
 	float _b2 = _Quat2.k[2];
 	float _b3 = _Quat2.k[3];
-	fp4 ret1, ret2, ret3, ret4;
+	fp32 ret1, ret2, ret3, ret4;
 	asm("
 			mula.s	_a3,_b0
 			madda.s	_a0,_b3
@@ -80,17 +80,17 @@ void CQuatfp4::Multiply(const TQuaternion& _Quat2)
 }
 
 template <>
-fp4 CQuatfp4::DotProd(const TQuaternion& _Q) const
+fp32 CQuatfp32::DotProd(const TQuaternion& _Q) const
 {
-	fp4 _a0 = k[0];
-	fp4 _a1 = k[1];
-	fp4 _a2 = k[2];
-	fp4 _a3 = k[3];
-	fp4 _b0 = _Q.k[0];
-	fp4 _b1 = _Q.k[1];
-	fp4 _b2 = _Q.k[2];
-	fp4 _b3 = _Q.k[3];
-	fp4 ret;
+	fp32 _a0 = k[0];
+	fp32 _a1 = k[1];
+	fp32 _a2 = k[2];
+	fp32 _a3 = k[3];
+	fp32 _b0 = _Q.k[0];
+	fp32 _b1 = _Q.k[1];
+	fp32 _b2 = _Q.k[2];
+	fp32 _b3 = _Q.k[3];
+	fp32 ret;
 	
 	asm ("
 			mula.s	_a0, _b0
@@ -104,12 +104,12 @@ fp4 CQuatfp4::DotProd(const TQuaternion& _Q) const
 }
 
 template <>
-void CQuatfp4::Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp4 _t) const
+void CQuatfp32::Interpolate(const TQuaternion& _Other, TQuaternion& _Dest, fp32 _t) const
 {
-	fp4 _a0, _b0, _c0, _d0;
-	fp4 _a1, _b1, _c1, _d1;
-	fp4 reta, retb, retc, retd;		// these will probably share register with _x1 values since those aren't required once these start being used
-	fp4 tmp, tmp0 = 0.0f, tmp1 = 1.0f;
+	fp32 _a0, _b0, _c0, _d0;
+	fp32 _a1, _b1, _c1, _d1;
+	fp32 reta, retb, retc, retd;		// these will probably share register with _x1 values since those aren't required once these start being used
+	fp32 tmp, tmp0 = 0.0f, tmp1 = 1.0f;
 	_a0 = k[0];
 	_b0 = k[1];
 	_c0 = k[2];
@@ -165,24 +165,24 @@ no_neg:
 	_Dest.k[3]	= retd;
 }
 
-extern "C" void CMat4Dfp4_ASM_Multiply3x3(const CMat4Dfp4 *m1, const CMat4Dfp4 *m2, CMat4Dfp4 *m3);
-extern "C" void CMat4Dfp4_ASM_Multiply4x4(const CMat4Dfp4 *m1, const CMat4Dfp4 *m2, CMat4Dfp4 *m3);
-extern "C" void CVec3Dfp4Normalize(CVec3Dfp4 *pVec);
-extern "C" void CVec3Dfp4_ASM_Mul_Mat4D(CVec3Dfp4 *pVec, const CMat4Dfp4 *m1);
+extern "C" void CMat4Dfp32_ASM_Multiply3x3(const CMat4Dfp32 *m1, const CMat4Dfp32 *m2, CMat4Dfp32 *m3);
+extern "C" void CMat4Dfp32_ASM_Multiply4x4(const CMat4Dfp32 *m1, const CMat4Dfp32 *m2, CMat4Dfp32 *m3);
+extern "C" void CVec3Dfp32Normalize(CVec3Dfp32 *pVec);
+extern "C" void CVec3Dfp32_ASM_Mul_Mat4D(CVec3Dfp32 *pVec, const CMat4Dfp32 *m1);
 
 // Added by Joacim Jonsson
 
 //template<>
-inline void CMat4Dfp4::Multiply3x3(const CMat4Dfp4& m, CMat4Dfp4& DestMat) const
+inline void CMat4Dfp32::Multiply3x3(const CMat4Dfp32& m, CMat4Dfp32& DestMat) const
 {
-	CMat4Dfp4_ASM_Multiply3x3( this, &m, &DestMat );
+	CMat4Dfp32_ASM_Multiply3x3( this, &m, &DestMat );
 	DestMat.UnitNot3x3();
 }
 
 //template<>
-inline void CMat4Dfp4::Multiply(const CMat4Dfp4& m, CMat4Dfp4& DestMat) const
+inline void CMat4Dfp32::Multiply(const CMat4Dfp32& m, CMat4Dfp32& DestMat) const
 {
-//	CMat4Dfp4_ASM_Multiply4x4(this, &m, &DestMat);
+//	CMat4Dfp32_ASM_Multiply4x4(this, &m, &DestMat);
 	uint128 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 	asm("
 			mtsab %0, 0
@@ -283,7 +283,7 @@ _finished:
 }
 
 // Added by Martin Gustafsson
-inline void CMat4Dfp4::InverseOrthogonal(M& DestMat) const
+inline void CMat4Dfp32::InverseOrthogonal(M& DestMat) const
 {
 	asm volatile ("
 		lq				t0,	0x00(%0)
@@ -376,16 +376,16 @@ inline void CMat4Dfp4::InverseOrthogonal(M& DestMat) const
 	);
 }
 
-inline void CVec3Dfp4::CrossProd(const V& a, V& dest) const
+inline void CVec3Dfp32::CrossProd(const V& a, V& dest) const
 {
-	fp4 _x1 = k[0];
-	fp4 _y1 = k[1];
-	fp4 _z1 = k[2];
-	fp4 _x2 = a.k[0];
-	fp4 _y2 = a.k[1];
-	fp4 _z2 = a.k[2];
+	fp32 _x1 = k[0];
+	fp32 _y1 = k[1];
+	fp32 _z1 = k[2];
+	fp32 _x2 = a.k[0];
+	fp32 _y2 = a.k[1];
+	fp32 _z2 = a.k[2];
 
-	fp4 _d0, _d1, _d2;
+	fp32 _d0, _d1, _d2;
 	asm ("
 			mula.s	_y1, _z2
 			msub.s	_d0, _z1, _y2
@@ -430,7 +430,7 @@ inline void CVec3Dfp4::CrossProd(const V& a, V& dest) const
 }
 
 //template<>
-inline void CVec3Dfp4::operator*=(const CMat4Dfp4 &M)
+inline void CVec3Dfp32::operator*=(const CMat4Dfp32 &M)
 {
 	asm volatile ("
 
@@ -474,7 +474,7 @@ inline void CVec3Dfp4::operator*=(const CMat4Dfp4 &M)
 	);
 }
 
-inline void CVec3Dfp4::Lerp(const V& a, fp4 t, V& dest) const
+inline void CVec3Dfp32::Lerp(const V& a, fp32 t, V& dest) const
 {
 	asm volatile ("
 	    lq			$2,	0x00(%1)	# Load/align src1
@@ -511,7 +511,7 @@ inline void CVec3Dfp4::Lerp(const V& a, fp4 t, V& dest) const
 }
 
 /*
-inline void CVec3Dfp4::CompMul(const V& a, V& dest) const
+inline void CVec3Dfp32::CompMul(const V& a, V& dest) const
 {
 	asm volatile ("
 		lwc1		$f2, 0x00(%1)
@@ -534,9 +534,9 @@ inline void CVec3Dfp4::CompMul(const V& a, V& dest) const
 	);
 }
 	
-inline CVec3Dfp4 &CVec3Dfp4::Normalize()
+inline CVec3Dfp32 &CVec3Dfp32::Normalize()
 {
-	CVec3Dfp4Normalize(this);
+	CVec3Dfp32Normalize(this);
 	return *this;
 }
 */

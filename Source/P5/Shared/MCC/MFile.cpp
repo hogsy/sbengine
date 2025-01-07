@@ -357,7 +357,7 @@ void CCFile::OpenExt(CStr _name, int _mode, ECompressTypes _eType, ESettings _eS
 	}
 }
 
-void CCFile::SetPriority(fp4 _Priority)
+void CCFile::SetPriority(fp32 _Priority)
 {
 	m_pStream->SetPriority(_Priority);
 }

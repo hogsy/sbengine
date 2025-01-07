@@ -117,7 +117,7 @@ public:
 
 	static void RegistryConvertDataToStr(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 	{
-		typedef const TList_Vector<uint8> t_CType;
+		typedef const TArray<uint8> t_CType;
 		int nMin = Min(_nDimSrc, _nDimDst);
 		for (int i = 0; i < nMin; ++i)
 		{
@@ -131,7 +131,7 @@ public:
 	
 	static void RegistryConvertStrToData(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 	{
-		typedef TList_Vector<uint8> t_CType;
+		typedef TArray<uint8> t_CType;
 		if (_nDimSrc == 1 && _nDimDst > 1)
 		{
 			CStr::spCStrData &Source = ((CStr::spCStrData *)_pSource)[0];
@@ -240,7 +240,7 @@ public:
 					for (int i = 0; i < _nDimDst; ++i)
 					{
 						CStr Dst = ParseEsqSeqCompatible(pParse, NStr::StrLen(pParse), true, ",");
-						(((t_CType *)(_pDest)))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.Str(),(fp8)0));
+						(((t_CType *)(_pDest)))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.Str(),(fp64)0));
 					}
 				}
 				else
@@ -249,7 +249,7 @@ public:
 					for (int i = 0; i < _nDimDst; ++i)
 					{
 						CStr Dst = ParseEsqSeqCompatible(pParse, NStr::StrLen(pParse), true, ",");
-						(((t_CType *)(_pDest)))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.StrW(),(fp8)0));
+						(((t_CType *)(_pDest)))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.StrW(),(fp64)0));
 					}
 				}
 			}
@@ -268,9 +268,9 @@ public:
 				if (Source)
 				{
 					if (Source->IsAnsi())
-						((t_CType *)(_pDest))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source->Str(), (fp8)0));
+						((t_CType *)(_pDest))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source->Str(), (fp64)0));
 					else
-						((t_CType *)(_pDest))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source->StrW(), (fp8)0));
+						((t_CType *)(_pDest))[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source->StrW(), (fp64)0));
 				}
 				else
 					((t_CType *)(_pDest))[i] = 0;
@@ -360,9 +360,9 @@ public:
 				t_CType &Source = ((t_CType *)_pSource)[i];
 
 				if (i == 0)
-					Dest = CStrF("%f", (fp4)(Source));
+					Dest = CStrF("%f", (fp32)(Source));
 				else
-					Dest += CStrF(",%f", (fp4)(Source));
+					Dest += CStrF(",%f", (fp32)(Source));
 			}
 			CStr::spCStrData &dDest = ((CStr::spCStrData *)_pDest)[0];
 			dDest = Dest.GetStrData();
@@ -375,7 +375,41 @@ public:
 				t_CType &Source = ((t_CType *)_pSource)[i];
 
 				CStr::spCStrData &dDest = ((CStr::spCStrData *)_pDest)[i];
-				CStr Dest = CStrF("%f", (fp4)(Source));
+				CStr Dest = CStrF("%f", (fp32)(Source));
+				dDest = Dest.GetStrData();
+			}
+			for (int i = nMin; i < _nDimDst; ++i)
+				(((t_CType *)(_pDest)))[i] = 0;
+		}
+	}
+
+	template <typename t_CType>
+	static void RegistryConvertfp16ToStr(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+	{
+		if (_nDimSrc > 1 && _nDimDst == 1)
+		{
+			CStr Dest;
+			for (int i = 0; i < _nDimSrc; ++i)
+			{
+				t_CType &Source = ((t_CType *)_pSource)[i];
+
+				if (i == 0)
+					Dest = CStrF("%f", Source.Getfp32());
+				else
+					Dest += CStrF(",%f", Source.Getfp32());
+			}
+			CStr::spCStrData &dDest = ((CStr::spCStrData *)_pDest)[0];
+			dDest = Dest.GetStrData();
+		}
+		else
+		{
+			int nMin = Min(_nDimSrc, _nDimDst);
+			for (int i = 0; i < nMin; ++i)
+			{
+				t_CType &Source = ((t_CType *)_pSource)[i];
+
+				CStr::spCStrData &dDest = ((CStr::spCStrData *)_pDest)[i];
+				CStr Dest = CStrF("%f", Source.Getfp32());
 				dDest = Dest.GetStrData();
 			}
 			for (int i = nMin; i < _nDimDst; ++i)
@@ -397,6 +431,20 @@ public:
 			(((t_CType1 *)(_pDest)))[i] = t_CType1();
 	}
 
+	template <typename t_CType0, typename t_CType1>
+	static void RegistryConvertfp16(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+	{
+		int nMin = Min(_nDimSrc, _nDimDst);
+		for (int i = 0; i < nMin; ++i)
+		{
+			t_CType0 &Source = ((t_CType0 *)_pSource)[i];
+			t_CType1 &Dest = ((t_CType1 *)_pDest)[i];
+			Dest = (t_CType1)Source.Getfp32();
+		}
+		for (int i = nMin; i < _nDimDst; ++i)
+			(((t_CType1 *)(_pDest)))[i] = t_CType1();
+	}
+
 	template <typename t_CType0>
 	static void RegistryConvertSame(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 	{
@@ -411,20 +459,20 @@ public:
 			(((t_CType0 *)(_pDest)))[i] = t_CType0();
 	}
 
-	static void RegistryConvertCopyListVector(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+	static void RegistryConvertCopyArray(const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 	{
 		int nMin = Min(_nDimSrc, _nDimDst);
 		for (int i = 0; i < nMin; ++i)
 		{
-			TList_Vector<uint8> &Source = ((TList_Vector<uint8> *)_pSource)[i];
-			TList_Vector<uint8> &Dest = ((TList_Vector<uint8> *)_pDest)[i];
+			TArray<uint8> &Source = ((TArray<uint8> *)_pSource)[i];
+			TArray<uint8> &Dest = ((TArray<uint8> *)_pDest)[i];
 
 			mint Len = Source.Len();
 			Dest.SetLen(Len);
 			memcpy(Dest.GetBasePtr(), Source.GetBasePtr(), Len);
 		}
 		for (int i = nMin; i < _nDimDst; ++i)
-			((TList_Vector<uint8> *)_pDest)[i].Clear();
+			((TArray<uint8> *)_pDest)[i].Clear();
 	}
 
 
@@ -507,9 +555,9 @@ public:
 			QSortHash_r(_pReg, iStart, _iEnd);
 	};
 
-	static fp4 Private_Anim_GetKFDelta(const CRegistry_Dynamic *_pReg, const CRegistry_Dynamic::CAnimationSequence *_pSeq, uint32 _Calc0, uint32 _Calc1, fp4 _SecLen, fp4 _LoopEnd, fp4 _LoopStart)
+	static fp32 Private_Anim_GetKFDelta(const CRegistry_Dynamic *_pReg, const CRegistry_Dynamic::CAnimationSequence *_pSeq, uint32 _Calc0, uint32 _Calc1, fp32 _SecLen, fp32 _LoopEnd, fp32 _LoopStart)
 	{
-		fp4 Duration = 0;
+		fp32 Duration = 0;
 		if (_Calc0 & EGetKFFlags_Type)
 		{
 			uint32 Value0 = _Calc0 & EGetKFFlags_Value;

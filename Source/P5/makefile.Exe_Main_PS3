@@ -1,0 +1,658 @@
+
+Exe_Main_PS3ProjectName := Exe_Main_PS3
+Exe_Main_PS3OutputDir :=Projects/Main/Exe_PS3/Output/$(PlatformName)/Exe_Main_PS3/$(Config)
+
+Exe_Main_PS3Includes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Exe_Main_PS3Includes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Exe_Main_PS3Includes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include/network
+Exe_Main_PS3Includes += -I shared/mcc
+Exe_Main_PS3Includes += -I Projects/Main/Exe/PCH
+Exe_Main_PS3Includes += -I SDK/Include
+Exe_Main_PS3Includes += -I Projects/Main/Exe_PS3
+Exe_Main_PS3PPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Exe_Main_PS3Defs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Exe_Main_PS3ObjFilesCpp := $(Exe_Main_PS3OutputDir)/GameClasses_Dyn.o $(Exe_Main_PS3OutputDir)/GameWorld_Dyn.o $(Exe_Main_PS3OutputDir)/MCC_Dyn.o $(Exe_Main_PS3OutputDir)/MRTC_Dyn.o $(Exe_Main_PS3OutputDir)/MRTC_VPUManager.o $(Exe_Main_PS3OutputDir)/MRegistryNavigator.o $(Exe_Main_PS3OutputDir)/MRenderCapture.o $(Exe_Main_PS3OutputDir)/MRenderPS3GCM_Dyn.o $(Exe_Main_PS3OutputDir)/MSystem_Dyn.o $(Exe_Main_PS3OutputDir)/Mrtc.o $(Exe_Main_PS3OutputDir)/PCH.o $(Exe_Main_PS3OutputDir)/WGameContext.o $(Exe_Main_PS3OutputDir)/WGameContextMain.o $(Exe_Main_PS3OutputDir)/WGameContext_P6.o $(Exe_Main_PS3OutputDir)/WGameMultiplayerHandler.o $(Exe_Main_PS3OutputDir)/WGamePSNetworkHandler.o $(Exe_Main_PS3OutputDir)/XRApp.o $(Exe_Main_PS3OutputDir)/XRUtil.o $(Exe_Main_PS3OutputDir)/XR_Dyn.o 
+Exe_Main_PS3ObjFilesC := 
+
+Exe_Main_PS3SpuElfFiles := 
+
+Exe_Main_PS3SpursObjFiles := 
+
+Exe_Main_PS3SrcFilesCpp := Shared/MCC/MCC_Dyn.cpp Shared/MOS/Classes/GameContext/WGameContext.cpp Shared/MOS/Classes/Registry/MRegistryNavigator.cpp Shared/MOS/Classes/Render/MRenderCapture.cpp Shared/MOS/MSystem/MSystem_Dyn.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp Shared/MOS/XR/XR_Dyn.cpp Shared/Mcc/MRTC_Dyn.cpp Shared/Mcc/MRTC_VPUManager.cpp Shared/Mcc/Mrtc.cpp Shared/Mos/Xr/XRUtil.cpp Projects/Main/Exe/PCH/PCH.cpp Projects/Main/Exe/WGameContextMain.cpp Projects/Main/Exe/WGameContext_P6.cpp Projects/Main/Exe/WGameMultiplayerHandler.cpp Projects/Main/Exe/XRApp.cpp Projects/Main/GameClasses/GameClasses_Dyn.cpp Projects/Main/GameWorld/GameWorld_Dyn.cpp Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp 
+Exe_Main_PS3SrcFilesC := 
+
+
+ifeq ($(Config),Release)
+	Exe_Main_PS3Defs += -DNDEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib/psgl/rsx/opt 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Exe_Main_PS3Defs += -DM_Profile -DM_RTM -DNDEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O0 -g  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib/psgl/rsx/debug 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+ifeq ($(Config),RTMD)
+	Exe_Main_PS3Defs += -DM_Profile -DM_RTM -DNDEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib/psgl/rsx/opt 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+ifeq ($(Config),Debug)
+	Exe_Main_PS3Defs += -D_DEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O0 -g  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)/target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)/target/ppu/lib/psgl/rsx/debug 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Exe_Main_PS3Defs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib/psgl/rsx/opt 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+ifeq ($(Config),RTM)
+	Exe_Main_PS3Defs += -DM_RTM -DNDEBUG  
+	Exe_Main_PS3PPU_CPP_OPTIONS := -O3 -finline-functions  $(Exe_Main_PS3PPU_CPP_OPTIONS) 
+	Exe_Main_PS3PPU_LD_DIRS = -L$(FIXED_SN_PS3_PATH)/ppu/lib/sn -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib -L$(FIXED_SCE_PS3_ROOT)target/ppu/lib/psgl/rsx/ultra-opt 
+	Exe_Main_PS3PPU_LD_DEPS += -lsn -lm -lio_stub -lnet_stub -lnetctl_stub -lfs_stub -lgcm_cmd -lcgc -lgcm_sys_stub -lsysutil_stub -ladec_stub -lvdec_stub -lspurs_stub -laudio_stub -latrac3plus_stub -lresc_stub -lsysmodule_stub -lsysutil_np_stub
+endif
+
+Exe_Main_PS3clean: 
+	@echo Cleaning Exe_Main_PS3 $(Config)
+	@-rm -f $(Exe_Main_PS3OutputDir)/*.*
+-include $(Exe_Main_PS3ObjFilesCpp:.o=.d) $(Exe_Main_PS3ObjFilesC:.o=.d) $(Exe_Main_PS3SpuElfFiles:.elf=.d)$(Exe_Main_PS3SpursObjFiles:.o=.d)
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MRTC_VPUManager.o: Shared/Mcc/MRTC_VPUManager.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/WGameContext_P6.o: Projects/Main/Exe/WGameContext_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/WGameContextMain.o: Projects/Main/Exe/WGameContextMain.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/WGameMultiplayerHandler.o: Projects/Main/Exe/WGameMultiplayerHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/WGamePSNetworkHandler.o: Projects/Main/Exe_PS3/WGamePSNetworkHandler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/XRApp.o: Projects/Main/Exe/XRApp.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/XRUtil.o: Shared/Mos/Xr/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/PCH.o: Projects/Main/Exe/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MRegistryNavigator.o: Shared/MOS/Classes/Registry/MRegistryNavigator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MRenderCapture.o: Shared/MOS/Classes/Render/MRenderCapture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/WGameContext.o: Shared/MOS/Classes/GameContext/WGameContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/Mrtc.o: Shared/Mcc/Mrtc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/GameClasses_Dyn.o: Projects/Main/GameClasses/GameClasses_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/GameWorld_Dyn.o: Projects/Main/GameWorld/GameWorld_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MCC_Dyn.o: Shared/MCC/MCC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MRenderPS3GCM_Dyn.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3GCM_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MRTC_Dyn.o: Shared/Mcc/MRTC_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/MSystem_Dyn.o: Shared/MOS/MSystem/MSystem_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Release/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug_RTM/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/Debug/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTMD_Profile/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/Exe_PS3/Output/Ps3/Exe_Main_PS3/RTM/XR_Dyn.o: Shared/MOS/XR/XR_Dyn.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(Exe_Main_PS3PPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Exe_Main_PS3Defs) $(Exe_Main_PS3Includes) $(DEPEND) $@ $< > $(basename $@).d
+
+Exe_Main_PS3_CreateOutputDir:
+	@mkdir -p $(Exe_Main_PS3OutputDir)
+
+Exe_Main_PS3TargetFile := Exe_Main_PS3_$(Config).elf
+Exe_Main_PS3TargetSelfFile := Exe_Main_PS3_$(Config).self
+Exe_Main_PS3TargetPath := $(LinkDir)/$(Exe_Main_PS3TargetFile)
+Exe_Main_PS3TargetSelfPath := $(LinkDir)/$(Exe_Main_PS3TargetSelfFile)
+
+$(Exe_Main_PS3TargetPath): $(Exe_Main_PS3ObjFilesCpp) $(Exe_Main_PS3ObjFilesC) $(Exe_Main_PS3SpursObjFiles) $(LocalLibDeps) 
+	@echo Creating Exe_Main_PS3
+	$(PPU_LN_VERBOSE)$(PPU_CC) $(Exe_Main_PS3PPU_LD_DIRS) -L$(LinkDir) -Wl,--start-group $(Exe_Main_PS3ObjFilesCpp) $(Exe_Main_PS3ObjFilesC) $(LocalLibs) $(Exe_Main_PS3PPU_LD_DEPS) -Wl,--end-group -o $(Exe_Main_PS3TargetPath) $(LINK_ERRORCONV)
+	$(MAKE_SELF) $(Exe_Main_PS3TargetPath) $(Exe_Main_PS3TargetSelfPath)
+	PostCopy $(Exe_Main_PS3TargetSelfPath) $(SolutionName) System/PS3Exes/$(Exe_Main_PS3TargetSelfFile)
+	PostCopy $(Exe_Main_PS3TargetPath) $(SolutionName) System/PS3Exes/$(Exe_Main_PS3TargetFile)
+
+Exe_Main_PS3ExtraTargets: 

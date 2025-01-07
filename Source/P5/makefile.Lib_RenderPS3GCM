@@ -1,0 +1,582 @@
+
+Lib_RenderPS3GCMProjectName := Lib_RenderPS3GCM
+Lib_RenderPS3GCMOutputDir :=Shared/MOS/RenderContexts/PS3GCM/Output/$(PlatformName)/Lib_RenderPS3GCM/$(Config)
+
+Lib_RenderPS3GCMIncludes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Lib_RenderPS3GCMIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Lib_RenderPS3GCMIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include/network
+Lib_RenderPS3GCMIncludes += -I Shared/MOS/RenderContexts/PS3GCM/PCH
+Lib_RenderPS3GCMIncludes += -I Shared/mcc
+Lib_RenderPS3GCMIncludes += -I SDK/Include
+Lib_RenderPS3GCMIncludes += -I Shared/MOS/RenderContexts/PS3GCM
+Lib_RenderPS3GCMPPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Lib_RenderPS3GCMDefs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Lib_RenderPS3GCMObjFilesCpp := $(Lib_RenderPS3GCMOutputDir)/MDisplayPS3.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Attrib.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Cmd.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Context.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_FragmentProgram.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Geometry.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Heap.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Image.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_OcclusionQuery.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Render.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_RenderTarget.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_RenderVA.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_StaticContext.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_Texture.o $(Lib_RenderPS3GCMOutputDir)/MRenderPS3_VertexProgram.o $(Lib_RenderPS3GCMOutputDir)/MRenderVPGen.o $(Lib_RenderPS3GCMOutputDir)/Pch.o 
+Lib_RenderPS3GCMObjFilesC := 
+
+Lib_RenderPS3GCMSpuElfFiles := 
+
+Lib_RenderPS3GCMSpursObjFiles := 
+
+Lib_RenderPS3GCMSrcFilesCpp := Shared/MOS/Classes/Render/MRenderVPGen.cpp Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp 
+Lib_RenderPS3GCMSrcFilesC := 
+
+
+ifeq ($(Config),Release)
+	Lib_RenderPS3GCMDefs += -DNDEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Lib_RenderPS3GCMDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O0 -g  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD)
+	Lib_RenderPS3GCMDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug)
+	Lib_RenderPS3GCMDefs += -D_DEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O0 -g  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Lib_RenderPS3GCMDefs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTM)
+	Lib_RenderPS3GCMDefs += -DM_RTM -DNDEBUG  
+	Lib_RenderPS3GCMPPU_CPP_OPTIONS := -O3 -finline-functions  $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) 
+endif
+
+Lib_RenderPS3GCMclean: 
+	@echo Cleaning Lib_RenderPS3GCM $(Config)
+	@-rm -f $(Lib_RenderPS3GCMOutputDir)/*.*
+-include $(Lib_RenderPS3GCMObjFilesCpp:.o=.d) $(Lib_RenderPS3GCMObjFilesC:.o=.d) $(Lib_RenderPS3GCMSpuElfFiles:.elf=.d)$(Lib_RenderPS3GCMSpursObjFiles:.o=.d)
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Attrib.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Attrib.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MDisplayPS3.o: Shared/MOS/RenderContexts/PS3GCM/MDisplayPS3.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Context.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Context.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_StaticContext.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_StaticContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Image.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Image.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Cmd.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Cmd.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Render.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Render.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_RenderVA.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderVA.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Geometry.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Geometry.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Heap.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Heap.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_OcclusionQuery.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_OcclusionQuery.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_RenderTarget.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_RenderTarget.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_Texture.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_Texture.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_FragmentProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_FragmentProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderPS3_VertexProgram.o: Shared/MOS/RenderContexts/PS3GCM/MRenderPS3_VertexProgram.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/Pch.o: Shared/MOS/RenderContexts/PS3GCM/Pch/Pch.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Release/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug_RTM/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/Debug/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTMD_Profile/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/RenderContexts/PS3GCM/Output/Ps3/Lib_RenderPS3GCM/RTM/MRenderVPGen.o: Shared/MOS/Classes/Render/MRenderVPGen.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(Lib_RenderPS3GCMPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_RenderPS3GCMDefs) $(Lib_RenderPS3GCMIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Lib_RenderPS3GCM_CreateOutputDir:
+	@mkdir -p $(Lib_RenderPS3GCMOutputDir)
+
+Lib_RenderPS3GCMTargetFileName := libLib_RenderPS3GCM.a
+Lib_RenderPS3GCMTargetPath := $(LinkDir)/$(Lib_RenderPS3GCMTargetFileName)
+
+$(Lib_RenderPS3GCMTargetPath): $(Lib_RenderPS3GCMObjFilesCpp) $(Lib_RenderPS3GCMObjFilesC) $(Lib_RenderPS3GCMSpursObjFiles) 
+	@echo Creating Lib_RenderPS3GCM
+	$(PPU_LN_VERBOSE)$(PPU_AR) rc $(Lib_RenderPS3GCMTargetPath) $(Lib_RenderPS3GCMObjFilesCpp) $(Lib_RenderPS3GCMObjFilesC) $(Lib_RenderPS3GCMSpursObjFiles) 
+	$(PPU_LN_VERBOSE)$(PPU_RANLIB) $(Lib_RenderPS3GCMTargetPath)
+
+Lib_RenderPS3GCMExtraTargets: 

@@ -69,7 +69,8 @@ CImage::CImage()
 	m_Memmodel = IMAGE_MEM_VOID;
 	m_pBitmap = NULL;
 	m_AllocSize = 0;
-	UpdateFormat();
+	m_Pixelsize = 0;
+//	UpdateFormat();
 };
 
 CImage::CImage(int _w, int _h, int _format, int _memmodel, int _Flags)
@@ -111,7 +112,8 @@ void CImage::Destroy()
 	m_Width = 0;
 	m_Height = 0;
 	m_Modulo = 0;
-	UpdateFormat();
+	m_Pixelsize = 0;
+//	UpdateFormat();
 };
 /*
 #ifdef COMPILER_NEEDOPERATORDELETE
@@ -274,6 +276,19 @@ void CImage::CreateVirtual(int _w, int _h, int _format, int _memmodel, spCImageP
 	UpdateFormat();
 };
 
+void CImage::CreateVirtual_NoDelete(int _w, int _h, int _Format, int _MemModel, int _Flags)
+{
+	m_Width = _w;
+	m_Height = _h;
+	m_Format = _Format;
+	m_Flags = _Flags;
+	m_Memmodel = _MemModel | IMAGE_MEM_VIRTUAL;
+	m_Pixelsize = Format2PixelSize(_Format);
+	m_Modulo = 0;
+	m_pBitmap = NULL;
+	m_spPalette = NULL;
+}
+
 void CImage::CreateReference(int _w, int _h, int _format, int _memmodel, int _modulo, void* _pBitmap, spCImagePalette _spPalette, int _Flags)
 {
 	MAUTOSTRIP(CImage_CreateReference, MAUTOSTRIP_VOID);
@@ -385,12 +400,10 @@ void CImage::CompressSound(const char * _pFormat, CImage* _pDestImg, float _Prio
 {
 	MAUTOSTRIP(CImage_CompressSound, MAUTOSTRIP_VOID);
 
-#ifndef	PLATFORM_CONSOLE
 	Compress_Sound(_pFormat, _pDestImg, _Priority, _Quality, _Flags);
-#endif
 }
 
-void CImage::Compress(int _Compression, fp4 _Quality, CImage* _pDestImg, CTexture *_pTexture)
+void CImage::Compress(int _Compression, fp32 _Quality, CImage* _pDestImg, CTexture *_pTexture)
 {
 	MAUTOSTRIP(CImage_Compress, MAUTOSTRIP_VOID);
 
@@ -418,7 +431,6 @@ void CImage::Decompress(CImage* _pDestImg)
 {
 	MAUTOSTRIP(CImage_Decompress, MAUTOSTRIP_VOID);
 
-#ifndef	PLATFORM_CONSOLE
 	if (!(GetMemModel() & IMAGE_MEM_COMPRESSED))
 		Error("Compress", "Image is not compressed.");
 
@@ -436,7 +448,6 @@ void CImage::Decompress(CImage* _pDestImg)
 	else if (GetMemModel() & IMAGE_MEM_COMPRESSTYPE_SOUND)
 		Decompress_Sound(_pDestImg);
 	else
-#endif
 		Error("Decompress", "Unsupported compress-type.");
 }
 
@@ -1891,8 +1902,9 @@ int CImage::BPP2Format(int bpp)
 		case 15 : return IMAGE_FORMAT_BGR5;
 		case 16 : return IMAGE_FORMAT_B5G6R5;
 		case 24 : return IMAGE_FORMAT_BGR8;
-		case 32 : return IMAGE_FORMAT_BGRX8;
+		case 32 : return IMAGE_FORMAT_BGRX8 | IMAGE_FORMAT_RGBA8 | IMAGE_FORMAT_BGRA8;
 		case 48 : return IMAGE_FORMAT_RGB16;
+		case 64 : return IMAGE_FORMAT_RGBA16 | IMAGE_FORMAT_RGBA16_F;
 		default : return 0;
 	};
 };
@@ -1914,7 +1926,10 @@ int CImage::GetMemSize() const
 {
 	MAUTOSTRIP(CImage_GetMemSize, 0);
 
-	fp4 PixelSize = 0.5f;
+	if(m_AllocSize)
+		return m_AllocSize;
+
+	fp32 PixelSize = 0.5f;
 	if(m_Format == IMAGE_FORMAT_ALPHA)
 		PixelSize = 1;
 
@@ -2305,12 +2320,17 @@ void CImage::Write(CCFile* _pFile)
 // -------------------------------------------------------------------
 //  Geometric operations
 // -------------------------------------------------------------------
-bool CImage::ClipLine(const CRct& cr, int& x0, int& y0, int& x1, int& y1)
+bool CImage::ClipLine(const CRct& cr, int& _x0, int& _y0, int& _x1, int& _y1)
 {
 	MAUTOSTRIP(CImage_ClipLine_cr_ix0_iy0_ix1_iy1, false);
 
+	int x0(_x0);
+	int y0(_y0);
+	int x1(_x1);
+	int y1(_y1);
+
 	// Clip X
-	if (x0 > x1) 
+	if (x0 > x1)
 	{
 		Swap(x0,x1);
 		Swap(y0,y1);
@@ -2359,19 +2379,23 @@ bool CImage::ClipLine(const CRct& cr, int& x0, int& y0, int& x1, int& y1)
 	if (x0 >= cr.p1.x) return false;
 	if (x1 < cr.p0.x) return false;
 
+	_x0 = x0;
+	_y0 = y0;
+	_x1 = x1;
+	_y1 = y1;
 //	return ((abs(x1-x0) > 1) || (abs(y1-y0) > 1));
 	return true;
 };
 
 // -------------------------------------------------------------------
-bool CImage::ClipLine(const CRct& cr, fp4& x0, fp4& y0, fp4& x1, fp4& y1)
+bool CImage::ClipLine(const CRct& cr, fp32& x0, fp32& y0, fp32& x1, fp32& y1)
 {
 	MAUTOSTRIP(CImage_ClipLine_cr_fx0_fy0_fx1_fy1, false);
 
-	fp4 crx0 = cr.p0.x;
-	fp4 cry0 = cr.p0.y;
-	fp4 crx1 = cr.p1.x;
-	fp4 cry1 = cr.p1.y;
+	fp32 crx0 = cr.p0.x;
+	fp32 cry0 = cr.p0.y;
+	fp32 crx1 = cr.p1.x;
+	fp32 cry1 = cr.p1.y;
 
 	// Clip X
 	if (x0 > x1) 
@@ -3088,6 +3112,7 @@ static void CImage_Convert_RGB565_RGBA32(void* _pSrc, void* _pDest, CPixel32* _p
 		for( int t = 0 ; t < _nPixels ; t++ )
 		{
 			Col = *pSrc; pSrc++;
+			::SwapLE(Col);
 
 			r = (Col>>11) & 0x1f;
 			g = (Col>>5) & 0x3f;
@@ -3107,15 +3132,18 @@ static void CImage_Convert_RGB565_RGBA32(void* _pSrc, void* _pDest, CPixel32* _p
 
 static void CImage_Convert_RGBA5551_RGBA32(void* _pSrc, void* _pDest, CPixel32* _pSrcPal, int _nPixels)
 {
-	MAUTOSTRIP(CImage_Convert_RGB565_RGBA32, MAUTOSTRIP_VOID);
+	MAUTOSTRIP(CImage_Convert_RGBA5551_RGBA32, MAUTOSTRIP_VOID);
 
 	uint16 *pSrc = (uint16 *)_pSrc;
 	uint16 Col;
-	uint8 *pDest = (uint8 *)_pDest;
-	uint8 r, g, b, a;
+//	uint8 *pDest = (uint8 *)_pDest;
+//	uint8 r, g, b, a;
+	uint32* pDest =(uint32*)_pDest;
+	uint32 FCol, r, g, b, a;
 	for( int t = 0 ; t < _nPixels ; t++ )
 	{
 		Col = *pSrc; pSrc++;
+		::SwapLE(Col);
 
 		r = (Col>>10) & 0x1f;
 		g = (Col>>5) & 0x1f;
@@ -3125,10 +3153,14 @@ static void CImage_Convert_RGBA5551_RGBA32(void* _pSrc, void* _pDest, CPixel32* 
 		g = (g<<3)|(g&3);
 		b = (b<<3)|(b&3);
 
-		*pDest = b;	pDest++;
-		*pDest = g;	pDest++;
-		*pDest = r;	pDest++;
-		*pDest = a;	pDest++;
+		FCol = b | (g << 8) | (r << 16) | (a << 24);
+		::SwapLE(FCol);
+		*pDest++ = FCol;
+
+//		*pDest = b;	pDest++;
+//		*pDest = g;	pDest++;
+//		*pDest = r;	pDest++;
+//		*pDest = a;	pDest++;
 	}
 }
 
@@ -4297,14 +4329,14 @@ static void CImage_Convert_RGBFLOAT_RGBA32(void* _pSrc, void* _pDest, CPixel32* 
 {
 	MAUTOSTRIP(CImage_Convert_RGBFLOAT_RGBA32, MAUTOSTRIP_VOID);
 
-	CVec3Dfp4* pSrc = (CVec3Dfp4*)_pSrc;
+	CVec3Dfp32* pSrc = (CVec3Dfp32*)_pSrc;
 	uint32 *pDest = (uint32 *)_pDest;
 	for(int t = 0 ; t < _nPixels ; t++ )
 	{
 		*pDest = CPixel32(
-			RoundToInt(Min(pSrc->k[0], 255.0f)),
-			RoundToInt(Min(pSrc->k[1], 255.0f)),
-			RoundToInt(Min(pSrc->k[2], 255.0f)));
+			RoundToInt(Min(pSrc->k[0] * 255.0f, 255.0f)),
+			RoundToInt(Min(pSrc->k[1] * 255.0f, 255.0f)),
+			RoundToInt(Min(pSrc->k[2] * 255.0f, 255.0f)));
 		pSrc++;
 		pDest++;
 	}
@@ -4315,11 +4347,12 @@ static void CImage_Convert_RGB32_RGBFLOAT(void* _pSrc, void* _pDest, CPixel32* _
 	MAUTOSTRIP(CImage_Convert_RGB32_RGBFLOAT, MAUTOSTRIP_VOID);
 
 	uint32 *pSrc = (uint32 *)_pSrc;
-	CVec3Dfp4* pDest = (CVec3Dfp4*)_pDest;
+	CVec3Dfp32* pDest = (CVec3Dfp32*)_pDest;
 	for(int t = 0 ; t < _nPixels ; t++ )
 	{
-		CPixel32 Pix = *pSrc;
-		*pDest = CVec3Dfp4(Pix.GetR(), Pix.GetG(), Pix.GetB());
+//		CPixel32 Pix = *pSrc;
+//		*pDest = CVec3Dfp32(Pix.GetR(), Pix.GetG(), Pix.GetB());
+		M_VSt_V3_Slow(M_VMul(M_VLd_Pixel32_f32(pSrc), M_VScalar(1.0f/255.0f)), pDest);
 		pSrc++;
 		pDest++;
 	}
@@ -4330,13 +4363,13 @@ static void CImage_Convert_RGB24_RGBFLOAT(void* _pSrc, void* _pDest, CPixel32* _
 	MAUTOSTRIP(CImage_Convert_RGB24_RGBFLOAT, MAUTOSTRIP_VOID);
 
 	uint8 *pSrc = (uint8*)_pSrc;
-	CVec3Dfp4* pDest = (CVec3Dfp4*)_pDest;
+	CVec3Dfp32* pDest = (CVec3Dfp32*)_pDest;
 	for(int t = 0 ; t < _nPixels ; t++ )
 	{
-		CVec3Dfp4 Pix;
-		Pix[2] = *(pSrc++);
-		Pix[1] = *(pSrc++);
-		Pix[0] = *(pSrc++);
+		CVec3Dfp32 Pix;
+		Pix[2] = fp32(*(pSrc++)) / 255.0f;
+		Pix[1] = fp32(*(pSrc++)) / 255.0f;
+		Pix[0] = fp32(*(pSrc++)) / 255.0f;
 		*pDest = Pix;
 		pDest++;
 	}
@@ -4346,13 +4379,13 @@ static void CImage_Convert_RGBFLOAT_RGB24(void* _pSrc, void* _pDest, CPixel32* _
 {
 	MAUTOSTRIP(CImage_Convert_RGBFLOAT_RGB24, MAUTOSTRIP_VOID);
 
-	CVec3Dfp4* pSrc = (CVec3Dfp4*)_pSrc;
+	CVec3Dfp32* pSrc = (CVec3Dfp32*)_pSrc;
 	uint8 *pDest = (uint8*)_pDest;
 	for(int t = 0 ; t < _nPixels ; t++ )
 	{
-		*(pDest++) = RoundToInt(Min(pSrc->k[2], 255.0f));
-		*(pDest++) = RoundToInt(Min(pSrc->k[1], 255.0f));
-		*(pDest++) = RoundToInt(Min(pSrc->k[0], 255.0f));
+		*(pDest++) = RoundToInt(Min(pSrc->k[2] * 255.0f, 255.0f));
+		*(pDest++) = RoundToInt(Min(pSrc->k[1] * 255.0f, 255.0f));
+		*(pDest++) = RoundToInt(Min(pSrc->k[0] * 255.0f, 255.0f));
 		pSrc++;
 	}
 }
@@ -4472,6 +4505,20 @@ static void CImage_Convert_I8A8_BGRA8_IA2Normal(void* _pSrc, void* _pDest, CPixe
 		*pDest++	= G;
 		*pDest++	= R;
 		*pDest++	= 255;
+	}
+}
+
+static void CImage_Convert_A8_I8A8(void* _pSrc, void* _pDest, CPixel32* _pSrcPal, int _nPixels)
+{
+	MAUTOSTRIP(CImage_Convert_A8_I8A8, MAUTOSTRIP_VOID);
+
+	uint8* pSrc = (uint8*)_pSrc;
+	uint8* pDst = (uint8*)_pDest;
+
+	for(int x = 0; x < _nPixels; x++)
+	{
+		*pDst++	= 255;
+		*pDst++	= *pSrc++;
 	}
 }
 
@@ -5384,7 +5431,7 @@ void CImage::ConvertPixelArray(void* pSrc, void* pDest, int SrcFmt, int DestFmt,
 						}
 
 					default:
-						Error_static("ConvertScanline (RGB)", CStrF("Convertion not supported. (%s -> %s)", CImage::GetFormatName(SrcFmt), CImage::GetFormatName(DestFmt)));
+						Error_static("ConvertScanline (IA2NORMAL)", CStrF("Convertion not supported. (%s -> %s)", CImage::GetFormatName(SrcFmt), CImage::GetFormatName(DestFmt)));
 					}
 					break;
 				}
@@ -5394,6 +5441,32 @@ void CImage::ConvertPixelArray(void* pSrc, void* pDest, int SrcFmt, int DestFmt,
 			}
 		}
 
+	// ---------------------------------
+	//	IA2NORMAL
+	// ---------------------------------
+	case IMAGE_CONVERT_ALPHA_TO_RGB :
+		{
+			switch(SrcFmt)
+			{
+			case IMAGE_FORMAT_A8:
+				{
+					switch(DestFmt)
+					{
+					case IMAGE_FORMAT_I8A8:
+						{
+							CImage_Convert_A8_I8A8(pSrc, pDest, pSrcPal, nPixels);
+							return;
+						};
+
+					default:
+						Error_static("ConvertScanline (ALPHA_TO_RGB)", CStrF("Conversion not supported. (%s -> %s)", CImage::GetFormatName(SrcFmt), CImage::GetFormatName(DestFmt)));
+					}
+				};
+
+			default:
+				Error_static("ConvertScanline (ALPHA_TO_RGB)", CStrF("Conversion not supported. (%s -> %s)", CImage::GetFormatName(SrcFmt), CImage::GetFormatName(DestFmt)));
+			}
+		}
 
 
 	default :
@@ -5844,8 +5917,8 @@ void CImage::ProcessPixelArray(int _Operation, int _EffectValue1, int _EffectVal
 		{
 			if(SrcFmt == IMAGE_FORMAT_RGB32_F)
 			{
-				CVec3Dfp4* npSrc = (CVec3Dfp4*)pSrc;
-				CVec3Dfp4* npDst = (CVec3Dfp4*)pDest;
+				CVec3Dfp32* npSrc = (CVec3Dfp32*)pSrc;
+				CVec3Dfp32* npDst = (CVec3Dfp32*)pDest;
 				while(nPixels)
 				{
 					*npDst = *npSrc + *npDst;
@@ -6148,7 +6221,7 @@ RGB32_MASAT_NoBClip:
 // -------------------------------------------------------------------
 void CImage::ProcessPixelArray_Stretch(int _Operation, int _EffectValue1, int _EffectValue2, 
 	void* pSrc, void* pDest, int SrcFmt, int DestFmt, int nPixels, CPixel32* pSrcPal,
-	int _nSrcPixels, fp4 _SourcePos, fp4 _SourceStep)
+	int _nSrcPixels, fp32 _SourcePos, fp32 _SourceStep)
 {
 	MAUTOSTRIP(CImage_ProcessPixelArray_Stretch, MAUTOSTRIP_VOID);
 
@@ -7408,11 +7481,11 @@ LpX_Gray:
 				{
 					int sx = x+x;
 					int sy = y+y;
-					CVec3Dfp4 v = *(CVec3Dfp4*)&pS[sx*12 + sy*SrcMod];
-					v += *(CVec3Dfp4*)&pS[(sx+1)*12 + sy*SrcMod];
-					v += *(CVec3Dfp4*)&pS[sx*12 + (sy+1)*SrcMod];
-					v += *(CVec3Dfp4*)&pS[(sx+1)*12 + (sy+1)*SrcMod];
-					v.Scale(0.25f, *(CVec3Dfp4*)&pD[x*12 + y*DestMod]);
+					CVec3Dfp32 v = *(CVec3Dfp32*)&pS[sx*12 + sy*SrcMod];
+					v += *(CVec3Dfp32*)&pS[(sx+1)*12 + sy*SrcMod];
+					v += *(CVec3Dfp32*)&pS[sx*12 + (sy+1)*SrcMod];
+					v += *(CVec3Dfp32*)&pS[(sx+1)*12 + (sy+1)*SrcMod];
+					v.Scale(0.25f, *(CVec3Dfp32*)&pD[x*12 + y*DestMod]);
 				}
 			break;
 		}
@@ -8371,7 +8444,7 @@ void CImage::SetPixel(const CClipRect& cr, CPnt p, CPixel32 _Color)
 	MUnlock(this);
 };
 
-void CImage::SetPixel3f(const CClipRect& cr, CPnt p, const CVec3Dfp4& _Color)
+void CImage::SetPixel3f(const CClipRect& cr, CPnt p, const CVec3Dfp32& _Color)
 {
 	MAUTOSTRIP(CImage_SetPixel3f, MAUTOSTRIP_VOID);
 
@@ -8387,14 +8460,14 @@ void CImage::SetPixel3f(const CClipRect& cr, CPnt p, const CVec3Dfp4& _Color)
 	MLock(this, pSurfMem);
 	if (m_Format & IMAGE_FORMAT_RGB32_F)
 	{
-		CVec3Dfp4* pImg = (CVec3Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec3Dfp32* pImg = (CVec3Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		pImg->k[0] = _Color[0];
 		pImg->k[1] = _Color[1];
 		pImg->k[2] = _Color[2];
 	}
 	else if (m_Format & IMAGE_FORMAT_RGBA32_F)
 	{
-		CVec4Dfp4* pImg = (CVec4Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec4Dfp32* pImg = (CVec4Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		pImg->k[0] = _Color[0];
 		pImg->k[1] = _Color[1];
 		pImg->k[2] = _Color[2];
@@ -8411,7 +8484,7 @@ void CImage::SetPixel3f(const CClipRect& cr, CPnt p, const CVec3Dfp4& _Color)
 	MUnlock(this);
 };
 
-void CImage::SetPixel4f(const CClipRect& cr, CPnt p, const CVec4Dfp4& _Color)
+void CImage::SetPixel4f(const CClipRect& cr, CPnt p, const CVec4Dfp32& _Color)
 {
 	MAUTOSTRIP(CImage_SetPixel4f, MAUTOSTRIP_VOID);
 
@@ -8425,18 +8498,18 @@ void CImage::SetPixel4f(const CClipRect& cr, CPnt p, const CVec4Dfp4& _Color)
 
 	uint8* pSurfMem;
 	MLock(this, pSurfMem);
-//	CVec4Dfp4* pImg = (CVec4Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+//	CVec4Dfp32* pImg = (CVec4Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 //	*pImg = _Color;
 	if (m_Format & IMAGE_FORMAT_RGB32_F)
 	{
-		CVec3Dfp4* pImg = (CVec3Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec3Dfp32* pImg = (CVec3Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		pImg->k[0] = _Color[0];
 		pImg->k[1] = _Color[1];
 		pImg->k[2] = _Color[2];
 	}
 	else if (m_Format & IMAGE_FORMAT_RGBA32_F)
 	{
-		CVec4Dfp4* pImg = (CVec4Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec4Dfp32* pImg = (CVec4Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		pImg->k[0] = _Color[0];
 		pImg->k[1] = _Color[1];
 		pImg->k[2] = _Color[2];
@@ -8456,18 +8529,18 @@ void CImage::SetPixel4f(const CClipRect& cr, CPnt p, const CVec4Dfp4& _Color)
 
 #define FRAC(a) ((a) - M_Floor(a))
 
-CPixel32 CImage::GetPixelUV_Nearest(const CVec2Dfp4& _UV)
+CPixel32 CImage::GetPixelUV_Nearest(const CVec2Dfp32& _UV)
 {
 	MAUTOSTRIP(CImage_GetPixel, 0);
 
 	if (!(m_Memmodel & IMAGE_MEM_LOCKABLE)) return 0;
 
-	fp4 u = FRAC(_UV[0]);
-	fp4 v = FRAC(_UV[1]);
-	fp4 w = GetWidth();
-	fp4 h = GetHeight();
-	fp4 x = u * w;
-	fp4 y = v * h;
+	fp32 u = FRAC(_UV[0]);
+	fp32 v = FRAC(_UV[1]);
+	fp32 w = GetWidth();
+	fp32 h = GetHeight();
+	fp32 x = u * w;
+	fp32 y = v * h;
 	int x0 = TruncToInt(x);
 	int y0 = TruncToInt(y);
 	if (x0 < 0)
@@ -8489,20 +8562,20 @@ CPixel32 CImage::GetPixelUV_Nearest(const CVec2Dfp4& _UV)
 	return ConvertRAWColor(col, m_Format, m_spPalette);
 }
 
-CPixel32 CImage::GetPixelUV_Bilinear(const CVec2Dfp4& _UV, int _EdgeClamp)
+CPixel32 CImage::GetPixelUV_Bilinear(const CVec2Dfp32& _UV, int _EdgeClamp)
 {
 	MAUTOSTRIP(CImage_GetPixel, 0);
 
 	if (!(m_Memmodel & IMAGE_MEM_LOCKABLE)) return 0;
 
-	fp4 w = GetWidth();
-	fp4 h = GetHeight();
-	fp4 winv = 1.0f / w;
-	fp4 hinv = 1.0f / h;
-	fp4 u = FRAC(_UV[0] - 0.5f*winv);
-	fp4 v = FRAC(_UV[1] - 0.5f*hinv);
-	fp4 x = u * w;
-	fp4 y = v * h;
+	fp32 w = GetWidth();
+	fp32 h = GetHeight();
+	fp32 winv = 1.0f / w;
+	fp32 hinv = 1.0f / h;
+	fp32 u = FRAC(_UV[0] - 0.5f*winv);
+	fp32 v = FRAC(_UV[1] - 0.5f*hinv);
+	fp32 x = u * w;
+	fp32 y = v * h;
 	int x0 = TruncToInt(x);
 	int y0 = TruncToInt(y);
 	if (x0 < 0)
@@ -8530,8 +8603,8 @@ CPixel32 CImage::GetPixelUV_Bilinear(const CVec2Dfp4& _UV, int _EdgeClamp)
 		else
 			y1 = 0;
 	}
-	fp4 xf = FRAC(x);
-	fp4 yf = FRAC(y);
+	fp32 xf = FRAC(x);
+	fp32 yf = FRAC(y);
 
 	CPixel32 col;
 	uint8* pSurfMem;
@@ -8572,7 +8645,7 @@ CPixel32 CImage::GetPixel(const CClipRect& cr, const CPnt& _p)
 	return ConvertRAWColor(col, m_Format, m_spPalette);
 }
 
-CVec3Dfp4 CImage::GetPixel3f(const CClipRect& cr, CPnt p)
+CVec3Dfp32 CImage::GetPixel3f(const CClipRect& cr, CPnt p)
 {
 	MAUTOSTRIP(CImage_GetPixel3f, 0.0f);
 
@@ -8580,19 +8653,19 @@ CVec3Dfp4 CImage::GetPixel3f(const CClipRect& cr, CPnt p)
 	if (!cr.Visible(p)) return 0;
 	p += cr;
 
-	CVec3Dfp4 Ret;
+	CVec3Dfp32 Ret;
 	uint8* pSurfMem;
 	MLock(this, pSurfMem);
 	if (m_Format & IMAGE_FORMAT_RGB32_F)
 	{
-		CVec3Dfp4* pImg = (CVec3Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec3Dfp32* pImg = (CVec3Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		Ret.k[0] = pImg->k[0];
 		Ret.k[1] = pImg->k[1];
 		Ret.k[2] = pImg->k[2];
 	}
 	else if (m_Format & IMAGE_FORMAT_RGBA32_F)
 	{
-		CVec4Dfp4* pImg = (CVec4Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec4Dfp32* pImg = (CVec4Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		Ret.k[0] = pImg->k[0];
 		Ret.k[1] = pImg->k[1];
 		Ret.k[2] = pImg->k[2];
@@ -8600,9 +8673,9 @@ CVec3Dfp4 CImage::GetPixel3f(const CClipRect& cr, CPnt p)
 	else if (m_Format & IMAGE_FORMAT_BGRA16)
 	{
 		uint16* pImg = (uint16*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
-		Ret.k[0] = fp4(pImg[2]) / 65535.0f;
-		Ret.k[1] = fp4(pImg[1]) / 65535.0f;
-		Ret.k[2] = fp4(pImg[0]) / 65535.0f;
+		Ret.k[0] = fp32(pImg[2]) / 65535.0f;
+		Ret.k[1] = fp32(pImg[1]) / 65535.0f;
+		Ret.k[2] = fp32(pImg[0]) / 65535.0f;
 	}
 	else
 	{
@@ -8615,11 +8688,11 @@ CVec3Dfp4 CImage::GetPixel3f(const CClipRect& cr, CPnt p)
 	return Ret;
 }
 
-CVec4Dfp4 CImage::GetPixel4f(const CClipRect& cr, CPnt p)
+CVec4Dfp32 CImage::GetPixel4f(const CClipRect& cr, CPnt p)
 {
 	MAUTOSTRIP(CImage_GetPixel4f, 0.0f);
 
-	CVec4Dfp4 Ret;
+	CVec4Dfp32 Ret;
 	Ret = 0;
 	if (!(m_Memmodel & IMAGE_MEM_LOCKABLE)) return Ret;
 	if (!cr.Visible(p)) return Ret;
@@ -8629,11 +8702,11 @@ CVec4Dfp4 CImage::GetPixel4f(const CClipRect& cr, CPnt p)
 	MLock(this, pSurfMem);
 	if (m_Format & IMAGE_FORMAT_RGBA32_F)
 	{
-		Ret = *(CVec4Dfp4*)&pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		Ret = *(CVec4Dfp32*)&pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 	}
 	else if (m_Format & IMAGE_FORMAT_RGB32_F)
 	{
-		CVec3Dfp4* pImg = (CVec3Dfp4*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
+		CVec3Dfp32* pImg = (CVec3Dfp32*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
 		Ret.k[0] = pImg->k[0];
 		Ret.k[1] = pImg->k[1];
 		Ret.k[2] = pImg->k[2];
@@ -8642,10 +8715,10 @@ CVec4Dfp4 CImage::GetPixel4f(const CClipRect& cr, CPnt p)
 	else if (m_Format & IMAGE_FORMAT_BGRA16)
 	{
 		uint16* pImg = (uint16*) &pSurfMem[m_Modulo*p.y + m_Pixelsize*p.x];
-		Ret.k[0] = fp4(pImg[2]) / 65535.0f;
-		Ret.k[1] = fp4(pImg[1]) / 65535.0f;
-		Ret.k[2] = fp4(pImg[0]) / 65535.0f;
-		Ret.k[3] = fp4(pImg[3]) / 65535.0f;
+		Ret.k[0] = fp32(pImg[2]) / 65535.0f;
+		Ret.k[1] = fp32(pImg[1]) / 65535.0f;
+		Ret.k[2] = fp32(pImg[0]) / 65535.0f;
+		Ret.k[3] = fp32(pImg[3]) / 65535.0f;
 	}
 	else
 	{
@@ -8736,10 +8809,10 @@ void CImage::Fill(const CClipRect& cr, int32 color)
 			case 12 :
 				{
 					// Assume IMAGE_FORMAT_RGB32_F
-					fp4* pSurf = (fp4*)&pSurfMem[mod*y + xofs];
-					fp4 r = Color.GetR();
-					fp4 g = Color.GetG();
-					fp4 b = Color.GetB();
+					fp32* pSurf = (fp32*)&pSurfMem[mod*y + xofs];
+					fp32 r = Color.GetR();
+					fp32 g = Color.GetG();
+					fp32 b = Color.GetB();
 					for( int i = 0; i < w; i++ )
 					{
 						*(pSurf++)	= r;
@@ -8751,11 +8824,11 @@ void CImage::Fill(const CClipRect& cr, int32 color)
 			case 16 :
 				{
 					// Assume IMAGE_FORMAT_RGBA32_F
-					fp4* pSurf = (fp4*)&pSurfMem[mod*y + xofs];
-					fp4 r = Color.GetR();
-					fp4 g = Color.GetG();
-					fp4 b = Color.GetB();
-					fp4 a = Color.GetA();
+					fp32* pSurf = (fp32*)&pSurfMem[mod*y + xofs];
+					fp32 r = Color.GetR();
+					fp32 g = Color.GetG();
+					fp32 b = Color.GetB();
+					fp32 a = Color.GetA();
 					for( int i = 0; i < w; i++ )
 					{
 						*(pSurf++)	= r;
@@ -9017,7 +9090,7 @@ void CImage::Blt(const CClipRect& cr, CImage& src, int _flags, CPnt destp, int _
 	MUnlock(this);
 }
 
-void CImage::BltStretch(const CClipRect& cr, CImage& _Src, int _Flags, CVec2Dfp4 _Dest, CVec2Dfp4 _Scale, int _EffectValue, CRct* _pRetDestRect)
+void CImage::BltStretch(const CClipRect& cr, CImage& _Src, int _Flags, CVec2Dfp32 _Dest, CVec2Dfp32 _Scale, int _EffectValue, CRct* _pRetDestRect)
 {
 	MAUTOSTRIP(CImage_BltStretch, MAUTOSTRIP_VOID);
 
@@ -9027,36 +9100,36 @@ void CImage::BltStretch(const CClipRect& cr, CImage& _Src, int _Flags, CVec2Dfp4
 	if (!(m_Memmodel & IMAGE_MEM_LOCKABLE)) return;
 	if (!(_Src.m_Memmodel & IMAGE_MEM_LOCKABLE)) return;
 
-	CVec2Dfp4 SrcPos(0);
+	CVec2Dfp32 SrcPos(0);
 	_Dest.k[0] += cr.ofs.x;
 	_Dest.k[1] += cr.ofs.y;
-	fp4 xFrac = _Dest.k[0] - M_Floor(_Dest.k[0]);
-	fp4 yFrac = _Dest.k[1] - M_Floor(_Dest.k[1]);
+	fp32 xFrac = _Dest.k[0] - M_Floor(_Dest.k[0]);
+	fp32 yFrac = _Dest.k[1] - M_Floor(_Dest.k[1]);
 	_Dest.k[0] = M_Floor(_Dest.k[0]);
 	_Dest.k[1] = M_Floor(_Dest.k[1]);
 
 	if ((_Scale.k[0] == 0) || (_Scale.k[1] == 0)) return;
-	CVec2Dfp4 ScaleInv(1.0f/_Scale.k[0], 1.0f/_Scale.k[1]);
+	CVec2Dfp32 ScaleInv(1.0f/_Scale.k[0], 1.0f/_Scale.k[1]);
 
 	SrcPos.k[0] -= xFrac * ScaleInv.k[0];
 	SrcPos.k[1] -= yFrac * ScaleInv.k[1];
 
 	if (_Dest.k[0] < cr.clip.p0.x)
 	{
-		SrcPos.k[0] += ((fp4)cr.clip.p0.x - _Dest.k[0]) * ScaleInv.k[0];
+		SrcPos.k[0] += ((fp32)cr.clip.p0.x - _Dest.k[0]) * ScaleInv.k[0];
 		_Dest.k[0] = cr.clip.p0.x;
 	}
 
 	if (_Dest.k[1] < cr.clip.p0.y)
 	{
-		SrcPos.k[1] += ((fp4)cr.clip.p0.y - _Dest.k[1]) * ScaleInv.k[1];
+		SrcPos.k[1] += ((fp32)cr.clip.p0.y - _Dest.k[1]) * ScaleInv.k[1];
 		_Dest.k[1] = cr.clip.p0.y;
 	}
 
 	int clipw = cr.clip.p1.x - cr.clip.p0.x;
 	int cliph = cr.clip.p1.y - cr.clip.p0.y;
-	int w = Min((int)(((fp4)_Src.GetWidth() - SrcPos.k[0]) * ScaleInv.k[0]) + 1, clipw);
-	int h = Min((int)(((fp4)_Src.GetHeight() - SrcPos.k[1]) * ScaleInv.k[1]) + 1, cliph);
+	int w = Min((int)(((fp32)_Src.GetWidth() - SrcPos.k[0]) * ScaleInv.k[0]) + 1, clipw);
+	int h = Min((int)(((fp32)_Src.GetHeight() - SrcPos.k[1]) * ScaleInv.k[1]) + 1, cliph);
 	w = Min(GetWidth() - int(_Dest.k[0]), w);
 	h = Min(GetHeight() - int(_Dest.k[1]), h);
 	if ((w <= 0) || (h <= 0)) return;
@@ -9091,7 +9164,7 @@ void CImage::BltStretch(const CClipRect& cr, CImage& _Src, int _Flags, CVec2Dfp4
 //				LogFile(CStrF("BltStretch %.2f, %.2f, %d, %d, %.2f, %.2f, SInv %.2f", 
 //					_Dest.k[0], _Dest.k[1], w, h, SrcPos.k[0], SrcPos.k[1], ScaleInv.k[0]));
 
-				fp4 SrcY = SrcPos.k[1];
+				fp32 SrcY = SrcPos.k[1];
 				for (int y = 0; y < h; y++)
 				{
 					int sy = (int)SrcY;
@@ -9207,8 +9280,8 @@ void CImage::Invert()
 }
 
 // -------------------------------------------------------------------
-void CImage::Internal_TextureSpan_Clut8_Copy(int SpanLen, fp4 zinv0, fp4 zinv1,
-	const CVec2Dfp4& _tc0,  const CVec2Dfp4& _tc1,
+void CImage::Internal_TextureSpan_Clut8_Copy(int SpanLen, fp32 zinv0, fp32 zinv1,
+	const CVec2Dfp32& _tc0,  const CVec2Dfp32& _tc1,
 	uint8* pSurfMem, uint8* pTextureMem, int Txt_Modulo, int Txt_xAnd, int Txt_yAnd)
 {
 	MAUTOSTRIP(CImage_Internal_TextureSpan_Clut8_Copy, MAUTOSTRIP_VOID);
@@ -9217,11 +9290,11 @@ void CImage::Internal_TextureSpan_Clut8_Copy(int SpanLen, fp4 zinv0, fp4 zinv1,
 	int tc0x, tc0y;
 	tc0x = (int)(_tc0.k[0] * 65536.0f*512.0f);
 	tc0y = (int)(_tc0.k[1] * 65536.0f*512.0f);
-//	fp4 leninv = 65536.0*512.0/SpanLen;
+//	fp32 leninv = 65536.0*512.0/SpanLen;
 
 #ifdef CPU_INTELP5
-//	fp4 leninv = GetMathAccel()->FastDivFp4Int(65536.0f*512.0f, SpanLen);
-	fp4 leninv = (65536.0f * 512.0f) / SpanLen;
+//	fp32 leninv = GetMathAccel()->FastDivFp32Int(65536.0f*512.0f, SpanLen);
+	fp32 leninv = (65536.0f * 512.0f) / SpanLen;
 	int iptcx = (int)((_tc1.k[0] - _tc0.k[0]) * leninv);
 	int iptcy = (int)((_tc1.k[1] - _tc0.k[1]) * leninv);
 	__asm
@@ -9479,7 +9552,7 @@ void CImage::TextureTest(CImage* Texture)
 	int spanlen = Min(GetWidth(), 160);
 	for (int y = 0; y < ydest; y++)
 	{
-		Internal_TextureSpan_Clut8_Copy(spanlen, 1, 1, CVec2Dfp4(0, y), CVec2Dfp4(128, y/2),
+		Internal_TextureSpan_Clut8_Copy(spanlen, 1, 1, CVec2Dfp32(0, y), CVec2Dfp32(128, y/2),
 			&pSurfMem[y*Mod], pTextureMem,
 			Txt_Mod, Txt_xAnd, Txt_yAnd);
 	};
@@ -9489,7 +9562,7 @@ void CImage::TextureTest(CImage* Texture)
 };
 */
 // -------------------------------------------------------------------
-void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp4& _p1, const CVec3Dfp4& _p2, int32 color)
+void CImage::Triangle(const CClipRect& cr, const CVec3Dfp32& _p0,  const CVec3Dfp32& _p1, const CVec3Dfp32& _p2, int32 color)
 {
 	MAUTOSTRIP(CImage_Triangle, MAUTOSTRIP_VOID);
 
@@ -9500,8 +9573,8 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 	int col = ConvertColor(color, m_Format, m_spPalette);
 	int psize = GetPixelSize();
 
-	CVec3Dfp4 p[3];
-	fp4 ymin = _FP4_MAX;
+	CVec3Dfp32 p[3];
+	fp32 ymin = _FP32_MAX;
 	int yl0 = 0;
 	if (_p0.k[1] < ymin) ymin = _p0.k[1];
 	if (_p1.k[1] < ymin) { ymin = _p1.k[1]; yl0 = 1; };
@@ -9516,10 +9589,10 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 
 	bool IPl = FALSE;
 	bool IPr = FALSE;
-	fp4 ipxl;
-	fp4 ipxr;
-	fp4 xl;
-	fp4 xr;
+	fp32 ipxl;
+	fp32 ipxr;
+	fp32 xl;
+	fp32 xr;
 
 	uint8* pSurfMem;
 	MLock(this, pSurfMem);
@@ -9528,14 +9601,14 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 	bool Finished = FALSE;
 	while (!Finished)
 	{
-		fp4 dyl = p[yl1].k[1] - p[yl0].k[1];
-		fp4 dyr = p[yr1].k[1] - p[yr0].k[1];
+		fp32 dyl = p[yl1].k[1] - p[yl0].k[1];
+		fp32 dyr = p[yr1].k[1] - p[yr0].k[1];
 
 		if ((dyl > 0) && (dyr > 0) && 
 			(p[yl1].k[1] > cr.clip.p0.y) && (p[yl0].k[1] < cr.clip.p1.y) &&
 			(p[yr1].k[1] > cr.clip.p0.y) && (p[yr0].k[1] < cr.clip.p1.y))
 		{
-			int y = Max((int) M_Floor((fp4)Max((int)p[yl0].k[1], (int)p[yr0].k[1]) + 1), cr.clip.p0.y);
+			int y = Max((int) M_Floor((fp32)Max((int)p[yl0].k[1], (int)p[yr0].k[1]) + 1), cr.clip.p0.y);
 			IPl = FALSE;
 			IPr = FALSE;
 			if (!IPl)
@@ -9589,9 +9662,9 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 // -------------------------------------------------------------------
 #define CONST_CIMAGE_PERSPECTIVESTEP 16
 
-void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp4& _p1, const CVec3Dfp4& _p2,
+void CImage::Triangle(const CClipRect& cr, const CVec3Dfp32& _p0,  const CVec3Dfp32& _p1, const CVec3Dfp32& _p2,
 					  CPixel32 _col0, CPixel32 _col1, CPixel32 _col2, 
-					  const CVec2Dfp4 _tc0, const CVec2Dfp4 _tc1, const CVec2Dfp4 _tc2, CImage& Texture)
+					  const CVec2Dfp32 _tc0, const CVec2Dfp32 _tc1, const CVec2Dfp32 _tc2, CImage& Texture)
 {
 	MAUTOSTRIP(CImage_Triangle_2, MAUTOSTRIP_VOID);
 
@@ -9601,11 +9674,11 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 
 //	int psize = GetPixelSize();
 
-	CVec3Dfp4 p[3];
-	CVec3Dfp4 ck[3];
-	CVec2Dfp4 tck[3];
+	CVec3Dfp32 p[3];
+	CVec3Dfp32 ck[3];
+	CVec2Dfp32 tck[3];
 
-	fp4 ymin = _FP4_MAX;
+	fp32 ymin = _FP32_MAX;
 	int yl0 = 0;
 	if (_p0.k[1] < ymin) ymin = _p0.k[1];
 	if (_p1.k[1] < ymin) { ymin = _p1.k[1]; yl0 = 1; };
@@ -9617,20 +9690,20 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 	p[0] = _p0;
 	p[1] = _p1;
 	p[2] = _p2;
-	ck[0] = CVec3Dfp4(_col0.GetR(), _col0.GetG(), _col0.GetB()) * p[0].k[2];
-	ck[1] = CVec3Dfp4(_col1.GetR(), _col1.GetG(), _col1.GetB()) * p[1].k[2];
-	ck[2] = CVec3Dfp4(_col2.GetR(), _col2.GetG(), _col2.GetB()) * p[2].k[2];
+	ck[0] = CVec3Dfp32(_col0.GetR(), _col0.GetG(), _col0.GetB()) * p[0].k[2];
+	ck[1] = CVec3Dfp32(_col1.GetR(), _col1.GetG(), _col1.GetB()) * p[1].k[2];
+	ck[2] = CVec3Dfp32(_col2.GetR(), _col2.GetG(), _col2.GetB()) * p[2].k[2];
 	tck[0] = _tc0 * p[0].k[2];
 	tck[1] = _tc1 * p[1].k[2];
 	tck[2] = _tc2 * p[2].k[2];
 
 	bool IPl = FALSE;
 	bool IPr = FALSE;
-	fp4 ipxl, ipxr;
-	fp4 ipzinvl, ipzinvr;
-	fp4 xl, xr, zinvl, zinvr;
-	CVec2Dfp4 iptckl, iptckr, tckl, tckr;
-	CVec3Dfp4 ipckl, ipckr, ckl, ckr;
+	fp32 ipxl, ipxr;
+	fp32 ipzinvl, ipzinvr;
+	fp32 xl, xr, zinvl, zinvr;
+	CVec2Dfp32 iptckl, iptckr, tckl, tckr;
+	CVec3Dfp32 ipckl, ipckr, ckl, ckr;
 
 	uint8* pSurfMem;
 	MLock(this, pSurfMem);
@@ -9639,20 +9712,20 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 	bool Finished = FALSE;
 	while (!Finished)
 	{
-		fp4 dyl = p[yl1].k[1] - p[yl0].k[1];
-		fp4 dyr = p[yr1].k[1] - p[yr0].k[1];
+		fp32 dyl = p[yl1].k[1] - p[yl0].k[1];
+		fp32 dyr = p[yr1].k[1] - p[yr0].k[1];
 
 		if ((dyl > 0) && (dyr > 0) && 
 			(p[yl1].k[1] > cr.clip.p0.y) && (p[yl0].k[1] < cr.clip.p1.y) &&
 			(p[yr1].k[1] > cr.clip.p0.y) && (p[yr0].k[1] < cr.clip.p1.y))
 		{
-			int y = Max((int)M_Floor((fp4)Max((int)p[yl0].k[1], (int)p[yr0].k[1]) + 1), cr.clip.p0.y);
+			int y = Max((int)M_Floor((fp32)Max((int)p[yl0].k[1], (int)p[yr0].k[1]) + 1), cr.clip.p0.y);
 			IPl = FALSE;
 			IPr = FALSE;
 			if (!IPl)
 			{
-				fp4 clipdy = (y - p[yl0].k[1]);
-				fp4 dyinv = 1/dyl;
+				fp32 clipdy = (y - p[yl0].k[1]);
+				fp32 dyinv = 1/dyl;
 				ipxl = (p[yl1].k[0] - p[yl0].k[0]) * dyinv;
 				xl = p[yl0].k[0] + ipxl * clipdy;
 				ipzinvl = (p[yl1].k[2] - p[yl0].k[2]) * dyinv;
@@ -9665,8 +9738,8 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 			};
 			if (!IPr)
 			{
-				fp4 clipdy = (y - p[yr0].k[1]);
-				fp4 dyinv = 1/dyr;
+				fp32 clipdy = (y - p[yr0].k[1]);
+				fp32 dyinv = 1/dyr;
 				ipxr = (p[yr1].k[0] - p[yr0].k[0]) * dyinv;
 				xr = p[yr0].k[0] + ipxr * clipdy;
 				ipzinvr = (p[yr1].k[2] - p[yr0].k[2]) * dyinv;
@@ -9687,32 +9760,32 @@ void CImage::Triangle(const CClipRect& cr, const CVec3Dfp4& _p0,  const CVec3Dfp
 					if (ixl < cr.clip.p0.x) ixl = cr.clip.p0.x;
 					if (ixr >= cr.clip.p1.x) ixr = cr.clip.p1.x-1;
 //					int len = ixr - ixl + 1;
-					fp4 dx = xr-xl;
-					fp4 xclip = (fp4)ixl - xl;
-					if (M_Fabs(dx) <= _FP4_MIN) dx = 0.00000001f;
-					fp4 dxinv = 1/dx;
+					fp32 dx = xr-xl;
+					fp32 xclip = (fp32)ixl - xl;
+					if (M_Fabs(dx) <= _FP32_MIN) dx = 0.00000001f;
+					fp32 dxinv = 1/dx;
 
-					CVec3Dfp4 x_ipck = (ckr-ckl) * dxinv;
-					CVec2Dfp4 x_iptck = (tckr - tckl) * dxinv;
-//					fp4 x_ipzinv = (zinvr - zinvl) * dxinv;
+					CVec3Dfp32 x_ipck = (ckr-ckl) * dxinv;
+					CVec2Dfp32 x_iptck = (tckr - tckl) * dxinv;
+//					fp32 x_ipzinv = (zinvr - zinvl) * dxinv;
 
-					CVec3Dfp4 x_ck0 = ckl + (x_ipck * xclip);
-					CVec2Dfp4 x_tck0 = tckl + (x_iptck * xclip);
-//					fp4 x_zinv0 = zinvl + (x_ipzinv * xclip);
+					CVec3Dfp32 x_ck0 = ckl + (x_ipck * xclip);
+					CVec2Dfp32 x_tck0 = tckl + (x_iptck * xclip);
+//					fp32 x_zinv0 = zinvl + (x_ipzinv * xclip);
 
 					int x0 = ixl;
 					while (x0 < ixr)
 					{
 						int x1;
-						fp4 dxx_inv;
+						fp32 dxx_inv;
 						if (x0 + CONST_CIMAGE_PERSPECTIVESTEP <= ixr)
 						{
 							x1 = x0 + CONST_CIMAGE_PERSPECTIVESTEP;
-							dxx_inv = 1.0f/(fp4)CONST_CIMAGE_PERSPECTIVESTEP;
+							dxx_inv = 1.0f/(fp32)CONST_CIMAGE_PERSPECTIVESTEP;
 						}
 						else
 						{
-							dxx_inv = 1.0f/(fp4)(ixr - x0);
+							dxx_inv = 1.0f/(fp32)(ixr - x0);
 							x1 = ixr;
 						};
 
@@ -10144,19 +10217,19 @@ uint16 SYSTEMDLLEXPORT CImage::ConvToRGBA5551(CPixel32 _c)
 	return (a << 15) + (r << 10) + (g << 5) + b;
 }
 
-CVec2Dfp4 SYSTEMDLLEXPORT CImage::TransformSampleVector(int _iTransform, const CVec2Dfp4& _InVector, fp4 _PixelWidth, fp4 _PixelHeight)
+CVec2Dfp32 SYSTEMDLLEXPORT CImage::TransformSampleVector(int _iTransform, const CVec2Dfp32& _InVector, fp32 _PixelWidth, fp32 _PixelHeight)
 {
-	CVec2Dfp4 OutVector = _InVector;
+	CVec2Dfp32 OutVector = _InVector;
 	if(_iTransform & IMAGE_TRANSFORM_ROTATECW)
 	{
-		CVec2Dfp4 TempVector = OutVector;
+		CVec2Dfp32 TempVector = OutVector;
 		OutVector.k[0]	= 1.0f - TempVector.k[1] - _PixelWidth;
 		OutVector.k[1]	= TempVector.k[0];
 	}
 
 	if(_iTransform & IMAGE_TRANSFORM_ROTATECCW)
 	{
-		CVec2Dfp4 TempVector = OutVector;
+		CVec2Dfp32 TempVector = OutVector;
 		OutVector.k[0]	= TempVector.k[1];
 		OutVector.k[1]	= 1.0f - TempVector.k[0] - _PixelHeight;
 	}
@@ -10177,15 +10250,15 @@ spCImage CImage::Transform(int _iTransform)
 
 	int Width = GetWidth();
 	int Height = GetHeight();
-	fp4 invWidth = 1.0f / Width;
-	fp4 invHeight = 1.0f / Height;
+	fp32 invWidth = 1.0f / Width;
+	fp32 invHeight = 1.0f / Height;
 
 	for(int y = 0; y < Height; y++)
 	{
 		for(int x = 0; x < Width; x++)
 		{
-			CVec2Dfp4 SampleTexcoord(x * invWidth, y * invHeight);
-			CVec2Dfp4 OutputTexcoord = TransformSampleVector(_iTransform, SampleTexcoord, invWidth, invHeight);
+			CVec2Dfp32 SampleTexcoord(x * invWidth, y * invHeight);
+			CVec2Dfp32 OutputTexcoord = TransformSampleVector(_iTransform, SampleTexcoord, invWidth, invHeight);
 
 			CPixel32 Pixel = GetPixel(GetClipRect(), CPnt((int)(SampleTexcoord.k[0] * Width), (int)(SampleTexcoord.k[1] * Height)));
 			spImg->SetPixel(spImg->GetClipRect(), CPnt((int)(OutputTexcoord.k[0] * Width), (int)(OutputTexcoord.k[1] * Height)), Pixel);

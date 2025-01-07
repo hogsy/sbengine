@@ -34,7 +34,7 @@ class CHash3DLink
 public:
 	void* pNextH3D;
 	void* pPrevH3D;
-	CVec3Dfp4 OldPosH3D;
+	CVec3Dfp32 OldPosH3D;
 
 	CHash3DLink()
 	{
@@ -57,7 +57,7 @@ public:
 template<class T>
 class THash3D : public CReferenceCount
 {
-	typedef TList_Vector<T*> QueryBuffer;
+	typedef TArray<T*> QueryBuffer;
 
 	class Size3D
 	{
@@ -73,11 +73,11 @@ class THash3D : public CReferenceCount
 
 	T** pHash;
 
-	int GetXBox(fp4 _x) { return (((int) _x) >> BoxSizeShift.k[0]) & nBoxAnd.k[0]; };
-	int GetYBox(fp4 _y) { return (((int) _y) >> BoxSizeShift.k[1]) & nBoxAnd.k[1]; };
-	int GetZBox(fp4 _z) { return (((int) _z) >> BoxSizeShift.k[2]) & nBoxAnd.k[2]; };
+	int GetXBox(fp32 _x) { return (((int) _x) >> BoxSizeShift.k[0]) & nBoxAnd.k[0]; };
+	int GetYBox(fp32 _y) { return (((int) _y) >> BoxSizeShift.k[1]) & nBoxAnd.k[1]; };
+	int GetZBox(fp32 _z) { return (((int) _z) >> BoxSizeShift.k[2]) & nBoxAnd.k[2]; };
 
-	void GetXBoxRange(fp4 _x0, fp4 _x1, int& x0, int& x1) 
+	void GetXBoxRange(fp32 _x0, fp32 _x1, int& x0, int& x1) 
 	{ 
 		x0 = ((int) _x0) >> BoxSizeShift.k[0];
 		x1 = ((int) _x1) >> BoxSizeShift.k[0];
@@ -93,7 +93,7 @@ class THash3D : public CReferenceCount
 		};
 	};
 
-	void GetYBoxRange(fp4 _y0, fp4 _y1, int& y0, int& y1) 
+	void GetYBoxRange(fp32 _y0, fp32 _y1, int& y0, int& y1) 
 	{ 
 		y0 = ((int) _y0) >> BoxSizeShift.k[1];
 		y1 = ((int) _y1) >> BoxSizeShift.k[1];
@@ -109,7 +109,7 @@ class THash3D : public CReferenceCount
 		};
 	};
 
-	void GetZBoxRange(fp4 _z0, fp4 _z1, int& z0, int& z1) 
+	void GetZBoxRange(fp32 _z0, fp32 _z1, int& z0, int& z1) 
 	{ 
 		z0 = ((int) _z0) >> BoxSizeShift.k[2];
 		z1 = ((int) _z1) >> BoxSizeShift.k[2];
@@ -125,7 +125,7 @@ class THash3D : public CReferenceCount
 		};
 	};
 
-	int CalcHashIndex(CVec3Dfp4& pos)
+	int CalcHashIndex(CVec3Dfp32& pos)
 	{
 		int x = GetXBox(pos.k[0]);
 		int y = GetYBox(pos.k[1]);
@@ -134,7 +134,7 @@ class THash3D : public CReferenceCount
 	};
 
 public:
-	THash3D(CVec3Dfp4 _nBoxShift, CVec3Dfp4 _BoxSizeShift)
+	THash3D(CVec3Dfp32 _nBoxShift, CVec3Dfp32 _BoxSizeShift)
 	{
 		nBoxShift.k[0] = _nBoxShift.k[0];
 		nBoxShift.k[1] = _nBoxShift.k[1];
@@ -168,7 +168,7 @@ public:
 		pHash = NULL;
 	};
 
-	void Insert(T* _p, CVec3Dfp4 pos)
+	void Insert(T* _p, CVec3Dfp32 pos)
 	{
 		int index = CalcHashIndex(pos);
 		if (pHash[index] != NULL)
@@ -179,21 +179,19 @@ public:
 		_p->OldPosH3D = pos;
 	};
 
-	void Insert(T* _p, const CMat4Dfp4& mpos)
+	void Insert(T* _p, const CMat4Dfp32& mpos)
 	{
-		CVec3Dfp4 pos;
+		CVec3Dfp32 pos;
 		pos.GetMatrixRow(3, mpos);
 		Insert(_p, pos);
 	};
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-	void Insert(T* _p, const CMat43fp4& mpos)
+	void Insert(T* _p, const CMat43fp32& mpos)
 	{
-		CVec3Dfp4 pos;
+		CVec3Dfp32 pos;
 		pos.GetMatrixRow(3, mpos);
 		Insert(_p, pos);
 	}
-#endif
 
 	void Remove(T* _p)
 	{
@@ -221,27 +219,25 @@ public:
 		_p->pNextH3D = NULL;
 	};
 
-	void Move(T* _p, CVec3Dfp4 newpos)
+	void Move(T* _p, CVec3Dfp32 newpos)
 	{
 		Remove(_p);
 		Insert(_p, newpos);
 	};
 
-	void Move(T* _p, const CMat4Dfp4& newmpos)
+	void Move(T* _p, const CMat4Dfp32& newmpos)
 	{
 		Remove(_p);
 		Insert(_p, newmpos);
 	};
 
-#ifndef DEFINE_MAT43_IS_MAT4D
-	void Move(T* _p, const CMat43fp4& newmpos)
+	void Move(T* _p, const CMat43fp32& newmpos)
 	{
 		Remove(_p);
 		Insert(_p, newmpos);
 	}
-#endif
 
-	void ExtractWithinBox(const CVec3Dfp4& minp, const CVec3Dfp4& maxp, QueryBuffer* pBuffer)
+	void ExtractWithinBox(const CVec3Dfp32& minp, const CVec3Dfp32& maxp, QueryBuffer* pBuffer)
 	{
 		int x0, x1, y0, y1, z0, z1;
 		GetXBoxRange(minp.k[0], maxp.k[0], x0, x1);
@@ -273,10 +269,10 @@ public:
 		};
 	};
 
-	void ExtractWithinSphere(const CVec3Dfp4& Pos, fp4 Radius, QueryBuffer* pBuffer)
+	void ExtractWithinSphere(const CVec3Dfp32& Pos, fp32 Radius, QueryBuffer* pBuffer)
 	{
-		CVec3Dfp4 minp(Pos);
-		CVec3Dfp4 maxp(Pos);
+		CVec3Dfp32 minp(Pos);
+		CVec3Dfp32 maxp(Pos);
 		minp.k[0] -= Radius;
 		minp.k[1] -= Radius;
 		minp.k[2] -= Radius;
@@ -353,9 +349,9 @@ public:
 
 class MCCDLLEXPORT CSpaceEnum_OctTree : public CReferenceCount
 {
-	TList_Vector<CSE_Node> m_lNodes;
-	TList_Vector<CSE_IDInfo> m_lIDInfo;
-	TList_Vector<CSE_IDLink> m_lIDLinks;
+	TArray<CSE_Node> m_lNodes;
+	TArray<CSE_IDInfo> m_lIDInfo;
+	TArray<CSE_IDLink> m_lIDLinks;
 
 	CSE_Node* m_pNodes;
 	CSE_IDLink* m_pIDLinks;
@@ -379,9 +375,9 @@ class MCCDLLEXPORT CSpaceEnum_OctTree : public CReferenceCount
 public:
 	CSpaceEnum_OctTree(int _BoxSizeShift, int _MinBoxSizeShift, int _nMaxNodes, int _nMaxIDLinks, int _nIDs);
 
-	int Insert(int _ID, const CVec3Dfp4& _Min, const CVec3Dfp4& _Max);
+	int Insert(int _ID, const CVec3Dfp32& _Min, const CVec3Dfp32& _Max);
 	void Remove(int _ID);
-	void EnumerateBox(CVec3Dfp4 _Min, CVec3Dfp4 _Max, int(*pfnEnumObjectsCallback)(int _ID));
+	void EnumerateBox(CVec3Dfp32 _Min, CVec3Dfp32 _Max, int(*pfnEnumObjectsCallback)(int _ID));
 
 	// IO for rendering the OctTree.
 	const CSE_Node* GetRootPtr() const;

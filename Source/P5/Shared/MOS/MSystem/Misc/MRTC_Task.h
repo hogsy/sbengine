@@ -4,6 +4,29 @@
 
 #include "../../Classes/Miscellaneous/MMd5.h"
 
+enum
+{
+	TASKMAN_PORT_COORDINATOR	= 12110,
+
+	HOST_PACKET_REQUEST_SESSION	= 1,		// Host is asking for a session ID
+	HOST_PACKET_RESPOND_SESSION,			// Coord. is handing out a session ID
+	HOST_PACKET_KILL_SESSION,				// Host is terminating session (but might keep the connection alive)
+	HOST_PACKET_REQUEST_AGENTS,				// Host is asking for a number of agents
+	HOST_PACKET_RESPOND_AGENTS,				// Coord. hands out agents (might not be the same number that the host asked for)
+	HOST_PACKET_HOST_INFO,
+	HOST_PACKET_REQUEST_AGENTS_EXT,			// Host is asking for a number of agent with extended attributes (possibly amount of RAM or if a GFX card is required)
+
+
+	HOST_REQUEST_FL_GFXCARD	= M_Bit(0),
+	HOST_REQUEST_FL_MEMORY	= M_Bit(1),
+	HOST_REQUEST_FL_MUTUALEXCLUSIVE	= M_Bit(2),	// Only run 1 instance of this task on a single client
+
+	HOST_REQUEST_FL_MASK = 0xffff,
+
+	CLIENT_REQUEST_FL_SHIFT = 16,
+	CLIENT_REQUEST_FL_SLOWTASK	= M_Bit(0) << CLIENT_REQUEST_FL_SHIFT,
+};
+
 typedef TPtr<class MRTC_TaskBaseArg> spMRTC_TaskBaseArg;
 
 class SYSTEMDLLEXPORT MRTC_TaskBaseArg : public CReferenceCount
@@ -380,6 +403,9 @@ protected:
 
 	TArray<spMRTC_RemoteTaskInstance>	m_lspPendingRemoteTasks;
 
+	fp32 m_RestartTaskTime;
+	fp32 m_ReportTaskTime;
+
 	int m_CoordinatorSocket;		// Connection to coordinator
 	int m_HostSocket;				// Host port (xwc connects to this)
 	int m_AgentSocket;				// Agent port (used to deliver exe files to agents)
@@ -472,6 +498,9 @@ public:
 	void Client_Stop();
 	bool Client_IsAlive();
 	void Client_Log(CStr _Msg);
+	void Client_SetBlocking(bool _bBlocking);
+
+	void FlushLog();
 
 	void SetMaxWorkingThreads(int _Count);
 	int GetMaxWorkingThreads();

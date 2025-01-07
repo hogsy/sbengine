@@ -53,13 +53,13 @@ int32 CScriptMultiType::SafeGetInteger()
 	return 0;
 }
 
-fp4 CScriptMultiType::SafeGetFloat()
+fp32 CScriptMultiType::SafeGetFloat()
 {
 	switch (m_Type)
 	{
 	case EType_String:
 		{
-			return NStr::StrToFloat(m_Data.m_pString, (fp4)0);
+			return NStr::StrToFloat(m_Data.m_pString, (fp32)0);
 		}
 	case EType_Integer:
 		{

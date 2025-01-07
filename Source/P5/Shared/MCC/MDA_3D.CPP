@@ -125,7 +125,7 @@ int CSpaceEnum_OctTree::InsertAtNode(int _ID, int _iNode, const CBox3Dint& _Box,
 	{
 		// (At max level) ||
 		// (The box fill up this box entirly)
-//fp8 Time; T_Start(Time);
+//fp64 Time; T_Start(Time);
 		int iIDLink = m_spIDLinkHeap->AllocID();
 		if (iIDLink < 0) Error("InsertAtNode", "Dissaster struck!");
 		int iNext = pNode->m_iFirstID;
@@ -258,7 +258,7 @@ int CSpaceEnum_OctTree::ReInsertAtNode(int _ID, int _iNode, const CBox3Dint& _Bo
 
 		// (At max level) ||
 		// (The box fill up this box entirly)
-//fp8 Time; T_Start(Time);
+//fp64 Time; T_Start(Time);
 		int iIDLink = m_spIDLinkHeap->AllocID();
 		if (iIDLink < 0) Error("ReInsertAtNode", "Dissaster struck!");
 		int iNext = pNode->m_iFirstID;
@@ -582,7 +582,7 @@ void CSpaceEnum_OctTree::RemoveAtNode(int _ID, int _iNode, const CBox3Dint& _Box
 	}
 }
 
-int CSpaceEnum_OctTree::Insert(int _ID, const CVec3Dfp4& _Min, const CVec3Dfp4& _Max)
+int CSpaceEnum_OctTree::Insert(int _ID, const CVec3Dfp32& _Min, const CVec3Dfp32& _Max)
 {
 	int MaxW = TruncToInt(Max3(_Max.k[0] - _Min.k[0], _Max.k[1] - _Min.k[1], _Max.k[2] - _Min.k[2]));
 	MaxW = (GetGEPow2(MaxW) >> 1);
@@ -656,7 +656,7 @@ void CSpaceEnum_OctTree::Remove(int _ID)
 	RemoveAtNode(_ID, m_iRoot, pIDInfo->m_Box, m_RootBox, 0);
 }
 
-void CSpaceEnum_OctTree::EnumerateBox(CVec3Dfp4 _Min, CVec3Dfp4 _Max, int(*pfnEnumObjectsCallback)(int _ID))
+void CSpaceEnum_OctTree::EnumerateBox(CVec3Dfp32 _Min, CVec3Dfp32 _Max, int(*pfnEnumObjectsCallback)(int _ID))
 {
 }
 

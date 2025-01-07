@@ -37,7 +37,9 @@ public:
 
 		
 		m_pThread = DNew(CWorkerThread) CWorkerThread(this);
+#if 1//ndef PLATFORM_PS3
 		m_pThread->Thread_Create(NULL, 32768, MRTC_THREAD_PRIO_HIGHEST);
+#endif
 	}
 
 	class CWorkerThread : public MRTC_Thread
@@ -52,6 +54,11 @@ public:
 		~CWorkerThread()
 		{
 			Thread_Destroy();
+		}
+
+		const char* Thread_GetName() const
+		{
+			return "CNetworkCore::CWorkerThread";
 		}
 
 		int Thread_Main()
@@ -160,13 +167,13 @@ public:
 			{
 				EQueueLength = 4
 			};
-			fp8 m_Value;
-			fp8 m_ValuePerSec[EQueueLength];
+			fp64 m_Value;
+			fp64 m_ValuePerSec[EQueueLength];
 			CMTime m_Timer;
 			CMTime m_QueueTime;
 			CMTime m_LastValueTime;
 			int m_iCurrentQueue;
-			fp8 m_Average;
+			fp64 m_Average;
 			MRTC_CriticalSection m_Lock;
 
 			CStatUpdater()
@@ -181,7 +188,7 @@ public:
 				m_LastValueTime = CMTime::GetCPU();
 			}
 
-			void AddValue(fp8 _Value, CMTime _Now)
+			void AddValue(fp64 _Value, CMTime _Now)
 			{
 				m_Value += _Value;
 
@@ -196,7 +203,7 @@ public:
 					if (m_iCurrentQueue >= EQueueLength)
 						m_iCurrentQueue = 0;
 
-					fp8 Average = 0;
+					fp64 Average = 0;
 					for (int i = 0; i < EQueueLength; ++i)
 					{
 						Average += m_ValuePerSec[i];
@@ -211,7 +218,7 @@ public:
 				}
 			}
 
-			fp8 GetValue()
+			fp64 GetValue()
 			{
 				M_LOCK(m_Lock);
 				return m_Average;
@@ -228,12 +235,12 @@ public:
 			{
 				EQueueLength = 8
 			};
-			fp8 m_Time[EQueueLength];
+			fp64 m_Time[EQueueLength];
 			int m_nTime[EQueueLength];
 			CMTime m_Timer;
 			CMTime m_QueueTime;
 			int m_iCurrentQueue;
-			fp8 m_Average;
+			fp64 m_Average;
 			MRTC_CriticalSection m_Lock;
 
 			CPingQueue()
@@ -248,7 +255,7 @@ public:
 				m_QueueTime = CMTime::CreateFromSeconds(0.25f);
 			}
 
-			void AddPing(fp8 _Ping, CMTime _Now)
+			void AddPing(fp64 _Ping, CMTime _Now)
 			{
                 if (_Now.Compare(m_Timer) > 0)
 				{
@@ -261,13 +268,13 @@ public:
 					m_nTime[m_iCurrentQueue] = 0;
 
 					int iAverage = 0;
-					fp8 Average = 0;
+					fp64 Average = 0;
 					for (int i = 0; i < EQueueLength; ++i)
 					{
 						if (m_nTime[i])
 						{
 							++iAverage;
-							Average += m_Time[i] / ((fp8)m_nTime[i]);
+							Average += m_Time[i] / ((fp64)m_nTime[i]);
 						}
 					}
 					if (iAverage > 0)
@@ -282,7 +289,7 @@ public:
 				++m_nTime[m_iCurrentQueue];
 			}
 
-			fp8 GetPing()
+			fp64 GetPing()
 			{
 				M_LOCK(m_Lock);
 				return m_Average;
@@ -890,10 +897,10 @@ public:
 				return pChn;
 			}
 
-			fp8 UpdateAckStats(const CMTime &_Now, fp8 &_PacketSize, fp8 &_BufferSize)
+			fp64 UpdateAckStats(const CMTime &_Now, fp64 &_PacketSize, fp64 &_BufferSize)
 			{
-				fp8 All = 0;
-				fp8 AllPacket = 0;
+				fp64 All = 0;
+				fp64 AllPacket = 0;
 				_BufferSize = 0;
 				for (int i = 0; i < m_Channels.Len(); ++i)
 				{
@@ -909,7 +916,7 @@ public:
 						if (Len > _BufferSize)
 							_BufferSize = Len;
 						
-						fp8 Value = m_Channels[i]->m_StatAcks.GetValue();
+						fp64 Value = m_Channels[i]->m_StatAcks.GetValue();
 						All += Value;						
 						Value = m_Channels[i]->m_PacketSize.GetValue();
 						AllPacket += Value;						
@@ -1207,8 +1214,8 @@ public:
 			{
 			public:
 				CDataQueue m_Queue;
-				fp4 m_Priority;
-				fp4 m_MaxRate;
+				fp32 m_Priority;
+				fp32 m_MaxRate;
 				uint32 m_bReliable:1;
 				uint32 m_bOutOfOrder:1;
 				MRTC_CriticalSection m_StuffedLock;
@@ -1286,7 +1293,7 @@ public:
 				}
 			}
 
-			int ChannelAlloc(fp4 _Priority, fp4 _MaxRate, bint _bReliable, bint _bOutOfOrder)
+			int ChannelAlloc(fp32 _Priority, fp32 _MaxRate, bint _bReliable, bint _bOutOfOrder)
 			{
 				M_ASSERT(!_bReliable || (_bReliable && !_bOutOfOrder), "");
 				int Length = m_Channels.Len();
@@ -1507,7 +1514,7 @@ public:
 
 						*pPacket = m_ConnectionID; ++pPacket;
 						uint8 *pChannelHeader = pPacket;
-						*pChannelHeader = iCh | DBit(7); ++pPacket;
+						*pChannelHeader = iCh | M_Bit(7); ++pPacket;
 
 	//					uint16 *pLastHeader = NULL;
 						while (pChn->m_Queue.m_nQueuedPackets.Get())
@@ -1521,9 +1528,9 @@ public:
 								continue;
 							}
 
-							uint16 Header = pHeadPacket->m_Size | DBit(15);
+							uint16 Header = pHeadPacket->m_Size | M_Bit(15);
 							if (pHeadPacket->m_bInternal)
-								Header |= DBit(14);
+								Header |= M_Bit(14);
 							SwapLE(Header);
 							*((uint16 *)pPacket) = Header; pPacket += 2;
 							memcpy(pPacket, pChn->m_Queue.m_Heap.GetBasePtr() + pHeadPacket->m_Memory, pHeadPacket->m_Size);
@@ -1617,7 +1624,7 @@ public:
 								*((uint16 *)pPacket) = Temp; pPacket += 2;
 
 								bSend = true;
-								*pChannelHeader |= DBit(6);
+								*pChannelHeader |= M_Bit(6);
 
 								while (nRoomFor > 0)
 								{
@@ -1693,7 +1700,7 @@ public:
 #endif
 							if (pChn->m_bReliable)
 							{
-								*pChannelHeader |= DBit(5);
+								*pChannelHeader |= M_Bit(5);
 							}
 
 							uint16 *pLastHeader = NULL;
@@ -1710,7 +1717,7 @@ public:
 								}
 								uint16 Header = pHeadPacket->m_Size;
 								if (pHeadPacket->m_bInternal)
-									Header |= DBit(14);
+									Header |= M_Bit(14);
 								pLastHeader = (uint16 *)pPacket; pPacket += 2;
 
 								SwapLE(Header);
@@ -1754,10 +1761,10 @@ public:
 							if (pLastHeader)
 							{
 								bSend = true;
-								*pChannelHeader |= DBit(7); // We are sending data with this channel
+								*pChannelHeader |= M_Bit(7); // We are sending data with this channel
 								uint16 Header = *pLastHeader;
 								SwapLE(Header);
-								Header |= DBit(15);
+								Header |= M_Bit(15);
 								SwapLE(Header);
 								*pLastHeader = Header;
 							}
@@ -1830,9 +1837,9 @@ public:
 				int H1 = *pPacket; ++pPacket;
 				int iChannel = H1 & DBitRange(0,4);
 
-				bint bReliable = H1 & DBit(5);
+				bint bReliable = H1 & M_Bit(5);
 				int nAck = 0;
-				if (H1 & DBit(6))
+				if (H1 & M_Bit(6))
 				{
 					uint16 Temp = *((uint16 *)pPacket); pPacket += 2;
 					SwapLE(Temp);
@@ -1909,7 +1916,7 @@ public:
 					}
 				}
 
-				bint bHasData = H1 & DBit(7);
+				bint bHasData = H1 & M_Bit(7);
 
 				bint bContinue = bHasData;
 				while (pPacket < pPacketEnd && bContinue)
@@ -1930,8 +1937,8 @@ public:
 					if (pPacket + Size > pPacketEnd)
 						break; // Size error
 
-					bint bInternalData = H1 & DBit(14);
-					bContinue = !(H1 & DBit(15));
+					bint bInternalData = H1 & M_Bit(14);
+					bContinue = !(H1 & M_Bit(15));
 
 					if (bInternalData && QueueIncomingInternalMessage(iChannel, iPacket))
 					{
@@ -2297,7 +2304,7 @@ public:
 		{
 //			return;
 			CMTime Now = CMTime::GetCPU();
-			fp8 Ping = m_PingQueue.GetPing();
+			fp64 Ping = m_PingQueue.GetPing();
 			CMTime TimeOut;
 			if (Ping > 0.0)
 				TimeOut = Now - CMTime::CreateFromSeconds(m_PingQueue.GetPing()*2.0);
@@ -2339,7 +2346,7 @@ public:
 
 		void UpdateMisc()
 		{
-			if ((CMTime::GetCPU() - m_Time_LastReceive).GetTime() > 10.0)
+			if ((CMTime::GetCPU() - m_Time_LastReceive).GetTime() > 30.0)
 				ChangeConnectionStatus(ENetworkPacketStatus_Timeout, 0);
 			else
 				ChangeConnectionStatus(0, ENetworkPacketStatus_Timeout);
@@ -2419,11 +2426,11 @@ public:
 
 			CMTime Now = CMTime::GetCPU();
 
-			fp8 PacketSize = 0;
-			fp8 BufferSize = 0;
-			fp8 Acks = m_ChannelsReceive.UpdateAckStats(Now, PacketSize, BufferSize);
-//			fp8 Scale = 1.0;
-			fp8 UpdateTime = 0.05f;
+			fp64 PacketSize = 0;
+			fp64 BufferSize = 0;
+			fp64 Acks = m_ChannelsReceive.UpdateAckStats(Now, PacketSize, BufferSize);
+//			fp64 Scale = 1.0;
+			fp64 UpdateTime = 0.05f;
 			if (Acks > 0)
 			{
 //				UpdateTime = (BufferSize / PacketSize) / 16;
@@ -2472,7 +2479,7 @@ public:
 
 	MRTC_CriticalSection m_ConnectionsLock;
 	MRTC_CriticalSection m_ThreadUpdateLock;
-	TList_Vector<spCConnection> m_splConnections;
+	TArray<spCConnection> m_splConnections;
 	CIDHeap m_ConnectionIDs;
 	DLinkD_List(CConnection, m_Link) m_Connections;
 
@@ -2667,12 +2674,14 @@ public:
 		return m_ThreadID;
 	}
 
+	const char* Thread_GetName() const
+	{
+		return "NetworkCore worker";
+	}
 
 	int m_ThreadID;
 	int Thread_Main()
 	{
-		MRTC_SystemInfo::Thread_SetName("NetworkCore worker");
-
 		m_ThreadID = (int)(mint)MRTC_SystemInfo::OS_GetThreadID();
 		m_pThread->m_QuitEvent.ReportTo(&m_MainEvent);
 //		CStr Program;
@@ -2861,7 +2870,7 @@ public:
 		return true;
 	}
 
-	virtual CNetwork_ServerInfo* Client_OpenConnection(int _hConnection, CNetwork_Address * _pAddress, fp4 _TimeOut)
+	virtual CNetwork_ServerInfo* Client_OpenConnection(int _hConnection, CNetwork_Address * _pAddress, fp32 _TimeOut)
 	{
 		CClient *pConn = (CClient *)GetConnection(_hConnection);
 
@@ -2977,7 +2986,7 @@ public:
 			return ENetworkPacketStatus_Closed;
 	}
 
-	virtual fp4 Connection_GetPing(int _hConnection)
+	virtual fp32 Connection_GetPing(int _hConnection)
 	{
 		CConnection *pConn = GetConnection(_hConnection);
 
@@ -2988,7 +2997,7 @@ public:
 	}
 
 	//
-	virtual int Connection_ChannelAlloc(int _hConnection, uint32 _Flags, fp4 _RatePriority, fp4 _MaxRate)
+	virtual int Connection_ChannelAlloc(int _hConnection, uint32 _Flags, fp32 _RatePriority, fp32 _MaxRate)
 	{
 		M_LOCK(m_ThreadUpdateLock);
 		CConnection *pConn = GetConnection(_hConnection);
@@ -3173,12 +3182,12 @@ public:
 	}
 
 	//
-	virtual void Connection_SetRate(int _hConnection, fp4 _BytesPerSecond)
+	virtual void Connection_SetRate(int _hConnection, fp32 _BytesPerSecond)
 	{
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	virtual void Global_SetRate(fp4 _BytesPerSecond)
+	virtual void Global_SetRate(fp32 _BytesPerSecond)
 	{
 	}
 

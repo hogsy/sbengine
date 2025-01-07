@@ -10,10 +10,10 @@
 //#define CXR_VB_LOGATTRIBUTES
 
 // -------------------------------------------------------------------
-//  CXR_VertexBuffer
+//  CXR_VertexBufferGeometry
 // -------------------------------------------------------------------
 
-bool CXR_VertexBuffer::SetVBChain(CXR_VBManager *_pVBM, bool _bVBIDs)
+bool CXR_VertexBufferGeometry::AllocVBChain(CXR_VBManager *_pVBM, bool _bVBIDs)
 {
 
 	if (_bVBIDs)
@@ -53,6 +53,9 @@ bool CXR_VertexBuffer::SetVBChain(CXR_VBManager *_pVBM, bool _bVBIDs)
 	return true;
 }
 
+// -------------------------------------------------------------------
+//  CXR_VertexBuffer
+// -------------------------------------------------------------------
 bool CXR_VertexBuffer::AllocTextureMatrix(CXR_VBManager *_pVBM)
 {
 	if (!m_pTextureTransform)
@@ -66,22 +69,35 @@ void CXR_VertexBuffer::Clear()
 {
 	MAUTOSTRIP(CXR_VertexBuffer_Clear, MAUTOSTRIP_VOID);
 
-	m_pVBChain = 0;
-	m_Priority = 0;
+	CXR_VertexBufferGeometry::Clear();
+//	m_Link.Construct();
 
+//	m_pVBChain = 0;
+//	m_pMatrixPaletteArgs = 0;
+//	m_Flags = 0;
+//	m_iLight = 0;
+//	m_pTransform = 0; 
+//	m_Color = 0xffffffff;
+
+	m_Priority = 0;
 	m_pAttrib = 0;
-	m_pMatrixPaletteArgs = 0;
 	m_pPreRender = 0;
-	m_Flags = 0;
-	m_iLight = 0;
 	m_iVP	= 0;
 	m_iClip = 0;
-	m_pTransform = 0; 
 	m_pTextureTransform = 0;
-	m_Color = 0xffffffff;
 
+#ifdef M_Profile
+	m_VBEColor = 0xff808080;
+	m_Time.Reset();
+
+	#ifdef _DEBUG
+		if (m_Link.IsInList())
+			M_BREAKPOINT; // You cannot clear a VB that is already added to VBM
+	#endif
+#endif
 }
 
+/*
 bool CXR_VertexBuffer::IsValid()
 {
 	MAUTOSTRIP(CXR_VertexBuffer_IsValid, false);
@@ -107,37 +123,106 @@ bool CXR_VertexBuffer::IsValid()
 
 	return true;
 }
+*/
 
 void CXR_VertexBuffer::SetMatrix(CRenderContext* _pRC)
 {
 	MAUTOSTRIP(CXR_VertexBuffer_SetMatrix, MAUTOSTRIP_VOID);
-	_pRC->Matrix_SetMode(CRC_MATRIX_MODEL);
+//	_pRC->Matrix_SetMode(CRC_MATRIX_MODEL);
+
+	_pRC->Matrix_SetModelAndTexture(m_pTransform, m_pTextureTransform);
+
+#if 0
 	if (m_pTransform) 
-		_pRC->Matrix_Set(*m_pTransform);
+		_pRC->Matrix_Set(*m_pTransform, CRC_MATRIX_MODEL);
 	else
-		_pRC->Matrix_SetUnit();
+		_pRC->Matrix_SetUnit(CRC_MATRIX_MODEL);
 
 	if (m_pTextureTransform)
 	{
-		for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+		if (CRC_MAXTEXCOORDS == 8)
 		{
-			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + i);
-			if (m_pTextureTransform[i]) 
-				_pRC->Matrix_Set(*m_pTextureTransform[i]);
+			// What we don't do to get rid of microcoded instructions
+
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 0);
+			if (m_pTextureTransform[0]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[0], CRC_MATRIX_TEXTURE + 0);
 			else
-				_pRC->Matrix_SetUnit();
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 0);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 1);
+			if (m_pTextureTransform[1]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[1], CRC_MATRIX_TEXTURE + 1);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 1);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 2);
+			if (m_pTextureTransform[2]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[2], CRC_MATRIX_TEXTURE + 2);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 2);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 3);
+			if (m_pTextureTransform[3]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[3], CRC_MATRIX_TEXTURE + 3);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 3);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 4);
+			if (m_pTextureTransform[4]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[4], CRC_MATRIX_TEXTURE + 4);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 4);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 5);
+			if (m_pTextureTransform[5]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[5], CRC_MATRIX_TEXTURE + 5);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 5);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 6);
+			if (m_pTextureTransform[6]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[6], CRC_MATRIX_TEXTURE + 6);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 6);
+//			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + 7);
+			if (m_pTextureTransform[7]) 
+				_pRC->Matrix_Set(*m_pTextureTransform[7], CRC_MATRIX_TEXTURE + 7);
+			else
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 7);
+		}
+		else
+		{
+			for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+			{
+				_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + i);
+				if (m_pTextureTransform[i]) 
+					_pRC->Matrix_Set(*m_pTextureTransform[i]);
+				else
+					_pRC->Matrix_SetUnit();
+			}
 		}
 	}
 	else
 	{
-		for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+		if (CRC_MAXTEXCOORDS == 8)
 		{
-			_pRC->Matrix_SetMode(CRC_MATRIX_TEXTURE + i);
-			_pRC->Matrix_SetUnit();
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 0);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 1);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 2);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 3);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 4);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 5);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 6);
+			_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + 7);
+		}
+		else
+		{
+			for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+			{
+				_pRC->Matrix_SetUnit(CRC_MATRIX_TEXTURE + i);
+			}
 		}
 	}
 
-	_pRC->Matrix_SetMode(CRC_MATRIX_MODEL);
+//	_pRC->Matrix_SetMode(CRC_MATRIX_MODEL);
+#endif
+	if (m_pMatrixPaletteArgs && (m_pMatrixPaletteArgs->m_VpuTaskId != InvalidVpuTask))
+		MRTC_ThreadPoolManager::VPU_BlockOnTask(m_pMatrixPaletteArgs->m_VpuTaskId,VpuWorkersContext);
 	_pRC->Matrix_SetPalette(m_pMatrixPaletteArgs);
 }
 
@@ -154,7 +239,7 @@ int CXR_VertexBuffer::RenderGeometry(CRenderContext* _pRC)
 	MSCOPESHORT(CXR_VertexBuffer::RenderGeometry); //AR-SCOPE
 
 	int nBuffers = 0;
-	_pRC->Geometry_Color(m_Color);
+//	_pRC->Geometry_Color(m_Color); // Already called from SetAttrib, this caused a LHS
 	if (m_Flags & CXR_VBFLAGS_VBIDCHAIN)
 	{
 		CXR_VBIDChain *pChain = GetVBIDChain();
@@ -168,8 +253,17 @@ int CXR_VertexBuffer::RenderGeometry(CRenderContext* _pRC)
 				{
 					_pRC->Render_VertexBuffer(pChain->m_VBID);
 				}
+				else if (pChain->m_PrimType == CRC_RIP_VBID_IBTRIANGLES)
+				{
+					_pRC->Render_VertexBuffer_IndexBufferTriangles(pChain->m_VBID, pChain->m_IBID, pChain->m_nPrim, pChain->m_PrimOffset);
+				}
 				else
 				{
+					if (pChain->m_TaskId != InvalidVpuTask)
+					{
+						MRTC_ThreadPoolManager::VPU_BlockOnTask(pChain->m_TaskId,VpuWorkersContext);
+					}
+
 					_pRC->Geometry_VertexBuffer(pChain->m_VBID, !(m_Flags & CXR_VBFLAGS_TRACKVERTEXUSAGE));
 
 					switch(pChain->m_PrimType)
@@ -200,7 +294,7 @@ int CXR_VertexBuffer::RenderGeometry(CRenderContext* _pRC)
 			}
 			else
 			{
-				M_ASSERT(0, "Dumma dig");
+				M_ASSERT(0, "VBID chain with null VBID.");
 			}
 
 			++nBuffers;
@@ -218,14 +312,19 @@ int CXR_VertexBuffer::RenderGeometry(CRenderContext* _pRC)
 			_pRC->Geometry_VertexBuffer(*pChain, !(m_Flags & CXR_VBFLAGS_TRACKVERTEXUSAGE));
 				
 			#ifdef PLATFORM_DOLPHIN				
-				if (pChain->m_pV)   DCStoreRange(pChain->m_pV, sizeof(CVec3Dfp4) * pChain->m_nV);
-				if (pChain->m_pN)   DCStoreRange(pChain->m_pN, sizeof(CVec3Dfp4) * pChain->m_nV);
+				if (pChain->m_pV)   DCStoreRange(pChain->m_pV, sizeof(CVec3Dfp32) * pChain->m_nV);
+				if (pChain->m_pN)   DCStoreRange(pChain->m_pN, sizeof(CVec3Dfp32) * pChain->m_nV);
 				if (pChain->m_pCol) DCStoreRange(pChain->m_pCol, sizeof(CPixel32) * pChain->m_nV);
 
 				for (int i=0; i<CRC_MAXTEXCOORDS; i++)
 					if (pChain->m_pTV[i])
-						DCStoreRange( pChain->m_pTV[i], pChain->m_nTVComp[i]*sizeof(fp4) * pChain->m_nV );
+						DCStoreRange( pChain->m_pTV[i], pChain->m_nTVComp[i]*sizeof(fp32) * pChain->m_nV );
 			#endif
+
+			if (pChain->m_TaskId != InvalidVpuTask)
+			{
+				MRTC_ThreadPoolManager::VPU_BlockOnTask(pChain->m_TaskId,VpuWorkersContext);
+			}
 
 			switch(pChain->m_PrimType)
 			{

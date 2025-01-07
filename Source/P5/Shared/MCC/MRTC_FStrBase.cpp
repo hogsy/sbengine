@@ -26,8 +26,9 @@ void CFStrBase::Capture(const char* _pStr)
 void CFStrBase::Capture(const char* _pStr, int _Len)
 {
 	int Len = Min(GetMax()-1, _Len);
-	memcpy(GetStr(), _pStr, Len);
-	GetStr()[Len] = 0;
+	char* pDest = GetStr();
+	memcpy(pDest, _pStr, Len);
+	pDest[Len] = 0;
 }
 
 void CFStrBase::CaptureFormated(const char* x, ...)

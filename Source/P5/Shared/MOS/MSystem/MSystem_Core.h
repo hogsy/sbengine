@@ -2,6 +2,7 @@
 #define __INC_MSYSTEMCORE
 
 #include "MSystem.h"
+#include "Sound/MSound.h"
 
 #include "MFloat.h"
 
@@ -29,10 +30,10 @@ protected:
 	CStr m_OptionsFilename;
 	CStr m_DefaultSystem;
 
-	TList_Vector<spCDisplayContextDesc> m_lspDC;
+	TArray<spCDisplayContextDesc> m_lspDC;
 	int m_iCurrentDC;
 
-	TList_Vector<CSubSystem*> m_lpSubSystems;
+	TArray<CSubSystem*> m_lpSubSystems;
 
 	TPtr<class CXR_SurfaceContext> m_spSurfCtx;
 	TPtr<class CXR_VBContext> m_spVBCtx;
@@ -81,6 +82,9 @@ public:
 	virtual void Parser_MT_Enable(int enable);
 	virtual void Parser_MemShowAllocs(CStr _Str);
 	virtual void Parser_MemHideAllocs();
+	virtual CStr Parser_GetPlatformName();
+	virtual CStr Parser_GetExePath();
+
 	void Register(CScriptRegisterContext &_RegContext);
 	virtual void ExitProcess();
 

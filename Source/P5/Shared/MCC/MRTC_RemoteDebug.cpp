@@ -22,9 +22,13 @@ public:
 
 		}
 
+		const char* Thread_GetName() const
+		{
+			return "Remote debug profiler";
+		}
+
 		int Thread_Main()
 		{
-			MRTC_SystemInfo::Thread_SetName("Remote debug profiler");
 			MRTC_SystemInfo::Thread_SetProcessor(4);
 			MRTC_RemoteDebugChannel *pChn = MRTC_GetRD()->CreateDebugChannel(51);
 			while (!Thread_IsTerminating())
@@ -109,7 +113,6 @@ public:
 		m_HeapSecuence = 0;
 		// Alloc a 512 KiB temp buffer;
 		m_TempBufferSize = ETempBufferSize;
-//		m_pTempBuffer = MRTC_SystemInfo::OS_Alloc(m_TempBufferSize, true);
 		m_TempBufferPos = 0;
 		m_PacketBufferPos = 0;
 		m_FlushTempBufferRecurse = 0;
@@ -137,13 +140,13 @@ public:
 		}
 	}
 
-	__declspec(thread) static int m_iCurrentScopeStack;
-	__declspec(thread) static int m_iCurrentCategoryStack;
+	static MRTC_THREADLOCAL int m_iCurrentScopeStack;
+	static MRTC_THREADLOCAL int m_iCurrentCategoryStack;
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTSCOPE
-	__declspec(thread) static MRTC_RemoteDebugScope *m_ScopeStack[DRDMaxScopeMaxStack];
+	static MRTC_THREADLOCAL MRTC_RemoteDebugScope* m_ScopeStack[DRDMaxScopeMaxStack];
 #endif
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCATEGORY
-	__declspec(thread) static MRTC_RemoteDebugCategory *m_CatogoryStack[DRDMaxCategoryMaxStack];
+	static MRTC_THREADLOCAL MRTC_RemoteDebugCategory* m_CatogoryStack[DRDMaxCategoryMaxStack];
 #endif
 
 	void InitClientConnection(CNetwork *_pNetwork,int _iClient)
@@ -197,7 +200,7 @@ public:
 			spNetwork->Create(pDevice);
 //			m_ThreadLookAside0 = m_spNetwork->Global_GetThreadID();
 			m_bCreateSuccess = true;
-			m_pPacketBuffer = MRTC_SystemInfo::OS_Alloc(4*1024, true); // We need EMaxPacketSize bytes a packet
+			m_pPacketBuffer = MRTC_SystemInfo::OS_Alloc(4*1024, 128); // We need EMaxPacketSize bytes a packet
 
 			CNetwork_Address *pAddr = spNetwork->Global_ResolveAddress(CStrF("*:%d", _Port));
 			if (!pAddr)
@@ -228,8 +231,8 @@ public:
 				{
 					//JK-NOTE: m_Lock has not been taken yet, cannot unlock it
 //					M_UNLOCK(m_Lock);
-					CMTime Timeout = CMTime::GetCPU() + CMTime::CreateFromSeconds(1.5);
-					while (CMTime::GetCPU().Compare(Timeout) < 0)
+					CMTime Timeout = CMTime::GetCPU() + CMTime::CreateFromSeconds(1.5f);
+					do
 					{
 						if (spNetwork->Server_Connection_Avail(iServer)) 
 						{
@@ -241,7 +244,7 @@ public:
 								InitClientConnection(spNetwork, iClient);
 							}
 						}
-					}					
+					} while (CMTime::GetCPU().Compare(Timeout) < 0);
 				}
 
 				if (iClient >= 0)
@@ -406,7 +409,7 @@ public:
 
 				while (Size && !m_bPendingDisconnect)
 				{
-					int ToSend = MinMT(Size, EMaxPacketSize);
+					int ToSend = MinMT(Size, (mint)EMaxPacketSize);
 					CNetwork_Packet Pack;
 					Pack.m_pData = pPacket;
 					Pack.m_Size = ToSend;
@@ -1156,11 +1159,15 @@ public:
 		m_TempBufferPos = 0;
 	}
 
+	const char* Thread_GetName() const
+	{
+		return "Remote debug";
+	}
+
 	int Thread_Main()
 	{
-		MRTC_SystemInfo::Thread_SetName("Remote debug");
 //		m_ThreadLookAside1 = (int)MRTC_SystemInfo::OS_GetThreadID();
-		fp4 Periodicity = 1.0/60.0;
+		fp32 Periodicity = 1.0/60.0;
 		CMTime NextPeriodic = CMTime::CreateFromSeconds(Periodicity) + CMTime::GetCPU();
 		while (!Thread_IsTerminating())
 		{
@@ -1178,14 +1185,14 @@ public:
 	}
 };
 
-__declspec(thread) int MRTC_RemoteDebugInternal::m_iCurrentScopeStack = -1;
-__declspec(thread) int MRTC_RemoteDebugInternal::m_iCurrentCategoryStack = -1;
+MRTC_THREADLOCAL int MRTC_RemoteDebugInternal::m_iCurrentScopeStack = -1;
+MRTC_THREADLOCAL int MRTC_RemoteDebugInternal::m_iCurrentCategoryStack = -1;
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTSCOPE
-__declspec(thread) MRTC_RemoteDebugScope *MRTC_RemoteDebugInternal::m_ScopeStack[DRDMaxScopeMaxStack];
+MRTC_THREADLOCAL MRTC_RemoteDebugScope *MRTC_RemoteDebugInternal::m_ScopeStack[DRDMaxScopeMaxStack];
 #endif
 
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCATEGORY
-__declspec(thread) MRTC_RemoteDebugCategory *MRTC_RemoteDebugInternal::m_CatogoryStack[DRDMaxCategoryMaxStack];
+MRTC_THREADLOCAL MRTC_RemoteDebugCategory *MRTC_RemoteDebugInternal::m_CatogoryStack[DRDMaxCategoryMaxStack];
 #endif
 
 
@@ -1336,7 +1343,7 @@ void MRTC_RemoteDebug::SendDataRaw(uint32 _Message, const void *_pData, mint _Da
 	pInternal->QueuePacket(pPacket, (pCurrent - pPacket));
 }
 
-void MRTC_RemoteDebug::SendData(uint32 _Message, const void *_pData, mint _DataSize, bool _bAttachStackTrace, bool _bSendCategoryScope, mint _Ebp)
+void M_NOINLINE MRTC_RemoteDebug::SendData(uint32 _Message, const void *_pData, mint _DataSize, bool _bAttachStackTrace, bool _bSendCategoryScope, mint _Ebp)
 {
 	MRTC_RemoteDebugInternal *pInternal = GetInternal();
 	mint StackTrace[128];
@@ -1441,39 +1448,270 @@ MRTC_RemoteDebugScope::~MRTC_RemoteDebugScope()
 }
 #endif
 
+#ifdef PLATFORM_CONSOLE
+//#define M_ENABLE_RDMEMORYDEBUGGER
+#endif
+
+#ifdef M_ENABLE_RDMEMORYDEBUGGER
+class CRDDebugger
+{
+public:
+	mint m_Recursive;
+	CRDDebugger()
+	{
+		m_Recursive = 0;
+	}
+	class CHeap
+	{
+	public:
+		mint m_Address;
+		class CAllocation
+		{
+		public:
+			mint m_Address;
+			mint m_Size;
+
+			class CCompare
+			{
+			public:
+
+				M_INLINE static int Compare(const CAllocation *_pFirst, const CAllocation *_pSecond, void *_pContext)
+				{
+					if (_pFirst->m_Address > _pSecond->m_Address)
+						return 1;
+					else if (_pFirst->m_Address < _pSecond->m_Address)
+						return -1;
+					return 0;
+				}
+
+				M_INLINE static int Compare(const CAllocation *_pTest, uint64 _Key, void *_pContext)
+				{
+					if (_pTest->m_Address > _Key)
+						return 1;
+					else if (_pTest->m_Address < _Key)
+						return -1;
+					return 0;
+				}
+			};
+
+			DIdsTreeAVLAligned_Link(CAllocation, m_LinkAll, mint, CCompare);
+			DLinkDS_Link(CAllocation, m_Link);
+
+		};
+
+		DIdsTreeAVLAligned_Tree(CAllocation, m_LinkAll, mint, CAllocation::CCompare) m_Allocs;
+		typedef DIdsTreeAVLAligned_Iterator(CAllocation, m_LinkAll, mint, CAllocation::CCompare) CAllocIter;
+
+		class CCompare
+		{
+		public:
+
+			M_INLINE static int Compare(const CHeap *_pFirst, const CHeap *_pSecond, void *_pContext)
+			{
+				if (_pFirst->m_Address > _pSecond->m_Address)
+					return 1;
+				else if (_pFirst->m_Address < _pSecond->m_Address)
+					return -1;
+				return 0;
+			}
+
+			M_INLINE static int Compare(const CHeap *_pTest, uint64 _Key, void *_pContext)
+			{
+				if (_pTest->m_Address > _Key)
+					return 1;
+				else if (_pTest->m_Address < _Key)
+					return -1;
+				return 0;
+			}
+		};
+
+		DIdsTreeAVLAligned_Link(CHeap, m_LinkAll, mint, CCompare);
 
 
+	};
 
-void gf_RDSendRegisterPhysicalHeap(mint _Heap, const char *_pName)
+	DIdsTreeAVLAligned_Tree(CHeap, m_LinkAll, mint, CHeap::CCompare) m_Heaps;
+
+	TCPool<CHeap, 4096, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_HeapPool;
+	TCPool<CHeap::CAllocation, 4096, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_AllocPool;
+
+	CHeap *GetHeap(mint _Heap)
+	{
+		CHeap *pRet = m_Heaps.FindEqual(_Heap);
+		if (!pRet)
+		{
+			pRet = m_HeapPool.New();
+			pRet->m_Address = _Heap;
+			m_Heaps.f_Insert(pRet);
+		}
+		return pRet;
+	}
+
+	NThread::CMutual m_Lock;
+
+	void Lock()
+	{
+		++m_Recursive;
+	}
+
+	void Unlock()
+	{
+		--m_Recursive;
+	}
+
+	void AddAlloc(mint _Alloc, mint _Heap, mint _Size)
+	{
+		DLock(m_Lock);
+		if (m_Recursive)
+			return;
+		{
+			DLock(*this);
+			
+			CHeap *pHeap = GetHeap(_Heap);
+
+			CHeap::CAllocation *pAlloc = pHeap->m_Allocs.FindEqual(_Alloc);
+			if (pAlloc)
+				M_BREAKPOINT;
+
+			pAlloc = m_AllocPool.New();
+			pAlloc->m_Address = _Alloc;
+			pAlloc->m_Size = _Size;
+			pHeap->m_Allocs.f_Insert(pAlloc);
+		}
+	}
+
+	void RemoveAlloc(mint _Alloc, mint _Heap)
+	{
+		DLock(m_Lock);
+		if (m_Recursive)
+			return;
+		{
+			DLock(*this);
+			
+			CHeap *pHeap = GetHeap(_Heap);
+
+			CHeap::CAllocation *pAlloc = pHeap->m_Allocs.FindEqual(_Alloc);
+			if (pAlloc)
+			{
+				pHeap->m_Allocs.f_Remove(pAlloc);
+				m_AllocPool.Delete(pAlloc);
+			}
+		}
+	}
+
+	void ClearHeap(mint _Heap)
+	{
+		DLock(m_Lock);
+		if (m_Recursive)
+			return;
+		{
+			DLock(*this);
+			
+			CHeap *pHeap = m_Heaps.FindEqual(_Heap);
+			if (pHeap)
+			{
+				while (pHeap->m_Allocs.GetRoot())
+				{
+					CHeap::CAllocation *pAlloc = pHeap->m_Allocs.GetRoot();
+					pHeap->m_Allocs.f_Remove(pAlloc);
+					m_AllocPool.Delete(pAlloc);
+				}
+				m_Heaps.f_Remove(pHeap);
+				m_HeapPool.Delete(pHeap);
+			}
+		}
+	}
+
+	void MoveAllocs(mint _Alloc0, mint _Heap0, mint _Alloc1, mint _Heap1, mint _Size)
+	{
+		DLock(m_Lock);
+		if (m_Recursive)
+			return;
+		{
+			DLock(*this);
+			
+			CHeap *pHeap = GetHeap(_Heap0);
+			CHeap *pHeapTo = GetHeap(_Heap1);
+
+			aint Diff = (_Alloc1 - _Alloc0);
+
+
+			CHeap::CAllocIter Iter;
+
+			Iter.SetRoot(pHeap->m_Allocs);
+			if (!Iter.FindEqualForward(_Alloc0))
+				M_BREAKPOINT;
+
+			mint EndAddress = _Alloc0 + _Size;
+
+			DLinkDS_List(CHeap::CAllocation, m_Link) ToMove;
+			while (Iter)
+			{
+				CHeap::CAllocation *pAlloc = Iter;
+				if (pAlloc->m_Address >= EndAddress)
+					break;
+				ToMove.Insert(pAlloc);
+				++Iter;
+			}
+
+			CHeap::CAllocation *pAlloc = ToMove.Pop();
+			while (pAlloc)
+			{
+				pHeap->m_Allocs.f_Remove(pAlloc);
+				pAlloc->m_Address += Diff;
+				CHeap::CAllocation *pAlloc2 = pHeapTo->m_Allocs.FindEqual(pAlloc->m_Address);
+				if (pAlloc2)
+				{
+					if (pHeapTo == pHeap)
+						M_BREAKPOINT;
+
+					pHeapTo->m_Allocs.f_Remove(pAlloc2);
+					m_AllocPool.Delete(pAlloc2);
+				}
+				pHeapTo->m_Allocs.f_Insert(pAlloc);
+			
+				pAlloc = ToMove.Pop();
+			}
+		}
+	}
+};
+
+
+bint g_bRDDebuggerInit = 0;
+mint g_RDDebugger[(sizeof(CRDDebugger) + sizeof(mint)) / sizeof(mint)];
+CRDDebugger &GetRRDebugger()
+{
+	if (!g_bRDDebuggerInit)
+	{
+		new ((void *)g_RDDebugger) CRDDebugger;
+		g_bRDDebuggerInit = 1;
+	}
+	return (CRDDebugger &)g_RDDebugger;
+}
+#endif
+
+void gf_RDSendRegisterPhysicalHeap(mint _Heap, const char *_pName, mint _HeapStart, mint _HeapEnd)
 {
 	if (!MRTC_GetRD() || !(MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_PhysicalMemory))
 		return;
 	uint64 Data[128];
 	Data[0] = _Heap; SwapLE(Data[0]); 
-	strcpy((char *)(Data+1), _pName);
-	MRTC_GetRD()->SendData(ERemoteDebug_RegisterPhysicalHeap, Data, 9+strlen(_pName), false, false);
+	Data[1] = _HeapStart; SwapLE(Data[1]); 
+	Data[2] = _HeapEnd; SwapLE(Data[2]); 
+	strcpy((char *)(Data+3), _pName);
+	MRTC_GetRD()->SendData(ERemoteDebug_RegisterPhysicalHeap, Data, 8*3+1+strlen(_pName), false, false);
 }
 
-void gf_RDSendRegisterHeap(mint _Heap, const char *_pName)
+void gf_RDSendRegisterHeap(mint _Heap, const char *_pName, mint _HeapStart, mint _HeapEnd)
 {
 	if (!MRTC_GetRD() || !(MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_HeapMemory))
 		return;
 	uint64 Data[128];
 	Data[0] = _Heap;SwapLE(Data[0]); 
-	strcpy((char *)(Data+1), _pName);
-	MRTC_GetRD()->SendData(ERemoteDebug_RegisterHeap, Data, 9+strlen(_pName), false, false);
-}
-
-inline void ByteSwap_uint64_Test(uint64& _Value)
-{
-	uint64 Temp = _Value;
-	_Value = _byteswap_uint64(Temp);
-}
-
-inline void ByteSwap_uint64_Test(int64& _Value)
-{
-	uint64 Temp = _Value;
-	_Value = _byteswap_uint64(Temp);
+	Data[1] = _HeapStart; SwapLE(Data[1]); 
+	Data[2] = _HeapEnd; SwapLE(Data[2]); 
+	strcpy((char *)(Data+3), _pName);
+	MRTC_GetRD()->SendData(ERemoteDebug_RegisterHeap, Data, 8*3+1+strlen(_pName), false, false);
 }
 
 void gf_RDSendPhysicalAlloc(void *_pData, mint _Size, mint _Heap, uint64 _Sequence, uint32 _Type)
@@ -1511,6 +1749,9 @@ void gf_RDSendPhysicalAlloc(void *_pData, mint _Size, mint _Heap, uint64 _Sequen
 
 void gf_RDSendHeapAlloc(void *_pData, mint _Size, void *_pHeap, uint64 _Sequence, uint32 _Type)
 {
+#ifdef M_ENABLE_RDMEMORYDEBUGGER
+	GetRRDebugger().AddAlloc((mint)_pData, (mint)_pHeap, _Size);
+#endif
 #ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
 	if (MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData) 
 #endif
@@ -1541,8 +1782,48 @@ void gf_RDSendHeapAlloc(void *_pData, mint _Size, void *_pHeap, uint64 _Sequence
 	}
 }
 
+void gf_RDSendHeapMove(void *_pDataSource, void *_pDataDest, mint _Size, void *_pHeapFrom, void *_pHeapTo, uint64 _Sequence)
+{
+#ifdef M_ENABLE_RDMEMORYDEBUGGER
+	GetRRDebugger().MoveAllocs((mint)_pDataSource, (mint)_pHeapFrom, (mint)_pDataDest, (mint)_pHeapTo, _Size);
+#endif
+#ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
+	if (MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData) 
+#endif
+
+	{
+		if (!MRTC_GetRD())
+			return;
+
+		if (_pDataSource == NULL || _pDataDest == NULL)
+			M_BREAKPOINT;
+		if (!(MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_HeapMemory))
+			return;
+
+		uint64 Data[6];
+		Data[0] = (mint)_pDataSource;
+		Data[1] = (mint)_pDataDest;
+		Data[2] = _Size;
+		Data[3] = (mint)_pHeapFrom;
+		Data[4] = (mint)_pHeapTo;
+		Data[5] = _Sequence;
+
+		SwapLE(Data[0]);
+		SwapLE(Data[1]);
+		SwapLE(Data[2]);
+		SwapLE(Data[3]);
+		SwapLE(Data[4]);
+		SwapLE(Data[5]);
+
+		MRTC_GetRD()->SendData(ERemoteDebug_HeapMove, Data, sizeof(Data), false, false);
+	}
+}
+
 void gf_RDSendHeapClear(void *_pHeap)
 {
+#ifdef M_ENABLE_RDMEMORYDEBUGGER
+	GetRRDebugger().ClearHeap((mint)_pHeap);
+#endif
 	if (!MRTC_GetRD() || !(MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_HeapMemory))
 		return;
 
@@ -1555,6 +1836,9 @@ void gf_RDSendHeapClear(void *_pHeap)
 
 void gf_RDSendHeapFree(void *_pData, void *_pHeap, uint64 _Sequence)
 {
+#ifdef M_ENABLE_RDMEMORYDEBUGGER
+	GetRRDebugger().RemoveAlloc((mint)_pData, (mint)_pHeap);
+#endif
 	if (!MRTC_GetRD() || !(MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_HeapMemory))
 		return;
 	if (_pData == NULL)

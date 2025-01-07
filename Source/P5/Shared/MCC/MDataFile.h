@@ -94,7 +94,7 @@ public:
 
 enum EDataFileFlag
 {
-	EDataFileFlag_NoHidePos = DBit(0)
+	EDataFileFlag_NoHidePos = M_Bit(0)
 };
 
 class MCCDLLEXPORT CDataFile : public CReferenceCount
@@ -273,7 +273,7 @@ public:
 	template<class T>
 	void WriteArrayEntry(T& _Array, const char* _pEntryName, int _Version)
 	{
-		WriteArrayEntry(_pEntryName, _Array.GetBasePtr(), _Array.Length(), _Version);
+		WriteArrayEntry(_pEntryName, _Array.GetBasePtr(), _Array.Len(), _Version);
 	}
 
 	template <class T>

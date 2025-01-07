@@ -1,0 +1,1420 @@
+
+Lib_XRClassesProjectName := Lib_XRClasses
+Lib_XRClassesOutputDir :=Shared/MOS/Libs/XRClasses/Output/$(PlatformName)/Lib_XRClasses/$(Config)
+
+Lib_XRClassesIncludes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Lib_XRClassesIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Lib_XRClassesIncludes += -I Shared/MOS/XR/PCH
+Lib_XRClassesIncludes += -I Shared/mcc
+Lib_XRClassesIncludes += -I Shared/MOS/Libs/XRClasses
+Lib_XRClassesPPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Lib_XRClassesDefs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Lib_XRClassesObjFilesCpp := $(Lib_XRClassesOutputDir)/AnimGraph2.o $(Lib_XRClassesOutputDir)/AnimGraph2Compiler.o $(Lib_XRClassesOutputDir)/AnimGraph2Compiler_GraphBlock.o $(Lib_XRClassesOutputDir)/AnimGraph2Compiler_Reactions.o $(Lib_XRClassesOutputDir)/AnimGraph2Compiler_State.o $(Lib_XRClassesOutputDir)/AnimGraph2_Action.o $(Lib_XRClassesOutputDir)/AnimGraph2_AnimLayer.o $(Lib_XRClassesOutputDir)/AnimGraph2_CCheck.o $(Lib_XRClassesOutputDir)/AnimGraph2_GraphBlock.o $(Lib_XRClassesOutputDir)/AnimGraph2_IO.o $(Lib_XRClassesOutputDir)/AnimGraph2_LogDump.o $(Lib_XRClassesOutputDir)/AnimGraph2_Reaction.o $(Lib_XRClassesOutputDir)/AnimGraph2_State.o $(Lib_XRClassesOutputDir)/MCSolid.o $(Lib_XRClassesOutputDir)/PCH.o $(Lib_XRClassesOutputDir)/WPhysCapsule.o $(Lib_XRClassesOutputDir)/WPhysCollision.o $(Lib_XRClassesOutputDir)/WPhysCollisionObsolete.o $(Lib_XRClassesOutputDir)/WPhysColllisionPolyOBB.o $(Lib_XRClassesOutputDir)/WPhysOBB.o $(Lib_XRClassesOutputDir)/WPhysPCS.o $(Lib_XRClassesOutputDir)/WPhysPolyOBB_fp4.o $(Lib_XRClassesOutputDir)/WPhysTT.o $(Lib_XRClassesOutputDir)/WPhysTriLine.o $(Lib_XRClassesOutputDir)/WPhysTriOBB_fp4.o $(Lib_XRClassesOutputDir)/WPhysTriSphere.o $(Lib_XRClassesOutputDir)/XRBlockNav.o $(Lib_XRClassesOutputDir)/XRBlockNavGrid.o $(Lib_XRClassesOutputDir)/XRBlockNavResult.o $(Lib_XRClassesOutputDir)/XRClass.o $(Lib_XRClassesOutputDir)/XRIndexedSolid.o $(Lib_XRClassesOutputDir)/XRLight.o $(Lib_XRClassesOutputDir)/XRMediumDesc.o $(Lib_XRClassesOutputDir)/XRNavGraph.o $(Lib_XRClassesOutputDir)/XRNavGraphBuilder.o $(Lib_XRClassesOutputDir)/XRShader.o $(Lib_XRClassesOutputDir)/XRThinSolid.o $(Lib_XRClassesOutputDir)/XRUtil.o $(Lib_XRClassesOutputDir)/XRUtilRS.o $(Lib_XRClassesOutputDir)/XRUtilSubdivSurf.o $(Lib_XRClassesOutputDir)/XRVBContainer.o $(Lib_XRClassesOutputDir)/XRVBEContext.o $(Lib_XRClassesOutputDir)/XRVBMHelper.o $(Lib_XRClassesOutputDir)/XRVertexBuffer.o $(Lib_XRClassesOutputDir)/XWSolid.o 
+Lib_XRClassesObjFilesC := 
+
+Lib_XRClassesSpuElfFiles := 
+
+Lib_XRClassesSpursObjFiles := 
+
+Lib_XRClassesSrcFilesCpp := Shared/MOS/XR/PCH/PCH.cpp Shared/MOS/XR/Phys/WPhysCapsule.cpp Shared/MOS/XR/Phys/WPhysOBB.cpp Shared/MOS/XR/Phys/WPhysPCS.cpp Shared/MOS/XR/Phys/WPhysTT.cpp Shared/MOS/XR/Phys/WPhysTriLine.cpp Shared/MOS/XR/Phys/WPhysTriSphere.cpp Shared/MOS/XR/Solids/MCSolid.cpp Shared/MOS/XR/Solids/XRThinSolid.cpp Shared/MOS/XR/Solids/XWSolid.cpp Shared/MOS/XR/XRClass.cpp Shared/MOS/XR/XRLight.cpp Shared/MOS/XR/XRMediumDesc.cpp Shared/MOS/XR/XRNavGraph.cpp Shared/MOS/XR/XRShader.cpp Shared/MOS/XR/XRUtil.cpp Shared/MOS/XR/XRUtilRS.cpp Shared/MOS/XR/XRUtilSubdivSurf.cpp Shared/MOS/XR/XRVBContainer.cpp Shared/MOS/XR/XRVBEContext.cpp Shared/MOS/XR/XRVertexBuffer.cpp Shared/MOS/Xr/Phys/WPhysCollision.cpp Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp Shared/MOS/Xr/Solids/XRIndexedSolid.cpp Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp Shared/MOS/Xr/XRBlockNav.cpp Shared/MOS/Xr/XRBlockNavGrid.cpp Shared/MOS/Xr/XRBlockNavResult.cpp Shared/MOS/Xr/XRNavGraphBuilder.cpp Shared/MOS/Xr/XRVBMHelper.cpp 
+Lib_XRClassesSrcFilesC := 
+
+
+ifeq ($(Config),Release)
+	Lib_XRClassesDefs += -DNDEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Lib_XRClassesDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O0 -g  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD)
+	Lib_XRClassesDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug)
+	Lib_XRClassesDefs += -D_DEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O0 -g  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Lib_XRClassesDefs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTM)
+	Lib_XRClassesDefs += -DM_RTM -DNDEBUG  
+	Lib_XRClassesPPU_CPP_OPTIONS := -O3 -finline-functions  $(Lib_XRClassesPPU_CPP_OPTIONS) 
+endif
+
+Lib_XRClassesclean: 
+	@echo Cleaning Lib_XRClasses $(Config)
+	@-rm -f $(Lib_XRClassesOutputDir)/*.*
+-include $(Lib_XRClassesObjFilesCpp:.o=.d) $(Lib_XRClassesObjFilesC:.o=.d) $(Lib_XRClassesSpuElfFiles:.elf=.d)$(Lib_XRClassesSpursObjFiles:.o=.d)
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) -g -Wall -fno-exceptions $(MAdditionalPS3Compile)  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) -g -Wall -fno-exceptions $(MAdditionalPS3Compile)  $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRClass.o: Shared/MOS/XR/XRClass.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRLight.o: Shared/MOS/XR/XRLight.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRMediumDesc.o: Shared/MOS/XR/XRMediumDesc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRUtil.o: Shared/MOS/XR/XRUtil.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRUtilRS.o: Shared/MOS/XR/XRUtilRS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRUtilSubdivSurf.o: Shared/MOS/XR/XRUtilSubdivSurf.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRVBContainer.o: Shared/MOS/XR/XRVBContainer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRVBMHelper.o: Shared/MOS/Xr/XRVBMHelper.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRVertexBuffer.o: Shared/MOS/XR/XRVertexBuffer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/MCSolid.o: Shared/MOS/XR/Solids/MCSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRIndexedSolid.o: Shared/MOS/Xr/Solids/XRIndexedSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRThinSolid.o: Shared/MOS/XR/Solids/XRThinSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XWSolid.o: Shared/MOS/XR/Solids/XWSolid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/PCH.o: Shared/MOS/XR/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysCapsule.o: Shared/MOS/XR/Phys/WPhysCapsule.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysCollision.o: Shared/MOS/Xr/Phys/WPhysCollision.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysCollisionObsolete.o: Shared/MOS/Xr/Phys/WPhysCollisionObsolete.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysColllisionPolyOBB.o: Shared/MOS/Xr/Phys/WPhysColllisionPolyOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysOBB.o: Shared/MOS/XR/Phys/WPhysOBB.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysPCS.o: Shared/MOS/XR/Phys/WPhysPCS.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysPolyOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysPolyOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysTriLine.o: Shared/MOS/XR/Phys/WPhysTriLine.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysTriOBB_fp4.o: Shared/MOS/Xr/Phys/WPhysTriOBB_fp4.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysTriSphere.o: Shared/MOS/XR/Phys/WPhysTriSphere.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/WPhysTT.o: Shared/MOS/XR/Phys/WPhysTT.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_Action.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Action.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_AnimLayer.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_AnimLayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_CCheck.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_CCheck.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_IO.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_IO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_LogDump.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_LogDump.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_Reaction.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_Reaction.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2_State.o: Shared/MOS/Xr/XRAnimGraph2/AnimGraph2_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2Compiler.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2Compiler_GraphBlock.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_GraphBlock.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2Compiler_Reactions.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_Reactions.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/AnimGraph2Compiler_State.o: Shared/MOS/Xr/XRAnimGraph2/AGCompiler2/AnimGraph2Compiler_State.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRBlockNav.o: Shared/MOS/Xr/XRBlockNav.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRBlockNavGrid.o: Shared/MOS/Xr/XRBlockNavGrid.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRBlockNavResult.o: Shared/MOS/Xr/XRBlockNavResult.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRNavGraph.o: Shared/MOS/XR/XRNavGraph.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRNavGraphBuilder.o: Shared/MOS/Xr/XRNavGraphBuilder.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRShader.o: Shared/MOS/XR/XRShader.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Release/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug_RTM/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/Debug/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTMD_Profile/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Shared/MOS/Libs/XRClasses/Output/Ps3/Lib_XRClasses/RTM/XRVBEContext.o: Shared/MOS/XR/XRVBEContext.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(Lib_XRClassesPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_XRClassesDefs) $(Lib_XRClassesIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Lib_XRClasses_CreateOutputDir:
+	@mkdir -p $(Lib_XRClassesOutputDir)
+
+Lib_XRClassesTargetFileName := libLib_XRClasses.a
+Lib_XRClassesTargetPath := $(LinkDir)/$(Lib_XRClassesTargetFileName)
+
+$(Lib_XRClassesTargetPath): $(Lib_XRClassesObjFilesCpp) $(Lib_XRClassesObjFilesC) $(Lib_XRClassesSpursObjFiles) 
+	@echo Creating Lib_XRClasses
+	$(PPU_LN_VERBOSE)$(PPU_AR) rc $(Lib_XRClassesTargetPath) $(Lib_XRClassesObjFilesCpp) $(Lib_XRClassesObjFilesC) $(Lib_XRClassesSpursObjFiles) 
+	$(PPU_LN_VERBOSE)$(PPU_RANLIB) $(Lib_XRClassesTargetPath)
+
+Lib_XRClassesExtraTargets: 

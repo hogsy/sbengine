@@ -16,23 +16,62 @@
 \*____________________________________________________________________________________________*/
 
 
+// #define CRC_QUATMATRIXPALETTE
+// #define CRC_SUPPORTCUBEVP
+
 enum EMPFlags
 {
 	 EMPFlags_Normal = 0
-	,EMPFlags_SpecialCubeVec = DBit(0)
-	,EMPFlags_SpecialCubeTex = DBit(1)
-	,EMPFlags_SpecialCubeTexScaleZ = DBit(2)
-	,EMPFlags_SpecialCubeTexScale2 = DBit(3)
+	,EMPFlags_SpecialCubeVec = M_Bit(0)
+	,EMPFlags_SpecialCubeTex = M_Bit(1)
+	,EMPFlags_SpecialCubeTexScaleZ = M_Bit(2)
+	,EMPFlags_SpecialCubeTexScale2 = M_Bit(3)
 };
-#if DEF_CRC_MAXTEXTURES > 4
-#define DEF_CRC_VPFormat_MaxTextures m_ProgramGenFormat.m_MultiTexture
-#else
-#define DEF_CRC_VPFormat_MaxTextures DEF_CRC_MAXTEXTURES
+
+#ifdef PLATFORM_XENON
+#define DEF_CRC_HARDCODEMULTITEXTURE
 #endif
+
+#ifdef PLATFORM_PS3
+#define DEF_CRC_HARDCODEMULTITEXTURE
+#endif
+
+#if DEF_CRC_MAXTEXTURES <= 4
+#define DEF_CRC_HARDCODEMULTITEXTURE
+#endif
+
+/*#ifdef DEF_CRC_HARDCODEMULTITEXTURE
+#define DEF_CRC_VPFormat_MaxTextures DEF_CRC_MAXTEXCOORDS
+#else
+	#define DEF_CRC_VPFormat_MaxTextures m_ProgramGenFormat.m_MultiTexture
+#endif*/
 
 class CRC_VPFormat
 {
 public:
+	enum
+	{
+		FMTBF0_TEXCOORDINPUTSCALE_SHIFT =	 0,		// "INPUTSCALE" is scaling and translation for compressed vertex attribute formats.
+		FMTBF0_TEXCOORDINPUTSCALE_AND =	  0xff,
+		FMTBF0_TEXCOORDINPUTSCALE_ANDSHIFTED = (FMTBF0_TEXCOORDINPUTSCALE_AND << FMTBF0_TEXCOORDINPUTSCALE_SHIFT),
+		FMTBF0_TEXTUREMATRIX_SHIFT = 		 8,
+		FMTBF0_TEXTUREMATRIX_AND =		  0xff,
+		FMTBF0_TEXTUREMATRIX_ANDSHIFTED = (FMTBF0_TEXTUREMATRIX_AND << FMTBF0_TEXTUREMATRIX_SHIFT),
+		FMTBF0_MWCOMP_SHIFT =			    16,
+		FMTBF0_MWCOMP_AND =				  0x0f,
+		FMTBF0_MWCOMP_ANDSHIFTED = (FMTBF0_MWCOMP_AND << FMTBF0_MWCOMP_SHIFT),
+		FMTBF0_NONORMAL =			0x00100000,
+		FMTBF0_USENORMAL =			0x00200000,
+		FMTBF0_USETANGENTS =		0x00400000,
+		FMTBF0_NORMALIZENORMAL =	0x00800000,
+		FMTBF0_NOVERTEXCOLOR =		0x01000000,
+		FMTBF0_NOCOLOROUTPUT =		0x02000000,
+		FMTBF0_VERTEXINPUTSCALE =	0x04000000,
+		FMTBF0_CLIPPLANES =			0x08000000,
+		FMTBF0_DEPTHFOG =			0x10000000,
+		FMTBF0_VERTEXLIGHTING =		0x20000000,
+	};
+
 	class CProgramFormat
 	{
 	public:
@@ -40,11 +79,7 @@ public:
 		enum
 		{
 			BITSIZE_LIGHTTYPES = 2,
-#if DEF_CRC_MAXTEXTURES > 4
 			BITSIZE_TEXGENMODE = 5,
-#else
-			BITSIZE_TEXGENMODE = 4,
-#endif
 			BITSIZE_TEXINPUTRENAME = DNumBits(CRC_MAXTEXCOORDS - 1),
 
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,75 +103,100 @@ public:
 			// 
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			FORMAT_VERSION = 0x0101,
+			FORMAT_VERSION = 0x0104,
 		};
 
+		// Current size:
+		//		PC		6*32 = 192bit, 24 bytes
+		//		Xenon	5*32 = 160bit, 20 bytes
+		//		PS3		4*32 = 128bit, 16 bytes
 
-		uint32 m_LightTypes : CRC_MAXLIGHTS * BITSIZE_LIGHTTYPES;								// 16 
-		uint32 m_TexInputRename : CRC_MAXTEXCOORDS * BITSIZE_TEXINPUTRENAME;					// 8
-		uint32 m_TexMatrix : CRC_MAXTEXCOORDS;													// 4
 
-		// bf byte 0
-		uint32 m_nMWComp : 4;				// Matrices per vertex, [0..8] is allowed range.	// 4
+		uint32 m_TexInputRename : CRC_MAXTEXCOORDS * BITSIZE_TEXINPUTRENAME;					// 32, Xenon, PC, needs to be killed for PS3
+		uint32 m_FmtBF0;																		// 32
 
-		// bf byte 1
-#ifndef PLATFORM_XBOX1
-		uint32 m_bNoNormal : 1;
+		uint8 m_lTexGenMode[CRC_MAXTEXCOORDS];													// 64
+
+#if defined PLATFORM_XENON || !defined PLATFORM_CONSOLE
+		uint32 m_ActiveVertices;																// 32, PC, Xenon
 #endif
-		uint32 m_bUseNormal : 1;																// 1
-		uint32 m_bUseTangents : 1;																// 1
-		uint32 m_bNormalizeNormal : 1;															// 1
-		uint32 m_bNoVertexColorComponent : 1;													// 1 
-		uint32 m_bNoColorOutput : 1;															// 1 
-
-		// bf byte 2,3
-		uint32 m_VertexTransform: 1;															// 1
-		uint32 m_TextureTransform: 4; // 6 byte									// 4 // DWORD
-#ifndef PLATFORM_XENON
-		uint32 m_bClipPlanes : 1;																// 1
-		uint32 m_FogDepth : 1;																	// 1
-		uint32 m_Lighting : 1;			// Lighting enabled // 7 byte							// 1
-		uint32 m_nLights : 4;				// Lights, [0..CRC_MAXLIGHTS] is allowed range		// 4
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+		uint32 m_LightTypes : CRC_MAXLIGHTS * BITSIZE_LIGHTTYPES;								// 16, PC
 #endif
-		uint32 m_MPFlags : 4;																	// 4
-#if DEF_CRC_MAXTEXTURES > 4
-		uint32 m_MultiTexture : 4;
-
-		uint16 m_lTexGenModeAndComponents[CRC_MAXTEXCOORDS];										// 32	
-#else
-		uint8 m_lTexGenModeAndComponents[CRC_MAXTEXCOORDS];										// 32	
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+		uint32 m_nLights : 4;																	// 4, PC
 #endif
-#ifndef PLATFORM_XBOX1
-		uint32 m_ActiveVertices;
+#ifdef CRC_SUPPORTCUBEVP
+		uint32 m_MPFlags : 4;																	// 4, None
 #endif
 
-		int GetTextureTransform(int _iTxt) const
+		uint32 GetTexCoordInputScale(uint32 _iTxt) const
 		{
-			return ((m_TextureTransform >> (_iTxt)) & 0x1);
+			return ((m_FmtBF0 >> FMTBF0_TEXCOORDINPUTSCALE_SHIFT) >> (_iTxt)) & 0x1;
 		}
-		int GetRename(int _iTxt) const
+		uint32 GetRename(uint32 _iTxt) const
 		{
 			return ((m_TexInputRename >> (_iTxt * BITSIZE_TEXINPUTRENAME)) & ((1<<BITSIZE_TEXINPUTRENAME)-1));
 		}
-		int GetTexGen(int _iTxt) const
+		uint32 GetTexGen(uint32 _iTxt) const
 		{
-			return m_lTexGenModeAndComponents[_iTxt] & ((1 << BITSIZE_TEXGENMODE) - 1);
+			return m_lTexGenMode[_iTxt];
 		}
-		int GetTexGenComponents(int _iTxt) const
+
+		uint32 GetTexMatrixMask() const
 		{
-			return (m_lTexGenModeAndComponents[_iTxt] & (((1 << 4) - 1) << BITSIZE_TEXGENMODE)) >> BITSIZE_TEXGENMODE;
+			return (m_FmtBF0 >> FMTBF0_TEXTUREMATRIX_SHIFT) & FMTBF0_TEXTUREMATRIX_AND;
 		}
-	}; // 12 bytes
+
+		uint32 GetTexCoordInputScaleMask() const
+		{
+			return (m_FmtBF0 >> FMTBF0_TEXCOORDINPUTSCALE_SHIFT) & FMTBF0_TEXCOORDINPUTSCALE_AND;
+		}
+
+		uint32 GetMWComp() const
+		{
+			return (m_FmtBF0 >> FMTBF0_MWCOMP_SHIFT) & FMTBF0_MWCOMP_AND;
+		}
+
+		void Clear()
+		{
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+			m_LightTypes = 0;
+#endif
+			m_TexInputRename = 0;
+			m_FmtBF0 = 0;
+#ifdef CRC_SUPPORTCUBEVP
+			m_MPFlags = 0;
+#endif
+#ifdef PLATFORM_XENON
+			m_ActiveVertices = 0;
+#endif
+			for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+				m_lTexGenMode[i] = 0;
+		}
+
+		CFStr GetString() const
+		{
+			CFStr VPName;
+			char* pD = VPName.GetStr();
+			pD[0] = 'V';
+			pD[1] = 'P';
+			CStrBase::HexStr(pD + 2, this, sizeof(CProgramFormat));
+			pD[2 + sizeof(CProgramFormat) * 2] = 0;
+			return VPName;
+		}
+	};
 
 	CProgramFormat m_ProgramGenFormat;
 
-	uint16 m_NeededTex:15;
-	uint16 m_bUseQuatMatrixPallette:1;
+	uint16 m_nTexGenParams;
 	int16 m_iConstant_Base;
 #ifndef PLATFORM_XENON
 	uint8 m_iConstant_ClipPlanes;
-	uint8 m_iConstant_Lights;
+#endif
 	uint8 m_iConstant_FogDepth;
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+	uint8 m_iConstant_Lights;
 #endif
 	uint8 m_iConstant_PosTransform;
 	uint8 m_iConstant_MP;
@@ -144,63 +204,88 @@ public:
 	uint8 m_iConstant_TexGenParam[CRC_MAXTEXCOORDS][4];
 	uint8 m_iConstant_TexMatrix[CRC_MAXTEXCOORDS];
 	uint8 m_iConstant_TexTransform[CRC_MAXTEXCOORDS];
+
+	static uint8 ms_lnTexGenParams[CRC_TEXGENMODE_MAX];
+	static uint32 ms_lTexGenFmtFlags[CRC_TEXGENMODE_MAX];
+
+	static void InitRegsNeeded()
+	{
+		memset(&ms_lnTexGenParams, 0, sizeof(ms_lnTexGenParams));
+		memset(&ms_lTexGenFmtFlags, 0, sizeof(ms_lTexGenFmtFlags));
+		ms_lnTexGenParams[CRC_TEXGENMODE_LINEAR] = 4;
+		ms_lnTexGenParams[CRC_TEXGENMODE_LINEARNHF] = 3;
+		ms_lnTexGenParams[CRC_TEXGENMODE_BOXNHF] = 10;
+		ms_lnTexGenParams[CRC_TEXGENMODE_SHADOWVOLUME2] = 1;
+		ms_lnTexGenParams[CRC_TEXGENMODE_CONSTANT] = 1;
+		ms_lnTexGenParams[CRC_TEXGENMODE_SHADOWVOLUME] = 1;
+		ms_lnTexGenParams[CRC_TEXGENMODE_BUMPCUBEENV] = 8;
+		ms_lnTexGenParams[CRC_TEXGENMODE_TSREFLECTION] = 1;
+		ms_lnTexGenParams[CRC_TEXGENMODE_LIGHTING] = 2;
+		ms_lnTexGenParams[CRC_TEXGENMODE_LIGHTING_NONORMAL] = 2;
+		ms_lnTexGenParams[CRC_TEXGENMODE_LIGHTFIELD] = 6;
+		ms_lnTexGenParams[CRC_TEXGENMODE_DECALTSTRANSFORM] = 4;
+		ms_lnTexGenParams[CRC_TEXGENMODE_TSLV] = 1;
+		ms_lnTexGenParams[CRC_TEXGENMODE_PIXELINFO] = 3;
+		ms_lnTexGenParams[CRC_TEXGENMODE_DEPTHOFFSET] = 2;
+		{
+			for(int i = CRC_TEXGENMODE_FIRSTUSENORMAL; i < CRC_TEXGENMODE_MAX; i++)
+				ms_lTexGenFmtFlags[i] |= FMTBF0_USENORMAL;
+		}
+		{
+			for(int i = CRC_TEXGENMODE_FIRSTUSETANGENT; i < CRC_TEXGENMODE_MAX; i++)
+				ms_lTexGenFmtFlags[i] |= FMTBF0_USETANGENTS;
+		}
+	}
 	
-	void Clear()
+/*	void Clear()
 	{
 		memset(&m_ProgramGenFormat, 0, sizeof(m_ProgramGenFormat));
 
-#ifndef PLATFORM_XBOX1
+#ifdef PLATFORM_XENON
 		m_ProgramGenFormat.m_ActiveVertices = 0xffffffff;
 #endif
-	}
-	CRC_VPFormat(bool _bUseQuatMatrixPallette, int _MaxTextures)
+	}*/
+	CRC_VPFormat()
 	{
+		Create();
+	}
 
+	void Create(uint _iConstant_Base = 0)
+	{
 		FillChar(this, sizeof(*this), 0);
-		Clear();
+		//		Clear();
 		m_ProgramGenFormat.m_TexInputRename = 0;
-#if DEF_CRC_MAXTEXTURES > 4
-		m_ProgramGenFormat.m_MultiTexture = _MaxTextures;
-#endif
-		for(int l = 0; l < CRC_MAXTEXCOORDS; l++)
+		for(uint32 l = 0; l < CRC_MAXTEXCOORDS; l++)
 			m_ProgramGenFormat.m_TexInputRename |= (l) << (l * CProgramFormat::BITSIZE_TEXINPUTRENAME);
 
-		m_iConstant_Base = -96;
+		m_iConstant_Base = _iConstant_Base;
 		m_iConstant_MP = EMatrixPalette;
 		m_iConstant_ConstantColor = EConstantColor;
-#ifndef PLATFORM_XENON
+//#ifndef PLATFORM_XENON
 		m_iConstant_FogDepth = EAttrib;
+//#endif
+#ifdef CRC_SUPPORTVERTEXLIGHTING
 		m_iConstant_Lights = ELights;
 #endif
-		m_bUseQuatMatrixPallette = _bUseQuatMatrixPallette;
-/*
+		/*
 		m_nMWComp = 0;
 		m_TexTransform = 0;
 		m_Lighting = 0;
 		m_nLights = 0;
 
-		for(int l = 0; l < CRC_MAXLIGHTS; l++)
-			m_LightTypes[l] = CRC_LIGHTTYPE_POINT;
+		for(uint32 l = 0; l < CRC_MAXLIGHTS; l++)
+		m_LightTypes[l] = CRC_LIGHTTYPE_POINT;
 
-		for(int i = 0; i < CRC_MAXTEXCOORDS; i++)
+		for(uint32 i = 0; i < CRC_MAXTEXCOORDS; i++)
 		{
-			m_TexGenMode[i] = 0;
-			m_iConstant_TexGenParam[i] = 0;
-			m_iConstant_TexMatrix[i] = 0;
+		m_TexGenMode[i] = 0;
+		m_iConstant_TexGenParam[i] = 0;
+		m_iConstant_TexMatrix[i] = 0;
 		}
 
 		m_iConstant_MP = 0;
 		m_iConstant_Lights = 0;
-*/
-	}
-
-	void Init(int _MaxTextures)
-	{
-		Clear();
-		m_ProgramGenFormat.m_TexInputRename = 0;
-#if DEF_CRC_MAXTEXTURES > 4
-		m_ProgramGenFormat.m_MultiTexture = _MaxTextures;
-#endif
+		*/
 	}
 
 #if defined(PLATFORM_XENON) || defined(PLATFORM_PS3)
@@ -243,13 +328,13 @@ public:
 		EClipPlanes = ((ELights + ESizeLights) + 3) &(~3), // Align on 4 registers
 		EMatrixPalette = ((EClipPlanes + ESizeClipPlanes) + 3) &(~3), 
 	};
-
-	M_INLINE static int GetUsedInputTextures(const CRC_Attributes* _pAttrib)
+#if 0
+	M_INLINE static uint32 GetUsedInputTextures(const CRC_Attributes* _pAttrib)
 	{
-		int RetUsed = 0;
-		for(int iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++)
+		uint32 RetUsed = 0;
+		for(uint32 iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++)
 		{
-			int TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
+			uint32 TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
 			if (TexGenMode >= CRC_TEXGENMODE_FIRSTUSENORMAL)
 				RetUsed |= 1 << CRC_MAXTEXCOORDS;
 
@@ -299,127 +384,91 @@ public:
 		return RetUsed;
 
 	}
+#endif 
 
-
-	M_INLINE void SetAttrib(const CRC_Attributes* _pAttrib, const CMat4Dfp4** _pMatrix, uint32 _EnabledTextures = 0xffffffff)
+	void SetAttrib(const CRC_Attributes* _pAttrib, const CMat4Dfp32** _pMatrix, uint32 _EnabledTextures = 0xffffffff)
 	{
-		int nRegsNeeded = 0;
-		for(int iTxt = 0; iTxt < DEF_CRC_VPFormat_MaxTextures; iTxt++)
+		uint32 nRegsNeeded = 0;
+		uint32 iTextMask = 1;
+#if CRC_MAXTEXCOORDS == 8
+		const static uint32 ActiveTexturesMask[CRC_MAXTEXCOORDS] = {(1 << (2 + 0)), (1 << (2 + 1)), (1 << (2 + 2)), (1 << (2 + 3)), (1 << (2 + 4)), (1 << (2 + 5)), (1 << (2 + 6)), (1 << (2 + 7))};
+#else
+		uint32 ActiveTexturesMask[CRC_MAXTEXCOORDS];
+		for(uint32 iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++)
+		{
+			ActiveTexturesMask[iTxt] = (1 << (2 + iTxt));
+		}
+#endif
+
+		uint32 FmtBF0 = m_ProgramGenFormat.m_FmtBF0;
+//		uint32 bUseNormal = 0;
+//		uint32 bUseTangents = 0;
+		for(uint32 iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++, iTextMask = iTextMask << 1)
 		{
 //			M_ASSERT(_pAttrib->m_lTexGenMode[iTxt] <= 255, "No more than 8 bits allowed, increase to x bit percomponent");
 //			m_ProgramGenFormat.m_TexGenMode |= (_pAttrib->m_lTexGenMode[iTxt] << (iTxt * CProgramFormat::BITSIZE_TEXGENMODE));
 
-			const CMat4Dfp4* pMatrix = _pMatrix[iTxt];
+			const CMat4Dfp32* pMatrix = _pMatrix[iTxt];
 			if (pMatrix)
 				nRegsNeeded += 4;
 
-			int TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
-#ifndef PLATFORM_XBOX1
-			if (!TexGenMode && !(m_ProgramGenFormat.m_ActiveVertices & (1 << (2 + _pAttrib->m_iTexCoordSet[iTxt]))))
-				TexGenMode = CRC_TEXGENMODE_VOID;
-			if (!TexGenMode && (!(_EnabledTextures & (1 << iTxt))))
-				TexGenMode = CRC_TEXGENMODE_VOID;
-			
-#endif
-#ifdef PLATFORM_XBOX1
-			if (!TexGenMode && ((!((1 << _pAttrib->m_iTexCoordSet[iTxt]) & _EnabledTextures)) || !_pAttrib->m_TextureID[iTxt]))
+			uint32 TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
+#ifdef PLATFORM_XENON
+/*			if (!TexGenMode && !(m_ProgramGenFormat.m_ActiveVertices & ActiveTexturesMask[_pAttrib->m_iTexCoordSet[iTxt]])
+				 && (!(_EnabledTextures & (iTextMask))))
+				TexGenMode = CRC_TEXGENMODE_VOID;*/
+			if (!TexGenMode && (!(_EnabledTextures & (iTextMask))))
 				TexGenMode = CRC_TEXGENMODE_VOID;
 #endif
 
-			m_ProgramGenFormat.m_lTexGenModeAndComponents[iTxt] |= TexGenMode;
-#ifdef PLATFORM_XBOX1
-			uint32 TexGenComp = _pAttrib->GetTexGenComp(iTxt);
-#else
-			uint32 TexGenComp = 0xf;
-#endif
-			m_ProgramGenFormat.m_lTexGenModeAndComponents[iTxt] |= TexGenComp << CProgramFormat::BITSIZE_TEXGENMODE;
+			m_ProgramGenFormat.m_lTexGenMode[iTxt] = TexGenMode;
 
-			if (TexGenMode >= CRC_TEXGENMODE_FIRSTUSENORMAL)
-				m_ProgramGenFormat.m_bUseNormal = 1;
-
+/*			if (TexGenMode >= CRC_TEXGENMODE_FIRSTUSENORMAL)
+				bUseNormal = 1;
 			if (TexGenMode >= CRC_TEXGENMODE_FIRSTUSETANGENT)
-				m_ProgramGenFormat.m_bUseTangents = 1;
+				bUseTangents = 1;
+*/
+			M_ASSERT(TexGenMode < CRC_TEXGENMODE_MAX, "!");
 
-			switch(TexGenMode)
-			{
-			case CRC_TEXGENMODE_LINEAR :
-				if (TexGenComp & 1)
-					nRegsNeeded += 1;
-				if (TexGenComp & 2)
-					nRegsNeeded += 1;
-				if (TexGenComp & 4)
-					nRegsNeeded += 1;
-				if (TexGenComp & 8)
-					nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_LINEARNHF :nRegsNeeded += 3;break;
-			case CRC_TEXGENMODE_BOXNHF :nRegsNeeded += 10;break;
-
-			case CRC_TEXGENMODE_SHADOWVOLUME2 :
-				nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_CONSTANT :
-				nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_SHADOWVOLUME :
-//				m_ProgramGenFormat.m_bNormalizeNormal = 1;
-				nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_BUMPCUBEENV :
-				nRegsNeeded += 8;
-				break;
-			case CRC_TEXGENMODE_TSREFLECTION :
-				nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_LIGHTING :
-				nRegsNeeded += 2;
-				break;
-			case CRC_TEXGENMODE_TSLV :
-				nRegsNeeded += 1;
-				break;
-			case CRC_TEXGENMODE_PIXELINFO :
-				nRegsNeeded += 3;
-				break;
-			case CRC_TEXGENMODE_DEPTHOFFSET :
-				nRegsNeeded += 2;
-				break;
-
-			default :;
-			}
+			FmtBF0 |= ms_lTexGenFmtFlags[TexGenMode];
+			nRegsNeeded += ms_lnTexGenParams[TexGenMode];
 		}
 
-		m_NeededTex = nRegsNeeded;
+//		m_ProgramGenFormat.m_bUseNormal = bUseNormal;
+//		m_ProgramGenFormat.m_bUseTangents = bUseTangents;
+
+		m_nTexGenParams = nRegsNeeded;
 
 #ifndef PLATFORM_XENON
 		if (_pAttrib->m_Flags & CRC_FLAGS_FOG)
-			m_ProgramGenFormat.m_FogDepth = 1;
+			FmtBF0 |= FMTBF0_DEPTHFOG;
+//			m_ProgramGenFormat.m_FogDepth = 1;
 #endif
+		m_ProgramGenFormat.m_FmtBF0 = FmtBF0;
 	}
 
 	/*
 	Not used any more, the has to be set through set attrib
-	M_INLINE void SetTexGenOff(int _iTxt)
+	M_INLINE void SetTexGenOff(uint32 _iTxt)
 	{
 		m_ProgramGenFormat.m_TexGenMode = (m_ProgramGenFormat.m_TexGenMode & (~(15 << (_iTxt * 4)))) | (CRC_TEXGENMODE_VOID << (_iTxt * 4));
 	}
 
-	M_INLINE void SetTexGenOn(int _iTxt, const CRC_Attributes* _pAttrib)
+	M_INLINE void SetTexGenOn(uint32 _iTxt, const CRC_Attributes* _pAttrib)
 	{
 		M_ASSERT(_pAttrib->m_lTexGenMode[iTxt] <= 15, "No more than 4 bits allowed, increase to 8 bit percomponent");
 		m_ProgramGenFormat.m_TexGenMode = (m_ProgramGenFormat.m_TexGenMode & (~(15 << (_iTxt * 4)))) | (_pAttrib->m_lTexGenMode[_iTxt] << (_iTxt * 4));
 	}
 	*/
 
-#ifndef PLATFORM_XENON
-	M_INLINE void SetLights(const CRC_Light* _pLights, int _nLights)
+#ifdef CRC_SUPPORTVERTEXLIGHTING
+	M_INLINE void SetLights(const CRC_Light* _pLights, uint32 _nLights)
 	{
-		m_ProgramGenFormat.m_Lighting = 1;
 		m_ProgramGenFormat.m_nLights = _nLights;
 		m_ProgramGenFormat.m_LightTypes = 0;
-		m_ProgramGenFormat.m_bUseNormal = 1;
-		m_ProgramGenFormat.m_bNormalizeNormal = 1;
+		m_ProgramGenFormat.m_FmtBF0 |= FMTBF0_VERTEXLIGHTING | FMTBF0_USENORMAL | FMTBF0_NORMALIZENORMAL;
 
-		for(int i = 0; i < _nLights; i++)
+		for(uint32 i = 0; i < _nLights; i++)
 			m_ProgramGenFormat.m_LightTypes |= _pLights[i].m_Type << (i*CProgramFormat::BITSIZE_LIGHTTYPES);
 	}
 
@@ -427,84 +476,113 @@ public:
 
 	M_INLINE void SetVertexTransform()
 	{
-		m_ProgramGenFormat.m_VertexTransform = true;
+		m_ProgramGenFormat.m_FmtBF0 |= FMTBF0_VERTEXINPUTSCALE;
 	}
 
-	M_INLINE void SetTextureTransform(int _iTxt)
+	M_INLINE void SetTexCoordInputScale(uint32 _iTxt)
 	{
-		m_ProgramGenFormat.m_TextureTransform |= 1 << _iTxt;
+		m_ProgramGenFormat.m_FmtBF0 |= (1 << (_iTxt + FMTBF0_TEXCOORDINPUTSCALE_SHIFT));
+	}
+
+	M_INLINE void SetTextureTransformFull(uint32 _Transform)
+	{
+		M_ASSERT((m_ProgramGenFormat.m_FmtBF0 & FMTBF0_TEXCOORDINPUTSCALE_AND) == 0, "!");
+		m_ProgramGenFormat.m_FmtBF0 |= (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_TEXCOORDINPUTSCALE_ANDSHIFTED) + (_Transform << FMTBF0_TEXCOORDINPUTSCALE_SHIFT);
+	}
+
+	M_INLINE void SetTransformFull()
+	{
+		m_ProgramGenFormat.m_FmtBF0 |= FMTBF0_VERTEXINPUTSCALE | FMTBF0_TEXCOORDINPUTSCALE_ANDSHIFTED;
 	}
 
 	M_INLINE void SetVertexColorComponent(bool _bColorVertex)
 	{
-		m_ProgramGenFormat.m_bNoVertexColorComponent = !_bColorVertex; 
+		m_ProgramGenFormat.m_FmtBF0 = (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_NOVERTEXCOLOR) | ((_bColorVertex) ? 0 : FMTBF0_NOVERTEXCOLOR);
 	}
 
 	M_INLINE void SetColorOutput(bool _bColor)
 	{
-		m_ProgramGenFormat.m_bNoColorOutput = !_bColor; 
-	}
-	#ifndef PLATFORM_XBOX1
-
-	M_INLINE void SetVertexNormalComponent(bool _bNormalVertex)
-	{
-		m_ProgramGenFormat.m_bNoNormal = !_bNormalVertex;
+		m_ProgramGenFormat.m_FmtBF0 = (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_NOCOLOROUTPUT) | ((_bColor) ? 0 : FMTBF0_NOCOLOROUTPUT);
 	}
 
+#if defined PLATFORM_XENON || !defined PLATFORM_CONSOLE
 	M_INLINE void SetActiveVertices(uint32 _ActivecVertices)
 	{
 		m_ProgramGenFormat.m_ActiveVertices = _ActivecVertices;
 	}
+#endif
 
-	#endif
+	M_INLINE static uint32 UpdateSetTexRename(uint32 _Start, uint32 _iTxt, uint32 _iRenameTo)
+	{
+		return (_Start & (~(((1<<CProgramFormat::BITSIZE_TEXINPUTRENAME)-1) << (_iTxt * CProgramFormat::BITSIZE_TEXINPUTRENAME)))) | _iRenameTo << (_iTxt * CProgramFormat::BITSIZE_TEXINPUTRENAME);
+	}
 
-	M_INLINE void SetTexRename(int _iTxt, int _iRenameTo)
+	M_INLINE void SetTexRenameFull(uint32 _Rename)
+	{
+		m_ProgramGenFormat.m_TexInputRename = _Rename;
+	}
+
+	M_INLINE void SetTexRename(uint32 _iTxt, uint32 _iRenameTo)
 	{
 //		m_ProgramGenFormat.m_TexInputRename = (m_ProgramGenFormat.m_TexInputRename & (~(3 << (_iTxt * 2)))) | _iRenameTo << (_iTxt * 2); 
 		m_ProgramGenFormat.m_TexInputRename = (m_ProgramGenFormat.m_TexInputRename & (~(((1<<CProgramFormat::BITSIZE_TEXINPUTRENAME)-1) << (_iTxt * CProgramFormat::BITSIZE_TEXINPUTRENAME)))) | _iRenameTo << (_iTxt * CProgramFormat::BITSIZE_TEXINPUTRENAME); 
 	}
 
-	M_INLINE void SetMWComp(int _nMWComp)
+	M_INLINE void SetMWComp(uint32 _nMWComp)
 	{
-		m_ProgramGenFormat.m_nMWComp = _nMWComp;
+		m_ProgramGenFormat.m_FmtBF0 = (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_MWCOMP_ANDSHIFTED) | (_nMWComp << FMTBF0_MWCOMP_SHIFT);
 	}
 
+#ifdef CRC_SUPPORTCUBEVP
 	M_INLINE void SetMPFlags(uint32 _Flags)
 	{
 		m_ProgramGenFormat.m_MPFlags = _Flags;
 	}
+#endif
 
 #ifndef PLATFORM_XENON
 	M_INLINE void SetClipPlanes(uint32 _bEnabled)
 	{
-		m_ProgramGenFormat.m_bClipPlanes = _bEnabled;
+		m_ProgramGenFormat.m_FmtBF0 = (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_CLIPPLANES) | ((_bEnabled) ? FMTBF0_CLIPPLANES : 0);
 	}
 #endif
 
-	M_INLINE void SetTexMatrix(int _iTxt)
+	M_INLINE void SetTexMatrix(uint32 _iTxt)
 	{
-		m_ProgramGenFormat.m_TexMatrix |= 1 << _iTxt;
+		m_ProgramGenFormat.m_FmtBF0 |= (1 << FMTBF0_TEXTUREMATRIX_SHIFT) << _iTxt;
 	}
 
-	int SetRegisters_Init(CVec4Dfp4* _pRegisters, int _Base, int _iReg);
+	M_INLINE uint32 UpdateSetTexMatrix(uint32 _Value, uint32 _iTxt)
+	{
+		return _Value | 1 << _iTxt;
+	}
 
-	M_INLINE int SetRegisters_ConstantColor(CVec4Dfp4* _pRegisters, int _iReg, CPixel32 _Color)
+	M_INLINE void SetTexMatrixFull(uint32 _Value)
+	{
+		m_ProgramGenFormat.m_FmtBF0 = (m_ProgramGenFormat.m_FmtBF0 & ~FMTBF0_TEXTUREMATRIX_ANDSHIFTED) | (_Value << FMTBF0_TEXTUREMATRIX_SHIFT);
+	}
+
+	uint32 SetRegisters_Init(CVec4Dfp32* _pRegisters, uint32 _iReg);
+
+	M_INLINE uint32 SetRegisters_ConstantColor(CVec4Dfp32* _pRegisters, uint32 _iReg, uint32 _Color)
 	{
 		m_iConstant_ConstantColor = _iReg;
+		vec128 col = M_VMul(M_VLd_Pixel32_f32(&_Color), M_VScalar(1.0f / 255.0f));
+		_pRegisters[0].v = col;
 
-		(*_pRegisters)[0] = fp4(_Color.GetR()) / 255.0f;
-		(*_pRegisters)[1] = fp4(_Color.GetG()) / 255.0f;
-		(*_pRegisters)[2] = fp4(_Color.GetB()) / 255.0f;
-		(*_pRegisters)[3] = fp4(_Color.GetA()) / 255.0f;
+/*		(*_pRegisters)[0] = fp32(_Color.GetR()) / 255.0f;
+		(*_pRegisters)[1] = fp32(_Color.GetG()) / 255.0f;
+		(*_pRegisters)[2] = fp32(_Color.GetB()) / 255.0f;
+		(*_pRegisters)[3] = fp32(_Color.GetA()) / 255.0f;*/
 		return 1;
 	}
 
 
-	M_INLINE int SetRegisters_Attrib(CVec4Dfp4* _pRegisters, int _iReg, const CRC_Attributes* _pAttrib, class CRC_Core* _pRC)
+	M_INLINE uint32 SetRegisters_Attrib(CVec4Dfp32* _pRegisters, uint32 _iReg, const CRC_Attributes* _pAttrib, class CRC_Core* _pRC)
 	{
-		int iReg = _iReg;
-#ifndef PLATFORM_XENON
-		if (m_ProgramGenFormat.m_FogDepth)
+		uint32 iReg = _iReg;
+//#ifndef PLATFORM_XENON
+		if (m_ProgramGenFormat.m_FmtBF0 & FMTBF0_DEPTHFOG)
 		{
 		// compute fog factor f = (fog_end - dist)*(1/(fog_end-fog_start))
 		// this is == to: (fog_end/(fog_end-fog_start) - dist/(fog_end-fog_start)
@@ -515,26 +593,26 @@ public:
 			m_iConstant_FogDepth = iReg;
 			iReg++;
 		}
-#endif
+//#endif
 		return iReg - _iReg;
 	}
 
-	static int GetFirstFreeRegister() { return 8; };
+	static uint32 GetFirstFreeRegister() { return 8; };
 
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_ClipPlanes(CVec4Dfp4* _pRegisters, int _iReg, CPlane3Dfp4* _pClipPlanes, int _nPlanes)
+	uint32 SetRegisters_ClipPlanes(CVec4Dfp32* _pRegisters, uint32 _iReg, CPlane3Dfp32* _pClipPlanes, uint32 _nPlanes)
 	{
 		m_iConstant_ClipPlanes = _iReg;
 
-		int nRegs = 6;
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegs);
+		uint32 nRegs = 6;
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegs);
 		M_ASSERT(nLeft >= nRegs, "Only supported");
 		M_ASSERT(_nPlanes <= nRegs, "!");
 
-		for(int i = 0; i < _nPlanes; i++)
+		for(uint32 i = 0; i < _nPlanes; i++)
 		{
-			const CPlane3Dfp4& Plane = _pClipPlanes[i];
+			const CPlane3Dfp32& Plane = _pClipPlanes[i];
 			pReg[i][0] = Plane.n[0];
 			pReg[i][1] = Plane.n[1];
 			pReg[i][2] = Plane.n[2];
@@ -545,33 +623,37 @@ public:
 	}
 
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_Transform(CVec4Dfp4* &_pRegisters, int _iReg, const CRC_VRegTransform *_pTransform)
+	uint32 SetRegisters_VertexInputScale(CVec4Dfp32* &_pRegisters, uint32 _iReg, const CRC_VRegTransform *_pTransform)
 	{
-		int nRegsNeeded = 0;
-		if (m_ProgramGenFormat.m_VertexTransform)
+		uint32 nRegsNeeded = 0;
+		if (m_ProgramGenFormat.m_FmtBF0 & FMTBF0_VERTEXINPUTSCALE)
 			++nRegsNeeded;
 
-		for (int i = 0; i < 4; ++i)
-		{
-			if (m_ProgramGenFormat.m_TextureTransform & (1 << i))
-				++nRegsNeeded;
-		}
+		uint32 TexCoordScaleMask = m_ProgramGenFormat.GetTexCoordInputScaleMask();
+		nRegsNeeded += (TexCoordScaleMask >> 0) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 1) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 2) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 3) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 4) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 5) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 6) & 1;
+		nRegsNeeded += (TexCoordScaleMask >> 7) & 1;
 
 		if (!nRegsNeeded)
 			return 0;
-		nRegsNeeded *= 2;
+		nRegsNeeded = nRegsNeeded << 1;
 
-		int nRegs = nRegsNeeded;
+		uint32 nRegs = nRegsNeeded;
 		
-		int iReg = _iReg;
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		uint32 iReg = _iReg;
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
 		const CRC_VRegTransform *pTransform = _pTransform;
 
 
-		if (m_ProgramGenFormat.m_VertexTransform)
+		if (m_ProgramGenFormat.m_FmtBF0 & FMTBF0_VERTEXINPUTSCALE)
 		{
 			m_iConstant_PosTransform = iReg; iReg += 2;
 			pReg[0] = pTransform->m_Scale;
@@ -580,15 +662,16 @@ public:
 			pReg += 2;
 		}
 
-		for (int i = 0; i < 4; ++i)
+		uint Mask = 1;
+		for (uint32 i = 0; i < CRC_MAXTEXCOORDS; ++i)
 		{
-			if (m_ProgramGenFormat.m_TextureTransform & (1 << i))
+			if (TexCoordScaleMask & Mask)
 			{
 				pReg[0] = pTransform->m_Scale;
 				pReg[1] = pTransform->m_Offset;
-				for (int j = 0; j < DEF_CRC_VPFormat_MaxTextures; ++j)
+				for (uint32 j = 0; j < CRC_MAXTEXCOORDS; ++j)
 				{
-					int OriginalCoord = m_ProgramGenFormat.GetRename(i);
+					uint32 OriginalCoord = m_ProgramGenFormat.GetRename(i);
 					if (OriginalCoord == i)
 						m_iConstant_TexTransform[j] = iReg;
 				}
@@ -596,34 +679,53 @@ public:
 				pReg += 2;
 				++pTransform;
 			}
+
+			Mask += Mask;
 		}
 
 		_pRegisters = pReg;
 		return nRegs;
 	}
 
-	template <class t_CRegisterBatchGetter>
-	int SetRegisters_TexGenMatrix(CVec4Dfp4* &_pRegisters, int _iReg, const CMat4Dfp4** _pMatrix, const CRC_Attributes* _pAttrib)
+	uint32 SetRegisters_TextureTransformFull(CVec4Dfp32* _pRegisters, uint _iReg, uint _Rename, const CVec4Dfp32* _pScalers)
 	{
-		int nRegsNeeded = m_NeededTex;
-#ifdef _DEBUG
-		SetAttrib(_pAttrib, _pMatrix);
-		M_ASSERT(m_NeededTex == nRegsNeeded, "SetAttrib has not been called");
-#endif
+		// Enables all transforms with proper renaming
+		uint32 nRegsNeeded = 2 + CRC_MAXTEXCOORDS * 2;
+		m_iConstant_PosTransform = _iReg;
+		_iReg += 2;
+		m_iConstant_TexTransform[0] = _iReg + (((_Rename >> 0) & 7) << 1);
+		m_iConstant_TexTransform[1] = _iReg + (((_Rename >> 3) & 7) << 1);
+		m_iConstant_TexTransform[2] = _iReg + (((_Rename >> 6) & 7) << 1);
+		m_iConstant_TexTransform[3] = _iReg + (((_Rename >> 9) & 7) << 1);
+		m_iConstant_TexTransform[4] = _iReg + (((_Rename >> 12) & 7) << 1);
+		m_iConstant_TexTransform[5] = _iReg + (((_Rename >> 15) & 7) << 1);
+		m_iConstant_TexTransform[6] = _iReg + (((_Rename >> 18) & 7) << 1);
+		m_iConstant_TexTransform[7] = _iReg + (((_Rename >> 21) & 7) << 1);
+
+		memcpy(_pRegisters, _pScalers, sizeof(CVec4Dfp32) * 18);
+
+		_iReg += CRC_MAXTEXCOORDS * 2;
+		return nRegsNeeded;
+	}
+
+	template <class t_CRegisterBatchGetter>
+	uint32 SetRegisters_TexGenMatrix(CVec4Dfp32* &_pRegisters, uint32 _iReg, const CMat4Dfp32** _pMatrix, const CRC_Attributes* _pAttrib)
+	{
+		uint32 nRegsNeeded = m_nTexGenParams;
 
 		if (!nRegsNeeded)
 			return 0;
 
-		int iReg = _iReg;
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		uint32 iReg = _iReg;
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
-		fp4* pAttr = _pAttrib->m_pTexGenAttr;
+		fp32* pAttr = _pAttrib->m_pTexGenAttr;
 
-		for(int iTxt = 0; iTxt < DEF_CRC_VPFormat_MaxTextures; iTxt++)
+		for(uint32 iTxt = 0; iTxt < CRC_MAXTEXCOORDS; iTxt++)
 		{
-			const CMat4Dfp4* pMatrix = _pMatrix[iTxt];
+			const CMat4Dfp32* pMatrix = _pMatrix[iTxt];
 
 			if (pMatrix)
 			{
@@ -651,8 +753,9 @@ public:
 				iReg += 4;
 			}
 
-			int TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
-#ifndef PLATFORM_XBOX1
+			uint32 TexGenMode = _pAttrib->m_lTexGenMode[iTxt];
+#ifdef PLATFORM_XENON
+			// 7 is texcoord0 on xenon?
 			if (!TexGenMode && !(m_ProgramGenFormat.m_ActiveVertices & (1 << (7 + m_ProgramGenFormat.GetRename(iTxt)))))
 				TexGenMode = CRC_TEXGENMODE_VOID;
 #endif
@@ -664,34 +767,34 @@ public:
 
 			case CRC_TEXGENMODE_LINEAR :
 				{
-					int Comp = _pAttrib->GetTexGenComp(iTxt);
+					uint32 Comp = _pAttrib->GetTexGenComp(iTxt);
 
 					{
 						if (pAttr)
 						{
 							if ((Comp & CRC_TEXGENCOMP_U))
-							{	(*pReg) = *(CVec4Dfp4*)pAttr; pAttr += 4; }
+							{	(*pReg) = *(CVec4Dfp32*)pAttr; pAttr += 4; }
 							else
-								(*pReg) = CVec4Dfp4(0,0,0,0);++pReg;
+								(*pReg) = CVec4Dfp32(0,0,0,0);++pReg;
 							if ((Comp & CRC_TEXGENCOMP_V))
-							{	(*pReg) = *(CVec4Dfp4*)pAttr; pAttr += 4; }
+							{	(*pReg) = *(CVec4Dfp32*)pAttr; pAttr += 4; }
 							else
-								(*pReg) = CVec4Dfp4(0,0,0,0);++pReg;
+								(*pReg) = CVec4Dfp32(0,0,0,0);++pReg;
 							if ((Comp & CRC_TEXGENCOMP_W))
-							{	(*pReg) = *(CVec4Dfp4*)pAttr; pAttr += 4; }
+							{	(*pReg) = *(CVec4Dfp32*)pAttr; pAttr += 4; }
 							else
-								(*pReg) = CVec4Dfp4(0,0,0,0);++pReg;
+								(*pReg) = CVec4Dfp32(0,0,0,0);++pReg;
 							if ((Comp & CRC_TEXGENCOMP_Q))
-							{	(*pReg) = *(CVec4Dfp4*)pAttr; pAttr += 4; }
+							{	(*pReg) = *(CVec4Dfp32*)pAttr; pAttr += 4; }
 							else
-								(*pReg) = CVec4Dfp4(0,0,0,1);++pReg;
+								(*pReg) = CVec4Dfp32(0,0,0,1);++pReg;
 						}
 						else
 						{
-							(*pReg) = CVec4Dfp4(0,0,0,0); ++pReg;
-							(*pReg) = CVec4Dfp4(0,0,0,0); ++pReg;
-							(*pReg) = CVec4Dfp4(0,0,0,0); ++pReg;
-							(*pReg) = CVec4Dfp4(0,0,0,1); ++pReg;
+							(*pReg) = CVec4Dfp32(0,0,0,0); ++pReg;
+							(*pReg) = CVec4Dfp32(0,0,0,0); ++pReg;
+							(*pReg) = CVec4Dfp32(0,0,0,0); ++pReg;
+							(*pReg) = CVec4Dfp32(0,0,0,1); ++pReg;
 						}
 					}
 
@@ -706,13 +809,13 @@ public:
 
 					if (pAttr)
 					{
-						memcpy(pReg, pAttr, sizeof(CVec4Dfp4) * 3);
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32) * 3);
 						pReg += 3;
 						pAttr += 4 * 3;
 					}
 					else
 					{
-						memset(pReg, 0, sizeof(CVec4Dfp4) * 3);
+						memset(pReg, 0, sizeof(CVec4Dfp32) * 3);
 						pReg += 3;
 					}
 
@@ -727,13 +830,13 @@ public:
 
 					if (pAttr)
 					{
-						memcpy(pReg, pAttr, sizeof(CVec4Dfp4) * 10);
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32) * 10);
 						pReg += 10;
 						pAttr += 10 * 4;
 					}
 					else
 					{
-						memset(pReg, 0, sizeof(CVec4Dfp4) * 10);
+						memset(pReg, 0, sizeof(CVec4Dfp32) * 10);
 						pReg += 10;
 					}
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
@@ -742,19 +845,38 @@ public:
 				break;
 
 			case CRC_TEXGENMODE_LIGHTING :
+			case CRC_TEXGENMODE_LIGHTING_NONORMAL :
 				{
 					if (pAttr)
 					{
-						*pReg = *((CVec4Dfp4*)pAttr); pReg++; pAttr += 4;
-						*pReg = *((CVec4Dfp4*)pAttr); pReg++; pAttr += 4;
+						*pReg = *((CVec4Dfp32*)pAttr); pReg++; pAttr += 4;
+						*pReg = *((CVec4Dfp32*)pAttr); pReg++; pAttr += 4;
 					}
 					else 
 					{
-						*pReg = CVec4Dfp4(0,0,0,1.0f/256.0f); pReg++;
-						*pReg = CVec4Dfp4(1,1,1,0); pReg++;
+						*pReg = CVec4Dfp32(0,0,0,1.0f/256.0f); pReg++;
+						*pReg = CVec4Dfp32(1,1,1,0); pReg++;
 					}
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
 					iReg += 2;
+					break;
+				}
+
+			case CRC_TEXGENMODE_LIGHTFIELD :
+				{
+					if (pAttr)
+					{
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32) * 6);
+						pReg += 6;
+						pAttr += 6 * 4;
+					}
+					else
+					{
+						memset(pReg,0,sizeof(CVec4Dfp32) * 6);
+						pReg += 6;
+					}
+					m_iConstant_TexGenParam[iTxt][0] = iReg;
+					iReg += 6;
 					break;
 				}
 
@@ -762,12 +884,12 @@ public:
 				{
 					if (pAttr)
 					{
-						*pReg = *((CVec4Dfp4*)pAttr);
+						*pReg = *((CVec4Dfp32*)pAttr);
 						pAttr += 4;
 					}
 					else 
 					{
-						*pReg = CVec4Dfp4(0,0,0,1);
+						*pReg = CVec4Dfp32(0,0,0,1);
 					}
 					++pReg;
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
@@ -779,16 +901,16 @@ public:
 				{
 					if (pAttr)
 					{
-						pReg[0] = ((CVec4Dfp4*)pAttr)[0];
-						pReg[1] = ((CVec4Dfp4*)pAttr)[1];
-						pReg[2] = ((CVec4Dfp4*)pAttr)[2];
+						pReg[0] = ((CVec4Dfp32*)pAttr)[0];
+						pReg[1] = ((CVec4Dfp32*)pAttr)[1];
+						pReg[2] = ((CVec4Dfp32*)pAttr)[2];
 						pAttr += 12;
 					}
 					else 
 					{
-						pReg[0] = CVec4Dfp4(1,0,0,0);
-						pReg[1] = CVec4Dfp4(0,1,0,0);
-						pReg[2] = CVec4Dfp4(0,0,1,0);
+						pReg[0] = CVec4Dfp32(1,0,0,0);
+						pReg[1] = CVec4Dfp32(0,1,0,0);
+						pReg[2] = CVec4Dfp32(0,0,1,0);
 					}
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
 					pReg += 3;
@@ -801,13 +923,13 @@ public:
 					M_ASSERT(pAttr, "!");
 					if (pAttr)
 					{
-						memcpy(pReg, pAttr, sizeof(CVec4Dfp4) * 8);
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32) * 8);
 						pReg += 8;
 						pAttr += 4 * 8;
 					}
 					else
 					{
-						memset(pReg, 0, sizeof(CVec4Dfp4) * 8);
+						memset(pReg, 0, sizeof(CVec4Dfp32) * 8);
 						pReg += 8;
 					}
 
@@ -820,13 +942,13 @@ public:
 					M_ASSERT(pAttr, "!");
 					if (pAttr)
 					{
-						memcpy(pReg, pAttr, sizeof(CVec4Dfp4) * 2);
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32) * 2);
 						pReg += 2;
 						pAttr += 4 * 2;
 					}
 					else
 					{
-						memset(pReg, 0, sizeof(CVec4Dfp4) * 2);
+						memset(pReg, 0, sizeof(CVec4Dfp32) * 2);
 						pReg += 2;
 					}
 
@@ -840,11 +962,11 @@ public:
 				{
 					if (pAttr)
 					{
-						memcpy(pReg, pAttr, sizeof(CVec4Dfp4)); pAttr += 4;
+						memcpy(pReg, pAttr, sizeof(CVec4Dfp32)); pAttr += 4;
 					}
 					else 
 					{
-						*pReg = CVec4Dfp4(0,0,0,0);
+						*pReg = CVec4Dfp32(0,0,0,0);
 					}
 					++pReg;
 
@@ -857,12 +979,12 @@ public:
 				{
 					if (pAttr)
 					{
-						pReg[0] = *((CVec4Dfp4*)pAttr);
+						pReg[0] = *((CVec4Dfp32*)pAttr);
 						pAttr += 4;
 					}
 					else 
 					{
-						pReg[0] = CVec4Dfp4(0,0,0,0);
+						pReg[0] = CVec4Dfp32(0,0,0,0);
 					}
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
 					pReg += 1;
@@ -874,14 +996,14 @@ public:
 				{
 					if (pAttr)
 					{
-						pReg[0] = ((CVec4Dfp4*)pAttr)[0];
-						pReg[1] = ((CVec4Dfp4*)pAttr)[1];
+						pReg[0] = ((CVec4Dfp32*)pAttr)[0];
+						pReg[1] = ((CVec4Dfp32*)pAttr)[1];
 						pAttr += 8;
 					}
 					else
 					{
-						pReg[0] = CVec4Dfp4(0,0,0,0);
-						pReg[1] = CVec4Dfp4(1,1,0,0);
+						pReg[0] = CVec4Dfp32(0,0,0,0);
+						pReg[1] = CVec4Dfp32(1,1,0,0);
 					}
 					m_iConstant_TexGenParam[iTxt][0] = iReg;
 					iReg += 2;
@@ -914,14 +1036,15 @@ public:
 		return iReg - _iReg;
 	}
 
+#ifdef CRC_SUPPORTVERTEXLIGHTING
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_Lights(CVec4Dfp4* &_pRegisters, int _iReg, const CRC_Light* _pLights, int _nLights)
+	uint32 SetRegisters_Lights(CVec4Dfp32* &_pRegisters, uint32 _iReg, const CRC_Light* _pLights, uint32 _nLights)
 	{
 
-		int nRegsNeeded = _nLights*2;
+		uint32 nRegsNeeded = _nLights*2;
 
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
 		m_iConstant_Lights = _iReg;
@@ -929,7 +1052,7 @@ public:
 		ConOut(CStrF("(CRC_VPFormat::SetRegisters_Lights) pL %.8x, nL %d", _pLights, _nLights));
 	#endif
 
-		for(int i = 0; i < _nLights; i++)
+		for(uint32 i = 0; i < _nLights; i++)
 		{
 			const CRC_Light& L = _pLights[i];
 			switch(L.m_Type)
@@ -941,17 +1064,17 @@ public:
 					(*pReg)[2] = 0;
 					(*pReg)[3] = 0;
 					++pReg;
-					(*pReg)[0] = fp4(L.m_Color.GetR()) / 255.0f;
-					(*pReg)[1] = fp4(L.m_Color.GetG()) / 255.0f;
-					(*pReg)[2] = fp4(L.m_Color.GetB()) / 255.0f;
-					(*pReg)[3] = fp4(L.m_Color.GetA()) / 255.0f;
+					(*pReg)[0] = fp32(L.m_Color.GetR()) / 255.0f;
+					(*pReg)[1] = fp32(L.m_Color.GetG()) / 255.0f;
+					(*pReg)[2] = fp32(L.m_Color.GetB()) / 255.0f;
+					(*pReg)[3] = fp32(L.m_Color.GetA()) / 255.0f;
 					++pReg;
 
 	#ifdef CRC_LOGLIGHTS
-					CVec4Dfp4 Amb(
-						fp4(L.m_Color.GetR()) / 255.0f,
-						fp4(L.m_Color.GetG()) / 255.0f,
-						fp4(L.m_Color.GetB()) / 255.0f,
+					CVec4Dfp32 Amb(
+						fp32(L.m_Color.GetR()) / 255.0f,
+						fp32(L.m_Color.GetG()) / 255.0f,
+						fp32(L.m_Color.GetB()) / 255.0f,
 						1.0f);
 					ConOut(CStrF("    Light %d, Ambient, Dir %s, Pos %s, Col %s", i, L.m_Direction.GetString().Str(), L.m_Pos.GetString().Str(), Amb.GetString().Str() ));
 	#endif
@@ -965,17 +1088,17 @@ public:
 					(*pReg)[2] = L.m_Pos[2];
 					(*pReg)[3] = L.m_Attenuation[1];
 					++pReg;
-					(*pReg)[0] = fp4(L.m_Color.GetR()) / 255.0f;
-					(*pReg)[1] = fp4(L.m_Color.GetG()) / 255.0f;
-					(*pReg)[2] = fp4(L.m_Color.GetB()) / 255.0f;
-					(*pReg)[3] = fp4(L.m_Color.GetA()) / 255.0f;
+					(*pReg)[0] = fp32(L.m_Color.GetR()) / 255.0f;
+					(*pReg)[1] = fp32(L.m_Color.GetG()) / 255.0f;
+					(*pReg)[2] = fp32(L.m_Color.GetB()) / 255.0f;
+					(*pReg)[3] = fp32(L.m_Color.GetA()) / 255.0f;
 					++pReg;
 
 	#ifdef CRC_LOGLIGHTS
-					CVec4Dfp4 Diff(
-						fp4(L.m_Color.GetR()) / 255.0f,
-						fp4(L.m_Color.GetG()) / 255.0f,
-						fp4(L.m_Color.GetB()) / 255.0f,
+					CVec4Dfp32 Diff(
+						fp32(L.m_Color.GetR()) / 255.0f,
+						fp32(L.m_Color.GetG()) / 255.0f,
+						fp32(L.m_Color.GetB()) / 255.0f,
 						1.0f);
 					ConOut(CStrF("    Light %d, Point, Dir %s, Pos %s, Col %s", i, L.m_Direction.GetString().Str(), L.m_Pos.GetString().Str(), Diff.GetString().Str() ));
 	#endif
@@ -989,17 +1112,17 @@ public:
 					(*pReg)[2] = L.m_Direction[2];
 					(*pReg)[3] = 0;
 					++pReg;
-					(*pReg)[0] = fp4(L.m_Color.GetR()) / 255.0f;
-					(*pReg)[1] = fp4(L.m_Color.GetG()) / 255.0f;
-					(*pReg)[2] = fp4(L.m_Color.GetB()) / 255.0f;
-					(*pReg)[3] = fp4(L.m_Color.GetA()) / 255.0f;
+					(*pReg)[0] = fp32(L.m_Color.GetR()) / 255.0f;
+					(*pReg)[1] = fp32(L.m_Color.GetG()) / 255.0f;
+					(*pReg)[2] = fp32(L.m_Color.GetB()) / 255.0f;
+					(*pReg)[3] = fp32(L.m_Color.GetA()) / 255.0f;
 					++pReg;
 
 	#ifdef CRC_LOGLIGHTS
-					CVec4Dfp4 Diff(
-						fp4(L.m_Color.GetR()) / 255.0f,
-						fp4(L.m_Color.GetG()) / 255.0f,
-						fp4(L.m_Color.GetB()) / 255.0f,
+					CVec4Dfp32 Diff(
+						fp32(L.m_Color.GetR()) / 255.0f,
+						fp32(L.m_Color.GetG()) / 255.0f,
+						fp32(L.m_Color.GetB()) / 255.0f,
 						1.0f);
 					ConOut(CStrF("    Light %d, Parallell, Dir %s, Pos %s, Col %s", i, L.m_Direction.GetString().Str(), L.m_Pos.GetString().Str(), Diff.GetString().Str() ));
 	#endif
@@ -1011,31 +1134,33 @@ public:
 		_pRegisters = pReg;
 		return _nLights*2;
 	}
+#endif
 
+#ifdef CRC_SUPPORTCUBEVP
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_MatrixPaletteSpecialCube(CVec4Dfp4* &_pRegisters, int _iReg, int _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
+	uint32 SetRegisters_MatrixPaletteSpecialCube(CVec4Dfp32* &_pRegisters, uint32 _iReg, uint32 _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
 	{
 		m_iConstant_MP = _iReg;
 		
-		int iReg = _iReg;
+		uint32 iReg = _iReg;
 
-		int MaxMat = (_nMaxReg) / 2;
-		int nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
+		uint32 MaxMat = (_nMaxReg) / 2;
+		uint32 nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
 
-		int nRegsNeeded = nMat * 2;
+		uint32 nRegsNeeded = nMat * 2;
 
 		if (!nRegsNeeded)
 			return 0;
 
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
 		// Transpose 4x4 and store as 4x3.
-		const CVec4Dfp4* pMatArray = (const CVec4Dfp4*)_pMatrixPalette->m_pMatrices;
-		for(int i = 0; i < nMat; i++)
+		const CVec4Dfp32* pMatArray = (const CVec4Dfp32*)_pMatrixPalette->m_pMatrices;
+		for(uint32 i = 0; i < nMat; i++)
 		{
-			const CVec4Dfp4 *pMat = pMatArray + i*2;
+			const CVec4Dfp32 *pMat = pMatArray + i*2;
 
 			*pReg = *pMat;
 			++pMat;	++pReg;
@@ -1047,35 +1172,36 @@ public:
 
 		return nMat*2;
 	}
+#endif
 
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_MatrixPalette(CVec4Dfp4* &_pRegisters, int _iReg, int _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
+	uint32 SetRegisters_MatrixPalette(CVec4Dfp32* &_pRegisters, uint32 _iReg, uint32 _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
 	{
 		m_iConstant_MP = _iReg;
 		
-		int iReg = _iReg;
+		uint32 iReg = _iReg;
 
-		int MaxMat = (_nMaxReg) / 3;
-		int nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
+		uint32 MaxMat = (_nMaxReg) / 3;
+		uint32 nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
 
-		int nRegsNeeded = nMat * 3;
+		uint32 nRegsNeeded = nMat * 3;
 
 		if (!nRegsNeeded)
 			return 0;
 
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
 		if (_pMatrixPalette->m_piMatrices)
 		{
 			// Transpose 4x4 and store as 4x3.
-			const CMat43fp4_MP* pMatArray = (const CMat43fp4_MP* )_pMatrixPalette->m_pMatrices;
+			const CMat4Dfp32* pMatArray = (const CMat4Dfp32* )_pMatrixPalette->m_pMatrices;
 			const uint16 *pIndexArray = _pMatrixPalette->m_piMatrices;
-			for(int i = 0; i < nMat; i++)
+			for(uint32 i = 0; i < nMat; i++)
 			{
-				const CMat43fp4_MP &Mat = pMatArray[pIndexArray[i]];
-//				CMat43fp4_MP Temp;Temp.Unit();const CMat43fp4_MP &Mat = Temp;
+				const CMat4Dfp32 &Mat = pMatArray[pIndexArray[i]];
+//				CMat4Dfp32 Temp;Temp.Unit();const CMat4Dfp32 &Mat = Temp;
 
 				(*pReg)[0] = Mat.k[0][0];
 				(*pReg)[1] = Mat.k[1][0];
@@ -1097,11 +1223,11 @@ public:
 		else
 		{
 			// Transpose 4x4 and store as 4x3.
-			const CMat43fp4_MP* pMatArray = (const CMat43fp4_MP*)_pMatrixPalette->m_pMatrices;
-			for(int i = 0; i < nMat; i++)
+			const CMat4Dfp32* pMatArray = (const CMat4Dfp32*)_pMatrixPalette->m_pMatrices;
+			for(uint32 i = 0; i < nMat; i++)
 			{
-				const CMat43fp4_MP &Mat = pMatArray[i];
-//				CMat43fp4_MP Temp; Temp.Unit(); const CMat43fp4_MP &Mat = Temp;
+				const CMat4Dfp32 &Mat = pMatArray[i];
+//				CMat4Dfp32 Temp; Temp.Unit(); const CMat4Dfp32 &Mat = Temp;
 
 				(*pReg)[0] = Mat.k[0][0];
 				(*pReg)[1] = Mat.k[1][0];
@@ -1127,35 +1253,35 @@ public:
 	}
 
 	template <class t_CRegisterBatchGetter>
-	int SetRegisters_MatrixPalette_Quat(CVec4Dfp4* &_pRegisters, int _iReg, int _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
+	uint32 SetRegisters_MatrixPalette_Quat(CVec4Dfp32* &_pRegisters, uint32 _iReg, uint32 _nMaxReg, const CRC_MatrixPalette *_pMatrixPalette)
 	{
 		m_iConstant_MP = _iReg;
 		
-		int iReg = _iReg;
+		uint32 iReg = _iReg;
 
-		int MaxMat = (_nMaxReg) / 2;
-		int nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
+		uint32 MaxMat = (_nMaxReg) / 2;
+		uint32 nMat = Min((uint32)MaxMat, _pMatrixPalette->m_nMatrices);
 
-		int nRegsNeeded = nMat * 2;
+		uint32 nRegsNeeded = nMat * 2;
 
 		if (!nRegsNeeded)
 			return 0;
 
-		CVec4Dfp4 *pReg = _pRegisters;
-		int nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
+		CVec4Dfp32 *pReg = _pRegisters;
+		uint32 nLeft = t_CRegisterBatchGetter::NewRegisterBatch(pReg, nRegsNeeded);
 		M_ASSERT(nLeft >= nRegsNeeded, "Only supported");
 
 		if (_pMatrixPalette->m_piMatrices)
 		{
 			// Transpose 4x4 and store as 4x3.
-			const CMat4Dfp4* pMatArray = _pMatrixPalette->m_pMatrices;
+			const CMat4Dfp32* pMatArray = _pMatrixPalette->m_pMatrices;
 			const uint16 *pIndexArray = _pMatrixPalette->m_piMatrices;
-			for(int i = 0; i < nMat; i++)
+			for(uint32 i = 0; i < nMat; i++)
 			{
-				const CMat4Dfp4 Mat = pMatArray[pIndexArray[i]];
+				const CMat4Dfp32 Mat = pMatArray[pIndexArray[i]];
 
-				CQuatfp4 Q;
-				CMat4Dfp4 Tmp(Mat);
+				CQuatfp32 Q;
+				CMat4Dfp32 Tmp(Mat);
 				Tmp.Transpose3x3();
 				Q.Create(Tmp);
 
@@ -1174,12 +1300,12 @@ public:
 		else
 		{
 			// Transpose 4x4 and store as 4x3.
-			const CMat4Dfp4* pMatArray = _pMatrixPalette->m_pMatrices;
-			for(int i = 0; i < nMat; i++)
+			const CMat4Dfp32* pMatArray = _pMatrixPalette->m_pMatrices;
+			for(uint32 i = 0; i < nMat; i++)
 			{
-				const CMat4Dfp4 Mat = pMatArray[i];
-				CQuatfp4 Q;
-				CMat4Dfp4 Tmp(Mat);
+				const CMat4Dfp32 Mat = pMatArray[i];
+				CQuatfp32 Q;
+				CMat4Dfp32 Tmp(Mat);
 				Tmp.Transpose3x3();
 				Q.Create(Tmp);
 
@@ -1201,7 +1327,7 @@ public:
 		return nMat*2;
 	}
 
-//	int SetRegisters_MatrixPalette_Quat(CVec4Dfp4* _pRegisters, int _iReg, int _iMaxReg, const uint8 *_pValidRegMap, const CMat4Dfp4* _pMatrices, int _nMatrices);
+//	uint32 SetRegisters_MatrixPalette_Quat(CVec4Dfp32* _pRegisters, uint32 _iReg, uint32 _iMaxReg, const uint8 *_pValidRegMap, const CMat4Dfp32* _pMatrices, uint32 _nMatrices);
 };
 
 
@@ -1209,7 +1335,7 @@ class CRC_VPGenerator : public CReferenceCount
 {
 protected:
 	spCRegistry m_spVPSource;
-	int m_MaxTextures;
+	uint32 m_MaxTexCoords;
 
 	char m_TextureSubst[CRC_MAXTEXCOORDS][32]; 
 

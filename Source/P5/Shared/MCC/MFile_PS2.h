@@ -23,7 +23,7 @@
 \*************************************************************************************************/
 
 // Waaah.. fixedpoint troubles :(
-#ifndef CPU_SUPPORT_FP8
+#ifndef CPU_SUPPORT_FP64
 #undef	double
 #endif
 
@@ -31,7 +31,7 @@
 #include <errno.h>
 #include "MRTC.h"
 
-#ifdef CPU_SUPPORT_FP8
+#ifdef CPU_SUPPORT_FP64
 #define double double_definition
 #endif
 

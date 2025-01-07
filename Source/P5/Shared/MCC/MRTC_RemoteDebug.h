@@ -29,6 +29,7 @@ enum
 	,ERemoteDebug_DllLoad
 	,ERemoteDebug_DllUnload
 	,ERemoteDebug_ProfileStackTrace
+	,ERemoteDebug_HeapMove
 };
 
 enum
@@ -41,20 +42,20 @@ enum
 
 enum ERDEnableFlag
 {
-	 ERDEnableFlag_Enable = DBit(0)
-	,ERDEnableFlag_Scope = DBit(1)
-	,ERDEnableFlag_Category = DBit(2)
-	,ERDEnableFlag_StackTrace = DBit(3)
-	,ERDEnableFlag_PhysicalMemory = DBit(4)
-	,ERDEnableFlag_HeapMemory = DBit(5)
-	,ERDEnableFlag_SendCRTAllocs = DBit(6)
-	,ERDEnableFlag_CObjAllocations = DBit(7)
-	,ERDEnableFlag_RuntimeClasses = DBit(8)
-	,ERDEnableFlag_RuntimeClassAllocations = DBit(9)
-	,ERDEnableFlag_Exceptions = DBit(10)
-	,ERDEnableFlag_LogFile = DBit(11)
-	,ERDEnableFlag_Trace = DBit(12)
-	,ERDEnableFlag_Profiling = DBit(13)
+	 ERDEnableFlag_Enable = M_Bit(0)
+	,ERDEnableFlag_Scope = M_Bit(1)
+	,ERDEnableFlag_Category = M_Bit(2)
+	,ERDEnableFlag_StackTrace = M_Bit(3)
+	,ERDEnableFlag_PhysicalMemory = M_Bit(4)
+	,ERDEnableFlag_HeapMemory = M_Bit(5)
+	,ERDEnableFlag_SendCRTAllocs = M_Bit(6)
+	,ERDEnableFlag_CObjAllocations = M_Bit(7)
+	,ERDEnableFlag_RuntimeClasses = M_Bit(8)
+	,ERDEnableFlag_RuntimeClassAllocations = M_Bit(9)
+	,ERDEnableFlag_Exceptions = M_Bit(10)
+	,ERDEnableFlag_LogFile = M_Bit(11)
+	,ERDEnableFlag_Trace = M_Bit(12)
+	,ERDEnableFlag_Profiling = M_Bit(13)
 };
 
 class MRTC_RemoteDebugChannel
@@ -130,7 +131,7 @@ public:
 
 };
 
-#ifdef PLATFORM_XBOX
+#ifdef PLATFORM_CONSOLE
 #define MRTC_ENABLE_REMOTEDEBUGGER_STATIC
 #endif
 
@@ -150,10 +151,11 @@ M_INLINE static uint64 gf_RDGetSequence()
 
 	return MRTC_GetRD()->GetSequence();
 }
-void gf_RDSendRegisterPhysicalHeap(mint _Heap, const char *_pName);
-void gf_RDSendRegisterHeap(mint _Heap, const char *_pName);
+void gf_RDSendRegisterPhysicalHeap(mint _Heap, const char *_pName, mint _HeapStart, mint _HeapEnd);
+void gf_RDSendRegisterHeap(mint _Heap, const char *_pName, mint _HeapStart, mint _HeapEnd);
 void gf_RDSendPhysicalAlloc(void *_pData, mint _Size, mint _Heap, uint64 _Sequence, uint32 _Type);
 void gf_RDSendHeapAlloc(void *_pData, mint _Size, void *_pHeap, uint64 _Sequence, uint32 _Type);
+void gf_RDSendHeapMove(void *_pDataSource, void *_pDataDest, mint _Size, void *_pHeapFrom, void *_pHeapTo, uint64 _Sequence);
 void gf_RDSendHeapFree(void *_pData, void *_pHeap, uint64 _Sequence);
 void gf_RDSendPhysicalFree(void *_pData, mint _Heap, uint64 _Sequence);
 void gf_RDSendHeapClear(void *_pHeap);
@@ -165,10 +167,11 @@ enum
 	 DRDMaxSendStackSize = 0
 };
 
-#define gf_RDSendRegisterPhysicalHeap(_Heap, _pName) ((void )0)
-#define gf_RDSendRegisterHeap(_Heap, _pName) ((void )0)
+#define gf_RDSendRegisterPhysicalHeap(_Heap, _pName, _HeapStart, _HeapEnd) ((void )0)
+#define gf_RDSendRegisterHeap(_Heap, _pName, _HeapStart, _HeapEnd) ((void )0)
 #define gf_RDSendPhysicalAlloc(_pData, _Size, _Heap, _Sequence, _Type) ((void )0)
 #define gf_RDSendHeapAlloc(_pData, _Size, _pHeap, _Sequence, _Type) ((void )0)
+#define gf_RDSendHeapMove(_pDataSource, _pDataDest, _Size, _pHeapFrom, _pHeapTo, _Sequence) ((void )0)
 #define gf_RDSendHeapFree(_pData, _pHeap, _Sequence) ((void )0)
 #define gf_RDSendPhysicalFree(_pData, _Heap, _Sequence) ((void )0)
 #define gf_RDSendHeapClear(_Heap) ((void )0)

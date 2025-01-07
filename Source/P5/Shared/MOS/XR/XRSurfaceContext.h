@@ -16,7 +16,7 @@ public:
 	class CXR_Engine* m_pEngine;
 	class CXR_VBManager* m_pVBM;
 	class CXR_VertexBuffer* m_pVBHead;
-	class CXR_VertexBuffer* m_pVBHeadSrc;
+	class CXR_VertexBufferGeometry* m_pVBHeadSrc;
 	CMTime m_AnimTime;
 	CMTime m_AnimTimeWrapped;
 //	int m_VBChainIndex;
@@ -24,9 +24,9 @@ public:
 	int m_iTexChannelNext;
 	int m_iFreeTexCoordSet;
 	int m_VBArrayReadOnlyMask;
-	const CMat43fp4* m_pModel2World;
-	const CMat43fp4* m_pWorld2View;
-	const CMat43fp4* m_pModel2View;
+	const CMat4Dfp32* m_pModel2World;
+	const CMat4Dfp32* m_pWorld2View;
+	const CMat4Dfp32* m_pModel2View;
 };
 
 // -------------------------------------------------------------------
@@ -35,9 +35,9 @@ class CXR_VBOperatorParamDesc
 public:
 	const char* m_pName;
 	const char* m_pDesc;
-	fp4 m_Default;
-	fp4 m_Min;
-	fp4 m_Max;
+	fp32 m_Default;
+	fp32 m_Min;
+	fp32 m_Max;
 };
 
 // -------------------------------------------------------------------
@@ -51,9 +51,9 @@ public:
 
 	// Operate
 	virtual bool OnOperate(CXR_VBOperatorContext& _Context, const class CXW_LayerOperation& _Oper, 
-		class CXR_VertexBuffer* _pSrcVB, class CXR_VertexBuffer* _pVB) pure;
+		class CXR_VertexBuffer* _pVB) pure;
 	virtual bool OnOperateFinish(CXR_VBOperatorContext& _Context, const class CXW_LayerOperation& _Oper, 
-		class CXR_VertexBuffer* _pSrcVB, class CXR_VertexBuffer* _pVB) { return true; };
+		class CXR_VertexBuffer* _pVB) { return true; };
 	virtual bool OnTestHWAccelerated(CXR_VBOperatorContext& _Context, class CRC_Attributes* _pAttrib, const class CXW_LayerOperation& _Oper);
 	virtual void OnInitSurface(class CXW_Surface* _pSurf, const class CXW_LayerOperation& _Oper);
 	
@@ -87,48 +87,49 @@ class CXR_SurfaceContext : public CReferenceCount
 protected:
 	MRTC_CriticalSection m_Lock;
 
-	TList_Vector<spCXW_Surface> m_lspSurfaces;
+	TArray<spCXW_Surface> m_lspSurfaces;
 
 	spCMap32 m_spHash;
 	int m_HashCapacity;
 
-	virtual void CreateHashTableSafe();	// If you _MUST_ use the CreateHashTable function outside of CXR_SurfaceContext then use this one.
+	dllvirtual void CreateHashTableSafe();	// If you _MUST_ use the CreateHashTable function outside of CXR_SurfaceContext then use this one.
 private:
-	virtual void CreateHashTable();	// This function is not thread-safe so don't call it outside of CXR_SurfaceContext (all usage of it has been threadsafed)
+	dllvirtual void CreateHashTable();	// This function is not thread-safe so don't call it outside of CXR_SurfaceContext (all usage of it has been threadsafed)
 	TMRTC_ThreadLocal<CXW_SurfaceKeyFrame> m_TempKeyFrame;
-public:
 
+public:
 	CXR_SurfaceContext();
 	virtual ~CXR_SurfaceContext();
 
-	virtual void Create();
+	dllvirtual void Create();
 	
-	virtual int GetNumSurfaces();
-	virtual void UpdateTextureIDs(int _SurfaceID = -1);
+	dllvirtual int GetNumSurfaces();
+	dllvirtual void UpdateTextureIDs(int _SurfaceID = -1);
 
-	virtual spCKeyContainerNode LoadSurfaceScript(const char* _pFileName, bool _bIgnoreParseOption = false);
-	virtual TArray<spCXW_Surface> CreateSurfaces(CKeyContainerNode* _pNode);
+	dllvirtual spCKeyContainerNode LoadSurfaceScript(const char* _pFileName, bool _bIgnoreParseOption = false);
+	dllvirtual TArray<spCXW_Surface> CreateSurfaces(CKeyContainerNode* _pNode);
+	dllvirtual TArray<spCXW_Surface> ScanDirectory(CStr _Path, bool _bIgnoreParseOption);
 
-	virtual void AddSurfaces(TList_Vector<spCXW_Surface> _lspSurfaces);
-	virtual void AddSurfaces(CCFile* _pFile);
-	virtual void AddSurfaces(CStr _FileName);
-	virtual void AddSurfaces(CKeyContainerNode* _pRoot);
-	virtual void AddDirectory(CStr _Path);
+	dllvirtual void AddSurfaces(TArray<spCXW_Surface> _lspSurfaces);
+	dllvirtual void AddSurfaces(CCFile* _pFile);
+	dllvirtual void AddSurfaces(CStr _FileName);
+	dllvirtual void AddSurfaces(CKeyContainerNode* _pRoot);
+	dllvirtual void AddDirectory(CStr _Path);
 
-	virtual void UpdateSurfaces(CStr _Path);
+	dllvirtual void UpdateSurfaces(CStr _Path);
 
-	virtual CStr GetSurfaceName(int _SurfaceID);
-	virtual int GetSurfaceID(const char* _pName);
-	virtual int GetSurfaceID(uint32 _NameHash);
+	dllvirtual CStr GetSurfaceName(int _SurfaceID);
+	dllvirtual int GetSurfaceID(const char* _pName);
+	dllvirtual int GetSurfaceID(uint32 _NameHash);
 
-	virtual CXW_Surface* GetSurface(int _SurfaceID);
-	virtual CXW_Surface* GetSurface(const char* _pName);
-	virtual CXW_Surface* GetSurfaceVersion(int _SurfaceID, class CXR_Engine *_pEngine);
-	virtual CXW_Surface* GetSurfaceVersion(int _SurfaceID, int _SurfOptions, int _SurfCaps);
-	virtual CXW_SurfaceKeyFrame* GetSurfaceKey(int _SurfaceID, int _SurfOptions, int _SurfCaps, CMTime _Time = CMTime(), int _iSeq = 0);
-	virtual CXW_SurfaceKeyFrame* GetSurfaceKey(int _SurfaceID, class CXR_Engine *_pEngine, CMTime _Time = CMTime(), int _iSeq = 0);
+	dllvirtual CXW_Surface* GetSurface(int _SurfaceID);
+	dllvirtual CXW_Surface* GetSurface(const char* _pName);
+	dllvirtual CXW_Surface* GetSurfaceVersion(int _SurfaceID, class CXR_Engine *_pEngine);
+	dllvirtual CXW_Surface* GetSurfaceVersion(int _SurfaceID, int _SurfOptions, int _SurfCaps);
+	dllvirtual CXW_SurfaceKeyFrame* GetSurfaceKey(int _SurfaceID, int _SurfOptions, int _SurfCaps, CMTime _Time = CMTime(), int _iSeq = 0);
+	dllvirtual CXW_SurfaceKeyFrame* GetSurfaceKey(int _SurfaceID, class CXR_Engine *_pEngine, CMTime _Time = CMTime(), int _iSeq = 0);
 
-	virtual CXW_SurfaceKeyFrame& GetTempSurfaceKeyFrame();
+	dllvirtual CXW_SurfaceKeyFrame& GetTempSurfaceKeyFrame();
 
 	// -------------------------------------------------------------------
 	//  This stuff doesn't really belong here, but since this object is always created and globaly registered

@@ -33,7 +33,7 @@ private:
 	{
 		uint32 m_nValueSize;          // string data size
 		int32  m_nValue;              // direct value
-		fp4    m_fValue;              // direct value
+		fp32    m_fValue;              // direct value
 	};
 
 	void Init(CStaticRegistryHandler* _pOwner);
@@ -105,14 +105,14 @@ public:
 	virtual void SetThisKey(const wchar* _pValue);
 	virtual void SetThisKey(CStr _Value);
 	virtual void SetThisKeyi(int32 _Value);
-	virtual void SetThisKeyf(fp4 _Value);
+	virtual void SetThisKeyf(fp32 _Value);
 	virtual void SetThisKeyd(const uint8* _pValue, int _Size, bool _bQuick = true);
 	virtual void SetThisKeyd(TArray<uint8> _lValue, bool _bReference = true);
 	virtual void SetThisKey(const char* _pName, const char* _pValue);
 	virtual void SetThisKey(const char* _pName, const wchar* _pValue);
 	virtual void SetThisKey(const char* _pName, CStr _Value);
 	virtual void SetThisKeyi(const char* _pName, int32 _Value);
-	virtual void SetThisKeyf(const char* _pName, fp4 _Value);
+	virtual void SetThisKeyf(const char* _pName, fp32 _Value);
 	virtual void SetThisKeyd(const char* _pName, const uint8* _pValue, int _Size, bool _bQuick = true);
 	virtual void SetThisKeyd(const char* _pName, TArray<uint8> _lValue, bool _bReference = true);
 	        void SetThisKey(const CRegistry* _pReg);
@@ -122,7 +122,7 @@ public:
 	virtual void AddKey(const char* _pName, const wchar* _pValue);
 	virtual void AddKey(const char* _pName, CStr _Value);
 	virtual void AddKeyi(const char* _pName, int32 _Value);
-	virtual void AddKeyf(const char* _pName, fp4 _Value);
+	virtual void AddKeyf(const char* _pName, fp32 _Value);
 	virtual void AddKeyd(const char* _pName, const uint8* _pValue, int _Size, bool _bQuick = true);
 	virtual void AddKeyd(const char* _pName, TArray<uint8> _lValue, bool _bReference = true);
 	virtual void AddKey(const CRegistry* _pReg);
@@ -130,7 +130,7 @@ public:
 	virtual void SetValue(const char* _pName, const wchar* _pValue);
 	virtual void SetValue(const char* _pName, CStr _Value);
 	virtual void SetValuei(const char* _pName, int32 _Value);
-	virtual void SetValuef(const char* _pName, fp4 _Value);
+	virtual void SetValuef(const char* _pName, fp32 _Value);
 	virtual void SetValued(const char* _pName, const uint8* _pValue, int _Size, bool _bQuick = true);
 	virtual void SetValued(const char* _pName, TArray<uint8> _lValue, bool _bReference = true);
 	virtual void SetValue(const CRegistry* _pReg);
@@ -138,7 +138,7 @@ public:
 	virtual void SetValue(int _iKey, const wchar* _pValue);
 	virtual void SetValue(int _iKey, CStr _Value);
 	virtual void SetValuei(int _iKey, int32 _Value);
-	virtual void SetValuef(int _iKey, fp4 _Value);
+	virtual void SetValuef(int _iKey, fp32 _Value);
 	virtual void SetValued(int _iKey, const uint8* _pValue, int _Size, bool _bQuick = true);
 	virtual void SetValued(int _iKey, TArray<uint8> _lValue, bool _bReference = true);
 	virtual void SetValue(int _iKey, const CRegistry* _pReg);
@@ -148,7 +148,7 @@ public:
 	virtual const char* GetThisName2() const;
 	virtual CStr GetThisValue() const;
 	virtual int32 GetThisValuei() const;
-	virtual fp4 GetThisValuef() const;
+	virtual fp32 GetThisValuef() const;
 	virtual const TArray<uint8> GetThisValued() const;
 	virtual TArray<uint8> GetThisValued();
 	virtual void DeleteKey(const char* _pName);
@@ -186,12 +186,12 @@ private:
 	void Elem_SetName(CRegistry_Static* _pElem, const char* _pName);
 	void Elem_Set(CRegistry_Static* _pElem, const char* _pValue);
 	void Elem_Set(CRegistry_Static* _pElem, int32 _nValue);
-	void Elem_Set(CRegistry_Static* _pElem, fp4 _fValue);
+	void Elem_Set(CRegistry_Static* _pElem, fp32 _fValue);
 
 	CRegistry_Static* Elem_Add(CRegistry_Static* _pElem, uint32 _Num, uint32 _Size);
 	CRegistry_Static* Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, const char* _pChildValue);
 	CRegistry_Static* Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, int32 _nValue);
-	CRegistry_Static* Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, fp4 _fValue);
+	CRegistry_Static* Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, fp32 _fValue);
 
 public:
 	CStaticRegistryHandler(uint32 _Size);

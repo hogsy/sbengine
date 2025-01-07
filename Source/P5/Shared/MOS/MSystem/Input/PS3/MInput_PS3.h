@@ -57,15 +57,16 @@ enum
 //	INPS3_JOY_SCANOFFSET = (SKEY_JOY1_AXIS00 - SKEY_JOY0_AXIS00),	// Scancode offset for multiple joystick devices
 };
 
-const fp4 INPS3_JOY_AXISDEADZONE = 0.25f;			// 25% deadzone
-const fp4 INPS3_JOY_AXISPOWER = 3.0f;				// axis = axis ^ power  (axis = [0..1])
-const fp4 INPS3_JOY_AXISMAXVALUE = 255.0f;			// scancode axis value is scaled to [0..255]
+const fp32 INPS3_JOY_AXISDEADZONE1D = 0.15f;
+const fp32 INPS3_JOY_AXISDEADZONE = 0.10f;			// 10% deadzone
+const fp32 INPS3_JOY_AXISPOWER = 1.5f;				// axis = axis ^ power  (axis = [0..1])
+const fp32 INPS3_JOY_AXISMAXVALUE = 255.0f;			// scancode axis value is scaled to [0..255]
 
 // -------------------------------------------------------------------
 class CPS3_JoystickData
 {
 public:
-	uint8 m_lButtons[8];
+	uint16 m_lButtons[64];
 };
 
 class CInputContext_PS3;
@@ -115,8 +116,11 @@ public:
 	bool Create(CInputContext_PS3* _pInput, int _PortNumber, int _iDevice = 0);
 
 	int OnTranslateAxis(int _iAxis, int _Data);
+	CVec2Dint32 OnTranslateAxis2D(int _x, int _y);
+
 	void OnButtonData(int _iButton, int _Data);
 	void OnAxisData(int _iAxis, int _Data);
+	void OnAxisData2D(int _iAxis0, int _iAxis1, int _Data0, int _Data1);
 	void OnPOVData(int _iPOV, int _Data, int _OldData);
 	void OnClearAxes();
 	void OnRefresh();
@@ -146,6 +150,8 @@ public:
 // -------------------------------------------------------------------
 class SYSTEMDLLEXPORT CInputContext_PS3 : public CInputContextCore
 {
+	friend class CPS3_Device_Joystick;
+	friend class CPS3_Device_KeyBoard;
 	MRTC_DECLARE;
 
 protected:
@@ -186,8 +192,6 @@ public:
 	// -------------------------------------------------------------------
 	// Overrides from CSubSystem
 	virtual aint OnMessage(const CSS_Msg& _Msg);
-	virtual void OnRefresh(int _Context);
-	virtual void OnBusy(int _Context);
 };
 
 typedef TPtr<CInputContext_PS3> spCInputContext_PS3;

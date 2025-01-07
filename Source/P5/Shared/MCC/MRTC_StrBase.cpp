@@ -144,6 +144,11 @@ void CStrBase::wcslwr(wchar* _pStr)
 int CStrBase::stricmp(const char* _s0, const char* _s1)
 {
 	MAUTOSTRIP(CStrBase_stricmp, 0);
+	if(!_s0)
+		return -1;
+	else if(!_s1)
+		return 1;
+
 	while(*_s0 && *_s1)
 	{
 		unsigned char c0 = cupr(*_s0++);
@@ -167,6 +172,11 @@ int CStrBase::stricmp(const char* _s0, const char* _s1)
 int CStrBase::strnicmp(const char* _s0, const char* _s1, mint _MaxLen)
 {
 	MAUTOSTRIP(CStrBase_stricmp, 0);
+	if(!_s0)
+		return -1;
+	else if(!_s1)
+		return 1;
+
 	while(*_s0 && *_s1 && _MaxLen-- > 0)
 	{
 		unsigned char c0 = cupr(*_s0++);
@@ -487,6 +497,54 @@ int CStrBase::swscanf( const wchar *_src, const wchar *_format, ... )
 #endif
 }
 */
+
+void CStrBase::HexStr(char* _pDest, const void* _pMem, int _nBytes)
+{
+	const uint8* pRAM = (uint8*)_pMem;
+	for(uint i = 0; i < _nBytes; i++)
+	{
+		uint Nibble;
+
+		Nibble = (*pRAM & 0xf0) >> 4;
+		if(Nibble < 10)
+			*_pDest++	= Nibble + '0';
+		else
+			*_pDest++	= Nibble + 'A' - 10;
+
+		Nibble = (*pRAM & 0x0f);
+		if(Nibble < 10)
+			*_pDest++	= Nibble + '0';
+		else
+			*_pDest++	= Nibble + 'A' - 10;
+
+		pRAM++;
+	}
+}
+
+void CStrBase::HexStr(wchar* _pDest, const void* _pMem, int _nBytes)
+{
+	const uint8* pRAM = (uint8*)_pMem;
+	for(uint i = 0; i < _nBytes; i++)
+	{
+		uint Nibble;
+
+		Nibble = (*pRAM & 0xf0) >> 4;
+		if(Nibble < 10)
+			*_pDest++	= Nibble + '0';
+		else
+			*_pDest++	= Nibble + 'A' - 10;
+
+		Nibble = (*pRAM & 0x0f);
+		if(Nibble < 10)
+			*_pDest++	= Nibble + '0';
+		else
+			*_pDest++	= Nibble + 'A' - 10;
+
+		pRAM++;
+	}
+}
+
+
 char* CStrBase::GetStr()
 {
 	MAUTOSTRIP(CStrBase_GetStr, NULL);
@@ -573,9 +631,9 @@ int CStrBase::Val_int(const char* _p, int& _Value)
 	return (pStop) ? pStop - _p : 0;
 }
 
-int CStrBase::Val_fp8(const char* _p, fp8& _Value)
+int CStrBase::Val_fp64(const char* _p, fp64& _Value)
 {
-	MAUTOSTRIP(CStrBase_Val_fp8, 0);
+	MAUTOSTRIP(CStrBase_Val_fp64, 0);
 	char* pStop = NULL;
 	errno = 0;
 	_Value = strtod(_p, &pStop);
@@ -593,9 +651,9 @@ int CStrBase::Val_int(const wchar* _p, int& _Value)
 	return (pStop) ? pStop-_p : 0;
 }
 
-int CStrBase::Val_fp8(const wchar* _p, fp8& _Value)
+int CStrBase::Val_fp64(const wchar* _p, fp64& _Value)
 {
-	MAUTOSTRIP(CStrBase_Val_fp8_2, 0);
+	MAUTOSTRIP(CStrBase_Val_fp64_2, 0);
 	wchar* pStop = NULL;
 	errno = 0;
 	_Value = wcstod(_p, &pStop);
@@ -614,13 +672,13 @@ int CStrBase::Val_int(const void* _p, int& _Value, int _Fmt)
 		return 0;
 }
 
-int CStrBase::Val_fp8(const void* _p, fp8& _Value, int _Fmt)
+int CStrBase::Val_fp64(const void* _p, fp64& _Value, int _Fmt)
 {
-	MAUTOSTRIP(CStrBase_Val_fp8_3, 0);
+	MAUTOSTRIP(CStrBase_Val_fp64_3, 0);
 	if (_Fmt == CSTR_FMT_ANSI)
-		return Val_fp8((const char*)_p, _Value);
+		return Val_fp64((const char*)_p, _Value);
 	else if (_Fmt == CSTR_FMT_UNICODE)
-		return Val_fp8((const wchar*)_p, _Value);
+		return Val_fp64((const wchar*)_p, _Value);
 	else
 		return 0;
 }
@@ -648,15 +706,15 @@ int CStrBase::Val_int() const
 	}
 };
 
-fp8 CStrBase::Val_fp8() const
+fp64 CStrBase::Val_fp64() const
 {
-	MAUTOSTRIP(CStrBase_Val_fp8_4, 0.0);
+	MAUTOSTRIP(CStrBase_Val_fp64_4, 0.0);
 	if (IsAnsi())
 	{
 		const char* p = GetStr();
 		if (!p) return 0;
 		errno = 0;
-		fp8 res = strtod(p, NULL);
+		fp64 res = strtod(p, NULL);
 		if (errno != 0) return 0;
 		return res;
 	}
@@ -665,7 +723,7 @@ fp8 CStrBase::Val_fp8() const
 		const wchar* p = GetStrW();
 		if (!p) return 0;
 		errno = 0;
-		fp8 res = wcstod(p, NULL);
+		fp64 res = wcstod(p, NULL);
 		if (errno != 0) return 0;
 		return res;
 	}
@@ -817,7 +875,7 @@ int CStrBase::CompareNoCase(const char* _s0, const char* _s1)
 	return stricmp(_s0, _s1);
 }
 
-int CStrBase::CompareNoCase(const wchar* _s0, const char* _s1)
+int M_NOINLINE CStrBase::CompareNoCase(const wchar* _s0, const char* _s1)
 {
 	MAUTOSTRIP(CStrBase_CompareNoCase_2, 0);
 	wchar Str1[1024];
@@ -829,7 +887,7 @@ int CStrBase::CompareNoCase(const wchar* _s0, const char* _s1)
 	return CompareNoCase(_s0, Str1);
 }
 
-int CStrBase::CompareNoCase(const char* _s0, const wchar* _s1)
+int M_NOINLINE CStrBase::CompareNoCase(const char* _s0, const wchar* _s1)
 {
 	MAUTOSTRIP(CStrBase_CompareNoCase_3, 0);
 	wchar Str0[1024];
@@ -1009,7 +1067,7 @@ int CStrBase::GetNumMatches(char ch) const
 		return 0;
 }
 
-int CStrBase::GetNumMatches(const char* _pSubStr) const
+int M_NOINLINE CStrBase::GetNumMatches(const char* _pSubStr) const
 {
 	MAUTOSTRIP(CStrBase_GetNumMatches_2, 0);
 	if (!_pSubStr) return -1;
@@ -1057,7 +1115,7 @@ int CStrBase::GetNumMatches(const char* _pSubStr) const
 		return -1;
 }
 
-int CStrBase::Find(const char* _pSubStr) const
+int M_NOINLINE CStrBase::Find(const char* _pSubStr) const
 {
 	MAUTOSTRIP(CStrBase_Find, 0);
 	if (!_pSubStr) return -1;
@@ -1085,7 +1143,7 @@ int CStrBase::Find(const char* _pSubStr) const
 	}
 };
 
-int CStrBase::FindFrom(int _iStart, const char* _pSubStr) const
+int M_NOINLINE CStrBase::FindFrom(int _iStart, const char* _pSubStr) const
 {
 	if(!_pSubStr) return -1;
 
@@ -1113,7 +1171,7 @@ int CStrBase::FindFrom(int _iStart, const char* _pSubStr) const
 	}
 }
 
-int CStrBase::FindReverse(const char* _pSubStr) const
+int M_NOINLINE CStrBase::FindReverse(const char* _pSubStr) const
 {
 	MAUTOSTRIP(CStrBase_FindReverse, 0);
 	if (!_pSubStr) return -1;
@@ -1377,17 +1435,17 @@ int CStrBase::GetIntSep(const char* _pSeparator)
 	}
 }
 
-fp8 CStrBase::Getfp8Sep(const char* _pSeparator)
+fp64 CStrBase::Getfp64Sep(const char* _pSeparator)
 {
-	MAUTOSTRIP(CStrBase_Getfp8Sep, 0.0);
+	MAUTOSTRIP(CStrBase_Getfp64Sep, 0.0);
 	int i = Find(_pSeparator);
 	int sl = StrLen(_pSeparator);
 	if (i >= 0)
 	{
 		MakeUnique();
 
-		fp8 v = 0;
-		int n = Val_fp8(StrAny(), v, GetFmt());
+		fp64 v = 0;
+		int n = Val_fp64(StrAny(), v, GetFmt());
 		if (n)
 			mfscpy(StrAny(), GetFmt(), StrAny(i+sl), GetFmt());
 		else
@@ -1397,7 +1455,7 @@ fp8 CStrBase::Getfp8Sep(const char* _pSeparator)
 	}
 	else
 	{
-		fp8 v = Val_fp8();
+		fp64 v = Val_fp64();
 		Clear();
 		return v;
 	}
@@ -1429,17 +1487,17 @@ int CStrBase::GetIntMSep(const char* _pSeparators)
 	}
 }
 
-fp8 CStrBase::Getfp8MSep(const char* _pSeparators)
+fp64 CStrBase::Getfp64MSep(const char* _pSeparators)
 {
-	MAUTOSTRIP(CStrBase_Getfp8MSep, 0.0);
+	MAUTOSTRIP(CStrBase_Getfp64MSep, 0.0);
 	int i = FindOneOf(_pSeparators);
 	int sl = 1;
 	if (i >= 0)
 	{
 		MakeUnique();
 
-		fp8 v = 0;
-		int n = Val_fp8(StrAny(), v, GetFmt());
+		fp64 v = 0;
+		int n = Val_fp64(StrAny(), v, GetFmt());
 		if (n)
 			mfscpy(StrAny(), GetFmt(), StrAny(i+sl), GetFmt());
 		else
@@ -1449,7 +1507,7 @@ fp8 CStrBase::Getfp8MSep(const char* _pSeparators)
 	}
 	else
 	{
-		fp8 v = Val_fp8();
+		fp64 v = Val_fp64();
 		Clear();
 		return v;
 	}
@@ -1553,11 +1611,11 @@ mint CStrBase::StrLen(const wchar* _pStr)
 
 	Author:		Anton Ragnarsson
 \*____________________________________________________________________*/
-uint32 CStrBase::StrHash(const char* _pString)
+uint32 CStrBase::StrHash(const char* _pString, uint32 _BaseHash)
 {
-	uint32 Hash = 5381;
+	uint32 Hash = _BaseHash + 5381;
 	if (_pString)
-		for (uint32 i=0; _pString[i] != 0; i++)
+		for (uint i = 0; _pString[i] != 0; i++)
 			Hash = Hash*33 + CStrBase::clwr(_pString[i]);
 	Hash -= 5381;	// So empty string == 0
 	return Hash;
@@ -1577,15 +1635,14 @@ int CStrBase::TranslateInt(const char* _pVal, const char** _pStrings)
 
 	CFStr s = Val.GetStrMSep(" ,+");
 	s.Trim();
-	if (s.Left(2) == "0X" ||
-		(s[0] >= '0' && s[0] <= '9'))
-	{
+
+	for(int i = 0; _pStrings[i]; i++)
+		if (s.CompareNoCase(_pStrings[i]) == 0)
+			return i;
+
+	if (s.Left(2) == "0X" || NStr::CharIsNumber(s[0]))
 		return s.Val_int();
-	}
-	else
-		for(int i = 0; _pStrings[i]; i++)
-			if (s.CompareNoCase(_pStrings[i]) == 0)
-				return i;
+
 	return -1;
 }
 
@@ -1853,7 +1910,7 @@ void CStrBase::CreateFromFlags(int _iFlags, const char** _pStrings)
 	#error "?"
 #endif
 
-#ifdef	CPU_SUPPORT_FP8
+#ifdef	CPU_SUPPORT_FP64
 #ifdef HAVE_LONG_DOUBLE
 #define LDOUBLE long double
 #else
@@ -2098,7 +2155,7 @@ static void dopr (char *buffer, mint maxlen, const char *format, va_list args)
 	if (cflags == DP_C_LDOUBLE)
 	  fvalue = va_arg (args, LDOUBLE);
 	else
-#ifdef	CPU_SUPPORT_FP8
+#ifdef	CPU_SUPPORT_FP64
 	  fvalue = va_arg (args, double);
 #else
 	  fvalue = va_arg (args, float);
@@ -2112,7 +2169,7 @@ static void dopr (char *buffer, mint maxlen, const char *format, va_list args)
 	if (cflags == DP_C_LDOUBLE)
 	  fvalue = va_arg (args, LDOUBLE);
 	else
-#ifdef	CPU_SUPPORT_FP8
+#ifdef	CPU_SUPPORT_FP64
 	  fvalue = va_arg (args, double);
 #else
 	  fvalue = va_arg (args, float);
@@ -2124,7 +2181,7 @@ static void dopr (char *buffer, mint maxlen, const char *format, va_list args)
 	if (cflags == DP_C_LDOUBLE)
 	  fvalue = va_arg (args, LDOUBLE);
 	else
-#ifdef	CPU_SUPPORT_FP8
+#ifdef	CPU_SUPPORT_FP64
 	  fvalue = va_arg (args, double);
 #else
 	  fvalue = va_arg (args, float);

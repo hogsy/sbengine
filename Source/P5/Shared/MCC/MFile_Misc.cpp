@@ -22,6 +22,7 @@
 #ifdef PLATFORM_WIN
 # include <errno.h>
 # include <io.h>
+extern CFStr ReplaceSlashes(const char* _pFileName);
 #endif
 
 #ifdef PLATFORM_DOLPHIN
@@ -305,7 +306,8 @@ extern void PS3File_FindClose( aint _handle );
 	m_lFiles.SetGrow(128);
 	_finddata_t FileInfo;
 
-	int hPath = _findfirst(_Path, &FileInfo);
+	CFStr WinPath = ReplaceSlashes(_Path);
+	int hPath = _findfirst(WinPath, &FileInfo);
 	if (hPath == -1)
 	{
 		if (errno == ENOENT) return;
@@ -407,6 +409,10 @@ CLogFile::~CLogFile()
 	m_spFile = NULL;
 }
 
+#ifdef PLATFORM_WIN_PC
+void gf_SetLogFileName(CStr _FileName);
+#endif
+
 bool CLogFile::OpenFile(bool _bAppend)
 {
 	m_bRecursive = true;
@@ -431,6 +437,9 @@ bool CLogFile::OpenFile(bool _bAppend)
 				else
 					Path = CStrF("%s_%d.log", m_FileName.Str(), i);
 				m_spFile->Open(Path, CFILE_WRITE | CFILE_NOLOG | ((_bAppend) ? CFILE_APPEND : 0));
+#ifdef PLATFORM_WIN_PC
+				gf_SetLogFileName(Path);
+#endif
 				break;
 	//			m_spFile->Close();
 			}
@@ -589,8 +598,10 @@ void CLogFile::Log(const wchar* _pStr)
 void CLogFile::Log(const char* _pStr)
 {
 	wchar Buffer[4096];
+	int Len = Min(4095, (int)strlen(_pStr));
 
-	CStrBase::mfscpy(Buffer, CSTR_FMT_UNICODE, _pStr, CSTR_FMT_ANSI);
+	CStrBase::mfsncpy(Buffer, CSTR_FMT_UNICODE, _pStr, CSTR_FMT_ANSI, Len);
+	Buffer[Len] = 0;
 	Log(Buffer);
 }
 

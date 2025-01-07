@@ -695,9 +695,9 @@ MRTC_ClassContainer g_ClassContainer = { 0 };
 //  Implement MRTC for CObj & CReferenceCount
 // -------------------------------------------------------------------
 #ifdef M_RTM
-MRTC_CRuntimeClass CObj::m_RuntimeClass = {"CObj", NULL, NULL};
-#else
 MRTC_CRuntimeClass CObj::m_RuntimeClass = {"CObj", NULL, NULL, 0};
+#else
+MRTC_CRuntimeClass CObj::m_RuntimeClass = {"CObj", NULL, NULL, 0, 0};
 #endif
 
 MRTC_CClassInit g_ClassRegCObj(&CObj::m_RuntimeClass);
@@ -750,8 +750,7 @@ MRTC_CRuntimeClass::MRTC_CRuntimeClass(char* _ClassName, int _Size, int _Version
 }
 #endif
 
-#ifndef COMPILER_CODEWARRIOR
-#endif
+
 
 
 void CreateCObjCommon(CReferenceCount* _pObj, MRTC_CRuntimeClass *_pClass)
@@ -763,54 +762,48 @@ void CreateCObjCommon(CReferenceCount* _pObj, MRTC_CRuntimeClass *_pClass)
 	}
 }
 
-#ifdef M_RTM
-#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
-int MRTC_CRuntimeClass::AddInstance()
-{
-	if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
-		MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassCreate, m_ClassName, strlen(m_ClassName)+1, false, false);
-	return 0;
-}
 
-int MRTC_CRuntimeClass::DelInstance()
-{
-	if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
-		MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassDestroy, m_ClassName, strlen(m_ClassName)+1, false, false);
-	return 0;
-}
-#endif
+#if !defined(M_RTM) || defined(MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES)
 
-#else
-int MRTC_CRuntimeClass::AddInstance()
-{
-#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
-	if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
-		MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassCreate, m_ClassName, strlen(m_ClassName)+1, false, false);
-#endif
-	return m_nDynamicInstances++;
-}
+	int MRTC_CRuntimeClass::AddInstance()
+	{
+		#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
+			if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
+				MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassCreate, m_ClassName, strlen(m_ClassName)+1, false, false);
+		#endif
 
-int MRTC_CRuntimeClass::DelInstance()
-{
-#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
-	if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
-		MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassDestroy, m_ClassName, strlen(m_ClassName)+1, false, false);
-#endif
-	m_nDynamicInstances--;
+		#ifndef M_RTM
+			return m_nDynamicInstances++;
+		#else
+			return 0;
+		#endif
+	}
 
-//	if (m_nDynamicInstances >= -1 && strcmp(m_ClassName, "CReferenceCount") == 0)
-//		OutputDebugString(CFStrF("(MRTC_CRuntimeClass::DelInstance) %s, %d\n", m_ClassName, m_nDynamicInstances));
+	int MRTC_CRuntimeClass::DelInstance()
+	{
+		#ifdef MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES
+			if (MRTC_GetRD() && (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_RuntimeClassAllocations))
+				MRTC_GetRD()->SendData(ERemoteDebug_RunTimeClassDestroy, m_ClassName, strlen(m_ClassName)+1, false, false);
+		#endif
 
-	return m_nDynamicInstances;
-}
+		#ifndef M_RTM
+			m_nDynamicInstances--;
+		//	if (m_nDynamicInstances >= -1 && strcmp(m_ClassName, "CReferenceCount") == 0)
+		//		OutputDebugString(CFStrF("(MRTC_CRuntimeClass::DelInstance) %s, %d\n", m_ClassName, m_nDynamicInstances));
+			return m_nDynamicInstances;
+		#else
+			// M_RTM
+			return 0;
+		#endif 
+	}
+#endif // !defined(M_RTM) || defined(MRTC_ENABLE_REMOTEDEBUGGER_SUPPORTCLASSES)
 
-int MRTC_CRuntimeClass::Instances()
-{
-	return m_nDynamicInstances;
-}
-#endif
+
+
 MRTC_CClassInit::MRTC_CClassInit(MRTC_CRuntimeClass* _pRTC)
 {
+	_pRTC->m_ClassNameHash = StringToHash(_pRTC->m_ClassName);
+
 //	OutputDebugString(CStrF("0x%x %s\n", &g_ClassContainer, _pRTC->m_ClassName));
 //	M_TRACEALWAYS("MRTC_CClassInit %s\n", _pRTC->m_ClassName);
 #ifdef _DEBUG
@@ -853,6 +846,8 @@ MRTC_CClassInit::MRTC_CClassInit(MRTC_CRuntimeClass* _pRTC)
 
 	g_ClassContainer.Insert(_pRTC);
 }
+
+
 
 #if 0 // Not used any more
 /*************************************************************************************************\
@@ -1448,7 +1443,7 @@ void MRTC_ContextStack::PopContext(MRTC_Context* _pCtx)
 class MRTC_ThreadPoolJob
 {
 public:
-	int m_nObj;
+	volatile int m_nObj;
 	void* m_pArg;
 	MRTC_ThreadJobFunction m_pfnFunction;
 
@@ -1463,8 +1458,23 @@ public:
 class MRTC_ThreadPoolThread : public MRTC_Thread_Core
 {
 public:
+	MRTC_ThreadPoolThread()
+	{
+		m_ThreadID = 0;
+		m_iThread = 0;
+	}
+	uint32 m_ThreadID;
+	uint32 m_iThread;
 	class MRTC_ThreadPoolManagerInternal* m_pManager;
-	NThread::CEventAutoResetReportable m_Event;
+	volatile uint32 m_nJobs;
+	volatile uint64 m_Time;
+	void* m_pSemaphore;
+	NThread::CAtomicInt m_Busy;
+	const char* Thread_GetName() const
+	{
+		return "Threadpool Thread";
+	}
+
 	virtual int Thread_Main();
 };
 
@@ -1474,9 +1484,11 @@ class MRTC_ThreadPoolManagerInternal
 	friend class MRTC_ThreadPoolThread;
 protected:
 	MRTC_ThreadPoolJob m_Job;
-	NThread::CAtomicInt m_iCurrent;
+	NThread::CAtomicInt m_iJobsTodo;
+	NThread::CAtomicInt m_iJobsDone;
+//	NThread::CAtomicInt m_nThreadsIdle;
 	MRTC_CriticalSection m_Lock;
-	NThread::CEventAutoResetReportable m_Event;
+	void* m_pSemaphore;
 	NThread::CEventAutoReset m_JobDone;
 	TThinArray<MRTC_ThreadPoolThread> m_lThreads;
 	uint16 m_nThreads;
@@ -1485,30 +1497,100 @@ protected:
 public:
 	MRTC_VPUManager m_VPUManager;
 
-#ifdef PLATFORM_XBOX
-	NThread::CAtomicInt m_CPUCount;
-#endif
-
 public:
+	void WakeUpThread()
+	{
+//		if (m_nThreadsIdle.Get() > 0)
+			MRTC_SystemInfo::Semaphore_Increase(m_pSemaphore,1);
+	}
+
 	MRTC_ThreadPoolManagerInternal() : m_nThreads(0), m_nActiveThreads(0)
 	{
-#ifdef PLATFORM_XBOX
-		m_CPUCount.Exchange(4);
+
+		m_AvailableCPUs = 0x0;
+		m_UsableCPUs = 0x0;
+#ifdef PLATFORM_XENON
+		m_AvailableCPUs = M_Bit(0) | M_Bit(1) | M_Bit(2) | M_Bit(3) | M_Bit(4) | M_Bit(5);
+		m_UsableCPUs =  M_Bit(1) | M_Bit(2) | M_Bit(3) | M_Bit(4);
 #endif
 	}
 	~MRTC_ThreadPoolManagerInternal()
 	{
 		Destroy();
 	}
-	void Create(int _nThreads, int _StackSize = 128*1024);
+	void Create(int _nThreads, int _StackSize = 128*1024, uint32 _Priority = MRTC_THREAD_PRIO_ABOVENORMAL);
 	void Destroy();
 
-#ifdef PLATFORM_XBOX
-	int GetCPUCount()
+	NThread::CSpinLock m_SchedulingLock;
+	uint32 m_AvailableCPUs;
+	uint32 m_UsableCPUs;
+	void WaitForThreadStart()
 	{
-		return m_CPUCount.Decrease();
-	}
+#ifdef PLATFORM_XENON
+		TAP_RCD<MRTC_ThreadPoolThread> pThread = m_lThreads;
+		for (mint i = 0; i < pThread.Len(); ++i)
+		{
+			while (Volatile(pThread[i].m_ThreadID) == 0)
+			{
+				MRTC_SystemInfo::OS_Sleep(1);
+			}
+		}
 #endif
+	}
+	void UpdateScheduling()
+	{
+#ifdef PLATFORM_XENON
+		uint32 CPUs = m_UsableCPUs & m_AvailableCPUs;
+		if (CPUs)
+		{
+			int iCPU = 0;
+			while (!(CPUs & M_BitD(iCPU)))
+			{
+				++iCPU;
+				if (iCPU == 32)
+					iCPU = 0;
+			}
+			TAP_RCD<MRTC_ThreadPoolThread> pThread = m_lThreads;
+			for (mint i = 0; i < pThread.Len(); ++i)
+			{
+				MRTC_SystemInfo::Thread_SetProcessor(pThread[i].m_ThreadID, iCPU);
+
+				++iCPU;
+				if (iCPU == 32)
+					iCPU = 0;
+				while (!(CPUs & M_BitD(iCPU)))
+				{
+					++iCPU;
+					if (iCPU == 32)
+						iCPU = 0;
+				}
+			}
+		}
+#endif
+	}
+	void EvacuateCPU(int _PhysicalCPU)
+	{
+#ifdef PLATFORM_XENON
+		DLock(m_SchedulingLock);
+		m_AvailableCPUs &= ~(uint32(M_BitD(_PhysicalCPU)));
+		UpdateScheduling();
+#endif
+	}
+	void RestoreCPU(int _PhysicalCPU)
+	{
+#ifdef PLATFORM_XENON
+		DLock(m_SchedulingLock);
+		m_AvailableCPUs |= (uint32(M_BitD(_PhysicalCPU)));
+		UpdateScheduling();
+#endif
+	}
+
+/*
+	void VPU_BlockUntilIdle()
+	{
+		m_VPUManager.BlockUntilIdle();
+	}
+*/
 
 	void Enable(bool _bEnable)
 	{
@@ -1538,21 +1620,29 @@ public:
 
 	int DoJob()
 	{
-		int32 iCurrent = m_iCurrent.Increase();
 		int nObj = m_Job.m_nObj;
-		if(iCurrent >= nObj)
+		if (m_iJobsTodo.Get() < 1)
+			return 0;
+		if (m_iJobsDone.Get() == nObj)
+			return 0;
+		if (m_iJobsDone.Get() > nObj)		
+			M_BREAKPOINT;
+		int32 iJobsTodo = m_iJobsTodo.Decrease();
+		if (iJobsTodo < 1)
 		{
-			if((iCurrent - m_nThreads + 1) == nObj)
-				return -1;
 			return 0;
 		}
-
-		m_Job.m_pfnFunction(iCurrent, m_Job.m_pArg);
+		m_Job.m_pfnFunction(nObj-iJobsTodo, m_Job.m_pArg);
+		int iJobsDone = m_iJobsDone.Increase();
+		if (iJobsDone > nObj-1)
+			M_BREAKPOINT;
+		if (iJobsDone == nObj-1)
+			return -1;
 		return 1;
 	}
 };
 
-void MRTC_ThreadPoolManagerInternal::Create(int _nThreads, int _StackSize)
+void MRTC_ThreadPoolManagerInternal::Create(int _nThreads, int _StackSize, uint32 _Priority)
 {
 	Destroy();
 
@@ -1560,15 +1650,24 @@ void MRTC_ThreadPoolManagerInternal::Create(int _nThreads, int _StackSize)
 	m_nActiveThreads = _nThreads;
 	if(_nThreads > 1)
 	{
-		m_iCurrent.Construct(0);
+		m_iJobsDone.Construct(0);
+		m_iJobsTodo.Construct(0);
 		m_lThreads.SetLen(_nThreads);
 		m_Job.Clear();
+
+		m_pSemaphore = MRTC_SystemInfo::Semaphore_Alloc(0, 1024*1024);
+		
 		for(int i = 0; i < _nThreads; i++)
 		{
+			m_lThreads[i].m_iThread = i;
 			m_lThreads[i].m_pManager = this;
-			m_Event.ReportTo(&m_lThreads[i].m_Event);
-			m_lThreads[i].Thread_Create(NULL, 128*1024);
+			m_lThreads[i].m_pSemaphore = m_pSemaphore;
+			m_lThreads[i].m_Busy.Exchange(0);
+			m_lThreads[i].Thread_Create(NULL, 128*1024, _Priority);
 		}
+		m_VPUManager.SetMultiThreaded(true);
+		WaitForThreadStart();
+		UpdateScheduling();
 	}
 }
 
@@ -1581,11 +1680,25 @@ void MRTC_ThreadPoolManagerInternal::Destroy()
 	m_lThreads.Destroy();
 }
 
-void MRTC_ThreadPoolManager::Create(int _nThreads, int _StackSize)
+void MRTC_ThreadPoolManager::EvacuateCPU(int _PhysicalCPU)
 {
 	MRTC_ThreadPoolManagerInternal* pMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
 	if(pMgr)
-		pMgr->Create(_nThreads, _StackSize);
+		pMgr->EvacuateCPU(_PhysicalCPU);
+}
+
+void MRTC_ThreadPoolManager::RestoreCPU(int _PhysicalCPU)
+{
+	MRTC_ThreadPoolManagerInternal* pMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
+	if(pMgr)
+		pMgr->RestoreCPU(_PhysicalCPU);
+}
+
+void MRTC_ThreadPoolManager::Create(int _nThreads, int _StackSize, uint32 _Priority)
+{
+	MRTC_ThreadPoolManagerInternal* pMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
+	if(pMgr)
+		pMgr->Create(_nThreads, _StackSize, _Priority);
 }
 
 void MRTC_ThreadPoolManager::Enable(bool _bEnable)
@@ -1619,85 +1732,220 @@ void MRTC_ThreadPoolManager::ProcessEachInstance(int _nObj, void* _pArg, MRTC_Th
 		pMgr->RunOnEachInstance(_nObj, _pArg, _pfnFunction, _pName);
 }
 
+
 void MRTC_ThreadPoolManagerInternal::RunOnEachInstance(int _nObj, void* _pArg, MRTC_ThreadJobFunction _pfnFunction, const char* _pName)
 {
+#ifdef THREADPOOL_NAMEDEVENTS
+	M_NAMEDEVENT("ThreadPool_DoJob",0xff004400);
+#endif
 	if(_nObj == 0)
 		return;
 
 	M_LOCK(m_Lock);
 	m_pName = _pName;
-	m_iCurrent.Exchange(0);
 	m_Job.m_nObj = _nObj;
 	m_Job.m_pArg = _pArg;
 	m_Job.m_pfnFunction = _pfnFunction;
+	m_nThreads++;		// Temp-increase number of threads
+	M_EXPORTBARRIER;
+	m_iJobsDone.Exchange(0);
+	m_iJobsTodo.Exchange(_nObj);
 
-	m_Event.Signal();
+	uint32 nJobs = 0;
+	uint64 StartTime = CMTimerFuncs_OS::Clock();
+	MRTC_SystemInfo::Semaphore_Increase(m_pSemaphore, m_nThreads - 1);
+	{
+		int32 State = 0;
+		while((State = DoJob()) > 0) {nJobs++;}
+		if(State == -1)
+			SignalJobDone();
+	}
+	StartTime = CMTimerFuncs_OS::Clock() - StartTime;
 	m_JobDone.Wait();
+	m_nThreads--;	// Set number of threads back to normal number
+
+	for (uint16 i = 0; i < m_nThreads;i++)
+		while (m_lThreads[i].m_Busy.IfEqualExchange(0,0) == 1);
+
 	m_Job.Clear();
 	m_pName = NULL;
+
+	static bool bDumpStats = false;
+	if(bDumpStats)
+	{
+		M_TRACEALWAYS("Job '%s' - Size %d\r\n", _pName, _nObj);
+		M_TRACEALWAYS("SystemThread did %d jobs in %lu ticks\r\n", nJobs, StartTime);
+		for(int i = 0; i < m_nThreads; i++)
+		{
+			M_TRACEALWAYS("Thread %d did %d jobs in %lu ticks\r\n", i, m_lThreads[i].m_nJobs, m_lThreads[i].m_Time);
+		}
+	}
 }
+
 
 int MRTC_ThreadPoolThread::Thread_Main()
 {
 	// Create a 256KiB scratchpad so we have something to work with
-#ifdef PLATFORM_XBOX
-
-	int iCPU = m_pManager->GetCPUCount();
-	MRTC_SystemInfo::Thread_SetProcessor(iCPU);
-	MRTC_SystemInfo::Thread_SetName(CStrF("ThreadPool%d", iCPU));
-#endif
+	m_ThreadID = MRTC_SystemInfo::Thread_GetCurrentID();
+	MRTC_SystemInfo::Thread_SetName(CStrF("ThreadPos%d", m_iThread));
 	MRTC_ScratchPadManager::Get(256 * 1024);
-	m_QuitEvent.ReportTo(&m_Event);
+
+
 	while(!Thread_IsTerminating())
 	{
-		m_Event.Wait();
-		if(Thread_IsTerminating())
-			break;
-//		int iObj = 0;
-//		void* pArg = 0;
-//		MRTC_ThreadJobFunction pfnFunction;
-//		int nJobsLeft = -1;
-		int nState;
-		while((nState = m_pManager->DoJob()) > 0) {}
-		if(nState == -1)
-			m_pManager->SignalJobDone();
-	}
+		if (!m_pManager->m_VPUManager.IsTaskWaiting(VpuWorkersContext) &&
+			!m_pManager->m_VPUManager.IsTaskWaiting(VpuAIContext))
+		{
+			MRTC_SystemInfo::Semaphore_WaitTimeout(m_pSemaphore,0.1);
+			if(Thread_IsTerminating())
+				return 0;
+		}
+#ifndef PLATFORM_PS3
+		{
+#ifdef THREADPOOL_NAMEDEVENTS
+			M_NAMEDEVENT("ThreadPool_VpuJob",0xff00cc00);
+#endif
+			bool bHasThreadPoolJobsTodo = m_pManager->m_iJobsTodo.Get()>0;
 
+			while (!bHasThreadPoolJobsTodo && m_pManager->m_VPUManager.IsTaskWaiting(VpuWorkersContext))
+			{
+				m_pManager->m_VPUManager.RunTask(VpuWorkersContext);
+				bHasThreadPoolJobsTodo = m_pManager->m_iJobsTodo.Get()>0;
+			}
+			while (!bHasThreadPoolJobsTodo && m_pManager->m_VPUManager.IsTaskWaiting(VpuAIContext))
+			{
+				m_pManager->m_VPUManager.RunTask(VpuAIContext);
+				bHasThreadPoolJobsTodo = m_pManager->m_iJobsTodo.Get()>0;
+			}
+			if (!bHasThreadPoolJobsTodo)
+				continue;
+		}
+#endif
+		m_Busy.Increase();
+		if (m_pManager->m_iJobsTodo.IfEqualExchange(0,0)!=0)
+		{
+#ifdef THREADPOOL_NAMEDEVENTS
+			M_NAMEDEVENT("ThreadPool_DoJob",0xff004400);
+#endif
+			M_IMPORTBARRIER;
+			uint64 StartTime = CMTimerFuncs_OS::Clock();
+			m_nJobs = 0;
+			int nState;
+			while((nState = m_pManager->DoJob()) > 0) {m_nJobs++;}
+			m_Time = CMTimerFuncs_OS::Clock() - StartTime;
+
+			if(nState == -1)
+				m_pManager->SignalJobDone();
+		}
+		m_Busy.Decrease();
+	}
 	return 0;
 }
 
 
-uint32 MRTC_ThreadPoolManager::VPU_AddTask(CVPU_JobDefinition& _JobDefinition)
+/*
+int MRTC_ThreadPoolThread::Thread_Main()
 {
-	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
-	return pVPUMgr.AddTask(_JobDefinition);
+// Create a 256KiB scratchpad so we have something to work with
+#ifdef PLATFORM_XBOX
+
+int iCPU = m_pManager->GetCPUCount();
+MRTC_SystemInfo::Thread_SetProcessor(iCPU);
+MRTC_SystemInfo::Thread_SetName(CStrF("ThreadPool%d", iCPU));
+#endif
+MRTC_ScratchPadManager::Get(256 * 1024);
+m_QuitEvent.ReportTo(&m_Event);
+
+while(!Thread_IsTerminating())
+{
+m_Event.Wait();
+if(Thread_IsTerminating())
+break;
+#ifndef PLATFORM_PS3
+if (m_pManager->m_Job.m_nObj)
+{
+#endif
+//		int iObj = 0;
+//		void* pArg = 0;
+//		MRTC_ThreadJobFunction pfnFunction;
+//		int nJobsLeft = -1;
+int nState;
+while((nState = m_pManager->DoJob()) > 0) {}
+if(nState == -1)
+m_pManager->SignalJobDone();
+
+
+#ifndef PLATFORM_PS3
+}
+else
+{
+MRTC_VPUManager& pVPUMgr = m_pManager->m_VPUManager;
+while(pVPUMgr.IsTaskWaiting() && m_pManager->m_Job.m_nObj==0)
+{
+pVPUMgr.RunTask();
+}
+}
+#endif
+
 }
 
-bool MRTC_ThreadPoolManager::VPU_IsTaskComplete(uint32 _Job)
-{
-	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
-	return pVPUMgr.IsTaskComplete(_Job);
+return 0;
 }
 
-void MRTC_ThreadPoolManager::VPU_BlockOnTask(uint32 _Job)
+
+*/
+
+uint16 MRTC_ThreadPoolManager::VPU_AddTask(const CVPU_JobDefinition& _JobDefinition,VpuContextId _ContextId,bool _Async,uint16 _LinkTaskId)
 {
 	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
-	pVPUMgr.BlockOnTask(_Job);
+	uint16 TaskId = pVPUMgr.AddTask(_JobDefinition,_Async,_ContextId,_LinkTaskId);
+#ifndef PLATFORM_PS3
+	MRTC_ThreadPoolManagerInternal* pMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
+	pMgr->WakeUpThread();
+#endif
+	return TaskId;
 }
 
-bool MRTC_ThreadPoolManager::VPU_TryBlockUntilIdle()
+bool MRTC_ThreadPoolManager::VPU_IsTaskComplete(uint16 _TaskId,VpuContextId _ContextId)
+{
+	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
+	return pVPUMgr.IsTaskComplete(_TaskId,_ContextId);
+}
+
+void MRTC_ThreadPoolManager::VPU_BlockOnTask(uint16 _TaskId,VpuContextId _ContextId, FVPUCallManager *_pManager, void *_pManagerContext)
+{
+	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
+	pVPUMgr.BlockOnTask(_TaskId,_ContextId, _pManager, _pManagerContext);
+}
+
+bool MRTC_ThreadPoolManager::VPU_TryBlockUntilIdle(VpuContextId _ContextId)
 {
 	//	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
 	//	return pVPUMgr.TryBlockUntilIdle();
 	return false;
 }
 
+#ifndef PLATFORM_PS3
+void MRTC_ThreadPoolManager::VPU_RegisterContext(VpuContextId _ContextId, VpuWorkerFunction _pfnVpuWorker)
+{
+	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
+	pVPUMgr.RegisterContext(_ContextId, _pfnVpuWorker);
+}
+#endif
+
+/*
 void MRTC_ThreadPoolManager::VPU_BlockUntilIdle()
 {
-	//	MRTC_VPUManager& pVPUMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal->m_VPUManager;
-	//	pVPUMgr.BlockUntilIdle();
-}
+	MRTC_ThreadPoolManagerInternal* pMgr = MRTC_GetObjectManager()->m_pThreadPoolManagerInternal;
+	if(!pMgr)
+	{
+		return;
+	}
+	else
+		pMgr->VPU_BlockUntilIdle();
 
+}
+*/
 
 
 /*************************************************************************************************\
@@ -1709,7 +1957,7 @@ void MRTC_ThreadPoolManager::VPU_BlockUntilIdle()
 class MRTC_ScratchPad
 {
 public:
-	TThinArray<uint8> m_lData;
+	TThinArrayAlign<uint8, 16> m_lData;
 
 	uint8* GetPtr(uint32 _nSize)
 	{
@@ -1903,6 +2151,7 @@ MRTC_ObjectManager::MRTC_ObjectManager()
 #ifdef PLATFORM_WIN_PC
 	m_Platform = 0;
 	m_bXDFCreate = 0;
+	m_Endian = 0;
 #endif
 
 	m_hMainThread = MRTC_SystemInfo::OS_GetThreadID();
@@ -1912,8 +2161,11 @@ MRTC_ObjectManager::MRTC_ObjectManager()
 	m_pObjMgrLock = new (MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_CriticalSection)]) MRTC_CriticalSection;
 	m_pGlobalStrLock = new (MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_CriticalSection)]) MRTC_CriticalSection;
 
-	m_pThreadPoolManagerInternal = new (MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_ThreadPoolManagerInternal)]) MRTC_ThreadPoolManagerInternal;
-	m_pScratchPadManagerInternal = new (MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_ScratchPadManagerInternal)]) MRTC_ScratchPadManagerInternal;
+	// Due to alignment stuff we have to do it this way
+	m_pThreadPoolManagerInternalMem = MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_ThreadPoolManagerInternal) + 127];
+	m_pThreadPoolManagerInternal = new ((void*)((((mint&)m_pThreadPoolManagerInternalMem) + 127) & ~127)) MRTC_ThreadPoolManagerInternal;
+	m_pScratchPadManagerInternalMem = MDA_NEW_DEBUG_NOLEAK uint8[sizeof(MRTC_ScratchPadManagerInternal) + 127];
+	m_pScratchPadManagerInternal = new ((void*)((((mint&)m_pScratchPadManagerInternalMem) + 127) & ~127)) MRTC_ScratchPadManagerInternal;
 
 	m_pRand = new (MDA_NEW_DEBUG_NOLEAK uint8 [sizeof(CRand_MersenneTwister)]) CRand_MersenneTwister;
 
@@ -1953,11 +2205,11 @@ MRTC_ObjectManager::~MRTC_ObjectManager()
 	delete m_pAutoStripLogger;
 #endif
 
-	if(m_pScratchPadManagerInternal)
-		delete m_pScratchPadManagerInternal;
+	if(m_pScratchPadManagerInternalMem)
+		delete [] m_pScratchPadManagerInternalMem;
 
-	if(m_pThreadPoolManagerInternal)
-		delete m_pThreadPoolManagerInternal;
+	if(m_pThreadPoolManagerInternalMem)
+		delete [] m_pThreadPoolManagerInternalMem;
 
 	if(m_pRand)
 		delete m_pRand;
@@ -2261,6 +2513,11 @@ MRTC_AddClassContainer g_AddClassContainer;
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 #ifndef M_STATICINIT
+#ifdef PLATFORM_WIN_PC
+extern "C" void __cdecl __clean_type_info_names(void);
+extern "C" uint __declspec(dllimport) __stdcall timeBeginPeriod( uint uPeriod);
+extern "C" uint __declspec(dllimport) __stdcall timeEndPeriod( uint uPeriod);
+#endif
 class MRTC_ModuleRefCount
 {
 	int m_Dummy;
@@ -2271,6 +2528,10 @@ public:
 		MRTC_ObjectManager* pOM = MRTC_GetObjectManager();
 		g_ObjectManagerContainer.Lock();
 		pOM->m_ModuleCount++;
+#ifdef PLATFORM_WIN_PC
+		if (pOM->m_ModuleCount == 1)
+			timeBeginPeriod(1);
+#endif
 		
 #ifdef _DEBUG
 		M_TRACEALWAYS("MRTC Memory manager module attach (%x) = %d\n (Debug)\n", &m_Dummy, pOM->m_ModuleCount);
@@ -2299,7 +2560,15 @@ public:
 		g_ObjectManagerContainer.Lock();
 		pOM->m_ModuleCount--;
 
+#ifdef PLATFORM_WIN_PC
+		if (pOM->m_ModuleCount == 1)
+			timeEndPeriod(1);
+#endif
 		M_TRACEALWAYS("MRTC Memory manager module detach (%x) = %d\n", &m_Dummy, pOM->m_ModuleCount);
+#ifdef PLATFORM_WIN_PC
+		__clean_type_info_names();
+#endif
+
 	/*	try
 		{
 			int *Ptr = NULL;
@@ -2476,6 +2745,8 @@ public:
 
 #ifdef PLATFORM_XBOX
 extern void gf_PreDestroySystem();
+extern mint gf_GetFreePhysicalMemory();
+extern mint gf_GetLargestBlockPhysicalMemory();
 #endif
 void MRTC_DestroyObjectManager()
 {
@@ -2492,9 +2763,10 @@ void MRTC_DestroyObjectManager()
 #endif
 }
 
+
 void MRTC_CreateMemManager()
 {
-	g_ObjectManagerContainer.m_pMemoryManager = new(MRTC_SystemInfo::OS_Alloc(sizeof(CDA_DefaultMemoryManager), true))CDA_DefaultMemoryManager;
+	g_ObjectManagerContainer.m_pMemoryManager = new(MRTC_SystemInfo::OS_Alloc(sizeof(CDA_DefaultMemoryManager), M_ALIGNMENTOF(CDA_DefaultMemoryManager)))CDA_DefaultMemoryManager;
 
 #if 1//#ifdef MRTC_MEMMANAGEROVERRIDE_MEMDEBUG
 #ifdef M_SUPPORTMEMORYDEBUG
@@ -2520,22 +2792,21 @@ void MRTC_CreateMemManager()
 	M_TRACEALWAYS("(MRTC_CreateMemManager) Memory used %d MiB\n", (m_Win32MemoryStatus.dwTotalPhys - m_Win32MemoryStatus.dwAvailPhys) / 0x100000 );
 
 	#if defined(M_RTM) && !defined(M_Profile)
-		fp4 GraphicHeapSize = 19.4f;
+		fp32 GraphicHeapSize = 19.4f;
 	#elif defined(_DEBUG)
-		fp4 GraphicHeapSize = 30.0f;
+		fp32 GraphicHeapSize = 30.0f;
 	#else
-		fp4 GraphicHeapSize = 46.0f;
+		fp32 GraphicHeapSize = 46.0f;
 	#endif
 	
 //	GraphicHeapSize = 22.5f;
 #ifdef PLATFORM_XENON
-#ifdef _DEBUG
-	int GlobalHeap = 192 * 0x100000;
-#else
-	int GlobalHeap = 192 * 0x100000;
-#endif
+
+	uint32 LargestSize = gf_GetLargestBlockPhysicalMemory();
+	uint32 GlobalHeap = AlignDown(gf_GetLargestBlockPhysicalMemory(), 4096);
 	//m_Win32MemoryStatus.dwTotalPhys - (GraphicHeapSize * 0x100000 + 256 * 0x100000);
 #else
+
 #ifdef M_RTM
 	int GlobalHeap = m_Win32MemoryStatus.dwTotalPhys - (GraphicHeapSize * 0x100000 + 16 * 0x100000);
 #elif defined(_DEBUG)
@@ -2593,7 +2864,7 @@ void MRTC_CreateMemManager()
 #ifdef PLATFORM_DOLPHIN
 
 	#ifdef USE_VIRTUAL_MEMORY
-		void* pMem = MRTC_SystemInfo::OS_Alloc(sizeof(CGameCube_VirtualHeap), true);
+		void* pMem = MRTC_SystemInfo::OS_Alloc(sizeof(CGameCube_VirtualHeap), M_ALIGNMENTOF(CGameCube_VirtualHeap));
 		g_ObjectManagerContainer.m_pVirtualHeap = new(pMem) CGameCube_VirtualHeap;
 		g_ObjectManagerContainer.m_pVirtualHeap->InitStatic(CGameCube_VirtualHeap::e_VMSize-65536);
 	#endif
@@ -2856,7 +3127,7 @@ void MRTC_CreateObjectManager()
 			else
 			{
 				bCreated = true;
-				char *buf = (char *) MRTC_SystemInfo::OS_Alloc(sizeof(MRTC_ObjectManager), true);
+				char *buf = (char *) MRTC_SystemInfo::OS_Alloc(sizeof(MRTC_ObjectManager), M_ALIGNMENTOF(MRTC_ObjectManager));
 
 				g_ObjectManagerContainer.m_pManager = (MRTC_ObjectManager*) buf;
 #ifdef MRTC_AUTOSTRIPLOGGER
@@ -2872,7 +3143,7 @@ void MRTC_CreateObjectManager()
 #ifdef PLATFORM_XENON
 				int nThreads = 4;
 #else
-				int nThreads = MRTC_SystemInfo::MRTC_GetSystemInfo().m_nCPU - 1;
+				int nThreads = Max((uint32)0, MRTC_SystemInfo::MRTC_GetSystemInfo().m_nCPU - 2);	// Reserve 1 thread for system and 1 for rendering
 #endif
 				g_ObjectManagerContainer.m_pManager->m_pThreadPoolManagerInternal->Create(nThreads);
 				EnvString = CFStrF("%d", (mint)buf);
@@ -2883,7 +3154,7 @@ void MRTC_CreateObjectManager()
 		}
 #else
 		bCreated = true;
-		char *buf = (char *) MRTC_SystemInfo::OS_Alloc(sizeof(MRTC_ObjectManager), true);
+		char *buf = (char *) MRTC_SystemInfo::OS_Alloc(sizeof(MRTC_ObjectManager), M_ALIGNMENTOF(MRTC_ObjectManager));
 
 		g_ObjectManagerContainer.m_pManager = (MRTC_ObjectManager*) buf;
 #ifndef M_STATICINIT
@@ -2919,11 +3190,11 @@ void MRTC_CreateObjectManager()
 		if (bCreated)
 		{		
 			MRTC_SystemInfo::MRTC_GetSystemInfo().PostCreate();
-		}
 
 #ifndef PLATFORM_PS3
-		MRTC_GetObjectManager()->ForgiveDebugNew(1);
+			MRTC_GetObjectManager()->ForgiveDebugNew(1);
 #endif
+		}
 	}
 
 };
@@ -3004,12 +3275,12 @@ NMemMgr::CMemTrack_Class::~CMemTrack_Class()
 
 #if defined(PLATFORM_WIN_PC) || defined(PLATFORM_XBOX) || defined(PLATFORM_PS3)
 
-void File_WriteLE(CCFile* _pFile, fp8 _Value)
+void File_WriteLE(CCFile* _pFile, fp64 _Value)
 {
 	_pFile->WriteLE(_Value);
 }
 
-void File_ReadLE(class CCFile* _pFile, fp8& _Value)
+void File_ReadLE(CCFile* _pFile, fp64& _Value)
 {
 	_pFile->ReadLE(_Value);
 }
@@ -3017,13 +3288,13 @@ void File_ReadLE(class CCFile* _pFile, fp8& _Value)
 
 #elif defined(PLATFORM_PS2)
 
-void CMTime::Write(class CCFile *_pFile) const
+void CMTime::Write(CCFile *_pFile) const
 {
 	_pFile->WriteLE(m_aTime[0]);
 	_pFile->WriteLE(m_aTime[1]);
 }
 
-void CMTime::Read(class CCFile *_pFile)
+void CMTime::Read(CCFile *_pFile)
 {
 	_pFile->ReadLE(m_aTime[0]);
 	_pFile->ReadLE(m_aTime[1]);

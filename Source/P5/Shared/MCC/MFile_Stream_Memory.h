@@ -35,7 +35,7 @@ class MCCDLLEXPORT CStream_Memory : public CStream
 	mint m_Len;
 	mint m_MinGrow;
 
-	TList_Vector<uint8> m_lFileMem;
+	TArray<uint8> m_lFileMem;
 	uint8* m_pFileMem;
 	int m_FileMaxLen;
 
@@ -43,7 +43,7 @@ class MCCDLLEXPORT CStream_Memory : public CStream
 
 public:
 	CStream_Memory();
-	CStream_Memory(TList_Vector<uint8> _lFileMem, int _MinGrow = 32768);
+	CStream_Memory(TArray<uint8> _lFileMem, int _MinGrow = 32768);
 	CStream_Memory(uint8* _pMem, int _CurrentLen, int _MaxLen);
 	~CStream_Memory();
 
@@ -51,7 +51,7 @@ public:
 
 	bool FileExists(CStr _name, int _mode);
 	void Open(const CStr _name, int _mode);
-	void Open(TList_Vector<uint8> _lFileMem, int _Mode, int _MinGrow = 32768);
+	void Open(TArray<uint8> _lFileMem, int _Mode, int _MinGrow = 32768);
 	void Open(uint8* _pMem, int _CurrentLen, int _MaxLen, int _Mode);
 	void Close();
 	void Read(void* dest, mint _Size);

@@ -1,0 +1,93 @@
+
+IsLocalPlayer = (m_iObject == Client::Player_GetLocalObject())
+IsPredictedPlayer = IsLocalPlayer && PredictionIsEnabled
+
+
+
+
+repeat
+{
+	SERVER:
+	{
+		X * OnRefresh();
+		X * CLIENTMIRROR::OnClientRefresh();
+
+		OnCreateClientUpdate();
+	}
+
+
+	CLIENT:
+	{
+		if (IsLocalPlayer)
+			X * OnClientPredict( RETIRE COMMANDS );
+		else
+			X * OnClientRefresh();
+
+		OnUnpackClientUpdate();
+	}
+}
+until quit
+
+// -------------------------------------------------------------------
+OnClientMessage()
+{
+	case GETCAMERA :
+		if (IsPredictedPlayer)
+			OnClientPredict( PREDICT COMMAND QUEUE );
+		else
+			Calc interpolated stuff
+}
+
+// -------------------------------------------------------------------
+CWObject_Character::OnProcessCommand(cmd)	// Different name
+{
+}
+
+CWObject_Character::OnRefresh()
+{
+	move...  OnProcessCommand(cmd) etc...
+}
+
+
+// -------------------------------------------------------------------
+CWObject_Character::OnClientRefresh()
+{
+	if (IsPredictedPlayer) return;
+
+	if mirror
+		OnClientRefresh_Mirror();
+	else
+		OnClientRefresh_TrueClient;
+}
+
+
+CWObject_Character::OnClientPredict_ProcessCommand(cmd, bFirst)	// Different name
+{
+}
+
+CWObject_Character::OnClientPredictFrame()
+{
+	move...  OnClientPredict_ProcessCommand(cmd, bFirst) etc...
+	OnClientRefresh_TrueClient();
+}
+
+CWObject_Character::OnClientPredict()
+{
+	case RETIRE COMMANDS :
+		repeat
+		{
+			OnClientPredictFrame( real client object )
+		}
+		until current frame is found.
+
+
+	case PREDICT COMMAND QUEUE :
+		{
+			for the entire command queue
+			{
+				OnClientPredictFrame( copies of client object )
+			}
+		}
+
+}
+

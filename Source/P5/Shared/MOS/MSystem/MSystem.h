@@ -23,9 +23,11 @@ extern CXboxDemoParams g_XboxDemoParams;
 #include "Raster/MTexture.h"
 #include "Raster/MDisplay.h"
 #include "Raster/MRender.h"
+#include "Sound/MSound.h"
 #include "MNetwork.h"
 #include "Input/MInput.h"
 #include "Misc/MRegistry.h"
+//#include "Misc/MPerfGraph.h"
 #include "Script/MScript.h"
 #include "Misc/MConsole.h"
 #include "Misc/MLocalizer.h"
@@ -133,6 +135,7 @@ public:
 	int m_iMainWindow;
 	spCDisplayContext m_spDisplay;
 	spCTextureContext m_spTC;
+	TPtr<class CWaveContext> m_spWC;
 
 	// -------------------------------
 	virtual void Create(void* this_inst, void* prev_inst, char* cmdline, int _cmdshow, const char* _pAppClassName) pure;
@@ -183,6 +186,8 @@ public:
 
 	virtual CStr GetCaption() pure;
 	virtual void SetCaption(CStr _Caption) pure;
+
+	virtual class CContentContext* GetContentContext(int _iContent) pure;
 
 #ifdef PLATFORM_WIN_PC
 	virtual void Win32_CreateInfo() pure;

@@ -11,13 +11,29 @@
 #include <sys/time.h>
 //#include <netex/netset.h>
 #include <netex/net.h>
+#include <netex/ifctl.h>
+#include <netex/libnetctl.h>
 #include <netex/errno.h>
 #include <arpa/inet.h>
- 
-void DebugBreak()
+
+#include <sysutil/sysutil_common.h>
+#include <sys/memory.h>
+#include <cell/gcm.h>
+
+#include <sys/process.h>
+#include <sys/ppu_thread.h>
+#include <pthread.h>
+#include <sys/synchronization.h>
+#include <sys/timer.h>
+#include <cell/fs/cell_fs_errno.h>
+#include <cell/fs/cell_fs_file_api.h>
+
+#define M_ASSERTALWAYS(f, Mess) if(!(f)) { MRTC_SystemInfo::OS_Assert(Mess, __FILE__, __LINE__); }
+
+/*void M_BREAKPOINT
 {
 	asm volatile("tw 31, 1, 1");
-}
+}*/
 /*
 template <int _nElementSize, int _nCount>
 class TAllocPool
@@ -67,6 +83,32 @@ public:
 };
 */
 
+class CPS3MutexLocker
+{
+protected:
+	sys_mutex_t* m_pMutex;
+public:
+	CPS3MutexLocker(sys_mutex_t* _pMutex) : m_pMutex(_pMutex)
+	{
+		int Error = sys_mutex_lock(*m_pMutex, 0);
+#ifndef M_RTM
+		if(Error != CELL_OK)
+			M_ASSERTALWAYS(0, "CPS3MutexLocker::CPS3MutexLocker - Error occured while trying to acquire mutex");
+#endif
+	}
+
+	~CPS3MutexLocker()
+	{
+		int Error = sys_mutex_unlock(*m_pMutex);
+#ifndef M_RTM
+		if(Error != CELL_OK)
+			M_ASSERTALWAYS(0, "CPS3MutexLocker::~CPS3MutexLocker - Error occured while trying to release mutex");
+#endif
+	}
+};
+
+#define DLocker(obj) CPS3MutexLocker aa##__LINE__(&obj->m_Mutex);
+
 struct sys_event_t
 {
 	int32 m_Signaled;
@@ -87,10 +129,74 @@ union UPrimitive
 	sys_sem_t m_Sem;
 };
 
+class CPrimitivePool
+{
+	enum
+	{
+		PAGE_COUNT	= 1,
+		MAX_PRIM_COUNT	= (PAGE_COUNT * 65536) / (sizeof(UPrimitive) + sizeof(uint16))
+	};
+public:
+#ifndef M_RTM
+	uint32 m_AllocMask[(MAX_PRIM_COUNT + 31) >> 5];
+#endif
+	UPrimitive m_Primitives[MAX_PRIM_COUNT];
+	uint16 m_FreeList[MAX_PRIM_COUNT];
+	uint16	m_nFreeCount;
+
+	sys_mutex_t m_Mutex;
+
+	CPrimitivePool()
+	{
+		memset(this, 0, sizeof(*this));
+
+		m_Mutex = (sys_mutex_t)MRTC_SystemInfo::OS_MutexOpen(NULL);
+
+		for(uint i = 0; i < MAX_PRIM_COUNT; i++)
+			m_FreeList[i] = i;
+
+		m_nFreeCount = MAX_PRIM_COUNT;
+	}
+
+	UPrimitive* Alloc()
+	{
+		if(m_nFreeCount == 0)
+		{
+			M_TRACEALWAYS("!!!!!!!!!!!!!!!!!!! OUT OF PRIMITIVES !!!!!!!!!!!!!!!!!!!!!!!");
+			M_BREAKPOINT;
+		}
+		DLocker(this)
+		uint32 iPrim = m_FreeList[--m_nFreeCount];
+#ifndef M_RTM
+		M_ASSERT(!(m_AllocMask[iPrim >> 5] & (1 << (iPrim & 31))), "Prim already allocated!");
+		m_AllocMask[iPrim >> 5] |= 1 << (iPrim & 31);
+#endif // M_RTM
+		return &m_Primitives[iPrim];
+	}
+
+	void Free(UPrimitive* _pPrim)
+	{
+		DLocker(this)
+		uint32 iPrim = ((uint8*)_pPrim - (uint8*)m_Primitives) / sizeof(UPrimitive);
+#ifndef M_RTM
+		M_ASSERT(iPrim >= 0 && iPrim < MAX_PRIM_COUNT, "!");
+		M_ASSERT(m_AllocMask[iPrim >> 5] & (1 << (iPrim & 31)), "Prim wasn't allocated!");
+		m_AllocMask[iPrim >> 5] &= ~(1 << (iPrim & 31));
+#endif // M_RTM
+		m_FreeList[m_nFreeCount++]	= iPrim;
+	}
+
+	void ReportAlloc()
+	{
+		// Report this allocation
+		gf_RDSendPhysicalAlloc((void*)m_Primitives, (PAGE_COUNT * 65536), 0, gf_RDGetSequence(), 0);
+	}
+};
+
 class MRTC_SystemInfoInternal
 {
 public:
-	TDA_Pool<UPrimitive> m_PrimitivePool;
+	CPrimitivePool m_PrimitivePool;
 	MRTC_SystemInfoInternal()
 	{
 		m_pTCPContext = NULL;
@@ -99,9 +205,62 @@ public:
 
 	class CTCPContext
 	{
+	protected:
+		int if_up_with(int index)
+		{
+			int state;
+			int ret;
+
+			(void)index;
+/*			ret = cellSysutilInit();
+			if (ret < 0) {
+				printf("cellSysutilInit() failed(%x)\n", ret);
+				return (-1);
+			}
+*/			ret = cellNetCtlInit();
+			if (ret < 0) {
+				printf("cellNetCtlInit() failed(%x)\n", ret);
+				return (-1);
+			}
+			CMTime Start = CMTime::GetCPU();
+			CMTime Timeout = CMTime::CreateFromSeconds(2.0f);
+			for (;;) {
+				if((CMTime::GetCPU() - Start).Compare(Timeout) > 0.0f)
+				{
+					MRTC_SystemInfo::OS_TraceRaw("Connection timeout.\r\n");
+					return -1;
+				}
+				ret = cellNetCtlGetState(&state);
+				if (ret < 0) {
+					printf("cellNetCtlGetState() failed(%x)\n", ret);
+					return (-1);
+				}
+				if (state == CELL_NET_CTL_STATE_IPObtained) {
+					MRTC_SystemInfo::OS_TraceRaw("Connection found.\r\n");
+					break;
+				}
+				MRTC_SystemInfo::OS_Sleep(500);
+//				sys_timer_usleep(500 * 1000);
+			}
+			return(0);
+		}
+
+		int if_up(void)
+		{
+			return(if_up_with(0));
+		}
+
+		int if_down(int sid)
+		{
+			(void)sid;
+			cellNetCtlTerm();
+//			cellSysutilShutdown();
+			return(0);
+		}
+
 	public:
 		bint m_bInitFailed;
-//		sys_netset_id_t m_sid;
+		int m_sid;
 
 		CTCPContext() : m_bInitFailed(false)//, m_sid(0)
 		{
@@ -111,68 +270,46 @@ public:
 		~CTCPContext()
 		{
 			m_SocketTree.f_DeleteAll();
-/*
 			if(!m_bInitFailed)
 			{
-				int ret = sys_netset_if_down(m_sid, -1, 0);
-				if(ret < 0)
-					MRTC_SystemInfo::OS_Assert(CFStrF("sys_netset_if_down failed(%d, %d)\n", ret, sys_net_errno).Str());
-				ret = sys_netset_close(m_sid, 0);
-				if(ret < 0)
-					MRTC_SystemInfo::OS_Assert(CFStrF("sys_netset_if_close failed(%d, %d)\n", ret, sys_net_errno).Str());
+				if_down(m_sid);
 				sys_net_finalize_network();
 			}
-*/		}
+		}
  
 		void Init()
 		{
-/*
 			m_bInitFailed = true;
 			if(sys_net_initialize_network() != 0)
 				return;
 
 			m_sid = -1;
-			do
-			{
-				static char g_settings[] =
-					"type nic\n"
-					"my_name \"my_hostname1\"\n"	// "my_name \"MAC:00:04:1f:01:02:03\"\n"
-					"dhcp\n"
-					"\n"
-					"vendor \"SCE\"\n"
-					"product \"Gigabit Ethernet\"\n"
-					"phy_config auto\n"; 
-				sys_netset_id_t sid = sys_netset_open(g_settings, NULL, 0);
-				if(sid < 0)
-					break;
-				int ret = sys_netset_if_up(sid, 15 * 1000, 0);
-				if(ret < 0)
-				{
-					sys_netset_close(sid, 0);
-					break;
-				}
-				m_sid = sid;
-
-			} while(0);
-
-			if(m_sid < 0)
+			int sid = if_up();
+			if(sid < 0)
 			{
 				sys_net_finalize_network();
 				return;
 			}
-*/
+
+			m_bInitFailed = false;
+			m_sid = sid;
 		}
 
 		class CTCPSocket : public MRTC_Thread
 		{
+		protected:
+			virtual const char* Thread_GetName() const
+			{
+				return "PS3 Socket";
+			}
 		public:
 			MRTC_CriticalSection m_Lock;
 
-			CTCPSocket()
+			CTCPSocket(NThread::CEventAutoResetReportableAggregate *_pReportTo, int _Socket)
 			{
 				m_State = 0;
-				m_pReportTo = NULL;
-				m_Socket = NULL;
+				m_pReportTo = _pReportTo;
+				m_Socket = _Socket;
 				m_bListenSocket = false;
 				m_bConnectionSocket = false;
 				Thread_Create(NULL, 16384, MRTC_THREAD_PRIO_HIGHEST);
@@ -181,7 +318,7 @@ public:
 			~CTCPSocket()
 			{
 				Thread_Destroy();
-				if(m_Socket && !(m_State & DBit(31)))
+				if(m_Socket && !(m_State & M_Bit(31)))
 				{
 					socketclose(m_Socket);
 					m_Socket = 0;
@@ -194,24 +331,27 @@ public:
 				{
 					if(m_Socket)
 					{
+						int Socket = m_Socket;
 						fd_set ReadSet;
-						FD_SET(m_Socket, &ReadSet);
+						FD_ZERO(&ReadSet);
+						FD_SET(Socket, &ReadSet);
 						fd_set WriteSet;
-						FD_SET(m_Socket, &WriteSet);
+						FD_ZERO(&WriteSet);
+						FD_SET(Socket, &WriteSet);
 						timeval timeout;
 						timeout.tv_sec = 0;
-						timeout.tv_usec = 100000;
-						socketselect(1, &ReadSet, &WriteSet, NULL, &timeout);
+						timeout.tv_usec = 0;
+						if(socketselect(Socket + 1, &ReadSet, &WriteSet, NULL, &timeout) > 0)
 						{
-							DIdsLockTyped(NThread::CMutual, m_Lock);
+							DLockTyped(NThread::CMutual, m_Lock);
 
 							uint32 LastState = m_State;
-							if(FD_ISSET(m_Socket, &ReadSet))
+							if(FD_ISSET(Socket, &ReadSet))
 							{
 								sockaddr_in AddrIn;
 								int Len = sizeof(AddrIn);
 								int Error;
-								if(m_bConnectionSocket && (Error = recv(m_Socket, NULL, 0, 0)) <= 0)
+								if(m_bConnectionSocket && (Error = recv(Socket, NULL, 0, 0)) <= 0)
 								{
 									int NetErrno = sys_net_errno;
 									if(Error == 0 || NetErrno == SYS_NET_ECONNABORTED)
@@ -223,7 +363,7 @@ public:
 								else
 									m_State |= NNet::ENetTCPState_Read;
 							}
-							if(FD_ISSET(m_Socket, &WriteSet))
+							if(FD_ISSET(Socket, &WriteSet))
 							{
 								m_State |= NNet::ENetTCPState_Write;
 							}
@@ -233,6 +373,8 @@ public:
 									m_pReportTo->Signal();
 							}
 						}
+
+						MRTC_SystemInfo::OS_Sleep(20);
 					}
 					else
 						MRTC_SystemInfo::OS_Sleep(50);
@@ -269,15 +411,18 @@ public:
 		typedef DIdsTreeAVLAligned_Iterator(CTCPSocket, m_TreeLink, void *, CTCPSocket::CAVLCompare_CTCPSocket) CSocketIter;
 		NThread::CMutual m_Lock;
 
-		void f_CheckFailed()
+		int f_CheckFailed()
 		{
 			if (m_bInitFailed)
-				Error_static(__FUNCTION__, "Initialization of network has failed, cannot use net");
+				return 1;
+			return 0;
 		}
 
 		bint f_ResolveAddres(const ch8 *_pAddress, NNet::CNetAddressIPv4 &_Address)
 		{
-			f_CheckFailed();
+			if(f_CheckFailed())
+				return false;
+
 			uint32 Address = inet_addr(_pAddress);
 			if(Address == ~0)
 				return false;
@@ -290,7 +435,8 @@ public:
 
 		CTCPSocket* f_Connect(const NNet::CNetAddressTCPv4 &_Address, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
-			f_CheckFailed();
+			if(f_CheckFailed())
+				return NULL;
 
 			int sock = socket(AF_INET, SOCK_STREAM, 0);
 			if(sock < 0)
@@ -326,11 +472,16 @@ public:
 				return NULL;
 			}
 
-			CTCPSocket* pReturn = DNew(CTCPSocket) CTCPSocket;
-			pReturn->m_Socket = sock;
-			pReturn->m_pReportTo = _pReportTo;
+			int NonBlocking = 1;
+			if (setsockopt(sock, SOL_SOCKET, SO_NBIO, (const char*)&NonBlocking, sizeof(NonBlocking)))
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				socketclose(sock);
+				return NULL;
+			}
+
+			CTCPSocket* pReturn = DNew(CTCPSocket) CTCPSocket(_pReportTo, sock);
+			{
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -339,9 +490,10 @@ public:
 
 		CTCPSocket* f_Bind(const NNet::CNetAddressUDPv4 &_Address, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
-			f_CheckFailed();
+			if(f_CheckFailed())
+				return false;
 
-			int sock = socket(AF_INET, SOCK_STREAM, 0);
+			int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 			if(sock < 0)
 				return NULL;
 
@@ -379,12 +531,17 @@ public:
 				}
 			}
 
-			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket;
-
-			pReturn->m_pReportTo = _pReportTo;
-			pReturn->m_Socket = sock;
+			int NonBlocking = 1;
+			if (setsockopt(sock, SOL_SOCKET, SO_NBIO, (const char*)&NonBlocking, sizeof(NonBlocking)))
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				socketclose(sock);
+				return NULL;
+			}
+
+			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket(_pReportTo, sock);
+
+			{
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -393,7 +550,8 @@ public:
 
 		CTCPSocket* f_Listen(const NNet::CNetAddressTCPv4 &_Address, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
-			f_CheckFailed();
+			if(f_CheckFailed())
+				return false;
 
 			int sock = socket(AF_INET, SOCK_STREAM, 0);
 			if(sock < 0)
@@ -416,12 +574,17 @@ public:
 				return NULL;
 			}
 
-			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket;
-
-			pReturn->m_pReportTo = _pReportTo;
-			pReturn->m_Socket = sock;
+			int NonBlocking = 1;
+			if (setsockopt(sock, SOL_SOCKET, SO_NBIO, (const char*)&NonBlocking, sizeof(NonBlocking)))
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				socketclose(sock);
+				return NULL;
+			}
+
+			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket(_pReportTo, sock);
+
+			{
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -430,7 +593,8 @@ public:
 
 		CTCPSocket* f_Accept(CTCPSocket *_pSocket, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
-			f_CheckFailed();
+			if(f_CheckFailed())
+				return false;
 
 			int sock = accept(_pSocket->m_Socket, NULL, 0);
 			if(sock < 0)
@@ -458,12 +622,10 @@ public:
 				return NULL;
 			}
 
-			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket;
+			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket(_pReportTo, sock);
 
-			pReturn->m_pReportTo = _pReportTo;
-			pReturn->m_Socket = sock;
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 
@@ -473,7 +635,7 @@ public:
 		void f_SetReportTo(CTCPSocket *_pSocket, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 				_pSocket->m_pReportTo = _pReportTo;
 
 				if(_pSocket->m_pReportTo)
@@ -483,19 +645,17 @@ public:
 
 		void* f_InheritHandle(CTCPSocket *_pSocket, NThread::CEventAutoResetReportableAggregate *_pReportTo)
 		{
-			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket;
+			CTCPSocket *pReturn = DNew(CTCPSocket) CTCPSocket(_pReportTo, _pSocket->m_Socket);
 
-			pReturn->m_pReportTo = _pReportTo;
-			pReturn->m_Socket = _pSocket->m_Socket;
 			pReturn->m_State = _pSocket->m_State;
 
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
-				_pSocket->m_State |= DBit(31);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				_pSocket->m_State |= M_Bit(31);
 			}
 
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Insert(pReturn);
 			}
 			if (pReturn->m_pReportTo)
@@ -507,13 +667,13 @@ public:
 		bint f_Close(CTCPSocket *_pSocket)
 		{
 			{
-				DIdsLockTyped(NThread::CMutual, m_Lock);
+				DLockTyped(NThread::CMutual, m_Lock);
 				m_SocketTree.f_Remove(_pSocket);
 			}
 
 			// Make sure that the report thread isn't using our socket
 			{
-				DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+				DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 			}
 
 			delete _pSocket;
@@ -523,7 +683,7 @@ public:
 
 		uint32 f_GetState(CTCPSocket *_pSocket)
 		{
-			DIdsLockTyped(NThread::CMutual, _pSocket->m_Lock);
+			DLockTyped(NThread::CMutual, _pSocket->m_Lock);
 			uint32 State = _pSocket->m_State & DBitRange(0, 30);
 			_pSocket->m_State &= ~DBitRange(0, 30);
 			return State;
@@ -573,7 +733,7 @@ public:
 			Address.sin_family = AF_INET;
 
 			socklen_t Size = sizeof(Address);
-			int Ret = recvfrom(_pSocket->m_Socket, (char *)_pData, _DataLen, 0, (sockaddr *)&Address, &Size);
+			int Ret = recvfrom(_pSocket->m_Socket, (char *)_pData, _DataLen, MSG_DONTWAIT, (sockaddr *)&Address, &Size);
 
 			if (Ret < 0)
 			{
@@ -603,7 +763,7 @@ public:
 			Address.sin_addr.s_addr = _Address.m_IP[0] | (_Address.m_IP[1] << 8) | (_Address.m_IP[2] << 16) | (_Address.m_IP[3] << 24);
 			Address.sin_port = _Address.m_Port;
 
-			int Ret = sendto(_pSocket->m_Socket, (const char *)_pData, _DataLen, 0, (sockaddr *)&Address, sizeof(Address));
+			int Ret = sendto(_pSocket->m_Socket, (const char *)_pData, _DataLen, MSG_DONTWAIT, (sockaddr *)&Address, sizeof(Address));
 
 			if (Ret < 0)
 			{
@@ -674,8 +834,33 @@ MRTC_SystemInfo::~MRTC_SystemInfo()
 		m_pThreadContext->~MRTC_ThreadContext();
 }
 
+#include <cell/sysmodule.h>
+
 void MRTC_SystemInfo::PostCreate()
 {
+	m_pInternalData->m_PrimitivePool.ReportAlloc();
+
+	cellSysmoduleInitialize();
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_FS);
+	cellSysmoduleLoadModule(CELL_SYSMODULE_IO);
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_RESC);
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_GCM_SYS);
+	cellSysmoduleLoadModule(CELL_SYSMODULE_GCM);
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_SPURS);
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_NET);
+
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_ADEC);
+	cellSysmoduleLoadModule(CELL_SYSMODULE_VDEC);
+
+	cellSysmoduleLoadModule(CELL_SYSMODULE_SYSUTIL_NP);
+
+
 }
 
 /*************************************************************************************************\
@@ -702,30 +887,37 @@ void MRTC_SystemInfo::CPU_MeasureFrequency()
 	m_CPUFrequencyRecp = 1.0f / m_CPUFrequencyfp;
 	printf("PS3 CPU Frequency: %u\n", (uint32)m_CPUFrequencyu);
 }
-
+/*
 int64 MRTC_SystemInfo::CPU_Clock()
 {
 	int64 result;
-	asm volatile("mftb %0": [result] "=r"(result));
+	 __asm__ volatile("1: mftb %[current_tb];"
+					"cmpwi 7, %[current_tb], 0;"
+					"beq-  7, 1b;"
+     : [current_tb] "=r" (result):
+     :"cr7");
+
+//	int64 result;
+//	asm volatile("mftb %0": [result] "=b"(result));
 	return result;
 }
-
+*/
 uint64 MRTC_SystemInfo::CPU_ClockFrequencyInt() const
 {
 	return m_CPUFrequencyu;
 }
 
-fp4 MRTC_SystemInfo::CPU_ClockFrequencyFloat() const
+fp32 MRTC_SystemInfo::CPU_ClockFrequencyFloat() const
 {
 	return m_CPUFrequencyfp;
 }
 
-fp4 MRTC_SystemInfo::CPU_ClockFrequencyRecp() const
+fp32 MRTC_SystemInfo::CPU_ClockFrequencyRecp() const
 {
 	return m_CPUFrequencyRecp;
 }
 
-fp4 MRTC_SystemInfo::OS_ClockFrequencyRecp() const
+fp32 MRTC_SystemInfo::OS_ClockFrequencyRecp() const
 {
 	return m_CPUFrequencyRecp;
 }
@@ -735,16 +927,29 @@ uint64 MRTC_SystemInfo::OS_ClockFrequencyInt() const
 	return m_CPUFrequencyu;
 }
 
-fp4 MRTC_SystemInfo::OS_ClockFrequencyFloat() const
+fp32 MRTC_SystemInfo::OS_ClockFrequencyFloat() const
 {
 	return m_CPUFrequencyfp;
 }
-
+/*
 int64 MRTC_SystemInfo::OS_Clock()
 {
 	int64 result;
-	asm volatile("mftb %0": [result] "=r"(result));
+	 __asm__ volatile("1: mftb %[current_tb];"
+					"cmpwi 7, %[current_tb], 0;"
+					"beq-  7, 1b;"
+     : [current_tb] "=r" (result):
+     :"cr7");
+
+//	asm volatile("mftb %0": [result] "=b"(result));
 	return result;
+}
+*/
+void MRTC_SystemInfo::OS_NamedEvent_Begin(const char* _pName, uint32 _Color)
+{
+}
+void MRTC_SystemInfo::OS_NamedEvent_End()
+{
 }
 
 /*************************************************************************************************\
@@ -775,46 +980,375 @@ void MRTC_SystemInfo::OS_HeapFree(void *_pMem)
 
 uint32 MRTC_SystemInfo::OS_HeapSize(const void *_pMem)
 {
-	DebugBreak(); // implement this (with dlmalloc?)
+	M_BREAKPOINT; // implement this (with dlmalloc?)
 //	return _msize(_pMem);
 	return 0;
 }
 
-void* MRTC_SystemInfo::OS_Alloc(uint32 _Size, bool _bCommit)
-{
-	sys_addr_t MemoryAddr;
-	_Size = (_Size + 65535) & ~65535;
-	
-	if (sys_memory_allocate(_Size, SYS_MEMORY_PAGE_SIZE_64K, &MemoryAddr) != CELL_OK)
-		return NULL;
+#ifdef PS3_RENDERER_GCM
+extern void* gs_lpPS3Heaps[];
+extern uint32 gs_nPS3Heaps;
+extern uint32 gs_PS3HeapSize[];
+extern uint32 gs_PS3PushBufferSize;
+#endif	// PS3_RENDERER_GCM
 
-	return (void *)MemoryAddr;
+static void* pMemoryFaker = 0;
+static uint32 Head = 0, Tail = 0;
+
+static MRTC_CriticalSection* gs_pFakerLock = 0;
+static uint8 M_ALIGN(128) gs_lFakerLock[sizeof(MRTC_CriticalSection)];
+
+int32_t cellGcmInit(const uint32_t cmdSize, const uint32_t ioSize, const void *ioAddress);
+
+static void InitMemoryFaker()
+{
+	if(pMemoryFaker)
+		return;
+
+	gs_pFakerLock = new(gs_lFakerLock) MRTC_CriticalSection;
+
+	sys_memory_info_t meminfo;
+	if(sys_memory_get_user_memory_size(&meminfo) != CELL_OK)
+		M_BREAKPOINT;
+
+
+	// Save atleast 16MiB for system use
+#ifdef PS3_RENDERER_GCM
+	uint32 AllFuckingMemory = Min((uint)(256 * 1024 * 1024), (meminfo.available_user_memory & ~(1024 * 1024 -1)) - (16 * 1024 * 1024));
+#else
+	uint32 AllFuckingMemory = (meminfo.available_user_memory & ~(1024 * 1024 -1)) - (32 * 1024 * 1024);
+#endif
+	sys_addr_t MemoryAddr;
+	if(sys_memory_allocate(AllFuckingMemory, SYS_MEMORY_PAGE_SIZE_1M, &MemoryAddr) != CELL_OK)
+		M_BREAKPOINT;
+
+	Tail = AllFuckingMemory;
+	pMemoryFaker = (void*)MemoryAddr;
+
+#ifdef PS3_RENDERER_GCM
+	gs_lpPS3Heaps[gs_nPS3Heaps] = pMemoryFaker;
+	gs_PS3HeapSize[gs_nPS3Heaps] = AllFuckingMemory;//gs_PS3PushBufferSize;
+	gs_nPS3Heaps++;
+
+	Head	+= gs_PS3PushBufferSize;
+#endif	// PS3_RENDERER_GCM
 }
 
-void MRTC_SystemInfo::OS_Free(void *_pMem)
+void* FakerAlloc(uint32 _Size, uint32 _Alignment)
 {
+	InitMemoryFaker();
+	M_LOCK(*gs_pFakerLock);
+	void* pMemory = 0;
+	if(!(_Size & (1024 * 1024 - 1)))
+	{
+		// 1MiB Aligned size requested.. Alloc from bottom
+
+		if((Tail - Head) < _Size)
+			return NULL;
+
+		pMemory = ((uint8*)pMemoryFaker) + Head;
+		Head += _Size;
+	}
+	else
+	{
+		_Size = (_Size + 65535) & ~65535;
+		if((Tail - Head) < _Size)
+			return NULL;
+
+		// Alloc from top
+		pMemory = ((uint8*)pMemoryFaker) + (Tail - _Size);
+		Tail -= _Size;
+	}
+
+	gf_RDSendPhysicalAlloc((void *)pMemory, _Size, 0, gf_RDGetSequence(), 0);
+	return (void *)pMemory;
+}
+
+void FakerFree(void *_pMem)
+{
+	M_BREAKPOINT;
+	if(_pMem)
+	{
+		gf_RDSendPhysicalFree(_pMem, gf_RDGetSequence(), 0);
+	}
 	sys_memory_free((sys_addr_t)_pMem);
 }
 
-#include <sys/memory.h>
+
+
+
+class CPhysicalMemoryContext
+{
+public:
+
+	bint m_bInit;
+	NThread::CMutual m_Lock;
+
+	class CAllocator : public CAllocator_Virtual
+	{
+	public:
+		static mint ms_Pos;
+		static mint ms_Data[(24*1024) / sizeof(mint)];
+		DIdsPInlineS static void *Alloc(mint _Size, mint _Location = 0)
+		{
+			mint Size = sizeof(ms_Data);
+			mint Left = Size - ms_Pos;
+			if (_Size > Left)
+				M_BREAKPOINT; // Out of memory
+			mint Ret = (mint)ms_Data + ms_Pos;
+			ms_Pos += _Size;
+			return (void *)Ret;
+		}
+
+		DIdsPInlineS static void *AllocAlignDebug(mint _Size, mint _Align, mint _Location, const ch8 *_pFile, aint _Line, aint _Flags = 0)
+		{
+			return Alloc(_Size);
+		}
+
+		DIdsPInlineS static void *AllocAlign(mint _Size, mint _Align, mint _Location = 0)
+		{
+			return Alloc(_Size);
+		}
+		DIdsPInlineS static void *AllocNoCommit(mint _Size, mint _Location = 0)
+		{
+			return Alloc(_Size);
+		}
+		DIdsPInlineS static void Free(void *_pBlock, mint _Size = 0, mint _Location = 0)
+		{
+		}
+		DIdsPInlineS static mint Size(void *_pBlock)
+		{
+			return 0;
+		}
+	};
+
+	typedef TCSimpleBlockManager<CAllocator, CPoolType_Growing> CBlockManager;
+	CBlockManager m_BlockManagers[4];
+	mint m_ValidBuffers;
+
+	void Init()
+	{
+		if (!m_bInit)
+		{
+			InitMemoryFaker();
+			new(this) CPhysicalMemoryContext;
+
+			mint SaveMemory = 512*1024;
+			mint FreeMemory = Tail - Head;
+
+
+			int64 Alloc64K = AlignDown(FreeMemory - SaveMemory, 64*1024);
+			Alloc64K = MaxMT(0, Alloc64K);
+
+			void* pData = FakerAlloc(Alloc64K,0);
+
+			M_TRACEALWAYS("Found %f MiB of physical memory\n", fp32(Alloc64K) / (1024.0 * 1024.0));
+
+			m_BlockManagers[0].Create("Physical 0", mint(pData), Alloc64K, 128);
+			m_ValidBuffers = 2;
+			m_bInit = true;
+		}
+	}
+#if 0
+	void Init2()
+	{
+		DLock(m_Lock);
+
+		MEMORYSTATUS MemoryStatus;
+		MemoryStatus.dwLength = sizeof(MEMORYSTATUS);
+		GlobalMemoryStatus(&MemoryStatus);
+
+		mint SaveMemory = 1024*1024;
+
+		int64 Alloc64K = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 64*1024);
+		Alloc64K = MaxMT(0, Alloc64K);
+		mint pData2 = NULL;
+		while (Alloc64K > 0)
+		{
+			pData2 = (mint)XPhysicalAlloc(Alloc64K, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+			if (pData2)
+				break;
+			Alloc64K -= 64*1024;
+		}
+
+		GlobalMemoryStatus(&MemoryStatus);
+
+		int64 Alloc64K2 = AlignDown(MemoryStatus.dwAvailPhys - SaveMemory, 64*1024);
+		Alloc64K2 = MaxMT(0, Alloc64K2);
+
+		mint pData3 = NULL;
+		while (Alloc64K2 > 0)
+		{
+			pData3 = (mint)XPhysicalAlloc(Alloc64K2, MAXULONG_PTR, 0, PAGE_READWRITE | MEM_LARGE_PAGES);//MEM_16MB_PAGES);
+			if (pData3)
+				break;
+			Alloc64K2 -= 64*1024;
+		}
+
+		GlobalMemoryStatus(&MemoryStatus);
+
+		M_TRACEALWAYS("Found %f MiB of physical memory\n", fp32(Alloc64K+Alloc64K2) / (1024.0 * 1024.0));
+
+		m_BlockManagers[2].Create("Physical 2", pData2, Alloc64K, 128);
+		m_BlockManagers[3].Create("Physical 3", pData3, Alloc64K2, 128);
+		m_ValidBuffers = 4;
+	}
+#endif
+	void *Alloc(mint _Size, mint _Alignment)
+	{
+		Init();
+		DLock(m_Lock);
+		for (mint i = m_ValidBuffers-1; i >= 0; --i)
+		{
+			CBlockManager::CBlock *pBlock = m_BlockManagers[i].Alloc(_Size, _Alignment);
+			if (pBlock)
+				return (void *)(mint)pBlock->GetMemory();
+		}
+		M_BREAKPOINT; // Out of memory
+		return NULL;
+	}
+	void Free(void *_pMemory)
+	{
+		DLock(m_Lock);
+		for (mint i = 0; i < m_ValidBuffers; ++i)
+		{
+			mint Memory = (mint)_pMemory;
+			if (Memory >= m_BlockManagers[i].m_pBlockStart && Memory < m_BlockManagers[i].m_pBlockEnd)
+			{
+				CBlockManager::CBlock *pBlock = m_BlockManagers[i].GetBlockFromAddress(Memory);
+				m_BlockManagers[i].Free(pBlock);
+				return;
+			}
+		}
+
+		M_BREAKPOINT; // Memory not found
+	}
+	mint Size(void *_pMemory)
+	{
+		DLock(m_Lock);
+		for (mint i = 0; i < m_ValidBuffers; ++i)
+		{
+			mint Memory = (mint)_pMemory;
+			if (Memory >= m_BlockManagers[i].m_pBlockStart && Memory < m_BlockManagers[i].m_pBlockEnd)
+			{
+				CBlockManager::CBlock *pBlock = m_BlockManagers[i].GetBlockFromAddress(Memory);
+				return m_BlockManagers[i].GetBlockSize(pBlock);
+			}
+		}
+		M_BREAKPOINT; // Memory not found
+		return 0;
+	}
+};
+mint g_PhysicalMemoryContext[(sizeof(CPhysicalMemoryContext) + sizeof(mint) - 1) / sizeof(mint)] = {0};
+mint CPhysicalMemoryContext::CAllocator::ms_Data[(24*1024) / sizeof(mint)];
+mint CPhysicalMemoryContext::CAllocator::ms_Pos = 0;
+
+mint gf_GetFreePhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	DLock(pContext->m_Lock);
+
+	mint FreeMem = 0;
+	for (mint i = 0; i < pContext->m_ValidBuffers; ++i)
+	{
+		FreeMem += pContext->m_BlockManagers[i].GetFreeMemory();
+	}
+	return FreeMem;
+}
+
+mint gf_GetLargestBlockPhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	DLock(pContext->m_Lock);
+	mint FreeMem = 0;
+	for (mint i = 0; i < pContext->m_ValidBuffers; ++i)
+	{
+		FreeMem = MaxMT(FreeMem, pContext->m_BlockManagers[i].GetLargestFreeBlock());
+	}
+	return FreeMem;
+}
+
+#if 0
+void gf_GetExtraPhysicalMemory()
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init2();
+
+	// Alloc more to memory manager
+
+	CDA_MemoryManager *pMemMan = MRTC_GetMemoryManager();
+
+	mint ToSave = 128*1024;
+	mint FreeMem = gf_GetFreePhysicalMemory();
+	while (FreeMem > ToSave)
+	{
+		mint ToAlloc = AlignDown(gf_GetLargestBlockPhysicalMemory()-4096, 4096);
+		ToAlloc = Min(ToAlloc, FreeMem - ToSave);
+		pMemMan->InitStatic(ToAlloc);
+		FreeMem = gf_GetFreePhysicalMemory();
+	}
+
+}
+#endif
+
+mint MRTC_SystemInfo::OS_MemSize(void *_pBlock)
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	return pContext->Size(_pBlock);
+
+}
+
+void* MRTC_SystemInfo::OS_Alloc(uint32 _Size, uint32 _Alignment)
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	pContext->Init();
+	return pContext->Alloc(_Size, _Alignment);
+}
+
+void MRTC_SystemInfo::OS_Free(void* _pMem)
+{
+	CPhysicalMemoryContext *pContext = (CPhysicalMemoryContext *)g_PhysicalMemoryContext;
+	return pContext->Free(_pMem);
+
+}
+
+
+
+
+
+
 void* MRTC_SystemInfo::OS_AllocGPU(uint32 _Size, bool _bCached)
 {
-	sys_addr_t MemoryAddr;
-	_Size = (_Size + 65535) & ~65535;
-	if (sys_memory_allocate(_Size, SYS_MEMORY_PAGE_SIZE_64K, &MemoryAddr) != CELL_OK)
-		return NULL;
+	_Size = (_Size + (1024*1024-1)) & ~(1024*1024-1);
+	void* pMemory = OS_Alloc(_Size, _bCached);
+	gf_RDSendPhysicalAlloc((void *)pMemory, _Size, 0, gf_RDGetSequence(), 0);
 
-	return (void *)MemoryAddr;
+	M_LOCK(*gs_pFakerLock);
+
+#ifdef PS3_RENDERER_GCM
+	gs_lpPS3Heaps[gs_nPS3Heaps] = pMemory;
+	gs_PS3HeapSize[gs_nPS3Heaps] = _Size;
+	gs_nPS3Heaps++;
+#endif // PS3_RENDERER_GCM
+
+	return pMemory;
 }
 
 void MRTC_SystemInfo::OS_FreeGPU(void *_pMem)
 {
+	M_BREAKPOINT;
+	if(_pMem)
+	{
+		gf_RDSendPhysicalFree(_pMem, gf_RDGetSequence(), 0);
+	}
 	sys_memory_free((sys_addr_t)_pMem);
 }
 
 bool MRTC_SystemInfo::OS_Commit(void *_pMem, uint32 _Size, bool _bCommited)
 {
-	DebugBreak();
+	M_BREAKPOINT;
 	return false;
 }
 
@@ -828,7 +1362,7 @@ uint32 MRTC_SystemInfo::OS_CommitGranularity()
 | Atomic
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-
+/*
 int32 MRTC_SystemInfo::Atomic_Increase(volatile int32 *_pDest)
 {
 	int32 result, temp;
@@ -838,7 +1372,7 @@ int32 MRTC_SystemInfo::Atomic_Increase(volatile int32 *_pDest)
 		"addi %1, %0, 1\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_inc_loop%=\n"
-		: "=&b"(result), "=&b"(temp)
+		: "=&b"(result), "=&r"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -854,7 +1388,7 @@ int32 MRTC_SystemInfo::Atomic_Decrease(volatile int32 *_pDest)
 		"subi %1, %0, 1\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_dec_loop%=\n"
-		: "=&b"(result), "=&b"(temp)
+		: "=&b"(result), "=&r"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -870,7 +1404,7 @@ int32 MRTC_SystemInfo::Atomic_Add(volatile int32 *_pDest, int32 _Add)
 		"add %1, %0, %2\n"
 		"stwcx. %1, 0, %2\n"
 		"bne-	.Latomic_add_loop%=\n"
-		: "=&b"(result), "=&b"(temp)
+		: "=&b"(result), "=&r"(temp)
 		: "r"(_pDest)
 		: "memory"
 		);
@@ -889,7 +1423,7 @@ int32 MRTC_SystemInfo::Atomic_IfEqualExchange(volatile int32 *_pDest, int32 _Com
 		"bne- .Latomic_iex_loop%=\n"
 	".Latomic_iex_done%=:\n"
 		: "=&b"(result)
-		: "r"(_pDest), "r"(_CompareTo), "b"(_SetTo)
+		: "r"(_pDest), "r"(_CompareTo), "r"(_SetTo)
 		: "memory"
 		);
 	
@@ -905,28 +1439,25 @@ int32 MRTC_SystemInfo::Atomic_Exchange(volatile int32 *_pDest, int32 _SetTo)
 		"stwcx. %2, 0, %1\n"
 		"bne-	.Latomic_xch_loop%=\n"
 		: "=&b"(result)
-		: "r"(_pDest), "b"(_SetTo)
+		: "r"(_pDest), "r"(_SetTo)
 		: "memory"
 		);
 	return result;
 }
-
+*/
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 | Thread
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-#include <sys/process.h>
-#include <sys/ppu_thread.h>
-#include <pthread.h>
-
+/*
 void* MRTC_SystemInfo::OS_GetThreadID()
 {
-	sys_ppu_thread_t Thread;
-	sys_ppu_thread_get_id(&Thread);
-	return (void *)(aint)Thread;
+	uint64 result;
+	asm volatile("mr %0, 13" : "=&b"(result));
+	return (void*)result;
 }
-
+*/
 
 void* MRTC_SystemInfo::OS_GetProcessID()
 {
@@ -937,7 +1468,7 @@ void* MRTC_SystemInfo::OS_GetProcessID()
 class CPS3Thread
 {
 public:
-	pthread_t m_ThreadID;
+	sys_ppu_thread_t m_ThreadID;
 	uint32(M_STDCALL*m_pfnEntryPoint)(void*);
 	void *m_pContext;
 
@@ -949,7 +1480,7 @@ public:
 	{
 		if (m_ThreadID)
 		{
-			pthread_detach(m_ThreadID);
+			sys_ppu_thread_detach(m_ThreadID);
 		}
 	}
 
@@ -971,36 +1502,27 @@ public:
 			return 0;
 	}
 
-	static void * fs_ThreadProc(void * _Context)
+	static void  fs_ThreadProc(uint64 _Context)
 	{
 		CPS3Thread *pContext = (CPS3Thread *)_Context;
 
 		uint32 ExitCode = pContext->m_pfnEntryPoint(pContext->m_pContext);
-		return (void *)(aint)ExitCode;
+		MRTC_SystemInfo::OS_ThreadExit(ExitCode);
 	}
 };
 
-void* MRTC_SystemInfo::OS_ThreadCreate(uint32(M_STDCALL*_pfnEntryPoint)(void*), int _StackSize, void* _pContext, int _ThreadPriority)
+void* MRTC_SystemInfo::OS_ThreadCreate(uint32(M_STDCALL*_pfnEntryPoint)(void*), int _StackSize, void* _pContext, int _ThreadPriority, const char* _pName)
 {
 	CPS3Thread *pThread = DNew(CPS3Thread) CPS3Thread;
 	pThread->m_pContext = _pContext;
 	pThread->m_pfnEntryPoint = _pfnEntryPoint;
 
-	pthread_attr_t PThreadAttr;
-	pthread_attr_init(&PThreadAttr);
-	pthread_attr_setstacksize(&PThreadAttr, _StackSize);
-	sched_param Param;
-	Param.sched_priority = CPS3Thread::MCCPrioToPS3Prio(_ThreadPriority);
-	pthread_attr_setschedparam(&PThreadAttr, &Param);
-//	PThreadAttr.
-	int Ret = pthread_create(&pThread->m_ThreadID, &PThreadAttr, CPS3Thread::fs_ThreadProc, pThread);
+	int Ret = sys_ppu_thread_create(&pThread->m_ThreadID, CPS3Thread::fs_ThreadProc, (uint64)pThread, CPS3Thread::MCCPrioToPS3Prio(_ThreadPriority), _StackSize, SYS_PPU_THREAD_CREATE_JOINABLE, _pName);
 	if (Ret == 0)
 	{
-		pthread_attr_destroy(&PThreadAttr);
 		return pThread;
 	}
 
-	pthread_attr_destroy(&PThreadAttr);
 	delete pThread;
 	return NULL;
 }
@@ -1008,21 +1530,22 @@ void* MRTC_SystemInfo::OS_ThreadCreate(uint32(M_STDCALL*_pfnEntryPoint)(void*), 
 int MRTC_SystemInfo::OS_ThreadDestroy(void* _hThread)
 {
 	CPS3Thread *pThread = (CPS3Thread *)_hThread;
-	void* ExitCode = 0;
-	pthread_join(pThread->m_ThreadID, &ExitCode);
+	uint64 ExitCode = 0;
+	sys_ppu_thread_join(pThread->m_ThreadID, &ExitCode);
 	delete pThread;
 	return (int)(aint)ExitCode;
 }
 
 void MRTC_SystemInfo::OS_ThreadExit(int _ExitCode)
 {
-	pthread_exit((void *)(aint)_ExitCode);
+	sys_ppu_thread_exit(_ExitCode);
+//	pthread_exit((void *)(aint)_ExitCode);
 }
 
 int MRTC_SystemInfo::OS_ThreadGetExitCode(void* _hThread)
 {
 	// Not supported and not used
-	DebugBreak();
+	M_BREAKPOINT;
 	return 0;
 }
 
@@ -1036,10 +1559,8 @@ bool MRTC_SystemInfo::OS_ThreadIsRunning(void* _hThread)
 void MRTC_SystemInfo::OS_ThreadTerminate(void* _hThread, int _ExitCode)
 {
 	// Not supported
-	DebugBreak();
+	M_BREAKPOINT;
 }
-
-#include <pthread.h>
 
 class CThreadLocalStoreList
 {
@@ -1073,7 +1594,7 @@ public:
 			}
 		}
 
-		MRTC_SystemInfo::OS_Assert("Out of thread local storage");
+		M_ASSERTALWAYS(0, "Out of thread local storage");
 		return ~0;
 	}
 
@@ -1083,7 +1604,7 @@ public:
 		uint64 Mask = 1 << _Index;
 		if(!(m_UsedIndices & Mask))
 		{
-			MRTC_SystemInfo::OS_Assert("Freeing non-allocate TLS");
+			M_ASSERTALWAYS(0, "Freeing non-allocate TLS");
 		}
 		m_UsedIndices = m_UsedIndices & ~Mask;
 	}
@@ -1179,6 +1700,16 @@ void MRTC_SystemInfo::Thread_SetProcessor(uint32 _Processor)
 {
 }
 
+void MRTC_SystemInfo::Thread_SetProcessor(uint32 _ThreadID, uint32 _Processor)
+{
+
+}
+
+uint32 MRTC_SystemInfo::Thread_GetCurrentID()
+{
+	return 0;
+}
+
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 | Mutex
@@ -1186,7 +1717,6 @@ void MRTC_SystemInfo::Thread_SetProcessor(uint32 _Processor)
 \*************************************************************************************************/
 
 // No support for named muteces
-#include <sys/synchronization.h>
 void MRTC_SystemInfo::OS_MutexClose(void* _pMutex)
 {
 	sys_mutex_destroy((sys_mutex_t)(aint)_pMutex);
@@ -1242,32 +1772,6 @@ void MRTC_SystemInfo::OS_MutexUnlock(void* _pMutex)
 	sys_mutex_unlock((sys_mutex_t)(aint)_pMutex);
 }
 
-class CPS3MutexLocker
-{
-protected:
-	sys_mutex_t* m_pMutex;
-public:
-	CPS3MutexLocker(sys_mutex_t* _pMutex) : m_pMutex(_pMutex)
-	{
-		int Error = sys_mutex_lock(*m_pMutex, 0);
-#ifndef M_RTM
-		if(Error != CELL_OK)
-			MRTC_SystemInfo::OS_Assert("CPS3MutexLocker::CPS3MutexLocker - Error occured while trying to acquire mutex");
-#endif
-	}
-
-	~CPS3MutexLocker()
-	{
-		int Error = sys_mutex_unlock(*m_pMutex);
-#ifndef M_RTM
-		if(Error != CELL_OK)
-			MRTC_SystemInfo::OS_Assert("CPS3MutexLocker::~CPS3MutexLocker - Error occured while trying to release mutex");
-#endif
-	}
-};
-
-#define DLocker(obj) CPS3MutexLocker aa##__LINE__(&obj->m_Mutex);
-
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -1275,11 +1779,11 @@ public:
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-
 void* MRTC_SystemInfo::Semaphore_Alloc(mint _InitialCount, mint _MaximumCount)
 {
 //	sys_sem_t* pSem = DNew(sys_sem_t) sys_sem_t;
-	sys_sem_t* pSem = (sys_sem_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.New();
+//	sys_sem_t* pSem = (sys_sem_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.New();
+	sys_sem_t* pSem = (sys_sem_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Alloc();
 
 	sys_mutex_attribute_t mutex_attr;
 	sys_mutex_attribute_initialize(mutex_attr);
@@ -1313,7 +1817,8 @@ void MRTC_SystemInfo::Semaphore_Free(void *_pSemaphore)
 	sys_sem_t* pSem = (sys_sem_t*)_pSemaphore;
 	sys_cond_destroy(pSem->m_Condition);
 	sys_mutex_destroy(pSem->m_Mutex);
-	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Delete((UPrimitive *)pSem);
+//	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Delete((UPrimitive *)pSem);
+	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Free((UPrimitive*)pSem);
 }
 
 void MRTC_SystemInfo::Semaphore_Increase(void * _pSemaphore, mint _Count)
@@ -1361,7 +1866,7 @@ void MRTC_SystemInfo::Semaphore_Wait(void * _pSemaphore)
 	pSem->m_CurrentCount--;
 }
 
-bint MRTC_SystemInfo::Semaphore_WaitTimeout(void * _pSemaphore, fp8 _Timeout)
+bint MRTC_SystemInfo::Semaphore_WaitTimeout(void * _pSemaphore, fp64 _Timeout)
 {
 	sys_sem_t* pSem = (sys_sem_t*)_pSemaphore;
 	DLocker(pSem);
@@ -1398,7 +1903,8 @@ bint MRTC_SystemInfo::Semaphore_WaitTimeout(void * _pSemaphore, fp8 _Timeout)
 void* MRTC_SystemInfo::Event_Alloc(bint _InitialSignal, bint _bAutoReset)
 {
 //	sys_event_t* pEvent = DNew(sys_event_t) sys_event_t;
-	sys_event_t* pEvent = (sys_event_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.New();
+//	sys_event_t* pEvent = (sys_event_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.New();
+	sys_event_t* pEvent = (sys_event_t*)MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Alloc();
 
 	sys_mutex_attribute_t mutex_attr;
 	sys_mutex_attribute_initialize(mutex_attr);
@@ -1432,7 +1938,8 @@ void MRTC_SystemInfo::Event_Free(void *_pEvent)
 	sys_event_t* pEvent = (sys_event_t*)_pEvent;
 	sys_cond_destroy(pEvent->m_Condition);
 	sys_mutex_destroy(pEvent->m_Mutex);
-	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Delete((UPrimitive *)pEvent);
+//	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Delete((UPrimitive *)pEvent);
+	MRTC_SystemInfo::MRTC_GetSystemInfo().m_pInternalData->m_PrimitivePool.Free((UPrimitive*)_pEvent);
 }
 
 void MRTC_SystemInfo::Event_ResetSignaled(void * _pEvent)
@@ -1487,7 +1994,7 @@ void MRTC_SystemInfo::Event_Wait(void * _pEvent)
 		pEvent->m_Signaled = 0;
 }
 
-bint MRTC_SystemInfo::Event_WaitTimeout(void * _pEvent, fp8 _Timeout)
+bint MRTC_SystemInfo::Event_WaitTimeout(void * _pEvent, fp64 _Timeout)
 {
 	sys_event_t* pEvent = (sys_event_t*)_pEvent;
 	DLocker(pEvent);
@@ -1531,10 +2038,9 @@ bint MRTC_SystemInfo::Event_WaitTimeout(void * _pEvent, fp8 _Timeout)
 void MRTC_SystemInfo::OS_Assert(const char* _pMsg, const char* _pFile, int _Line)
 {
 	OS_Trace("ERROR: Assert failed - %s (file: %s line: %d)", _pMsg, _pFile, _Line);
-	DebugBreak();
+//	M_BREAKPOINT;
 }
 
-#include <sys/timer.h>
 void MRTC_SystemInfo::OS_Sleep(int _Milliseconds)
 {
 	sys_timer_usleep(_Milliseconds * 1000);
@@ -1553,7 +2059,7 @@ void MRTC_SystemInfo::OS_Trace(const char *_pStr, ...)
 	}
 	else
 		lBuffer[0] = 0;
-/*
+
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
 #ifndef MRTC_ENABLE_REMOTEDEBUGGER_STATIC
 	if (MRTC_GetObjectManager() && MRTC_GetObjectManager()->GetRemoteDebugger())
@@ -1561,7 +2067,7 @@ void MRTC_SystemInfo::OS_Trace(const char *_pStr, ...)
 		if (MRTC_GetRD()->m_EnableFlags & ERDEnableFlag_Trace)
 			MRTC_GetRD()->SendData(ERemoteDebug_Trace, lBuffer, strlen(lBuffer) + 1, false, false);
 #endif
-*/
+
 	printf("%s", lBuffer);
 }
 
@@ -1574,9 +2080,6 @@ void gf_ModuleAdd()
 | File
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-
-#include <cell/fs/cell_fs_errno.h>
-#include <cell/fs/cell_fs_file_api.h>
 
 void PS3File_FixPath( char *_String )
 {
@@ -1655,6 +2158,12 @@ protected:
 	CPS3AsyncHandle* m_pPendingTasksListHead;
 	CPS3AsyncHandle* m_pPendingTasksListTail;
 	NThread::CEventAutoReset m_AvailTasks;
+
+	const char* Thread_GetName() const
+	{
+		return "PS3 Async FileIO";
+	}
+
 public:
 	CPS3AsyncFileIO()
 	{
@@ -1761,7 +2270,7 @@ bool MRTC_SystemInfo::OS_FileAsyncIsFinished(void *_pAsyncInstance)
 	return pAsync->m_bDone;
 }
 
-//#define ASYNCIO
+#define ASYNCIO
 
 void* MRTC_SystemInfo::OS_FileAsyncRead(void *_pFile, void *_pData, fint _DataSize, fint _FileOffset)
 {
@@ -1909,7 +2418,7 @@ int MRTC_SystemInfo::OS_FileOperationGranularity(const char *_pPath)
 
 fint MRTC_SystemInfo::OS_FilePosition(const char *_pFileName)
 {
-	DebugBreak();
+	M_BREAKPOINT;
 	return 0;
 }
 
@@ -1927,7 +2436,7 @@ bool MRTC_SystemInfo::OS_FileSetFileSize(const char *_pFilenName, fint _FileSize
 
 bool MRTC_SystemInfo::OS_FileSetTime(void *_pFile, const int64& _TimeCreate, const int64& _TimeAccess, const int64& _TimeWrite)
 {
-	DebugBreak();
+	M_BREAKPOINT;
 	return false;
 }
 
@@ -1979,7 +2488,7 @@ bool MRTC_SystemInfo::OS_DirectoryExists(const char *_pPath)
 
 bool MRTC_SystemInfo::OS_DirectoryChange(const char* _pPath)
 {
-	DebugBreak();
+	M_BREAKPOINT;
 	return false;
 }
 
@@ -1995,7 +2504,7 @@ bool MRTC_SystemInfo::OS_DirectoryCreate(const char* _pPath)
 
 char* MRTC_SystemInfo::OS_DirectoryGetCurrent(char* _pBuf, int _MaxLength)
 {
-	DebugBreak();
+	M_BREAKPOINT;
 	return NULL;
 }
 
@@ -2043,7 +2552,7 @@ public:
 		int64 m_TimeAccess;
 		int64 m_TimeWrite;
 	};
-	TList_Vector<CFileEntry> m_Files;
+	TArray<CFileEntry> m_Files;
 
 	int m_iCurrentFile;
 
@@ -2294,6 +2803,89 @@ int MRTC_SystemInfo::CNetwork::gf_Receive(void *_pSocket, NNet::CNetAddressUDPv4
 int MRTC_SystemInfo::CNetwork::gf_Send(void *_pSocket, const NNet::CNetAddressUDPv4 &_Address, const void *_pData, int _DataLen)
 {
 	return MRTC_GetSystemInfo().m_pInternalData->GetTCPContext()->f_Send((MRTC_SystemInfoInternal::CTCPContext::CTCPSocket *)_pSocket, _Address, _pData, _DataLen);
+}
+
+/*************************************************************************************************\
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+| Remote debugger stuff
+|__________________________________________________________________________________________________
+\*************************************************************************************************/
+
+static uint64 M_FORCEINLINE __StackTrace(mint* _pCallStack, uint64 _MaxStack)
+{
+	uint64 Temp, Temp2, nAddys;
+	asm volatile(""
+		"mr %0, %%r1\n"
+		"sub %1, %1, %1\n"
+		".LStackTraceLoop%=:\n"
+		"ld %2, 16(%0)\n"
+		"ld %0, 0(%0)\n"
+		"stw %2, 0(%3)\n"
+		"addi %3, %3, 4\n"
+		"addi %1, %1, 1\n"
+		"cmpd %1, %4\n"
+		"beq .LStackTraceDone%=\n"
+		"cmpwi %0, 0\n"
+		"bne .LStackTraceLoop%=\n"
+		".LStackTraceDone%=:\n"
+		: "=&b"(Temp),  "=&b"(nAddys), "=&b"(Temp2)
+		: "r"(_pCallStack), "r"(_MaxStack)
+		: "memory");
+
+	return nAddys;
+}
+
+mint M_FORCEINLINE MRTC_SystemInfo::OS_TraceStack(mint *_pCallStack, int _MaxStack, mint _ebp /* = 0xffffffff */)
+{
+	return __StackTrace(_pCallStack, _MaxStack);
+}
+
+void MRTC_SystemInfo::OS_TraceRaw(const char *_pMsg)
+{
+#if defined(M_Profile) || !defined(M_RTM)
+	printf("%s\n", _pMsg);
+#endif
+}
+
+void MRTC_SystemInfo::RD_GetServerName(char *_pName)
+{
+	strcpy(_pName, "RDS PS3");
+}
+
+void MRTC_SystemInfo::RD_PeriodicUpdate()
+{
+}
+
+void MRTC_SystemInfo::RD_ClientInit(void *_pPacket, mint &_Size)
+{
+#if defined(MRTC_ENABLE_REMOTEDEBUGGER)
+	extern const char* g_pModuleName;
+	uint8 *pPacket = (uint8 *)_pPacket;
+
+	uint32 *pSize = (uint32 *)pPacket; pPacket+= 4;
+	*((uint32 *)pPacket) = ERemoteDebug_Init; SwapLE(*((uint32 *)pPacket)); pPacket += sizeof(uint32);
+
+	// Platform
+	strcpy((char *)pPacket, "PS3");
+	pPacket += strlen((char *)pPacket)+1;
+
+	// Debug info
+	strcpy((char*)pPacket, g_pModuleName);
+	pPacket += strlen((char *)pPacket)+1;
+
+	_Size = *pSize = (pPacket - (uint8 *)_pPacket);
+	SwapLE(*pSize);
+
+#endif
+}
+
+void MRTC_SystemInfo::OS_Yeild()
+{
+	sys_ppu_thread_yield();
+}
+
+void MRTC_SystemInfo::OS_SendProfilingSnapshot(uint32 _ID)
+{
 }
 
 /*************************************************************************************************\

@@ -30,16 +30,16 @@
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-M_FORCEINLINE fp4 FloatFromGfp2(uint16 _gfp2)
+M_FORCEINLINE fp32 FloatFromGfp2(uint16 _gfp2)
 {
 	uint32 dw;
 	uint32 E = (_gfp2 >> 10) & 0x1f;
 	E += 48;
 	dw = ((_gfp2 & 0x8000) << 16) + (uint32(_gfp2 & 0x03ff) << 14) + (E << 24);
-	return *((fp4*)&dw);
+	return *((fp32*)&dw);
 }
 
-M_FORCEINLINE uint16 Gfp2FromFloat(fp4 _x)
+M_FORCEINLINE uint16 Gfp2FromFloat(fp32 _x)
 {
 	uint32 dw = *(const uint32*)&_x;
 	uint32 E = (dw & 0x7f000000) >> 24;
@@ -71,17 +71,17 @@ public:
 		m_Half = _x.m_Half;
 	}
 
-	gfp2(fp4 _x)
+	gfp2(fp32 _x)
 	{
 		m_Half = Gfp2FromFloat(_x);
 	}
 
-	operator fp4() const
+	operator fp32() const
 	{
 		return FloatFromGfp2(m_Half);
 	}
 
-	void operator=(fp4 _x)
+	void operator=(fp32 _x)
 	{
 		m_Half = Gfp2FromFloat(_x);
 	}
@@ -91,24 +91,24 @@ public:
 		m_Half = _x.m_Half;
 	}
 
-	fp4 operator* (const gfp2& _x)
+	fp32 operator* (const gfp2& _x)
 	{
-		return fp4(*this) * fp4(_x);
+		return fp32(*this) * fp32(_x);
 	}
 
-	fp4 operator/ (const gfp2& _x)
+	fp32 operator/ (const gfp2& _x)
 	{
-		return fp4(*this) / fp4(_x);
+		return fp32(*this) / fp32(_x);
 	}
 
-	fp4 operator+ (const gfp2& _x)
+	fp32 operator+ (const gfp2& _x)
 	{
-		return fp4(*this) + fp4(_x);
+		return fp32(*this) + fp32(_x);
 	}
 
-	fp4 operator- (const gfp2& _x)
+	fp32 operator- (const gfp2& _x)
 	{
-		return fp4(*this) - fp4(_x);
+		return fp32(*this) - fp32(_x);
 	}
 };
 
@@ -128,7 +128,7 @@ public:
 	{
 	}
 
-	CVec4Dgfp2(fp4 _r, fp4 _g, fp4 _b, fp4 _a)
+	CVec4Dgfp2(fp32 _r, fp32 _g, fp32 _b, fp32 _a)
 	{
 		k[0] = _r;
 		k[1] = _g;
@@ -168,7 +168,7 @@ public:
 		k[3].m_Half = GFP2_ONE;
 	}
 
-	void SetScalar(fp4 _x)
+	void SetScalar(fp32 _x)
 	{
 		gfp2 x = _x;
 		k[0].m_Half = x.m_Half;
@@ -197,22 +197,22 @@ public:
 		return k[0].m_Half | k[1].m_Half | k[2].m_Half | k[3].m_Half;
 	}
 
-	friend void MCCDLLEXPORT operator<< (CVec4Dfp4& _Dst, const CVec4Dgfp2& _Src);
-	friend void MCCDLLEXPORT operator<< (CVec4Dgfp2& _Dst, const CVec4Dfp4& _Src);
+	friend void MCCDLLEXPORT operator<< (CVec4Dfp32& _Dst, const CVec4Dgfp2& _Src);
+	friend void MCCDLLEXPORT operator<< (CVec4Dgfp2& _Dst, const CVec4Dfp32& _Src);
 
 
 	static void Add(const CVec4Dgfp2& _Oper1, const CVec4Dgfp2& _Oper2, CVec4Dgfp2& _Dest);
-	static void Scale(const CVec4Dgfp2& _Oper1, fp4 _Factor, CVec4Dgfp2& _Dest);
+	static void Scale(const CVec4Dgfp2& _Oper1, fp32 _Factor, CVec4Dgfp2& _Dest);
 	static void Multiply(const CVec4Dgfp2& _Oper1, const CVec4Dgfp2& _Oper2, CVec4Dgfp2& _Dest);
 	static void MultiplyAdd(const CVec4Dgfp2& _Oper1, const CVec4Dgfp2& _Oper2, const CVec4Dgfp2& _Oper3, CVec4Dgfp2& _Dest);
-	static void Lerp(const CVec4Dgfp2& _Oper1, const CVec4Dgfp2& _Oper2, CVec4Dgfp2& _Dest, fp4 _t);
+	static void Lerp(const CVec4Dgfp2& _Oper1, const CVec4Dgfp2& _Oper2, CVec4Dgfp2& _Dest, fp32 _t);
 
 	void Add(const CVec4Dgfp2& _Oper, CVec4Dgfp2& _Dest) const
 	{
 		Add(*this, _Oper, _Dest);
 	}
 
-	void Scale(fp4 _Factor, CVec4Dgfp2& _Dest) const
+	void Scale(fp32 _Factor, CVec4Dgfp2& _Dest) const
 	{
 		Scale(*this, _Factor, _Dest);
 	}
@@ -227,7 +227,7 @@ public:
 		MultiplyAdd(*this, _Oper1, _Oper2, _Dest);
 	}
 
-	void Lerp(const CVec4Dgfp2& _Oper, fp4 _t, CVec4Dgfp2& _Dest) const
+	void Lerp(const CVec4Dgfp2& _Oper, fp32 _t, CVec4Dgfp2& _Dest) const
 	{
 		Lerp(*this, _Oper, _Dest, _t);
 	}
@@ -244,7 +244,7 @@ public:
 	
 	CStr GetString() const
 	{
-		return CStrF("(%f, %f, %f, %f)", (fp4)k[0], (fp4)k[1], (fp4)k[2], (fp4)k[3]);
+		return CStrF("(%f, %f, %f, %f)", (fp32)k[0], (fp32)k[1], (fp32)k[2], (fp32)k[3]);
 	}
 
 	CFStr GetFilteredString(int _iType = 0) const
@@ -259,7 +259,7 @@ public:
 
 	void ParseString(const CStr& _s)
 	{
-		CVec4Dfp4 v;
+		CVec4Dfp32 v;
 		v.ParseString(_s);
 		*this << v;
 	}
@@ -271,8 +271,8 @@ public:
 	void Write(CCFile* _pFile) const;
 };
 
-void MCCDLLEXPORT operator<< (CVec4Dfp4& _Dst, const CVec4Dgfp2& _Src);
-void MCCDLLEXPORT operator<< (CVec4Dgfp2& _Dst, const CVec4Dfp4& _Src);
+void MCCDLLEXPORT operator<< (CVec4Dfp32& _Dst, const CVec4Dgfp2& _Src);
+void MCCDLLEXPORT operator<< (CVec4Dgfp2& _Dst, const CVec4Dfp32& _Src);
 #endif 
 
 #endif // _INC_MMATH_GFP2

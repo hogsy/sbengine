@@ -15,8 +15,6 @@
 \*_____________________________________________________________________________________________*/
 
 
-#include "MDA_LinkedList.h"
-#include "MDA_Reference.h"
 #include "MMemMgrHeap.h"
 #include "MFile_Misc.h"
 
@@ -25,7 +23,7 @@ static class CByteStreamManager *GetStreamManager();
 #define D_DefaultCacheSize 65536
 #define D_DefaultNumCaches 4
 
-class MCCDLLEXPORT CByteStreamAsyncInstance : public CDA_Referable
+class MCCDLLEXPORT CByteStreamAsyncInstance
 {
 public:
 	void *m_pInstance;
@@ -38,13 +36,11 @@ public:
 	void CloseInstance();
 };
 
-//DA_LLSI(CByteStreamAsyncInstance);
-
-class MCCDLLEXPORT CByteStreamDriveSortList : public CDA_LinkedList_Small
+/*class MCCDLLEXPORT CByteStreamDriveSortList
 {
 public:
 	int Compare(void *_pFirst, void *_pSecond);
-};
+};*/
 
 
 class MCCDLLEXPORT CCacheMem : public CReferenceCount
@@ -58,7 +54,7 @@ public:
 };
 
 //public CDA_Referable, 
-class MCCDLLEXPORT CByteStreamCacheLine : public CDA_Linkable
+class MCCDLLEXPORT CByteStreamCacheLine
 {
 public:
 	MRTC_CriticalSection m_Lock;
@@ -70,22 +66,25 @@ public:
 
 	~CByteStreamCacheLine()
 	{
+
 		Destroy();
 	}
 
 	void Destroy();
 
-	CDA_Link m_CacheLineList;
-	CDA_Link m_DriveList;
-	CDA_Link m_PendingList;
+	DLinkDS_Link(CByteStreamCacheLine, m_CacheLineLink);
+	DLinkDS_Link(CByteStreamCacheLine, m_DriveLink);
+	DLinkDS_Link(CByteStreamCacheLine, m_PendingLink);
+
+	DLinkDS_Link(CByteStreamCacheLine, m_TempLink);
+
 	CByteStreamAsyncInstance m_PendingOperation;
-	//TCDA_ReferenceType<CByteStreamAsyncInstance> ;
 	CCacheMem *m_pCacheMemUsed;
 
 	fint m_DataOffest;
 	mint m_NumBytesUsed;
 	mint m_NumBytes;
-	fp4 m_Prio;
+	fp32 m_Prio;
 	bool m_bDirty;
 	bool m_bWrite;
 	bool m_bPending;
@@ -124,15 +123,7 @@ public:
 		return m_bOperating;
 	}
 
-
-	M_INLINE bool Done(bool _bThrows, bool &_bWantedToThrow)
-	{
-		M_LOCK(m_Lock);
-		if (m_PendingOperation.m_pInstance)
-			return m_PendingOperation.Done(_bThrows, _bWantedToThrow);
-		else
-			return !m_bPending;
-	}
+	bool Done(bool _bThrows, bool &_bWantedToThrow);
 
 	M_INLINE void PerformOperation()
 	{
@@ -152,25 +143,33 @@ public:
 
 };
 
-DA_LLSI(CByteStreamCacheLine);
-DA_LLI(CByteStreamCacheLine);
-
 class MCCDLLEXPORT CByteStreamDrive
 {
 public:
 	MRTC_CriticalSection m_Lock;
 
 	CStr m_DriveName;
-	CDA_Link m_ListLink;
-	CDA_HashLink m_HashLink;
+	DLinkDS_Link(CByteStreamDrive, m_Link);
 
-//	TCDA_ReferenceType<CByteStreamCacheLine> m_Pending[2];
-	CDA_LinkedList_Small m_PendingOpr;
+	class CCompare
+	{
+	public:
+		static aint Compare(CByteStreamDrive *_pFirst, CByteStreamDrive *_pSecond, void *_pContext)
+		{
+			return _pFirst->m_DriveName.CompareNoCase(_pSecond->m_DriveName);
+		}
 
-	CDA_LinkedList_Small m_PendingCacheLinesForDelete;
+		static aint Compare(CByteStreamDrive *_pFirst, const ch8 *_Key, void *_pContext)
+		{
+			return _pFirst->m_DriveName.CompareNoCase(_Key);
+		}
+	};
 
-	CByteStreamDriveSortList m_Requests; // A queue of requests that is handeled in order of importance
-//	CDA_LinkedList_Small m_Finished; // A queue of finished requests
+	DIdsTreeAVLAligned_Link(CByteStreamDrive, m_TreeLink, const ch8 *, CByteStreamDrive::CCompare);
+
+	DLinkDS_List(CByteStreamCacheLine, m_PendingLink) m_PendingOpr;
+	DLinkDS_List(CByteStreamCacheLine, m_PendingLink) m_PendingCacheLinesForDelete;
+	DLinkDS_List(CByteStreamCacheLine, m_DriveLink) m_RequestsSorted;
 
 	aint m_CacheSize;
 	aint m_NumCaches;
@@ -194,31 +193,78 @@ public:
 };
 
 
+class CByteStreamManager;
 
-DA_LLSI(CByteStreamDrive);
-
-
-class MCCDLLEXPORT CByteStreamDrive_Hash : public TCDA_HashType<CByteStreamDrive, CDA_HashSmall, CStr> 
+class MCCDLLEXPORT CByteStreamData
 {
 public:
-	bool IsSame(void *_pFirst, void *_pSecond)
-	{
-		return ((CStr *)(_pFirst))->CompareNoCase(*((CStr *)(_pSecond))) == 0;
-	}
+	CByteStreamManager *m_pStreamManager;
+	CByteStreamDrive *m_pDrive;
+	CStr m_FileName;
+	float m_Priority;
+	void *m_pFile;
+	int m_OpenFlags;	
+	fint m_FilePos;
+#ifndef M_RTM
+	fint m_LastReadFilePosXDF;
+	fint m_LastReadFilePos;
+	CMTime m_TimeOpen;
+#endif
+	fint m_BytesRead;
+	fint m_FileSize;
 
-	mint GetHash(void *_pHashData)
-	{
-		CFStr Tmp = *((CStr *)(_pHashData));
+	DLinkDS_Link(CByteStreamData, m_Link);
 
-		CStr::strupr(Tmp);
+	DLinkDS_List(CByteStreamCacheLine, m_CacheLineLink) m_CacheLines; // A list of chache lines available for completion
+	DLinkDS_List(CByteStreamCacheLine, m_CacheLineLink) m_PendingCacheLines; // A list of requests that has been send out
+	CByteStreamCacheLine *m_pLastCacheLine;
+	aint m_nCacheLines;
+	aint m_CacheLine_Size;
+	aint m_CacheLine_Num;
+	bool m_bGood;
+	bool m_bAllowPrecache;
 
-		CMDA_CRC32Checker Checker;
-		Checker.AddStr(Tmp);
 
-		return Checker.m_CurrentCRC;
-	}
+	CByteStreamData();
+	~CByteStreamData();
+	bool Create(const CStr &_FileName, int _Flags, float _Priority, aint _NumCacheLines, aint _CacheLineSize);
+	void SetPriority(fp32 _Priority);
+	void Close();
+	void CreateCachelines();
+	bool Good_Get();
+	void Good_Clear();
+	bool EndOfFile();
+	void SeekEnd(fint _BytesFromEnd);
+	void SeekBeg(fint _BytesFromBeg);
+	void SeekCur(fint _BytesFromCur);
+	fint Len();
+	fint Pos();
+	void ServicePrecache();
+
+	void Service();
+	void WriteCacheLine(CByteStreamCacheLine *_pCacheLine);
+	bool PrepareCacheline(CByteStreamCacheLine *_pCacheLine, fint _Start, mint _NumBytes, bool _bBlock);
+	CByteStreamCacheLine *PrepareCacheline(fint _Start, mint _NumBytes, bool _bBlock);
+	void SetLastCacheLine(CByteStreamCacheLine *_pLastCacheLine);
+	CByteStreamCacheLine *GetCacheLine(fint _Start, mint _NumBytes, bool _bBlock = true);
+	CByteStreamCacheLine *GetCacheLine_NotINL(fint _Start, mint _NumBytes, bool _bBlock);
+	void Read(void *_pData, mint _nBytes);
+	void Write(const void *_pData, mint _nBytes);
+	bool Read(CAsyncRequest *_pRequest);
+	bool Write(CAsyncRequest *_pRequest);
+	bool AsyncFlush(bool _bBlock);
+
+#ifndef M_RTM
+	void XDFRecordClose();
+	void XDFRecordCreate(CStr _FileName);
+	void XDFRecordSeek();
+	void XDFRecordRead();
+#endif
+
+
+
+	
 };
-
 
 
 class MCCDLLEXPORT CByteStreamManager
@@ -227,26 +273,29 @@ public:
 
 	MRTC_CriticalSection m_Lock;
 
-	CDA_LinkedList_Small m_OpenStreams; // Contains streams that are open
-	CDA_LinkedList_Small m_Drives; // Contains streams that are open
-	CByteStreamDrive_Hash m_DriveHash; // Hash for drives
+	DLinkDS_List(CByteStreamData, m_Link) m_OpenStreams;
+	DLinkDS_List(CByteStreamDrive, m_Link) m_Drives;
+
+	DIdsTreeAVLAligned_Tree(CByteStreamDrive, m_TreeLink, const ch8 *, CByteStreamDrive::CCompare) m_DriveTree;
+
 	mint m_WorkSize;
 	mint m_DefaultCacheSize;
 	aint m_DefaultNumCaches;
 	int m_Corrupt;
 	int m_DisableCaching;
 
-	TDA_Pool<CByteStreamData> m_PoolByteStreamData;
-	TDA_Pool<CByteStreamCacheLine> m_PoolCacheLines;
+	TCPool<CByteStreamData, 128, NThread::CMutualAggregate> m_PoolByteStreamData;
+	TCPool<CByteStreamCacheLine, 128, NThread::CMutualAggregate> m_PoolCacheLines;
 
 	void *m_pXDFThread;
 	class CXDF *m_pXDFRecord;
 	class CXDF *m_pXDFUse;
 	NThread::CMutual m_XDFLock;
+	NThread::CMutual m_XDFUseLock;
 
 	TPtr<CLogFile> m_spLogFile;
 
-	TList_Vector<CStr> m_SearchPaths;
+	TArray<CStr> m_SearchPaths;
 	CStr m_SearchPathBase;
 	bool m_bLogData;
 
@@ -318,84 +367,3 @@ public:
 
 
 
-class MCCDLLEXPORT CByteStreamData
-{
-public:
-	CByteStreamManager *m_pStreamManager;
-	CByteStreamDrive *m_pDrive;
-	CStr m_FileName;
-	float m_Priority;
-	void *m_pFile;
-	int m_OpenFlags;	
-	fint m_FilePos;
-#ifndef M_RTM
-	fint m_LastReadFilePosXDF;
-	fint m_LastReadFilePos;
-	CMTime m_TimeOpen;
-#endif
-	fint m_BytesRead;
-	fint m_FileSize;
-
-	CDA_Link m_ListLink;
-
-	CDA_LinkedList_Small m_CacheLines; // A list of chache lines available for completion
-	CDA_LinkedList_Small m_PendingCacheLines; // A list of requests that has been send out
-	CByteStreamCacheLine *m_pLastCacheLine;
-	aint m_nCacheLines;
-	aint m_CacheLine_Size;
-	aint m_CacheLine_Num;
-	bool m_bGood;
-	bool m_bAllowPrecache;
-
-
-	CByteStreamData();
-	~CByteStreamData();
-	bool Create(const CStr &_FileName, int _Flags, float _Priority, aint _NumCacheLines, aint _CacheLineSize);
-	void SetPriority(fp4 _Priority);
-	void Close();
-	void CreateCachelines();
-	bool Good_Get();
-	void Good_Clear();
-	bool EndOfFile();
-	void SeekEnd(fint _BytesFromEnd);
-	void SeekBeg(fint _BytesFromBeg);
-	void SeekCur(fint _BytesFromCur);
-	fint Len();
-	fint Pos();
-	void ServicePrecache();
-
-	class CSortList : public CDA_LinkedList
-	{
-	public:
-		int Compare(CDA_Linkable *_pFirst, CDA_Linkable *_pSecond)
-		{
-			return ((CByteStreamCacheLine *)_pFirst)->m_DataOffest - ((CByteStreamCacheLine *)_pSecond)->m_DataOffest;					
-		}
-	};
-	
-	void Service();
-	void WriteCacheLine(CByteStreamCacheLine *_pCacheLine);
-	bool PrepareCacheline(CByteStreamCacheLine *_pCacheLine, fint _Start, mint _NumBytes, bool _bBlock);
-	CByteStreamCacheLine *PrepareCacheline(fint _Start, mint _NumBytes, bool _bBlock);
-	void SetLastCacheLine(CByteStreamCacheLine *_pLastCacheLine);
-	CByteStreamCacheLine *GetCacheLine(fint _Start, mint _NumBytes, bool _bBlock = true);
-	CByteStreamCacheLine *GetCacheLine_NotINL(fint _Start, mint _NumBytes, bool _bBlock);
-	void Read(void *_pData, mint _nBytes);
-	void Write(const void *_pData, mint _nBytes);
-	bool Read(CAsyncRequest *_pRequest);
-	bool Write(CAsyncRequest *_pRequest);
-	bool AsyncFlush(bool _bBlock);
-
-#ifndef M_RTM
-	void XDFRecordClose();
-	void XDFRecordCreate(CStr _FileName);
-	void XDFRecordSeek();
-	void XDFRecordRead();
-#endif
-
-
-
-	
-};
-
-DA_LLSI(CByteStreamData);

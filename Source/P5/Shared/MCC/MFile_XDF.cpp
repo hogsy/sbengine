@@ -163,8 +163,9 @@ void CXDF::Read(CCFile *_pFile)
 	{
 		CXDF_File &File = m_lFiles[i];
 		File.Read(_pFile, this);
-#ifndef PLATFORM_PS3
-//#if 1 // Disable this for final version
+//		M_TRACEALWAYS("XDF Filename '%s', FirstBlock %u, LastBlock %u, Length %d\r\n", GetFileName(File.m_iFileName), File.m_iFirstBlock, File.m_iLastBlock, File.m_FileLength);
+		// Disable for X06
+#if !defined(PLATFORM_PS3) && defined(M_Profile)
 		CStr FileName = m_BasePath + GetFileName(File.m_iFileName);
 		if (CDiskUtil::FileExists(FileName))
 		{
@@ -201,7 +202,7 @@ class CCompressedStreamGenerate
 public:
 	bint m_bInit;
 	uint8 m_OutBuffer[16384];
-	TList_Vector<uint8> m_CompressedStream;
+	TArray<uint8> m_CompressedStream;
 
 	z_stream m_Compressor; /* compression stream */
 
@@ -305,9 +306,9 @@ void CXDF::CompileFile(const char *_pFileSource, const char *_pFileDest, const c
 		}
 		CStr SizeStr;
 		if(Size > 5*1024*1024)
-			SizeStr = CStrF("%.3f MiB", (fp8)Size / (1024.0 * 1024.0));
+			SizeStr = CStrF("%.3f MiB", (fp64)Size / (1024.0 * 1024.0));
 		else if(Size > 5*1024)
-			SizeStr = CStrF("%.3f KiB", (fp8)Size / 1024.0);
+			SizeStr = CStrF("%.3f KiB", (fp64)Size / 1024.0);
 		else
 			SizeStr = CStrF("%lu B", Size);
 		LogFile(CStrF("Amount of data read for XDF '%s' is %s", _pFileSource, SizeStr.GetStr()));
@@ -337,6 +338,14 @@ void CXDF::CompileFile(const char *_pFileSource, const char *_pFileDest, const c
 			NumBytes -= ToCopy;
 		}
 	}
+
+	for(int iF = 0; iF < m_lFiles.Len(); iF++)
+	{
+		if(m_lFiles[iF].m_FileLength == 0)
+		{
+			m_lFiles[iF].m_FileLength = CDiskUtil::GetFileSize(CStrF("%s%s", _pFilesBasePath, &m_lNameHeap[m_lFiles[iF].m_iFileName]));
+		}
+	}
 	// Rewrite with right xdfposses
 	Out.Seek(0);
 	Write(&Out);
@@ -346,7 +355,6 @@ void CXDF::CompileFile(const char *_pFileSource, const char *_pFileDest, const c
 
 int CXDF::Thread_Main()
 {
-	MRTC_SystemInfo::Thread_SetName("XDF Unpacker");
 	m_QuitEvent.ReportTo(&m_EventFree);
 	m_FileStream.Seek(m_iDataStart);
 
@@ -448,13 +456,13 @@ bint CXDF::Read_NotInline(fint _Pos, void *_pData, mint _Len)
 	fint ToSeek = _Pos - m_XDFPos;
 	if (ToSeek < 0)
 	{
-		M_TRACEALWAYS("XDF Waring failed negative delete: %d\n", ToSeek);
+		M_TRACEALWAYS("XDF Warning failed negative delete: %d\n", ToSeek);
 		return false;
 		//Error_static(M_FUNCTION, "Cannot seek backwards in stream");
 	}
 	else if(ToSeek)
 	{
-		M_TRACEALWAYS("XDF Waring Seeking: %d\n", ToSeek);
+		M_TRACEALWAYS("XDF Warning Seeking: %d\n", ToSeek);
 	}
 
 	while (ToSeek)
@@ -672,7 +680,7 @@ static bint FindFilesMatchPattern(const char *_pFile, const char *_pPattern)
 	return false;
 }
 
-void CXDF::EnumFiles(TList_SortableVector<CDir_FileRec> &_Dest, CStr _Path)
+void CXDF::EnumFiles(TArray_Sortable<CDir_FileRec> &_Dest, CStr _Path)
 {
 	CFStr Fixed = _Path;
 	StrReplaceChar((char *)Fixed, '/', '\\');

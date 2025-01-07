@@ -44,9 +44,9 @@ public:
 	int16 m_RealWidth;
 	int16 m_RealHeight;
 	int m_TextureID;
-	fp4 m_volume;
-	fp4 m_Mainvolume;
-//	fp8 m_TimeLastVisible;
+	fp32 m_volume;
+	fp32 m_Mainvolume;
+//	fp64 m_TimeLastVisible;
 	int32 m_TimeLastVisible; //frames
 	int m_LastFrame;
 	int m_Frames;
@@ -83,7 +83,7 @@ class SYSTEMDLLEXPORT CTextureContainer_Video_Bink : public CTextureContainer_Vi
 
 protected:
 	TArray<spCTC_BinkTexture> m_lspVideos;
-	fp8 m_CloseTimeOut;
+	fp64 m_CloseTimeOut;
 	
 public:
 	CTextureContainer_Video_Bink();
@@ -94,7 +94,7 @@ public:
 	void ValidateLocalID(int _iLocal) const;
 	
 	virtual void CloseVideo(int _iLocal);
-	virtual void SetVolume(int _iLocal, fp4 fpVol);
+	virtual void SetVolume(int _iLocal, fp32 fpVol);
 	virtual void Pause(int _iLocal, bool _Paused = true);
 	virtual void AutoRestart(int _iLocal, bool _EnableAutoRestart = true);
 	virtual void Rewind(int _iLocal);
@@ -103,7 +103,7 @@ public:
 	virtual int GetFrame(int _iLocal);
 	virtual int GetNumFrames(int _iLocal);
 	virtual void SetFrame(int _iLocal, int _Frame);
-	virtual fp4 GetTime(int _iLocal);
+	virtual fp32 GetTime(int _iLocal);
 
 	virtual int GetNumLocal();
 	virtual int GetLocal(const char* _pName);

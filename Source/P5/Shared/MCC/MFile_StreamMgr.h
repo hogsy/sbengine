@@ -62,7 +62,7 @@ public:
 	bool Create(const CStr &_FileName, int _Flags, float _Priority, aint _NumCacheLines = -1, aint _CacheLineSize = -1);
 	bool Close();
 
-	void SetPriority(fp4 _Priority);
+	void SetPriority(fp32 _Priority);
 
 	bool Good();
 	void ClearFlags();

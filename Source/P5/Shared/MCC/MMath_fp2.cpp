@@ -8,6 +8,7 @@
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
+#if 0
 #ifdef CPU_X86
 
 class CXMMReg
@@ -15,7 +16,7 @@ class CXMMReg
 public:
 	union
 	{
-		fp4 kf[4];
+		fp32 kf[4];
 		uint32 ki[4];
 	};
 };
@@ -56,13 +57,13 @@ public:
 			movq [_TempXMM1+8], mm7
 */
 
-void operator<< (CVec4Dfp4& _Dst, const CVec4Dfp2& _Src)
+void operator<< (CVec4Dfp32& _Dst, const CVec4Dfp2& _Src)
 {
 	CXMMReg& XMM = *(CXMMReg*)&_Dst;
 	COPY_VEC4FP2_TO_XMM(_Src, XMM);
 }
 
-void operator<< (CVec4Dfp2& _Dst, const CVec4Dfp4& _Src)
+void operator<< (CVec4Dfp2& _Dst, const CVec4Dfp32& _Src)
 {
 	const CXMMReg& XMM = *(CXMMReg*)&_Src;
 	COPY_XMM_TO_VEC4FP2(XMM, _Dst);
@@ -153,7 +154,7 @@ void CVec4Dfp2::Add(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2&
 	}*/
 }
 
-void CVec4Dfp2::Scale(const CVec4Dfp2& _Oper1, fp4 _Factor, CVec4Dfp2& _Dest)
+void CVec4Dfp2::Scale(const CVec4Dfp2& _Oper1, fp32 _Factor, CVec4Dfp2& _Dest)
 {
 	CXMMReg TempXMM0;
 
@@ -313,7 +314,7 @@ void CVec4Dfp2::MultiplyAdd(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, co
 	COPY_XMM_TO_VEC4FP2(TempXMM0, _Dest);
 }
 
-void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2& _Dest, fp4 _t)
+void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2& _Dest, fp32 _t)
 {
 	CXMMReg TempXMM0;
 	CXMMReg TempXMM1;
@@ -346,7 +347,7 @@ void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-void operator<< (CVec4Dfp4& _Dst, const CVec4Dfp2& _Src)
+void operator<< (CVec4Dfp32& _Dst, const CVec4Dfp2& _Src)
 {
 	_Dst.k[0] = _Src.k[0];
 	_Dst.k[1] = _Src.k[1];
@@ -354,7 +355,7 @@ void operator<< (CVec4Dfp4& _Dst, const CVec4Dfp2& _Src)
 	_Dst.k[3] = _Src.k[3];
 }
 
-void operator<< (CVec4Dfp2& _Dst, const CVec4Dfp4& _Src)
+void operator<< (CVec4Dfp2& _Dst, const CVec4Dfp32& _Src)
 {
 	_Dst.k[0] = _Src.k[0];
 	_Dst.k[1] = _Src.k[1];
@@ -370,7 +371,7 @@ void CVec4Dfp2::Add(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2&
 	_Dest.k[3] = _Oper1.k[3] + _Oper2.k[3];
 }
 
-void CVec4Dfp2::Scale(const CVec4Dfp2& _Oper1, fp4 _Factor, CVec4Dfp2& _Dest)
+void CVec4Dfp2::Scale(const CVec4Dfp2& _Oper1, fp32 _Factor, CVec4Dfp2& _Dest)
 {
 	_Dest.k[0] = _Oper1.k[0] * _Factor;
 	_Dest.k[1] = _Oper1.k[1] * _Factor;
@@ -394,7 +395,7 @@ void CVec4Dfp2::MultiplyAdd(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, co
 	_Dest.k[3] = _Oper3.k[3] + _Oper1.k[3] * _Oper2.k[3];
 }
 
-void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2& _Dest, fp4 _t)
+void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2& _Dest, fp32 _t)
 {
 	_Dest.k[0] = _Oper1.k[0] + _t * (_Oper2.k[0] - _Oper1.k[0]);
 	_Dest.k[1] = _Oper1.k[1] + _t * (_Oper2.k[1] - _Oper1.k[1]);
@@ -404,6 +405,7 @@ void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2
 
 
 #endif
+#endif
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -411,12 +413,12 @@ void CVec4Dfp2::Lerp(const CVec4Dfp2& _Oper1, const CVec4Dfp2& _Oper2, CVec4Dfp2
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
 
-void CVec4Dfp2::ParseColor(const CStr& _s, bool _bHexUnit)
+void CVec4Dfp2Aggr::ParseColor(const CStr& _s, bool _bHexUnit)
 {
 	if (_s.CompareSubStr("0x") == 0)
 	{
 		// Hex color
-		CVec4Dfp4 v;
+		CVec4Dfp32 v;
 		int c = _s.Val_int();
 		v.k[0] = (c >> 16) & 0xff;
 		v.k[1] = (c >> 8) & 0xff;
@@ -436,7 +438,7 @@ void CVec4Dfp2::ParseColor(const CStr& _s, bool _bHexUnit)
 		int i = 0;
 		for(; i < 4; i++)
 		{
-			k[i] = M_AToF(&pStr[pos]);
+			k[i].Set(M_AToF(&pStr[pos]));
 			pos = CStr::SkipADigit(pStr, pos, len);
 			pos = CStr::GoToDigit(pStr, pos, len);
 			if (pos == len) break;
@@ -452,22 +454,22 @@ void CVec4Dfp2::ParseColor(const CStr& _s, bool _bHexUnit)
 		else if (i == 2)
 		{
 			// 3-components was specified, set alpha to 1
-			k[3] = _bHexUnit ? 1.0f : 255.0f;
+			k[3].Set(_bHexUnit ? 1.0f : 255.0f);
 		}
 	}
 }
 
-void CVec4Dfp2::Read(CCFile* _pFile)
+void CVec4Dfp2Aggr::Read(CCFile* _pFile)
 {
 	_pFile->ReadLE((uint16*)k, 4);
 }
 
-void CVec4Dfp2::Write(CCFile* _pFile) const
+void CVec4Dfp2Aggr::Write(CCFile* _pFile) const
 {
 	_pFile->WriteLE((const uint16*)k, 4);
 }
 
-void CVec4Dfp2::SwapLE()
+void CVec4Dfp2Aggr::SwapLE()
 {
 	k[0].SwapLE();
 	k[1].SwapLE();

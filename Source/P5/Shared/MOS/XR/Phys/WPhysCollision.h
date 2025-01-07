@@ -19,7 +19,7 @@
 #define dFMod(a,b) (fmod((a),(b)))
 #define dCopySign(a,b) (copysign((a),(b)))
 
-#define dInfinity _FP8_MAX
+#define dInfinity _FP64_MAX
 
 typedef double dReal;
 typedef dReal dVector3[4];
@@ -156,10 +156,10 @@ int Phys_Collide_OBB(const CPhysOBB& _BoxA,
 					 CCollisionInfo* _pCollisionInfo,
 					 int _MaxCollisions);
 
-int Phys_Collide_PolyOBB(const CVec3Dfp4* _pVertices, 
+int Phys_Collide_PolyOBB(const CVec3Dfp32* _pVertices, 
 						 const uint32* _pVertIndices, 
 						 const int nVertexCount,
-						 const CPlane3Dfp4& _PolyPlane, 
+						 const CPlane3Dfp32& _PolyPlane, 
 						 const CPhysOBB& _Box, 
 						 CCollisionInfo* _pCollisionInfo, 
 						 int _nMaxCollisions);
@@ -170,60 +170,60 @@ class CCollisionFunctions
 {
 public:
 	/*
-	static int BoxBox(const CVec3Dfp4& _BoxPos1, CMat4Dfp4 _BoxRot1, const CVec3Dfp4& _BoxExtent1,
-	const CVec3Dfp4& _BoxPos2, CMat4Dfp4 _BoxRot2, const CVec3Dfp4& _BoxExtent2,
-	CVec3Dfp4& _Normal, fp4 &_Depth,
-	CVec3Dfp4 *_CollisionPoints, int _MaxCollisions);
+	static int BoxBox(const CVec3Dfp32& _BoxPos1, CMat4Dfp32 _BoxRot1, const CVec3Dfp32& _BoxExtent1,
+	const CVec3Dfp32& _BoxPos2, CMat4Dfp32 _BoxRot2, const CVec3Dfp32& _BoxExtent2,
+	CVec3Dfp32& _Normal, fp32 &_Depth,
+	CVec3Dfp32 *_CollisionPoints, int _MaxCollisions);
 	*/
 
-	static int BoxTriangle(const TOBB<fp8>& _Box,
-						   const CVec3Dfp8 *_Vertices,
+	static int BoxTriangle(const TOBB<fp64>& _Box,
+						   const CVec3Dfp64 *_Vertices,
 						   CCollisionInfo* _pCollisionInfo,
 						   int _MaxCollisions);
 
-	static int BoxPolygon(const TOBB<fp8>& _Box,
-						  const CVec3Dfp8 *_pVertices,
+	static int BoxPolygon(const TOBB<fp64>& _Box,
+						  const CVec3Dfp64 *_pVertices,
 						  const uint32 *_pVertIndices,
 						  int _nVertices,
 						  CCollisionInfo* _pCollisionInfo,
 						  int _MaxCollisions);
 
-	static int BoxPolygon(const TOBB<fp4>& _Box,
-						  const CVec3Dfp4 *_pVertices,
+	static int BoxPolygon(const TOBB<fp32>& _Box,
+						  const CVec3Dfp32 *_pVertices,
 						  const uint32 *_pVertIndices,
 						  int _nVertices,
 						  CCollisionInfo* _pCollisionInfo,
 						  int _MaxCollisions);
 
 protected:
-	static bool BoxTriangle_TestNormal(fp8 _fp0, 
-									   fp8 _fR, 
-									   const CVec3Dfp8& _vNormal, 
+	static bool BoxTriangle_TestNormal(fp64 _fp0, 
+									   fp64 _fR, 
+									   const CVec3Dfp64& _vNormal, 
 									   int _iAxis,
-									   CVec3Dfp8& _BestNormal,
+									   CVec3Dfp64& _BestNormal,
 									   int& _BestAxis,
-									   fp8& _BestDepth);
+									   fp64& _BestDepth);
 
-	static bool BoxTriangle_TestFace(fp8 _fp0, fp8 _fp1, fp8 _fp2, 
-									 fp8 _fR, fp8 _fD, 
-									 CVec3Dfp8& _vNormal, 
+	static bool BoxTriangle_TestFace(fp64 _fp0, fp64 _fp1, fp64 _fp2, 
+									 fp64 _fR, fp64 _fD, 
+									 CVec3Dfp64& _vNormal, 
 									 int _iAxis,
-									 CVec3Dfp8& _BestNormal,
+									 CVec3Dfp64& _BestNormal,
 									 int& _BestAxis,
-									 fp8& _BestDepth);
+									 fp64& _BestDepth);
 
-	static bool BoxTriangle_TestEdge(fp8 _fp0, fp8 _fp1, 
-									 fp8 _fR, fp8 _fD, 
-									 const CVec3Dfp8& vNormal, 
+	static bool BoxTriangle_TestEdge(fp64 _fp0, fp64 _fp1, 
+									 fp64 _fR, fp64 _fD, 
+									 const CVec3Dfp64& vNormal, 
 									 int iAxis,
-									 CVec3Dfp8& _BestNormal,
+									 CVec3Dfp64& _BestNormal,
 									 int& _BestAxis,
-									 fp8& _BestDepth);
+									 fp64& _BestDepth);
 
 #if 1
-	static bool BoxTriangle_AddCollision(const CVec3Dfp8& _Position, 
-										 const CVec3Dfp8& _Normal,
-										 fp8 _IntersectionDepth,
+	static bool BoxTriangle_AddCollision(const CVec3Dfp64& _Position, 
+										 const CVec3Dfp64& _Normal,
+										 fp64 _IntersectionDepth,
 										 CCollisionInfo *_pCollisionInfo,
 										 int _Index,
 										 int _MaxCollisions)
@@ -231,8 +231,8 @@ protected:
 		if (_Index < _MaxCollisions)
 		{
 			_pCollisionInfo[_Index].m_bIsCollision = true;
-			_pCollisionInfo[_Index].m_Pos = _Position.Getfp4();
-			_pCollisionInfo[_Index].m_Plane.n = _Normal.Getfp4();
+			_pCollisionInfo[_Index].m_Pos = _Position.Getfp32();
+			_pCollisionInfo[_Index].m_Plane.n = _Normal.Getfp32();
 			_pCollisionInfo[_Index].m_Distance = _IntersectionDepth;
 			return true;
 		}
@@ -240,32 +240,32 @@ protected:
 	}
 #endif
 
-	static int BoxTriangle_Clip(const TOBB<fp8>& _Box,
-								const CVec3Dfp8& v0, 
-								const CVec3Dfp8& v1, 
-								const CVec3Dfp8& v2,
-								const CVec3Dfp8& _vE0, 
-								const CVec3Dfp8& _vE1, 
-								const CVec3Dfp8& _vE2, 
-								const CVec3Dfp8& _vN,
-								const CVec3Dfp8& _BestNormal,
+	static int BoxTriangle_Clip(const TOBB<fp64>& _Box,
+								const CVec3Dfp64& v0, 
+								const CVec3Dfp64& v1, 
+								const CVec3Dfp64& v2,
+								const CVec3Dfp64& _vE0, 
+								const CVec3Dfp64& _vE1, 
+								const CVec3Dfp64& _vE2, 
+								const CVec3Dfp64& _vN,
+								const CVec3Dfp64& _BestNormal,
 								int _iBestAxis,
-								fp8 _BestDepth,
+								fp64 _BestDepth,
 								CCollisionInfo *_pCollisionInfo,
 								int _MaxCollisions);
 
 
-	static bool ClosestPointOnTwoLines(CVec3Dfp8 vPoint1, CVec3Dfp8 vLenVec1, 
-									   CVec3Dfp8 vPoint2, CVec3Dfp8 vLenVec2, 
-									   fp8 &fvalue1, fp8 &fvalue2) 
+	static bool ClosestPointOnTwoLines(CVec3Dfp64 vPoint1, CVec3Dfp64 vLenVec1, 
+									   CVec3Dfp64 vPoint2, CVec3Dfp64 vLenVec2, 
+									   fp64 &fvalue1, fp64 &fvalue2) 
 	{
 		// calulate denominator
-		CVec3Dfp8 vp = vPoint2 - vPoint1;
+		CVec3Dfp64 vp = vPoint2 - vPoint1;
 		//SUBTRACT(vPoint2,vPoint1,vp);
-		fp8 fuaub  = vLenVec1 * vLenVec2;
-		fp8 fq1    = vLenVec1 * vp;
-		fp8 fq2    = -(vLenVec2 * vp);
-		fp8 fd     = 1.0 - fuaub * fuaub;
+		fp64 fuaub  = vLenVec1 * vLenVec2;
+		fp64 fq1    = vLenVec1 * vp;
+		fp64 fq2    = -(vLenVec2 * vp);
+		fp64 fd     = 1.0 - fuaub * fuaub;
 
 		// if denominator is positive
 		if (fd > 0.0f) {
@@ -283,9 +283,9 @@ protected:
 		}
 	}
 
-	static void ClipPolyToPlane(CVec3Dfp8 *avArrayIn, int ctIn, 
-								CVec3Dfp8 *avArrayOut, int &ctOut, 
-								const CVec4Dfp8& plPlane )
+	static void ClipPolyToPlane(CVec3Dfp64 *avArrayIn, int ctIn, 
+								CVec3Dfp64 *avArrayOut, int &ctOut, 
+								const CVec4Dfp64& plPlane )
 	{
 		// start with no output points
 		ctOut = 0;
@@ -299,8 +299,8 @@ protected:
 	( p.k[0]*v.k[0] + p.k[1]*v.k[1] + p.k[2]*v.k[2] + p.k[3] )
 
 			// calculate distance of edge points to plane
-			fp8 fDistance0 = POINTDISTANCE__( plPlane ,avArrayIn[i0] );
-			fp8 fDistance1 = POINTDISTANCE__( plPlane ,avArrayIn[i1] );
+			fp64 fDistance0 = POINTDISTANCE__( plPlane ,avArrayIn[i0] );
+			fp64 fDistance1 = POINTDISTANCE__( plPlane ,avArrayIn[i1] );
 
 #undef POINTDISTANCE__
 
@@ -320,7 +320,7 @@ protected:
 			if( (fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0) ) {
 
 				// find intersection point of edge and plane
-				CVec3Dfp8 vIntersectionPoint;
+				CVec3Dfp64 vIntersectionPoint;
 				vIntersectionPoint = avArrayIn[i0] - (avArrayIn[i0]-avArrayIn[i1])*fDistance0/(fDistance0-fDistance1);
 /*
 				vIntersectionPoint[0]= avArrayIn[i0][0] - (avArrayIn[i0][0]-avArrayIn[i1][0])*fDistance0/(fDistance0-fDistance1);

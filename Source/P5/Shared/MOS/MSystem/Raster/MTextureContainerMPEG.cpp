@@ -122,9 +122,9 @@ void RotateThreads()
 	
 }
 
-fp8		g_BytesRead	= 0;
-fp8		g_StartTime = 0;
-fp8		g_ReadTime	= 0;
+fp64		g_BytesRead	= 0;
+fp64		g_StartTime = 0;
+fp64		g_ReadTime	= 0;
 
 // --- CMpegASyncReaderStreamRequest --------------------------------------------------------------
 CMpegASyncReaderStreamRequest::CMpegASyncReaderStreamRequest( void *_pBuffer, int _FilePos, uint32 _Size )
@@ -1403,7 +1403,7 @@ void CMpegStream::SendAudio()
 	}
 }
 
-void CMpegStream::DecodeNextFrame( uint8 *_pPixels, uint32 _nBufSize, fp4 _DeltaTime )
+void CMpegStream::DecodeNextFrame( uint8 *_pPixels, uint32 _nBufSize, fp32 _DeltaTime )
 {
 	if( m_State == eEND || m_State == ePAUSE )
 	{
@@ -1434,7 +1434,7 @@ void CMpegStream::DecodeNextFrame( uint8 *_pPixels, uint32 _nBufSize, fp4 _Delta
 		CMTime DeltaTime = CMTime::CreateFromSeconds( _DeltaTime );
 		m_Time.Add( DeltaTime );
 	
-		fp4 PreferedTime = 1.f / fp4( m_FramesPerSecond );
+		fp32 PreferedTime = 1.f / fp32( m_FramesPerSecond );
 
 		if( m_Time.Compare( CMTime::CreateFromSeconds((PreferedTime*0.5f))) < 0 )
 		{
@@ -2473,7 +2473,7 @@ void CTextureContainer_Video_Mpeg::CloseVideo(int _iLocal)
 }
 
 
-void CTextureContainer_Video_Mpeg::SetVolume(int _iLocal, fp4 fpVol)
+void CTextureContainer_Video_Mpeg::SetVolume(int _iLocal, fp32 fpVol)
 {
 	ValidateLocalID(_iLocal);
 	CTC_MpegTexture* pV = m_lspVideos[_iLocal];
@@ -2542,7 +2542,7 @@ void CTextureContainer_Video_Mpeg::BuildInto
 //			CMTime Time = CMTime::GetCPU();
 			CMTime Time;
 			Time.Snapshot();
-			fp4 DeltaTime = Time.GetCycles() - pV->m_TimeLastVisible.GetCycles();
+			fp32 DeltaTime = Time.GetCycles() - pV->m_TimeLastVisible.GetCycles();
 			pV->m_TimeLastVisible = Time;
 			pV->m_pMpegStream->DecodeNextFrame( pPixels, nBufSize, DeltaTime );
 			_ppImg[0]->Unlock();
@@ -2587,16 +2587,16 @@ int CTextureContainer_Video_Mpeg::GetHeight(int _iLocal)
 }
 
 
-fp4 CTextureContainer_Video_Mpeg::GetTime(int _iLocal)
+fp32 CTextureContainer_Video_Mpeg::GetTime(int _iLocal)
 {
 	ValidateLocalID(_iLocal);
 	CTC_MpegTexture *pV	= m_lspVideos[_iLocal];
 	CMpegStream *pS		= pV->m_pMpegStream;
 
-	fp4 ret;
+	fp32 ret;
 
 	if( pS && pS->m_bNFramesValid )
-		ret = ( fp4(pS->m_CurrentFrame) / pS->m_FramesPerSecond );
+		ret = ( fp32(pS->m_CurrentFrame) / pS->m_FramesPerSecond );
 	else
 		ret = 0.0f;
 

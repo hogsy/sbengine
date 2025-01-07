@@ -13,7 +13,7 @@
 \*************************************************************************************************/
 class CTexture;
 typedef TPtr<CTexture> spCTexture;
-typedef TList_Vector<spCTexture> lspCTexture;
+typedef TArray<spCTexture> lspCTexture;
 
 class SYSTEMDLLEXPORT CTexture : public CReferenceCount
 {
@@ -41,7 +41,6 @@ public:
 	uint32 m_MipMapFilePosPos;
 	int16 m_IsLoaded;
 	CTC_TextureProperties m_Properties;
-//	CStringHashLink m_HashLink;
 
 	uint32 m_LargestMapFilePos;
 	CImage m_LargestMap;
@@ -58,7 +57,7 @@ public:
 	dllvirtual void Write2(CDataFile* _pDFile, int32 *_PicMip);
 	dllvirtual void WriteIndexData(CCFile* _pFile);
 	dllvirtual void WriteIndexData2(CCFile* _pFile, int32 *_PicMip);
-	dllvirtual void Compress(int _Compression, fp4 _Quality);
+	dllvirtual void Compress(int _Compression, fp32 _Quality);
 	dllvirtual void Decompress(bool _DecompMipmap = true);
 
 	dllvirtual void SerializeWrite(CDataFile* _pDFile);
@@ -66,12 +65,12 @@ public:
 	dllvirtual void SerializeRead(CDataFile* _pDFile);
 #endif
 
-	dllvirtual void Read(CDataFile* _pDFile, TList_Vector<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
-	dllvirtual void ReadIndexData(CCFile* _pFile, TList_Vector<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
+	dllvirtual void Read(CDataFile* _pDFile, TArray<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
+	dllvirtual void ReadIndexData(CCFile* _pFile, TArray<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
 	dllvirtual bool IsCompressed();
 
 	dllvirtual int Virtual_IsLoaded(int _iMipMap) { return ((m_IsLoaded>>_iMipMap) & 1); };
-	dllvirtual void Virtual_Read(CDataFile* _pDFile, TList_Vector<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
+	dllvirtual void Virtual_Read(CDataFile* _pDFile, TArray<spCImagePalette>* _plspPalettes = NULL, int _iPalBase = 0);
 	dllvirtual void Virtual_Load(CCFile* _pFile);
 	dllvirtual void Virtual_Load(CCFile* _pFile, int _iMipmap);
 	dllvirtual void Virtual_Unload();
@@ -111,9 +110,9 @@ public:
 	};
 
 protected:
-	TList_Vector<spCImagePalette> m_lspPalettes;
-	TList_Vector<spCTexture> m_lspTextures;
-	TList_Vector<uint32>	m_lTextureCompileChecksums;
+	TArray<spCImagePalette> m_lspPalettes;
+	TArray<spCTexture> m_lspTextures;
+	TArray<uint32>	m_lTextureCompileChecksums;
 
 //	spCStringHash m_spHash;
 //	CStringHash m_Hash;
@@ -173,9 +172,10 @@ public:
 	dllvirtual int AddTexture(CStr _FileName, const CTC_TextureProperties& _Properties, CStr _Name = (char*)NULL);
 	dllvirtual int AddTexture(spCImage _spImg, const CTC_TextureProperties& _Properties, CStr _Name, int _ConvertType = 0, void* _pConvertParam = NULL);
 	dllvirtual int AddTexture(CStr _FileName, const CTC_TextureProperties& _Properties, CStr _Name, int _ConvertType = 0, void* _pConvertParam = NULL);
+	dllvirtual void SetTexture(int _iLocal, spCImage _spImg, const CTC_TextureProperties& _Properties, int _ConvertType = 0, void* _pConvertParam = NULL);
 	dllvirtual void CreateTextureImage(spCTexture _spTxt, spCImage _spImg, int _ConvertType = 0, void* _pConvertParam = NULL);
 	dllvirtual void DeleteTexture(int _LocalID);
-	dllvirtual void AddFiltered(CTextureContainer_Plain *_pSrcXTC, TList_Vector<CStr> *_pAllowed);
+	dllvirtual void AddFiltered(CTextureContainer_Plain *_pSrcXTC, TArray<CStr> *_pAllowed);
 	dllvirtual void Add(CTextureContainer_Plain* _pDestXTC);
 	dllvirtual int AddFromScriptLine(CStr _Line, CStr _ScriptPath);
 	dllvirtual int AddFromKeys(CKeyContainer* _pKeys, CStr _BasePath);
@@ -188,14 +188,14 @@ public:
 	dllvirtual void WriteImageList2(CDataFile* _pDFile, int32 *_PicMip);
 	dllvirtual void WriteImageDirectory2(CDataFile* _pDFile, int32 *_PicMip);
 
-	dllvirtual void WriteXTC(CDataFile* _pDFile);
+	dllvirtual void WriteXTC(CDataFile* _pDFile, bool _bWriteList = true);
 	dllvirtual void WriteXTC(const char* _pName);
 	dllvirtual void WriteXTC2(CDataFile* _pDFile, int32 *_PicMip);
 	dllvirtual void WriteXTC2(const char* _pName, int32 *_PicMip);
 	dllvirtual void WriteXTC2_XT0(const char* _pName, int32 *_PicMip);
 
 	dllvirtual void WriteWAD(CStr _FileName);
-	dllvirtual void FilterTextures(TList_Vector<CStr> *_pValidTextures);
+	dllvirtual void FilterTextures(TArray<CStr> *_pValidTextures);
 	dllvirtual void ScaleToPow2();
 	dllvirtual void StripVersions(const uint8* _pKeepVersions, int _nVersions);
 	dllvirtual void RemoveTextureVersion(CStr _Name, uint8 _Version);
@@ -222,9 +222,9 @@ public:
 	// Operations
 	dllvirtual void Quantize(spCImagePalette _spPal = NULL);
 
-	dllvirtual void Compress(int _Compression, fp4 _Quality);
+	dllvirtual void Compress(int _Compression, fp32 _Quality);
 	dllvirtual void Decompress();
-	dllvirtual void Recompress( int _FromFormat, int _ToFormat, fp4 _Quality );	// Compress all textures with given format
+	dllvirtual void Recompress( int _FromFormat, int _ToFormat, fp32 _Quality );	// Compress all textures with given format
 
 	dllvirtual spCTextureContainer_Plain CreateSubContainer(uint8* _pTxtAddFlags, int _FlagListLen);
 	dllvirtual spCTextureContainer_Plain CreateSubContainer(uint32* _piTxtAdd, int _nTextures);
@@ -280,6 +280,7 @@ public:
 | CTextureContainer_VirtualXTC
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
+#if 0
 class CTextureCache_Entry
 {
 	int m_Texture;
@@ -294,33 +295,35 @@ public:
 	int GetTexture(){ return m_Texture; };
 	int GetMipMap(){ return m_MipMap; };
 };
+#endif
 
 // -------------------------------------------------------------------
 class SYSTEMDLLEXPORT CTextureContainer_VirtualXTC : public CTextureContainer_Plain
 {
 	MRTC_DECLARE;
+	friend class CTextureCache;
 
 protected:
-	TList_Vector<CTextureCache_Entry> m_liCached;
+//	TArray<CTextureCache_Entry> m_liCached;
 	CStr m_FileName;
 	CStr m_CacheFileName;
-	bool m_bIsCached;
+	spCCFile m_spPrecacheFile;
+//	bool m_bIsCached;
 
 	dllvirtual void ScanImageList(CDataFile* _pDFile);
 	dllvirtual void Unload(int _iLocal);
 	dllvirtual void Unload(int _iLocal, int _iMipMap);
 	dllvirtual void Load(int _iLocal);
-	dllvirtual void Load(int _iLocal, int _iMipMap);
+	dllvirtual void Load(int _iLocal, int _iMipMap, int _nMips = 1);
 
 	dllvirtual CStr GetFileName();	// If caching is enabled, GetFileName invokes cache copying if the file is not in the cache. Returns the cached filename.
 
 public:
-
 	DECLARE_OPERATOR_NEW
 
-	dllvirtual void Create(CDataFile* _pDFile, int _NumCache = 8);
+	dllvirtual void Create(CDataFile* _pDFile, CStr _FileName = CStr(), int _NumCache = 8);
 	dllvirtual void Create(CStr _FileName, int _NumCache = 8);
-	dllvirtual void SetCacheFile(CStr _CacheFileName);
+//	dllvirtual void SetCacheFile(CStr _CacheFileName);
 	dllvirtual void AddFromXTC(const char* _pName);
 	CTextureContainer_VirtualXTC();
 	~CTextureContainer_VirtualXTC();
@@ -336,8 +339,11 @@ public:
 	dllvirtual int GetTextureDesc(int _iLocal, CImage* _pTargetImg, int& _Ret_nMipmaps);
 	dllvirtual void GetTextureProperties(int _iLocal, CTC_TextureProperties&);
 	dllvirtual CImage* GetTexture(int _iLocal, int _iMipMap, int _TextureVersion);
+	dllvirtual CImage* GetTextureNumMip(int _iLocal, int _iMipMap, int _nMips, int _TextureVersion);
 	dllvirtual void ReleaseTexture(int _iLocal, int _iMipMap, int _TextureVersion);
 	dllvirtual void BuildInto(int _iLocal, CImage** _ppImg, int _nMipmaps, int _TextureVersion, int _ConvertType = IMAGE_CONVERT_RGB, int _iStartMip = 0, uint32 _BuildFlags = 0);
+	dllvirtual void OpenPrecache();
+	dllvirtual void ClosePrecache();
 };
 
 typedef TPtr<CTextureContainer_VirtualXTC> spCTextureContainer_VirtualXTC;
@@ -356,7 +362,7 @@ public:
 	virtual int AddVideo(CStr _FileName) pure;
 
 	virtual void CloseVideo(int _iLocal) pure;
-	virtual void SetVolume(int _iLocal, fp4 fpVol) pure;
+	virtual void SetVolume(int _iLocal, fp32 fpVol) pure;
 	virtual void Pause(int _iLocal, bool _Paused = true) pure;
 	virtual void AutoRestart(int _iLocal, bool _EnableAutoRestart = true) pure;
 	virtual void Rewind(int _iLocal) pure;
@@ -367,7 +373,7 @@ public:
 	virtual int GetWidth(int _iLocal) pure;
 	virtual int GetHeight(int _iLocal) pure;
 	virtual void SetFrame(int _iLocal, int _Frame) {}
-	virtual fp4 GetTime(int _iLocal) pure;
+	virtual fp32 GetTime(int _iLocal) pure;
 	virtual void SetSoundHandle(int _iLocal, int _hSound) pure;
 
 	virtual void GlobalPause() {}

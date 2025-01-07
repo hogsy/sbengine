@@ -80,7 +80,7 @@ CStr CStream_SubFile::GetFileName()
 	return m_spFile->GetFileName();
 }
 
-void CStream_SubFile::SetPriority(fp4 _Priority)
+void CStream_SubFile::SetPriority(fp32 _Priority)
 {
 	m_spFile->SetPriority(_Priority);
 }

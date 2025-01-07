@@ -3,6 +3,9 @@
 #include "MInput.h"
 #include "MInputCore.h"
 
+//#pragma optimize("", off)
+//#pragma inline_depth(0)
+
 // -------------------------------------------------------------------
 //  CInputContextCore
 // -------------------------------------------------------------------
@@ -15,7 +18,7 @@ CInputContextCore::CInputContextCore()
 
 	{
 		for(int i = 0; i < 512; i++)
-			m_KBState[i] = SKEY_UP;
+			m_KBState[i] = SKEY_UP | i;
 	}
 
 	m_nUserSK = 0;
@@ -124,7 +127,7 @@ void CInputContextCore::AddScanKey(CScanKey _Scan)
 	m_KBState[_Scan.m_ScanKey32 & 511] = _Scan.m_ScanKey32;
 }
 
-void CInputContextCore::DownKey(int _ScanCode, wchar _Char, fp8 _Time, int _nRep, int _Data0, int _Data1, int _iDevice)
+void CInputContextCore::DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep, int _Data0, int _Data1, int _iDevice)
 {
 	CScanKey k;
 	k.m_ScanKey32 = int(_ScanCode);
@@ -165,7 +168,7 @@ void CInputContextCore::DownKey(int _ScanCode, wchar _Char, fp8 _Time, int _nRep
 //ConOut(CStrF("DownKey %d, %d, %d", scancode, data0, data1));
 };
 
-void CInputContextCore::UpKey(int _ScanCode, fp8 _Time, int _Data0, int _Data1, int _iDevice)
+void CInputContextCore::UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice)
 {
 	CScanKey k;
 	k.m_ScanKey32 = m_KBState[_ScanCode & 511];
@@ -194,18 +197,36 @@ void CInputContextCore::UpKey(int _ScanCode, fp8 _Time, int _Data0, int _Data1, 
 	}
 };
 
+void CInputContextCore::RD_DownKey(int _ScanCode, wchar _Char, fp64 _Time, int _nRep, int _Data0, int _Data1, int _iDevice)
+{
+	M_LOCK(m_InputLock);
+	DownKey(_ScanCode, _Char, _Time, _nRep, _Data0, _Data1, _iDevice);
+}
+
+void CInputContextCore::RD_UpKey(int _ScanCode, fp64 _Time, int _Data0, int _Data1, int _iDevice)
+{
+	M_LOCK(m_InputLock);
+	UpKey(_ScanCode, _Time, _Data0, _Data1, _iDevice);
+}
+
 bool CInputContextCore::KeyPressed()
 {
 //	Update();
 	return (!m_spKBB->Empty());
 };
 
-CScanKey CInputContextCore::ScanKey()
+int CInputContextCore::GetScanKeys(CScanKey* _pDest, uint _nMax)
 {
-	while (!KeyPressed()) Update();
-	CScanKey k = m_spKBB->Get();
-	return k;
-};
+	M_LOCK(m_InputLock);
+
+	uint nKeys = 0;
+	while(nKeys < _nMax && !m_spKBB->Empty())
+	{
+		_pDest[nKeys++] = m_spKBB->Get();
+	}
+
+	return nKeys;
+}
 
 bool CInputContextCore::IsPressed(int _skey)
 {
@@ -216,40 +237,6 @@ bool CInputContextCore::IsNotPressed(int _skey)
 { 
 	return (m_KBState[_skey] & SKEY_UP) != 0;
 }
-
-bool CInputContextCore::IsPressed(int8 first, ... )
-{
-	va_list arg;
-	va_start(arg,first);
-	int8 code = first;
-	while (code != 0)
-	{
-		if (m_KBState[code] & SKEY_UP) return FALSE;
-#ifdef COMPILER_GNU
-		code = (int8)va_arg(arg, int);
-#else
-		code = va_arg(arg, int8);
-#endif
-	};
-	return TRUE;
-};
-
-bool CInputContextCore::IsNotPressed(int8 first, ... )
-{
-	va_list arg;
-	va_start(arg,first);
-	int8 code = first;
-	while (code != 0)
-	{
-		if (!(m_KBState[code] & SKEY_UP)) return FALSE;
-#ifdef COMPILER_GNU
-		code = (int8)va_arg(arg, int);
-#else
-		code = va_arg(arg, int8);
-#endif
-	};
-	return TRUE;
-};
 
 bool CInputContextCore::AddShiftKey(int8 scancode)
 {
@@ -394,12 +381,14 @@ spCInputEnvelopeInstance CInputContextCore::AppendEnvelope( int _index, const CS
 	if (iPadPhys < 0)
 		return NULL;
 
+	M_LOCK(m_InputLock);
 	CInputEnvelope *pEnvelope = m_Envelopes.FindEnvelope( _name );
 	return m_EnvelopeInstances.AppendEnvelope( iPadPhys, pEnvelope );
 }
 
 void CInputContextCore::FlushEnvelopes( )
 {
+	M_LOCK(m_InputLock);
 	m_EnvelopeInstances.FlushEnvelopes();
 }
 
@@ -409,6 +398,7 @@ void CInputContextCore::FlushEnvelopes( int _index )
 	if (iPadPhys < 0)
 		return;
 
+	M_LOCK(m_InputLock);
 	m_EnvelopeInstances.FlushEnvelopes( iPadPhys );
 }
 
@@ -418,6 +408,7 @@ spCInputEnvelopeInstance CInputContextCore::SetEnvelope( int _index, const CStr 
 	if (iPadPhys < 0)
 		return NULL;
 
+	M_LOCK(m_InputLock);
 	CInputEnvelope *pEnvelope = m_Envelopes.FindEnvelope( _name );
 	return m_EnvelopeInstances.SetEnvelope( iPadPhys, pEnvelope );
 }
@@ -428,6 +419,7 @@ void CInputContextCore::RemoveEnvelope( int _index, CInputEnvelopeInstance *_pEn
 	if (iPadPhys < 0)
 		return;
 
+	M_LOCK(m_InputLock);
 	m_EnvelopeInstances.RemoveEnvelope( iPadPhys, _pEnvelopeInstance );
 }
 

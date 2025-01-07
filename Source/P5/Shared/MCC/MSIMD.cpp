@@ -17,7 +17,7 @@
 #ifdef CPU_X86
 
 
-static void SSE_Sqrt8(fp4* _pSrc, fp4* _pDst, int _n)
+static void SSE_Sqrt8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	// Make sure padding area contains valid floats.
 	int nPadd = (_n+3) & 0xfffffffc;
@@ -41,7 +41,7 @@ static void SSE_Sqrt8(fp4* _pSrc, fp4* _pDst, int _n)
 	}
 }
 
-static void SSE_RecpSqrt8(fp4* _pSrc, fp4* _pDst, int _n)
+static void SSE_RecpSqrt8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	// Make sure padding area contains valid floats.
 	int nPadd = (_n+3) & 0xfffffffc;
@@ -66,7 +66,7 @@ static void SSE_RecpSqrt8(fp4* _pSrc, fp4* _pDst, int _n)
 	}
 }
 
-static void SSE_Recp8(fp4* _pSrc, fp4* _pDst, int _n)
+static void SSE_Recp8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	// Make sure padding area contains valid floats.
 	int nPadd = (_n+15) & 0xfffffff0;
@@ -100,7 +100,7 @@ Invert:
 	}
 }
 
-static void SSE_ConvertRGB(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV, int _Alpha)
+static void SSE_ConvertRGB(const CVec4Dfp32* _pLight, uint32* _pColors, int _nV, int _Alpha)
 {
 	int Alpha = _Alpha << 24;
 
@@ -136,7 +136,7 @@ skip:
 	}
 }
 
-static void SSE_ConvertRGBA(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV)
+static void SSE_ConvertRGBA(const CVec4Dfp32* _pLight, uint32* _pColors, int _nV)
 {
 	__asm
 	{
@@ -172,15 +172,15 @@ skip:
 
 #ifdef PLATFORM_DOLPHIN
 
-static void PPC_RecpSqrt8(register fp4* _pSrc, register fp4* _pDst, register int _n);
-static void PPC_RecpSqrt8(register fp4* _pSrc, register fp4* _pDst, register int _n)
+static void PPC_RecpSqrt8(register fp32* _pSrc, register fp32* _pDst, register int _n);
+static void PPC_RecpSqrt8(register fp32* _pSrc, register fp32* _pDst, register int _n)
 {
 /*	// Make sure padding area contains valid floats.
 	int nPadd = (_n+3) & 0xfffffffc;
 	for (int i=_n; i<nPadd; i++)
 		_pSrc[i] = 1.0f; */
 
-	register fp8 tmp0, tmp1;
+	register fp64 tmp0, tmp1;
 	asm
 	{
 		addi _n, _n, 3
@@ -201,10 +201,10 @@ static void PPC_RecpSqrt8(register fp4* _pSrc, register fp4* _pDst, register int
 	}
 }
 
-static void PPC_Recp8(register fp4* _pSrc, register fp4* _pDst, register int _n);
-static void PPC_Recp8(register fp4* _pSrc, register fp4* _pDst, register int _n)
+static void PPC_Recp8(register fp32* _pSrc, register fp32* _pDst, register int _n);
+static void PPC_Recp8(register fp32* _pSrc, register fp32* _pDst, register int _n)
 {
-	register fp8 tmp0, tmp1;
+	register fp64 tmp0, tmp1;
 	asm
 	{
 		addi _n, _n, 3
@@ -225,10 +225,10 @@ static void PPC_Recp8(register fp4* _pSrc, register fp4* _pDst, register int _n)
 	}
 }
 
-static void PPC_Sqrt8(register fp4* _pSrc, register fp4* _pDst, register int _n);
-static void PPC_Sqrt8(register fp4* _pSrc, register fp4* _pDst, register int _n)
+static void PPC_Sqrt8(register fp32* _pSrc, register fp32* _pDst, register int _n);
+static void PPC_Sqrt8(register fp32* _pSrc, register fp32* _pDst, register int _n)
 {
-	register fp8 tmp0, tmp1;
+	register fp64 tmp0, tmp1;
 	asm
 	{
 		addi _n, _n, 3
@@ -252,10 +252,10 @@ static void PPC_Sqrt8(register fp4* _pSrc, register fp4* _pDst, register int _n)
 }
 
 
-static void PPC_ConvertRGB(register const CVec4Dfp4* _pSrc, register uint32* _pDst, register int _nV, register int _Alpha);
-static void PPC_ConvertRGB(register const CVec4Dfp4* _pSrc, register uint32* _pDst, register int _nV, register int _Alpha)
+static void PPC_ConvertRGB(register const CVec4Dfp32* _pSrc, register uint32* _pDst, register int _nV, register int _Alpha);
+static void PPC_ConvertRGB(register const CVec4Dfp32* _pSrc, register uint32* _pDst, register int _nV, register int _Alpha)
 {
-	register fp8 tmp0, tmp1;
+	register fp64 tmp0, tmp1;
 	asm
 	{
 		mtctr _nV
@@ -274,10 +274,10 @@ static void PPC_ConvertRGB(register const CVec4Dfp4* _pSrc, register uint32* _pD
 	}
 }
 
-static void PPC_ConvertRGBA(register const CVec4Dfp4* _pSrc, register uint32* _pDst, register int _nV);
-static void PPC_ConvertRGBA(register const CVec4Dfp4* _pSrc, register uint32* _pDst, register int _nV)
+static void PPC_ConvertRGBA(register const CVec4Dfp32* _pSrc, register uint32* _pDst, register int _nV);
+static void PPC_ConvertRGBA(register const CVec4Dfp32* _pSrc, register uint32* _pDst, register int _nV)
 {
-	register fp8 tmp0, tmp1;
+	register fp64 tmp0, tmp1;
 	asm
 	{
 		mtctr _nV
@@ -298,7 +298,7 @@ static void PPC_ConvertRGBA(register const CVec4Dfp4* _pSrc, register uint32* _p
 #endif
 
 //----------------------------------------------------------------
-void SIMD_Sqrt8(fp4* _pSrc, fp4* _pDst, int _n)
+void SIMD_Sqrt8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	if (!_pDst) _pDst = _pSrc;
 
@@ -328,7 +328,7 @@ void SIMD_Sqrt8(fp4* _pSrc, fp4* _pDst, int _n)
 	}
 }
 
-void SIMD_RecpSqrt8(fp4* _pSrc, fp4* _pDst, int _n)
+void SIMD_RecpSqrt8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	if (!_pDst) _pDst = _pSrc;
 
@@ -376,7 +376,7 @@ void SIMD_RecpSqrt8(fp4* _pSrc, fp4* _pDst, int _n)
 	}
 }
 
-void SIMD_Recp8(fp4* _pSrc, fp4* _pDst, int _n)
+void SIMD_Recp8(fp32* _pSrc, fp32* _pDst, int _n)
 {
 	if (!_pDst) _pDst = _pSrc;
 
@@ -406,7 +406,7 @@ void SIMD_Recp8(fp4* _pSrc, fp4* _pDst, int _n)
 	}
 };
 
-void SIMD_ConvertRGB(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV, int _Alpha)
+void SIMD_ConvertRGB(const CVec4Dfp32* _pLight, uint32* _pColors, int _nV, int _Alpha)
 {
 #ifndef M_RTM
 	if (!MACRO_ISALIGNED16(_pLight))
@@ -438,7 +438,7 @@ void SIMD_ConvertRGB(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV, int _A
 	}
 }
 
-void SIMD_ConvertRGBA(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV)					// _pLight must be 16-byte aligned
+void SIMD_ConvertRGBA(const CVec4Dfp32* _pLight, uint32* _pColors, int _nV)					// _pLight must be 16-byte aligned
 {
 #ifndef M_RTM
 	if (!MACRO_ISALIGNED16(_pLight))
@@ -569,7 +569,7 @@ void SIMD_ConvertRGBA(const CVec4Dfp4* _pLight, uint32* _pColors, int _nV)					/
 //- Vector operations --------------------------------------------
 //----------------------------------------------------------------
 
-void SIMD_Mul(const fp4* _pSrc1, const fp4* _pSrc2, fp4* _pDst, int _n)
+void SIMD_Mul(const fp32* _pSrc1, const fp32* _pSrc2, fp32* _pDst, int _n)
 {
 #ifndef M_RTM
 	if (!MACRO_ISALIGNED16(_pSrc1))
@@ -644,17 +644,17 @@ void SIMD_Mul(const fp4* _pSrc1, const fp4* _pSrc2, fp4* _pDst, int _n)
 //----------------------------------------------------------------
 
 /*
-static void SIMD_Mul_SS_D(const fp4* _pSrc1, const fp4* _pSrc2, fp4* _pDst, int _n)
-static void SIMD_Mul_SC_D(const fp4* _pSrc1, fp4 _Src2, fp4* _pDst, int _n)
+static void SIMD_Mul_SS_D(const fp32* _pSrc1, const fp32* _pSrc2, fp32* _pDst, int _n)
+static void SIMD_Mul_SC_D(const fp32* _pSrc1, fp32 _Src2, fp32* _pDst, int _n)
 
-static void SIMD_Mul_SSS_D(const fp4* _pSrc1, const fp4* _pSrc2, const fp4* _pSrc3, fp4* _pDst, int _n)
-static void SIMD_Mul_SSC_D(const fp4* _pSrc1, const fp4* _pSrc2, fp4 _Src3, fp4* _pDst, int _n)
+static void SIMD_Mul_SSS_D(const fp32* _pSrc1, const fp32* _pSrc2, const fp32* _pSrc3, fp32* _pDst, int _n)
+static void SIMD_Mul_SSC_D(const fp32* _pSrc1, const fp32* _pSrc2, fp32 _Src3, fp32* _pDst, int _n)
 
-static void SIMD_Add_SS_D(const fp4* _pSrc1, const fp4* _pSrc2, fp4* _pDst, int _n)
-static void SIMD_Add_SC_D(const fp4* _pSrc1, fp4 _Src2, fp4* _pDst, int _n)
+static void SIMD_Add_SS_D(const fp32* _pSrc1, const fp32* _pSrc2, fp32* _pDst, int _n)
+static void SIMD_Add_SC_D(const fp32* _pSrc1, fp32 _Src2, fp32* _pDst, int _n)
 
-static void SIMD_Div_SS_D(const fp4* _pSrc1, const fp4* _pSrc2, fp4* _pDst, int _n)
-static void SIMD_Div_SC_D(const fp4* _pSrc1, fp4 _Src2, fp4* _pDst, int _n)
+static void SIMD_Div_SS_D(const fp32* _pSrc1, const fp32* _pSrc2, fp32* _pDst, int _n)
+static void SIMD_Div_SC_D(const fp32* _pSrc1, fp32 _Src2, fp32* _pDst, int _n)
 
 */
 

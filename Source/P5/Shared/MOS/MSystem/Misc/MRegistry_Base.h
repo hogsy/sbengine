@@ -51,7 +51,7 @@ public:
 
 	virtual CStr GetThisValue() const pure;
 	virtual int32 GetThisValuei() const pure;
-	virtual fp4 GetThisValuef() const pure;
+	virtual fp32 GetThisValuef() const pure;
 	virtual const TArray<uint8> GetThisValued() const pure;
 	virtual TArray<uint8> GetThisValued() pure;
 
@@ -60,17 +60,17 @@ public:
 
 	virtual CStr GetValue(int _iKey) const pure;
 	virtual int32 GetValuei(int _iKey) const pure;
-	virtual fp4 GetValuef(int _iKey) const pure;
+	virtual fp32 GetValuef(int _iKey) const pure;
 	virtual const TArray<uint8> GetValued(int _iKey) const pure;
 	virtual TArray<uint8> GetValued(int _iKey) pure;
 
 	virtual CStr GetValue(const char* _pName, const char* _pDefVal) const pure;
 	virtual int32 GetValuei(const char* _pName, int32 _DefVal) const pure;
-	virtual fp4 GetValuef(const char* _pName, fp4 _DefVal) const pure;
+	virtual fp32 GetValuef(const char* _pName, fp32 _DefVal) const pure;
 
 	virtual CStr GetValue(const char* _pName) const pure;	// Equivalent to GetValue(_pName, "", 0)
 	virtual int32 GetValuei(const char* _pName) const pure;	// Equivalent to GetValue(_pName, 0, 0)
-	virtual fp4 GetValuef(const char* _pName) const pure;	// Equivalent to GetValue(_pName, 0.0f, 0)
+	virtual fp32 GetValuef(const char* _pName) const pure;	// Equivalent to GetValue(_pName, 0.0f, 0)
 	virtual const TArray<uint8> GetValued(const char* _pName) const pure;
 	virtual TArray<uint8> GetValued(const char* _pName) pure;
 };

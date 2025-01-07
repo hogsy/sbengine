@@ -3,7 +3,7 @@
 #include "MFloat.h"
 #include "MMath.h"
 
-const fp4 MIPS_Sin( fp4 _Val )
+const fp32 MIPS_Sin( fp32 _Val )
 {
 	const float onepi = _PI;
 	const float twopi = _PI2;

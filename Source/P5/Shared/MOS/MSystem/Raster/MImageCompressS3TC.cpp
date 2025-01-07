@@ -407,7 +407,7 @@ static uint16 ShrinkTo565(const CPixel32& _Pixel)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static uint16 ShrinkTo565(const CVec3Dfp4& _Pixel)
+static uint16 ShrinkTo565(const CVec3Dfp32& _Pixel)
 {
 	int R = (int)Clamp(_Pixel.k[0] * (31.0f / 255.0f), 0.0f, 31.0f);
 	int G = (int)Clamp(_Pixel.k[1] * (63.0f / 255.0f), 0.0f, 63.0f);
@@ -448,9 +448,9 @@ static int Distance(const CPixel32& _Pixel0, const CPixel32& _Pixel1)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 Distance(const CPixel32& _Pixel0, const CVec3Dfp4& _Pixel2)
+static fp32 Distance(const CPixel32& _Pixel0, const CVec3Dfp32& _Pixel2)
 {
-	CVec3Dfp4 Pixel(_Pixel0.R(), _Pixel0.G(), _Pixel0.B());
+	CVec3Dfp32 Pixel(_Pixel0.R(), _Pixel0.G(), _Pixel0.B());
 
 	return Pixel.DistanceSqr(_Pixel2);
 }
@@ -466,10 +466,10 @@ static fp4 Distance(const CPixel32& _Pixel0, const CVec3Dfp4& _Pixel2)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 Distance(const CPixel32& _Pixel0, const uint16& _Pixel2)
+static fp32 Distance(const CPixel32& _Pixel0, const uint16& _Pixel2)
 {
-	CVec3Dfp4 Pixel0(_Pixel0.R(), _Pixel0.G(), _Pixel0.B());
-	CVec3Dfp4 Pixel1(ExpandRGB565(_Pixel2).R(), ExpandRGB565(_Pixel2).G(), ExpandRGB565(_Pixel2).B() );
+	CVec3Dfp32 Pixel0(_Pixel0.R(), _Pixel0.G(), _Pixel0.B());
+	CVec3Dfp32 Pixel1(ExpandRGB565(_Pixel2).R(), ExpandRGB565(_Pixel2).G(), ExpandRGB565(_Pixel2).B() );
 
 	return Pixel1.DistanceSqr(Pixel0);
 }
@@ -485,15 +485,15 @@ static fp4 Distance(const CPixel32& _Pixel0, const uint16& _Pixel2)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static int FindClosest(const CPixel32& _Color, CVec3Dfp4* _pCodebook)
+static int FindClosest(const CPixel32& _Color, CVec3Dfp32* _pCodebook)
 {
-	CVec3Dfp4 Color(_Color.R(), _Color.G(), _Color.B());
+	CVec3Dfp32 Color(_Color.R(), _Color.G(), _Color.B());
 
 	int iClosest = 0;
-	fp4 BestDist = Color.DistanceSqr(_pCodebook[0]);
+	fp32 BestDist = Color.DistanceSqr(_pCodebook[0]);
 	for( int i = 1; i < 4; i++)
 	{
-		fp4 fDist = Color.DistanceSqr(_pCodebook[i]);
+		fp32 fDist = Color.DistanceSqr(_pCodebook[i]);
 		if(fDist < BestDist)
 		{
 			iClosest = i;
@@ -674,12 +674,12 @@ static int FindClosest( uint16 _Color, uint16* _pCodebook )
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 FindClosestError4(const CVec3Dfp4& _Color, const CVec3Dfp4* _pCodebook)
+static fp32 FindClosestError4(const CVec3Dfp32& _Color, const CVec3Dfp32* _pCodebook)
 {
-	fp4 fError0 = (_pCodebook[0] - _Color).LengthSqr();
-	fp4 fError1 = (_pCodebook[1] - _Color).LengthSqr();
-	fp4 fError2 = (_pCodebook[2] - _Color).LengthSqr();
-	fp4 fError3 = (_pCodebook[3] - _Color).LengthSqr();
+	fp32 fError0 = (_pCodebook[0] - _Color).LengthSqr();
+	fp32 fError1 = (_pCodebook[1] - _Color).LengthSqr();
+	fp32 fError2 = (_pCodebook[2] - _Color).LengthSqr();
+	fp32 fError3 = (_pCodebook[3] - _Color).LengthSqr();
 
 	return Min(fError0, Min(fError1, Min(fError2, fError3)));
 }
@@ -695,11 +695,11 @@ static fp4 FindClosestError4(const CVec3Dfp4& _Color, const CVec3Dfp4* _pCodeboo
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 FindClosestError3(const CVec3Dfp4& _Color, const CVec3Dfp4* _pCodebook)
+static fp32 FindClosestError3(const CVec3Dfp32& _Color, const CVec3Dfp32* _pCodebook)
 {
-	fp4 fError0 = (_pCodebook[0] - _Color).LengthSqr();
-	fp4 fError1 = (_pCodebook[1] - _Color).LengthSqr();
-	fp4 fError2 = (_pCodebook[2] - _Color).LengthSqr();
+	fp32 fError0 = (_pCodebook[0] - _Color).LengthSqr();
+	fp32 fError1 = (_pCodebook[1] - _Color).LengthSqr();
+	fp32 fError2 = (_pCodebook[2] - _Color).LengthSqr();
 
 	return Min(fError0, Min(fError1, fError2));
 }
@@ -717,15 +717,15 @@ static fp4 FindClosestError3(const CVec3Dfp4& _Color, const CVec3Dfp4* _pCodeboo
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error1(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error1(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
-	CVec3Dfp4 aCodebook[4];
+	CVec3Dfp32 aCodebook[4];
 	aCodebook[0]	= _Start;
 	aCodebook[1]	= _Stop;
 	aCodebook[2]	= (_Start * (2.0f / 3.0f)) + (_Stop * (1.0f / 3.0f));
 	aCodebook[3]	= (_Start * (1.0f / 3.0f)) + (_Stop * (2.0f / 3.0f));
 
-	fp4 fError = FindClosestError4(_pColors[0], aCodebook);
+	fp32 fError = FindClosestError4(_pColors[0], aCodebook);
 	for(int i = 1; i < 16; i++)
 	{
 		fError += FindClosestError4(_pColors[i], aCodebook);
@@ -747,15 +747,15 @@ static fp4 GetDXT1Error1(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const 
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error1_SSE(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error1_SSE(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
-	CVec3Dfp4 M_ALIGN(16) aCodebook[4];
+	CVec3Dfp32 M_ALIGN(16) aCodebook[4];
 	aCodebook[0]	= _Start;
 	aCodebook[1]	= _Stop;
 	aCodebook[2]	= (_Start * (2.0f / 3.0f)) + (_Stop * (1.0f / 3.0f));
 	aCodebook[3]	= (_Start * (1.0f / 3.0f)) + (_Stop * (2.0f / 3.0f));
 
-	fp4 fError;
+	fp32 fError;
 	__asm
 	{
 		mov		esi, _pColors
@@ -847,14 +847,14 @@ LoopLabel:
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error2(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error2(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
-	CVec3Dfp4 aCodebook[3];
+	CVec3Dfp32 aCodebook[3];
 	aCodebook[0]	= _Stop;
 	aCodebook[1]	= _Start;
 	aCodebook[2]	= (_Start * (1.0f / 2.0f)) + (_Stop * (1.0f / 2.0f));
 
-	fp4 fError = FindClosestError3(_pColors[0], aCodebook);;
+	fp32 fError = FindClosestError3(_pColors[0], aCodebook);;
 	for(int i = 1; i < 16; i++)
 	{
 		fError += FindClosestError3(_pColors[i], aCodebook);
@@ -876,14 +876,14 @@ static fp4 GetDXT1Error2(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const 
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error2_SSE(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error2_SSE(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
-	CVec3Dfp4 M_ALIGN(16) aCodebook[3];
+	CVec3Dfp32 M_ALIGN(16) aCodebook[3];
 	aCodebook[0]	= _Stop;
 	aCodebook[1]	= _Start;
 	aCodebook[2]	= (_Start * (1.0f / 2.0f)) + (_Stop * (1.0f / 2.0f));
 
-	fp4 fError;
+	fp32 fError;
 	__asm
 	{
 		mov		esi, _pColors
@@ -963,7 +963,7 @@ LoopLabel:
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
 	return Min(GetDXT1Error1(_Start, _Stop, _pColors), GetDXT1Error2(_Start, _Stop, _pColors));
 }
@@ -982,7 +982,7 @@ static fp4 GetDXT1Error(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const C
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static fp4 GetDXT1Error_SSE(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, const CVec3Dfp4* _pColors)
+static fp32 GetDXT1Error_SSE(const CVec3Dfp32& _Start, const CVec3Dfp32& _Stop, const CVec3Dfp32* _pColors)
 {
 	return Min(GetDXT1Error1_SSE(_Start, _Stop, _pColors), GetDXT1Error2_SSE(_Start, _Stop, _pColors));
 }
@@ -999,50 +999,50 @@ static fp4 GetDXT1Error_SSE(const CVec3Dfp4& _Start, const CVec3Dfp4& _Stop, con
 \*_____________________________________________________________________________*/
 static void Quantizer( uint16* _pFinalCodebook, CPixel32* _pColors )
 {
-	CVec3Dfp4 M_ALIGN(16) aColors[16];
+	CVec3Dfp32 M_ALIGN(16) aColors[16];
 	for(int i = 0; i < 16; i++)
-		aColors[i]	= CVec3Dfp4(_pColors[i].R(), _pColors[i].G(), _pColors[i].B());
-	CBox3Dfp4 BoundBox( aColors[0], aColors[0] );
+		aColors[i]	= CVec3Dfp32(_pColors[i].R(), _pColors[i].G(), _pColors[i].B());
+	CBox3Dfp32 BoundBox( aColors[0], aColors[0] );
 	for(int i = 1; i < 16; i++)
 		BoundBox.Expand(aColors[i]);
 
 	int nIterations = 0;
-	CVec3Dfp4 StartMinVal = BoundBox.m_Min;
-	CVec3Dfp4 StopMinVal = BoundBox.m_Min;
-	CVec3Dfp4 aStartCenters[8], aStopCenters[8];
-	CVec3Dfp4 BoxOffset = (StartMinVal + BoundBox.m_Max) * 0.5f - StartMinVal;
+	CVec3Dfp32 StartMinVal = BoundBox.m_Min;
+	CVec3Dfp32 StopMinVal = BoundBox.m_Min;
+	CVec3Dfp32 aStartCenters[8], aStopCenters[8];
+	CVec3Dfp32 BoxOffset = (StartMinVal + BoundBox.m_Max) * 0.5f - StartMinVal;
 	while(BoxOffset.LengthSqr() > Sqr(0.5f))
 	{
-		CVec3Dfp4 StartMin = StartMinVal + BoxOffset * 0.5f;
-		CVec3Dfp4 StartMax = StartMin + BoxOffset;
+		CVec3Dfp32 StartMin = StartMinVal + BoxOffset * 0.5f;
+		CVec3Dfp32 StartMax = StartMin + BoxOffset;
 		aStartCenters[0]	= StartMin;
-		aStartCenters[1]	= CVec3Dfp4(StartMax.k[0], StartMin.k[1], StartMin.k[2]);
-		aStartCenters[2]	= CVec3Dfp4(StartMin.k[0], StartMax.k[1], StartMin.k[2]);
-		aStartCenters[3]	= CVec3Dfp4(StartMax.k[0], StartMax.k[1], StartMin.k[2]);
-		aStartCenters[4]	= CVec3Dfp4(StartMin.k[0], StartMin.k[1], StartMax.k[2]);
-		aStartCenters[5]	= CVec3Dfp4(StartMax.k[0], StartMin.k[1], StartMax.k[2]);
-		aStartCenters[6]	= CVec3Dfp4(StartMin.k[0], StartMax.k[1], StartMax.k[2]);
-		aStartCenters[7]	= CVec3Dfp4(StartMax.k[0], StartMax.k[1], StartMax.k[2]);
+		aStartCenters[1]	= CVec3Dfp32(StartMax.k[0], StartMin.k[1], StartMin.k[2]);
+		aStartCenters[2]	= CVec3Dfp32(StartMin.k[0], StartMax.k[1], StartMin.k[2]);
+		aStartCenters[3]	= CVec3Dfp32(StartMax.k[0], StartMax.k[1], StartMin.k[2]);
+		aStartCenters[4]	= CVec3Dfp32(StartMin.k[0], StartMin.k[1], StartMax.k[2]);
+		aStartCenters[5]	= CVec3Dfp32(StartMax.k[0], StartMin.k[1], StartMax.k[2]);
+		aStartCenters[6]	= CVec3Dfp32(StartMin.k[0], StartMax.k[1], StartMax.k[2]);
+		aStartCenters[7]	= CVec3Dfp32(StartMax.k[0], StartMax.k[1], StartMax.k[2]);
 
-		CVec3Dfp4 StopMin = StopMinVal + BoxOffset * 0.5f;
-		CVec3Dfp4 StopMax = StopMin + BoxOffset;
+		CVec3Dfp32 StopMin = StopMinVal + BoxOffset * 0.5f;
+		CVec3Dfp32 StopMax = StopMin + BoxOffset;
 		aStopCenters[0]	= StopMin;
-		aStopCenters[1]	= CVec3Dfp4(StopMax.k[0], StopMin.k[1], StopMin.k[2]);
-		aStopCenters[2]	= CVec3Dfp4(StopMin.k[0], StopMax.k[1], StopMin.k[2]);
-		aStopCenters[3]	= CVec3Dfp4(StopMax.k[0], StopMax.k[1], StopMin.k[2]);
-		aStopCenters[4]	= CVec3Dfp4(StopMin.k[0], StopMin.k[1], StopMax.k[2]);
-		aStopCenters[5]	= CVec3Dfp4(StopMax.k[0], StopMin.k[1], StopMax.k[2]);
-		aStopCenters[6]	= CVec3Dfp4(StopMin.k[0], StopMax.k[1], StopMax.k[2]);
-		aStopCenters[7]	= CVec3Dfp4(StopMax.k[0], StopMax.k[1], StopMax.k[2]);
+		aStopCenters[1]	= CVec3Dfp32(StopMax.k[0], StopMin.k[1], StopMin.k[2]);
+		aStopCenters[2]	= CVec3Dfp32(StopMin.k[0], StopMax.k[1], StopMin.k[2]);
+		aStopCenters[3]	= CVec3Dfp32(StopMax.k[0], StopMax.k[1], StopMin.k[2]);
+		aStopCenters[4]	= CVec3Dfp32(StopMin.k[0], StopMin.k[1], StopMax.k[2]);
+		aStopCenters[5]	= CVec3Dfp32(StopMax.k[0], StopMin.k[1], StopMax.k[2]);
+		aStopCenters[6]	= CVec3Dfp32(StopMin.k[0], StopMax.k[1], StopMax.k[2]);
+		aStopCenters[7]	= CVec3Dfp32(StopMax.k[0], StopMax.k[1], StopMax.k[2]);
 
 		int iBestStart = 0, iBestStop = 0;
-		fp4 fBestError = GetDXT1Error1_SSE(aStartCenters[0], aStopCenters[0], aColors);
+		fp32 fBestError = GetDXT1Error1_SSE(aStartCenters[0], aStopCenters[0], aColors);
 
 		for(int i = 0; i < 8; i++)
 		{
 			for(int j = 0; j < 8; j++)
 			{
-				fp4 fError = GetDXT1Error1_SSE(aStartCenters[i], aStopCenters[j], aColors);
+				fp32 fError = GetDXT1Error1_SSE(aStartCenters[i], aStopCenters[j], aColors);
 				if(fError < fBestError)
 				{
 					fBestError	= fError;
@@ -1059,11 +1059,11 @@ static void Quantizer( uint16* _pFinalCodebook, CPixel32* _pColors )
 		nIterations++;
 	}
 
-	CVec3Dfp4 StartCenter = StartMinVal + BoxOffset;
-	CVec3Dfp4 StopCenter = StopMinVal + BoxOffset;
+	CVec3Dfp32 StartCenter = StartMinVal + BoxOffset;
+	CVec3Dfp32 StopCenter = StopMinVal + BoxOffset;
 
-	fp4 fError1 = GetDXT1Error1_SSE(StartCenter, StopCenter, aColors);
-	fp4 fError2 = GetDXT1Error2_SSE(StartCenter, StopCenter, aColors);
+	fp32 fError1 = GetDXT1Error1_SSE(StartCenter, StopCenter, aColors);
+	fp32 fError2 = GetDXT1Error2_SSE(StartCenter, StopCenter, aColors);
 
 	if(fError1 < fError2)
 	{
@@ -1260,17 +1260,19 @@ static void EncodeDXT5(CPixel32* _pSrcImage, uint8* _pDestBlock)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-static void S3TCEncode(CImage* _pImage, void* _pDest, bool _bImageAlpha, fp4* _pRGBWeight )
+static bool S3TCEncode(CImage* _pImage, void* _pDest, bool _bImageAlpha, fp32* _pRGBWeight )
 {
 	uint8* pBlock = (uint8*)_pDest;
 	uint32* pSrcImage = (uint32*)_pImage->Lock();
 	int Width = _pImage->GetWidth();
 	int Height = _pImage->GetHeight();
 
+	bool bAlphaDropped = false;
+
 #ifdef S3TC_USE_DXTLIB
 
 	CDXTLibCompressor Compressor;
-	Compressor.Encode((uint8*)pSrcImage,pBlock,Width,Height,_bImageAlpha,_pRGBWeight);
+	bAlphaDropped = Compressor.Encode((uint8*)pSrcImage,pBlock,Width,Height,_bImageAlpha,_pRGBWeight);
 
 #else
 
@@ -1327,6 +1329,8 @@ static void S3TCEncode(CImage* _pImage, void* _pDest, bool _bImageAlpha, fp4* _p
 #endif // S3TC_USE_DXTLIB
 
 	_pImage->Unlock();
+
+	return bAlphaDropped;
 }
 
 /*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
@@ -1364,7 +1368,7 @@ static int S3TCGetEncodeSize(int _Width, int _Height, bool _bAlpha)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-void CImage::Compress_S3TC(fp4 _Quality, CImage* _pDestImg)
+void CImage::Compress_S3TC(fp32 _Quality, CImage* _pDestImg)
 {
 #ifdef IMAGE_IO_NOS3TC
 	Error("Compress_S3TC", "S3TC support disabled in this build.");
@@ -1416,7 +1420,13 @@ void CImage::Compress_S3TC(fp4 _Quality, CImage* _pDestImg)
 
 //	float weight[3] = {0.3086f, 0.6094f, 0.0820f};
 	float weight[3] = {0.33333f, 0.33333f, 0.33333f};
-	S3TCEncode(ConvImage, (uint8*)_pDestImg->m_pBitmap + sizeof(CImage_CompressHeader_S3TC), bImageAlpha, NULL);
+	if( S3TCEncode(ConvImage, (uint8*)_pDestImg->m_pBitmap + sizeof(CImage_CompressHeader_S3TC), bImageAlpha, NULL) )
+	{
+		bImageAlpha = false;
+		CompressType = IMAGE_COMPRESSTYPE_S3TC_DXT1;
+		CompressedSize = S3TCGetEncodeSize(ConvImage->GetWidth(),ConvImage->GetHeight(),false);
+		_pDestImg->m_AllocSize = CompressedSize + sizeof(CImage_CompressHeader_S3TC);
+	}
 
 	CImage_CompressHeader_S3TC& Header = *(CImage_CompressHeader_S3TC*)_pDestImg->m_pBitmap;
 	Header.setOffsetData( sizeof(CImage_CompressHeader_S3TC) );

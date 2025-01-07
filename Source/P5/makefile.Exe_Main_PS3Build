@@ -1,0 +1,30 @@
+
+Exe_Main_PS3BuildProjectName := Exe_Main_PS3Build
+Exe_Main_PS3BuildOutputDir :=Projects/Main/Exe_PS3/Output/$(PlatformName)/Exe_Main_PS3Build/$(Config)
+
+Exe_Main_PS3BuildIncludes := -I Projects/Main/Exe_PS3
+Exe_Main_PS3BuildPPU_CPP_OPTIONS := $(PPU_CPP_OPTIONS)
+Exe_Main_PS3BuildDefs := 
+
+Exe_Main_PS3BuildObjFilesCpp := 
+Exe_Main_PS3BuildObjFilesC := 
+
+Exe_Main_PS3BuildSpuElfFiles := 
+
+Exe_Main_PS3BuildSpursObjFiles := 
+
+Exe_Main_PS3BuildSrcFilesCpp := 
+Exe_Main_PS3BuildSrcFilesC := 
+
+
+Exe_Main_PS3Buildclean: 
+	@echo Cleaning Exe_Main_PS3Build $(Config)
+	@-rm -f $(Exe_Main_PS3BuildOutputDir)/*.*
+-include $(Exe_Main_PS3BuildObjFilesCpp:.o=.d) $(Exe_Main_PS3BuildObjFilesC:.o=.d) $(Exe_Main_PS3BuildSpuElfFiles:.elf=.d)$(Exe_Main_PS3BuildSpursObjFiles:.o=.d)
+
+Exe_Main_PS3Build_CreateOutputDir:
+	@mkdir -p $(Exe_Main_PS3BuildOutputDir)
+
+Exe_Main_PS3Build:
+
+Exe_Main_PS3BuildExtraTargets: 

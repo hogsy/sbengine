@@ -195,8 +195,8 @@ public:
 	~CHash2D();
 	void Create(int _nBoxes, int _BoxShiftSize, int _MaxIDs, bool _bUseLarge);
 	
-	void Insert(int _ID, const CVec3Dfp4& _Min, const CVec3Dfp4& _Max);
-	int EnumerateBox(const CVec3Dfp4& _Min, const CVec3Dfp4& _Max, int32* _pEnumRetIDs, int _MaxEnumIDs);
+	void Insert(int _ID, const CVec3Dfp32& _Min, const CVec3Dfp32& _Max);
+	int EnumerateBox(const CVec3Dfp32& _Min, const CVec3Dfp32& _Max, int32* _pEnumRetIDs, int _MaxEnumIDs);
 };
 
 //----------------------------------------------------------------

@@ -22,48 +22,57 @@
 #include "CW_Breakpoint.h"
 #endif*/
 
+void ThinArray_DoMemException(uint _OldLen, uint _NewLen, uint _SizeOfT)
+{
+	M_TRACE("(TThinArrayDataAligned::Create) Failed allocation of %d objects, %d bytes. (sizeof=%d)\n", _NewLen, _NewLen*_SizeOfT, _SizeOfT);
+	Error_static("TThinArray<>::SetLen", "Out of memory.");
+}
+
 //#define DEBUG_MEMORY
 
 int g_GlobalArrayAlloc = 0;
 
-CListVectorData::CListVectorData()
+CArrayData::CArrayData()
 {
 	m_Len = 0;
 	m_AllocLen = 0;
-	m_nGrow = TLIST_VECTOR_DEFAULTGROW;
+	m_nGrow = TArray_DEFAULTGROW;
+#ifndef M_RTM
+	m_nAllocCount = 0;
+#endif
 	m_pList = NULL;
 	m_ElemSize = 0;
 	m_nRef = 0;
 }
 
-void* CListVectorData::AllocObjects(int _nObjects)
+void* CArrayData::AllocObjects(int _nObjects)
 {
 #ifdef DEBUG_MEMORY
 	g_GlobalArrayAlloc += _nObjects*m_ElemSize;
-	if ((CListVectorCore::m_GlobalFlags & TLIST_VECTOR_MEMORYLOG | TLIST_VECTOR_RECURSIONPROT) == TLIST_VECTOR_MEMORYLOG)
+	if ((CArrayCore::m_GlobalFlags & TArray_MEMORYLOG | TArray_RECURSIONPROT) == TArray_MEMORYLOG)
 	{
-		CListVectorCore::m_GlobalFlags |= TLIST_VECTOR_RECURSIONPROT;
+		CArrayCore::m_GlobalFlags |= TArray_RECURSIONPROT;
 		LogFile(CStrF("Allocate %d, %d Total, %d %s", _nObjects*m_ElemSize, g_GlobalArrayAlloc, _nObjects, ClassName()));
-		CListVectorCore::m_GlobalFlags &= ~TLIST_VECTOR_RECURSIONPROT;
+		CArrayCore::m_GlobalFlags &= ~TArray_RECURSIONPROT;
 	}
 #endif
 	return NULL;
 }
 
-void CListVectorData::ResetObjects(void* _pObj, int _nElem)
+void CArrayData::ResetObjects(void* _pObj, int _nElem)
 {
 }
 
-void CListVectorData::FreeScalar(void* _pObj, int _nElem)
+void CArrayData::FreeScalar(void* _pObj, int _nElem)
 {
 #ifdef DEBUG_MEMORY
 	g_GlobalArrayAlloc -= _nElem*m_ElemSize;
 	if(_nElem) 
-		if ((CListVectorCore::m_GlobalFlags & TLIST_VECTOR_MEMORYLOG | TLIST_VECTOR_RECURSIONPROT) == TLIST_VECTOR_MEMORYLOG)
+		if ((CArrayCore::m_GlobalFlags & TArray_MEMORYLOG | TArray_RECURSIONPROT) == TArray_MEMORYLOG)
 		{
-			CListVectorCore::m_GlobalFlags |= TLIST_VECTOR_RECURSIONPROT;
+			CArrayCore::m_GlobalFlags |= TArray_RECURSIONPROT;
 			LogFile(CStrF("Free %d, %d Total, %d %s", _nElem*m_ElemSize, g_GlobalArrayAlloc, _nElem, ClassName()));
-			CListVectorCore::m_GlobalFlags &= ~TLIST_VECTOR_RECURSIONPROT;
+			CArrayCore::m_GlobalFlags &= ~TArray_RECURSIONPROT;
 		}
 #endif
 }
@@ -71,7 +80,7 @@ void CListVectorData::FreeScalar(void* _pObj, int _nElem)
 #define DLVCImp CObj
 #include "MdaCListVectorCoreImp.h"
 #undef DLVCImp
-#define DLVCImp CListVectorCoreDummy
+#define DLVCImp CArrayCoreDummy
 #include "MdaCListVectorCoreImp.h"
 #undef DLVCImp
 
@@ -111,8 +120,10 @@ void CIDHeap::Create(int _MaxIDCapacity, bool _Dynamic)
 	m_nAllocated = 0;
 	m_bDynamic = _Dynamic;
 	m_MaxIDCapacity = _MaxIDCapacity;
+	if (m_MaxIDCapacity == 0)
+		M_TRACEALWAYS("(CIDHeap::Create) WARNING: IDHeap capacity == 0, is this the intent?\n");
 	if ((m_MaxIDCapacity & 31) != 0) Error("-", "Capacity must be 32X.")
-	m_IDCapacity = (m_bDynamic) ? MinMT(256, m_MaxIDCapacity) : m_MaxIDCapacity;
+	m_IDCapacity = (m_bDynamic) ? MinMT(256, m_MaxIDCapacity) : MaxMT(32, m_MaxIDCapacity);
 	m_lIDAlloc.SetLen((m_IDCapacity >> 5) + 1);
 	m_pIDAlloc = &m_lIDAlloc[0];
 	m_LenMinusOne = m_lIDAlloc.Len() - 1;
@@ -122,6 +133,9 @@ void CIDHeap::Create(int _MaxIDCapacity, bool _Dynamic)
 
 int CIDHeap::AllocID()
 {
+	if (!m_pIDAlloc)
+		M_BREAKPOINT;
+
 	int32* pIDAlloc = m_pIDAlloc;
 	int AllocArrSize = m_LenMinusOne;
 
@@ -215,6 +229,9 @@ int CIDHeap::AllocIDRange(int _nIDs)
 
 bool CIDHeap::ForceAllocID(int _ID)
 {
+	if (!m_pIDAlloc)
+		M_BREAKPOINT;
+
 	if ((_ID < 0) || (_ID >= m_IDCapacity)) Error("ForceAllocID", "ID out of range.");
 	int pos = (_ID >> 5);
 	int bit = (_ID & 31);
@@ -230,6 +247,8 @@ bool CIDHeap::ForceAllocID(int _ID)
 
 void CIDHeap::FreeID(int _ID)
 {
+	if (!m_pIDAlloc)
+		M_BREAKPOINT;
 	int32* pIDAlloc = m_pIDAlloc;
 
 	if ((_ID < 0) || (_ID >= m_IDCapacity)) Error("FreeID", "ID out of range.");
@@ -254,6 +273,8 @@ void CIDHeap::FreeID(int _ID)
 
 int CIDHeap::IsAllocated(int _ID)
 {
+	if (!m_pIDAlloc)
+		M_BREAKPOINT;
 	if ((_ID < 0) || (_ID >= m_IDCapacity)) Error("FreeID", "ID out of range.");
 	int pos = (_ID >> 5);
 	int bit = (_ID & 31);
@@ -321,7 +342,7 @@ CKeyContainer::~CKeyContainer()
 	m_lKeyValues.Destroy();
 }
 
-void CKeyContainer::Create(const TList_Vector<CStr>& _lKeyNames, const TList_Vector<CStr>& _lKeyValues)
+void CKeyContainer::Create(const TArray<CStr>& _lKeyNames, const TArray<CStr>& _lKeyValues)
 {
 	int nKeys = _lKeyNames.Len();
 	if (_lKeyValues.Len() != nKeys) Error("-", "Number of keys/values mismatch.");
@@ -347,7 +368,15 @@ spCKeyContainer CKeyContainer::Duplicate() const
 {
 	spCKeyContainer spKC = MNew(CKeyContainer);
 	if (!spKC) MemError("Duplicate");
-	spKC->Create(m_lKeyNames, m_lKeyValues);
+	TArray<CStr> lKeyNames, lKeyValues;
+	lKeyNames.SetLen(m_lKeyNames.Len());
+	lKeyValues.SetLen(m_lKeyValues.Len());
+	for(uint i = 0; i < lKeyNames.Len(); i++)
+	{
+		lKeyNames[i] = m_lKeyNames[i];
+		lKeyValues[i] = m_lKeyValues[i];
+	}
+	spKC->Create(lKeyNames, lKeyValues);
 	return spKC;
 }
 
@@ -673,13 +702,13 @@ CStr CreateEscSeq(const char* p, int _Len)
 	return Ret;
 }
 */
-static CStr ParseQuote(const char* p, int& _Pos, int _Len)
+static CStr ParseQuote(const char* p, int& _Pos, int _Len, uint _Line)
 {
 	if (strncmp(p + _Pos, "\"{{{", 4) == 0)
 	{
 		_Pos += 4;
 		int End = FindSeq(p + _Pos, _Len - _Pos, "}}}\"", 4);
-		if (End < 0) Error_static("ParseQuote", "Unexpected end-of-file in quote.");
+		if (End < 0) Error_static("ParseQuote", CStrF("Line(%d) Unexpected end-of-file in quote.", _Line));
 		CStr s;
 		s.Capture(p + _Pos, End);
 		_Pos += End + 4;
@@ -689,7 +718,7 @@ static CStr ParseQuote(const char* p, int& _Pos, int _Len)
 	{
 		_Pos += 1;
 		int End = FindSeq(p + _Pos, _Len - _Pos, "\"", 1);
-		if (End < 0) Error_static("ParseQuote", "Unexpected end-of-file in quote.");
+		if (End < 0) Error_static("ParseQuote", CStrF("Line(%d) Unexpected end-of-file in quote.", _Line));
 		CStr s;
 		s.Capture(p + _Pos, End);
 		_Pos += End + 1;
@@ -697,7 +726,7 @@ static CStr ParseQuote(const char* p, int& _Pos, int _Len)
 	}
 	else
 	{
-		Error_static("ParseQuote", "Not a quote.");
+		Error_static("ParseQuote", CStrF("Line(%d) Not a quote.", _Line));
 	}
 
 	return CStr();  // <- doh., warning... SS
@@ -706,6 +735,14 @@ static CStr ParseQuote(const char* p, int& _Pos, int _Len)
 static void Parse_WhiteSpace(const char* p, int& _Pos, int _Len)
 {
 	while((_Pos < _Len) && CStr::IsWhiteSpace(p[_Pos])) _Pos++;
+}
+
+static uint Parse_Lines(const char* p, int _Pos, int _Len)
+{
+	uint Lines = 0;
+	for(int i = 0; i < _Len; i++)
+		if (p[i] == 10) Lines++;
+	return Lines;
 }
 
 static void ParseComment_Semicolon(const char* p, int& _Pos, int _Len)
@@ -717,12 +754,12 @@ static void ParseComment_Semicolon(const char* p, int& _Pos, int _Len)
 		_Pos += End+1;
 }
 
-static void ParseComment_SlashAstrix(const char* p, int& _Pos, int _Len)
+static void ParseComment_SlashAstrix(const char* p, int& _Pos, int _Len, uint _Line)
 {
 	int End = FindSeq(p + _Pos, _Len - _Pos, "*/", 2);
 	if (End < 0)
 	{
-		Error_static("ParseComment_SlashAstrix", "Unexpected end-of-file in /*  */ comment.");
+		Error_static("ParseComment_SlashAstrix", CStrF("Line(%d) Unexpected end-of-file in /*  */ comment.", _Line));
 	}
 	else
 		_Pos += End+2;
@@ -737,7 +774,13 @@ static void ParseComment_SlashSlash(const char* p, int& _Pos, int _Len)
 		_Pos += End+1;
 }
 
-int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnterScope)
+int CKeyContainerNode::ReadFromMemory(const char* _pStr, int _Size, bool _bEnterScope)
+{
+	uint Line = 1;
+	return ReadFromMemory_r(_pStr, _Size, _bEnterScope, Line);
+}
+
+int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnterScope, uint& _Line)
 {
 	bool bInScope = !_bEnterScope;
 
@@ -745,27 +788,40 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnte
 	int nQ = 0;
 
 	int Pos = 0;
+	int PosStart = 0;
 	while(Pos < _Len)
 	{
+		PosStart = Pos;
 		Parse_WhiteSpace(_pStr, Pos, _Len);
+		_Line += Parse_Lines(_pStr + PosStart, PosStart, Pos - PosStart);
 		if (Pos >= _Len) break;
-
+		
 		if (strncmp(_pStr + Pos, ";", 1) == 0)
-			ParseComment_Semicolon(_pStr, Pos, _Len);
+		{	// ;
+			ParseComment_Semicolon(_pStr, Pos, _Len); _Line++;
+		}
 
 		else if (strncmp(_pStr + Pos, "//", 2) == 0)
-			ParseComment_SlashSlash(_pStr, Pos, _Len);
+		{	// //
+			ParseComment_SlashSlash(_pStr, Pos, _Len); _Line++;
+		}
 
 		else if (strncmp(_pStr + Pos, "/*", 2) == 0)
-			ParseComment_SlashAstrix(_pStr, Pos, _Len);
+		{	/* */
+			PosStart = Pos;
+			ParseComment_SlashAstrix(_pStr, Pos, _Len, _Line);
+			_Line += Parse_Lines(_pStr + PosStart, PosStart, Pos - PosStart);
+		}
 
 		else if (strncmp(_pStr + Pos, "\"", 1) == 0)
 		{
-			// Quote
+			// Quote ""
 			if (!bInScope)
-				Error("ReadFromMemory_r", "Unexpected quote outside scope.");
+				Error("ReadFromMemory_r", CStrF("Line(%d): Unexpected quote outside scope.", _Line));
 
-			Q[nQ++] = ParseQuote(_pStr, Pos, _Len);
+			PosStart = Pos;
+			Q[nQ++] = ParseQuote(_pStr, Pos, _Len, _Line);
+			_Line += Parse_Lines(_pStr + PosStart, PosStart, Pos - PosStart);
 			if (nQ == 2)
 			{
 				Q[0].MakeUpperCase();
@@ -782,8 +838,9 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnte
 				spCKeyContainerNode spNode = MNew(CKeyContainerNode);
 				if (!spNode) MemError("ReadFromMemory_r");
 				m_lspSubKeys.Add(spNode);
-				if (m_lspSubKeys.Len() > 64) m_lspSubKeys.SetGrow(256);
-				Pos += spNode->ReadFromMemory_r(&_pStr[Pos], _Len - Pos, false);
+//				if (m_lspSubKeys.Len() > 64) m_lspSubKeys.SetGrow(256);
+				m_lspSubKeys.SetGrow(Max(256, GetGEPow2(m_lspSubKeys.Len())));
+				Pos += spNode->ReadFromMemory_r(&_pStr[Pos], _Len - Pos, false, _Line);
 			}
 			else
 				bInScope = true;
@@ -795,21 +852,23 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnte
 			if (bInScope)
 				return Pos;
 			else
-				Error("ReadFromMemory_r", "Unexpected '}'");
+				Error("ReadFromMemory_r", CStrF("Line(%d): Unexpected '}'", _Line));
 		}
 		else if (strncmp(_pStr + Pos, "(", 1) == 0)
 		{
-			// Data
+			// Data (
 			if (!bInScope)
-				Error("ReadFromMemory_r", "Unexpected key-data outside scope.");
+				Error("ReadFromMemory_r", CStrF("Line(%d): Unexpected key-data outside scope.", _Line));
 
 			int End = FindChar(_pStr + Pos, _Len - Pos, 10);	// EOL can be 13, 10 or just 10.
-			if (End < 0) Error("ReadFromMemory_r", "Unexpected end-of-file in key-data.");
+			if (End < 0) Error("ReadFromMemory_r", CStrF("Line(%d) Unexpected end-of-file in key-data.", _Line));
+
+			_Line++;
 
 			CStr s;
 			s.Capture(&_pStr[Pos], End);
 			m_spData->AddKey(CStrF("%d", m_spData->GetnKeys()), s);
-			Pos += End;
+			Pos += End+1;
 		}
 		else
 		{
@@ -820,7 +879,8 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Len, bool _bEnte
 				s.Capture(_pStr + Pos, _Len - Pos);
 			else
 				s.Capture(_pStr + Pos, End);
-			Error("ReadFromMemory_r", "Syntax error: " + s);
+			Error("ReadFromMemory_r", CStrF("(Line: %d) Syntax error: %s", _Line, s.GetStr()));
+			_Line++;
 		}
 	}
 
@@ -896,7 +956,8 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Size, bool _bEnt
 				spCKeyContainerNode spNode = DNew(CKeyContainerNode) CKeyContainerNode;
 				if (!spNode) MemError("ReadFromText");
 				m_lspSubKeys.Add(spNode);
-				if (m_lspSubKeys.Len() > 64) m_lspSubKeys.SetGrow(256);
+//				if (m_lspSubKeys.Len() > 64) m_lspSubKeys.SetGrow(256);
+				m_lspSubKeys.SetGrow(Max(256, GetGEPow2(m_lspSubKeys.Len())));
 				PosNextLine += spNode->ReadFromMemory_r(&_pStr[PosNextLine], _Size-PosNextLine, false);
 			}
 			else
@@ -967,13 +1028,14 @@ int CKeyContainerNode::ReadFromMemory_r(const char* _pStr, int _Size, bool _bEnt
 
 void CKeyContainerNode::ReadFromScript(CCFile* _pFile, bool _bEnterScope)
 {
-	TList_Vector<char> lFile;
+	TArray<char> lFile;
 
 	int len = _pFile->Length() - _pFile->Pos();
 	lFile.SetLen(len);
 	_pFile->Read(lFile.GetBasePtr(), len);
 
-	ReadFromMemory_r(lFile.GetBasePtr(), len, _bEnterScope);
+	uint Line = 1;
+	ReadFromMemory_r(lFile.GetBasePtr(), len, _bEnterScope, Line);
 
 /*	bool bInScope = !_bEnterScope;
 

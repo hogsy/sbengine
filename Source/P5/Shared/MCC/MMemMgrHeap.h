@@ -18,10 +18,8 @@
 #define __INC_MEMMGRHEAP
 
 //#include "MCC.h"
-#include "MDA_Linkedlist.h"
-#include "MDA_AVLTree.h"
-#include "MDA_Hash.h"
-
+#include "MRTC_RemoteDebug.h"
+#include "MMemMgrPool.h"
 //#ifndef MDA_DEFRAGMEMORY_ALIGN
 //#define MDA_DEFRAGMEMORY_ALIGN 8
 //#endif
@@ -85,7 +83,21 @@ namespace NMemMgr
 		CFStr m_ClassName;
 		DLinkD_Link(CMemTrack_Class, m_ILink);
 
-		CDA_HashLink m_HashLink;
+		class CCompare
+		{
+		public:
+			static aint Compare(CMemTrack_Class *_pFirst, CMemTrack_Class *_pSecond, void *_pContext)
+			{
+				return _pFirst->m_ClassName.CompareNoCase(_pSecond->m_ClassName);
+			}
+
+			static aint Compare(CMemTrack_Class *_pFirst, const ch8 *_Key, void *_pContext)
+			{
+				return _pFirst->m_ClassName.CompareNoCase(_Key);
+			}
+		};
+
+		DIdsTreeAVLAligned_Link(CMemTrack_Class, m_TreeLink, const ch8 *, CMemTrack_Class::CCompare);
 
 		class CMemTrack_Child *m_pChild;
 
@@ -114,38 +126,18 @@ namespace NMemMgr
 		~CMemTrack_Class();
 	};
 
-	typedef DLinkD_Iter(CMemTrack_Class, m_ILink) SICMemTrack_Class;
-
-	class CMemTrackHash : public TCDA_HashType<CMemTrack_Class, CDA_HashSmall, CFStr> 
-	{
-		virtual bool IsSame(void *_First, void *_Second)
-		{
-			CFStr *Obj1 = (CFStr *)_First;
-			CFStr *Obj2 = (CFStr *)_Second;
-
-			return strcmp(Obj1->GetStr(), Obj2->GetStr()) == 0;
-		}
-
-		virtual mint GetHash(void *_HashData)
-		{
-			CFStr *Obj = (CFStr *)_HashData;
-			CMDA_CRC32Checker Checker;
-			Checker.AddBlock(Obj->Str(), Obj->Len());
-			return Checker.m_CurrentCRC;
-		}
-	};
+	typedef DLinkD_Iter(CMemTrack_Class, m_ILink) CMemTrack_ClassIter;
 
 	class CMemTrack_Child
 	{
 	public:
 		CMemTrack_Child()
 		{
-			m_ChildrenHash.InitHash(2, (mint)&((CMemTrack_Class *)0x70000000)->m_ClassName - (mint)((CDA_Hashable *)(CMemTrack_Class *)0x70000000), 2);
 		}
 		~CMemTrack_Child()
 		{
 			{
-				SICMemTrack_Class Iterator = m_Children;
+				CMemTrack_ClassIter Iterator = m_Children;
 				while (Iterator)
 				{
 					delete ((NMemMgr::CMemTrack_Class *)Iterator);
@@ -154,8 +146,7 @@ namespace NMemMgr
 			}
 		}
 
-		CMemTrackHash m_ChildrenHash;
-
+		DIdsTreeAVLAligned_Tree(CMemTrack_Class, m_TreeLink, const ch8 *, CMemTrack_Class::CCompare) m_ChildrenTree;
 		DLinkD_List(CMemTrack_Class, m_ILink) m_Children;
 	};
 
@@ -466,7 +457,7 @@ typedef DIdsTreeAVLAligned_Iterator(CDA_MemoryManager_HeapChunk, m_TreeLink, voi
 
 // We need to store all strings for debug allocs, because the module that did the allocation might be unloaded when we check memory
 
-class MCCDLLEXPORT CDA_MemoryManager_DebugAllocFile : public CDA_Hashable
+class MCCDLLEXPORT CDA_MemoryManager_DebugAllocFile
 {
 public:
 	CDA_MemoryManager_DebugAllocFile()
@@ -477,13 +468,36 @@ public:
 	{
 
 	}
-	DLinkD_Link(CDA_MemoryManager_DebugAllocFile, m_ILink);
+
+	class CCompare
+	{
+	public:
+		static aint Compare(CDA_MemoryManager_DebugAllocFile *_pFirst, CDA_MemoryManager_DebugAllocFile *_pSecond, void *_pContext)
+		{
+			if (_pFirst->m_pOriginalPtr > _pSecond->m_pOriginalPtr)
+				return 1;
+			else if (_pFirst->m_pOriginalPtr < _pSecond->m_pOriginalPtr)
+				return -1;
+			return 0;
+		}
+
+		static aint Compare(CDA_MemoryManager_DebugAllocFile *_pFirst, const char *_Key, void *_pContext)
+		{
+			if (_pFirst->m_pOriginalPtr > _Key)
+				return 1;
+			else if (_pFirst->m_pOriginalPtr < _Key)
+				return -1;
+			return 0;
+		}
+	};
+
+	DIdsTreeAVLAligned_Link(CDA_MemoryManager_DebugAllocFile, m_TreeLink, const char *, CCompare);
 
 	const char *m_pOriginalPtr;
 	char m_FileName[_MAX_PATH];
 };
 
-typedef DLinkD_Iter(CDA_MemoryManager_DebugAllocFile, m_ILink) SICDA_MemoryManager_DebugAllocFile;
+typedef DIdsTreeAVLAligned_Iterator(CDA_MemoryManager_DebugAllocFile, m_TreeLink, const char *, CDA_MemoryManager_DebugAllocFile::CCompare) CDA_MemoryManager_DebugAllocFileIter;
 
 enum EDA_MemoryManager_DefragErrors
 {
@@ -517,7 +531,7 @@ public:
 	mint GetBlockSize(SDA_Defraggable *Block);
 	mint UserBlockSize(SDA_Defraggable *_Block);
 	CDA_MemoryManager_HeapChunk *GetChunkFromMem(void *Mem);
-	CDA_MemoryManager_SizeClass *GetFreeSizeClass(mint _Size);
+	CDA_MemoryManager_SizeClass *GetFreeSizeClass(mint _Size, bint _bFragment);
 
 	static void* MemFromBlock(SDA_Defraggable* _Block);
 
@@ -534,18 +548,17 @@ public:
 
 	MRTC_CriticalSection &GetLock(){return m_Lock;}
 	// Sizes
-	TDA_Pool<CDA_MemoryManager_SizeClass> m_SizesPool;
+	TCPool<CDA_MemoryManager_SizeClass, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_SizesPool;
 
-	DIdsTreeAVLAligned_Tree(CDA_MemoryManager_SizeClass, m_TreeLink, mint, CDA_MemoryManager_SizeClass::CCompare) m_SizesFreeTree;
+	DIdsTreeAVLAligned_Tree(CDA_MemoryManager_SizeClass, m_TreeLink, mint, CDA_MemoryManager_SizeClass::CCompare) m_SizesFreeTreeNormal;
+	DIdsTreeAVLAligned_Tree(CDA_MemoryManager_SizeClass, m_TreeLink, mint, CDA_MemoryManager_SizeClass::CCompare) m_SizesFreeTreeFragments;
 	CDA_MemoryManager_SizeClass* GetSizeClass(mint _SizeNeeded);
 
 #ifdef M_SUPPORTMEMORYDEBUG
 	// Debug string locations
-	TDA_Pool<CDA_MemoryManager_DebugAllocFile>  m_DebugStringsPool;
+	TCPool<CDA_MemoryManager_DebugAllocFile, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual>  m_DebugStringsPool;
 	
-	TCDA_IDHashType<CDA_MemoryManager_DebugAllocFile> m_DebugStringsHash;
-	DLinkD_List(CDA_MemoryManager_DebugAllocFile, m_ILink) m_DebugStings;
-	int m_bDebugHashInit;
+	DIdsTreeAVLAligned_Tree(CDA_MemoryManager_DebugAllocFile, m_TreeLink, const char *, CDA_MemoryManager_DebugAllocFile::CCompare) m_DebugStringTree;
 	int m_bDebugMemory;
 	int m_bShowAllocs;		
 	CFStr m_ShowAllocContext;
@@ -558,11 +571,11 @@ public:
 	int m_MemTracking_bOn;
 	int m_MemTracking_StartMem;
 
-	TDA_Pool<NMemMgr::CMemTrack_Class> m_MemTracking_TrackedPool;
-	TDA_Pool<NMemMgr::CMemTrack_Child> m_MemTracking_TrackedChildPool;
+	TCPool<NMemMgr::CMemTrack_Class, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_MemTracking_TrackedPool;
+	TCPool<NMemMgr::CMemTrack_Child, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_MemTracking_TrackedChildPool;
 
 
-	NMemMgr::CMemTrackHash m_MemTracking_Classes;
+	DIdsTreeAVLAligned_Tree(NMemMgr::CMemTrack_Class, m_TreeLink, const ch8 *, NMemMgr::CMemTrack_Class::CCompare) m_MemTracking_Classes;
 	DLinkD_List(NMemMgr::CMemTrack_Class, m_ILink) m_MemTracking_ClassesList;
 
 	void MemTracking_TrackAlloc(NMemMgr::CMemTrack_UniquePair &Track, mint Size);
@@ -580,7 +593,7 @@ public:
 		mint m_nAllocBytes;
 		mint m_nAllocNum;
 	};
-	void MemTracking_GetMemUsageInfo(TList_Vector<SMemInfo> &_StrList, const char* _pClassName = NULL);
+	void MemTracking_GetMemUsageInfo(TArray<SMemInfo> &_StrList, const char* _pClassName = NULL);
 
 	mint m_SequenceMark;
 	int GetSequenceMark() const { return m_SequenceMark; }
@@ -588,7 +601,7 @@ public:
 #endif
 
 	// Chunks
-	TDA_Pool<CDA_MemoryManager_HeapChunk> m_ChunksPool;
+	TCPool<CDA_MemoryManager_HeapChunk, 128, NThread::CLock, CPoolType_Freeable, CAllocator_Virtual> m_ChunksPool;
 	DIdsTreeAVLAligned_Tree(CDA_MemoryManager_HeapChunk, m_TreeLink, void *, CDA_MemoryManager_HeapChunk::CCompare) m_ChunksTree;
 
 	mint m_AllocatedMem;
@@ -597,6 +610,7 @@ public:
 	mint m_FreeMemMin;
 	mint m_DynamicGrowSize;
 	mint m_CommitGranularity;
+	mint m_LargeBlockThreshold;
 
 	class CDefaultMemoryManager *m_pDefaultManager;
 #ifdef MRTC_DEFAULTMAINHEAP
@@ -667,95 +681,70 @@ public:
 };
 
 
-
-class CBlockManager
+template <typename t_CAllocator = DIdsDefaultAllocator, typename t_CPoolType = CPoolType_Freeable>
+class TCSimpleBlockManager
 {
-private:
-
-	class CFreeLink
-	{
-	public:
-
-		CFreeLink *m_pNext;
-		CFreeLink *m_pPrev;
-
-		bool IsInList()
-		{
-			return m_pNext != NULL;
-		}
-
-		bool LoneInList()
-		{
-			return (m_pPrev->m_pPrev == NULL
-				&&
-				m_pNext->m_pNext == NULL);
-		}
 
 
-		void LinkAfter(CFreeLink *_pLink)
-		{
-			m_pNext = _pLink->m_pNext;
-			m_pPrev = _pLink;			
-			_pLink->m_pNext = this;
-			m_pNext->m_pPrev = this;
-		}
-		void Remove()
-		{
-			m_pNext->m_pPrev = m_pPrev;
-			m_pPrev->m_pNext = m_pNext;
-			m_pNext = NULL;
-		}
-	};
-
-	class CFreeList
-	{
-	public:
-		CFreeLink m_First;
-		CFreeLink m_Last;
-
-		CFreeList()
-		{
-			m_First.m_pNext = &m_Last;
-			m_First.m_pPrev = NULL;
-			m_Last.m_pNext = NULL;
-			m_Last.m_pPrev = &m_First;
-		}
-
-		bool IsEmpty()
-		{
-			return m_First.m_pNext == &m_Last;
-
-		}
-	};
-
+public:
 	class CBlockSize;
 
-	public:
 	class CBlock
 	{
-		friend class CBlockManager;
+		friend class TCSimpleBlockManager;
 		friend class CBlockSize;
 	private:
-		CFreeLink m_FreeLink;
-		CBlock *m_pPrevBlock;
-		CBlock *m_pNextBlock;
-	public:
-		void * m_pMemory;
-	};
-	private:
+		class CCompare
+		{
+		public:
+			DIdsPInlineS static aint Compare(const CBlock *_pFirst, const CBlock *_pSecond, void *_pContext)
+			{
+				if (_pFirst->m_Memory0 > _pSecond->m_Memory0)
+					return 1;
+				else if (_pFirst->m_Memory0 < _pSecond->m_Memory0)
+					return -1;
+				return 0;
+			}
 
-	TDA_Pool<CBlock> m_BlockPool;
+			DIdsPInlineS static aint Compare(const CBlock *_pTest, uint32 _Key, void *_pContext)
+			{
+				if (_pTest->GetMemory() > _Key)
+					return 1;
+				else if (_pTest->GetMemory() < _Key)
+					return -1;
+				return 0;
+			}
+		};
+
+		DIdsTreeAVLAligned_Link_FromTemplate(CBlock, m_AVLLink, uint32, CCompare);
+		CBlock *m_pPrevBlock;
+		CBlock *m_pNextBlock; // 8 bytes here
+	public:
+		uint32 m_Memory0:31;
+		uint32 m_Free:1;
+		uint32 GetMemory() const
+		{
+			return m_Memory0 << 1;
+		}
+		void SetMemory(uint32 _Memory)
+		{
+			m_Memory0 = _Memory >> 1;
+		}
+//		CBlockInfo *m_pBlockInfo;
+	};
+
+public:
+
+	typedef DIdsTreeAVLAligned_Iterator_FromTemplate(CBlock, m_AVLLink, uint32, typename CBlock::CCompare) CBlockIter;
 
 	class CBlockSize
 	{
 	public:
-		CFreeList m_FreeList;
-		mint m_Size;
 
 		class CCompare
 		{
 		public:
-			static aint Compare(CBlockSize *_pFirst, CBlockSize *_pSecond, void *_pContext)
+			DIdsPInlineS static aint Compare(const CBlockSize *_pFirst, const CBlockSize *_pSecond, void *_pContext)
 			{
 				if (_pFirst->m_Size > _pSecond->m_Size)
 					return 1;
@@ -764,24 +753,19 @@ private:
 				return 0;
 			}
 
-			static aint Compare(CBlockSize *_pFirst, mint _Key, void *_pContext)
+			DIdsPInlineS static aint Compare(const CBlockSize *_pTest, uint32 _Key, void *_pContext)
 			{
-				if (_pFirst->m_Size > _Key)
+				if (_pTest->m_Size > _Key)
 					return 1;
-				else if (_pFirst->m_Size < _Key)
+				else if (_pTest->m_Size < _Key)
 					return -1;
 				return 0;
 			}
 		};
 
-		DIdsTreeAVLAligned_Link(CBlockSize, m_TreeLink, mint, CBlockSize::CCompare);
-
-		static CBlockSize *BlockSizeFromFreeList(CFreeLink *_pFreeList)
-		{
-			M_OFFSET(CBlockSize, m_FreeList, Offset);
-
-			return (CBlockSize *)((uint8*)_pFreeList - Offset);
-		}
+		DIdsTreeAVLAligned_Link_FromTemplate(CBlockSize, m_AVLLink, uint32, CCompare);
+		DIdsTreeAVLAligned_Tree_FromTemplate(CBlock, m_AVLLink, uint32, typename CBlock::CCompare) m_FreeList;
+		uint32 m_Size;
 
 		CBlockSize()
 		{
@@ -791,62 +775,388 @@ private:
 			M_ASSERT(m_FreeList.IsEmpty(), "MUust");
 		}
 
-		CBlock *GetBlock()
+		CBlock *GetBlock(uint32 _Alignment)
 		{
-			CBlock *pBlock = (CBlock *)m_FreeList.m_First.m_pNext;
-			pBlock->m_FreeLink.Remove();
-			pBlock->m_FreeLink.m_pNext = NULL;
-			return pBlock;
+			CBlockIter Iter = m_FreeList;
+			while (Iter)
+			{
+				CBlock *pBlock = Iter;
+
+				if (!(pBlock->GetMemory() & (_Alignment - 1)))
+				{
+					return pBlock;
+				}
+				++Iter;
+			}
+
+			return NULL;
 		}
 
 		void AddBlock(CBlock *_pBlock)
 		{
-			_pBlock->m_FreeLink.LinkAfter(&m_FreeList.m_First);
+			m_FreeList.f_Insert(_pBlock);
+			_pBlock->m_Free = true;
 		}
 	};
 
-	TDA_Pool<CBlockSize> m_BlockSizePool;
+	TCPool<CBlockSize, 128, NThread::CLock, t_CPoolType, t_CAllocator> m_BlockSizePool;
+	TCPool<CBlock, 128, NThread::CLock, t_CPoolType, t_CAllocator> m_BlockPool;
 
+	DIdsTreeAVLAligned_Tree_FromTemplate(CBlockSize, m_AVLLink, uint32, typename CBlockSize::CCompare) m_FreeSizeTree;
+	DIdsTreeAVLAligned_Tree_FromTemplate(CBlock, m_AVLLink, uint32, typename CBlock::CCompare) m_BlockTree;
 
-	DIdsTreeAVLAligned_Tree(CBlockSize, m_TreeLink, mint, CBlockSize::CCompare) m_FreeSizeTree;
-	
-	void *m_pBlockStart;
-	void *m_pBlockEnd;
+	uint32 m_pBlockStart;
+	uint32 m_pBlockEnd;
+	uint32 m_Align;
+	uint32 m_FreeMemory;
 	CBlock *m_pFirstBlock;
-	mint m_Align;
-	mint m_bAutoDefrag:1;
 
-	virtual void MoveBlock(void *_To, void*_From, mint _Size);
+	void CheckHeap()
+	{
+	#ifndef _DEBUG
+		return;
+	#endif
+		// Iterate all blocks
+		CBlock *pCurrent = m_pFirstBlock;
+		bint bLastFree = false;
+		uint32 LastMem = 0;
+		if (pCurrent)
+			bLastFree = !pCurrent->m_Free;
+		
+		while (pCurrent)
+		{
+			if (pCurrent->m_Free)
+			{
+				if (bLastFree)
+					M_BREAKPOINT;
+			}
 
-	void RemoveFreeBlock(CBlock *_pBlock);
+			bLastFree = pCurrent->m_Free;
 
-	CBlockSize *GetSizeBlock(mint _BlockSize);
+			if (LastMem > pCurrent->GetMemory())
+				M_BREAKPOINT;
 
-	void DeleteBlock(CBlock *_pBlock);
+			LastMem = pCurrent->GetMemory();
 
-	public:
+			pCurrent = pCurrent->m_pNextBlock;
+		}
 
-	void Defrag();
+		DIdsTreeAVLAligned_Iterator_FromTemplate(CBlockSize, m_AVLLink, uint32, typename CBlockSize::CCompare) Iter = m_FreeSizeTree;
 
-	mint GetBlockSize(CBlock *_pBlock);
+		while (Iter)
+		{
+			CBlockIter Iter2 = Iter->m_FreeList;
 
-	CBlock *Alloc(mint _Size);
-	void Free(CBlock *&_pBlock);
-	void Create(void *_pMemory, mint _Blocksize, mint _Alignment, bool _bAutoDefrag);
+			uint32 BlockSize = GetBlockSize(Iter2);
+			uint32 ShouldBeSize = Iter->m_Size;
+			if (BlockSize != ShouldBeSize)
+				M_BREAKPOINT;
+
+
+			++Iter;
+		}
+	}
+
+
+	void RemoveFreeBlock(CBlock *_pBlock)
+	{
+		CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindEqual(GetBlockSize(_pBlock));
+		pSizeClass->m_FreeList.f_Remove(_pBlock);
+		_pBlock->m_Free = false;
+
+		if (pSizeClass->m_FreeList.IsEmpty())
+		{				
+			m_FreeSizeTree.f_Remove(pSizeClass);
+			m_BlockSizePool.Delete(pSizeClass);					
+		}
+	}
+
+	CBlockSize *GetSizeBlock(uint32 _BlockSize)
+	{
+		CBlockSize *pSizeClass = m_FreeSizeTree.FindEqual(_BlockSize);
+
+		if (!pSizeClass)
+		{
+			pSizeClass = m_BlockSizePool.New();
+			pSizeClass->m_Size = _BlockSize;
+			m_FreeSizeTree.f_Insert(pSizeClass);
+		}
+		return pSizeClass;
+	}
+
+	void DeleteBlock(CBlock *_pBlock)
+	{
+		if (_pBlock->m_pPrevBlock)
+			_pBlock->m_pPrevBlock->m_pNextBlock = _pBlock->m_pNextBlock;
+		else
+			m_pFirstBlock = _pBlock;
+
+		if (_pBlock->m_pNextBlock)
+			_pBlock->m_pNextBlock->m_pPrevBlock = _pBlock->m_pPrevBlock;
+
+		m_BlockPool.Delete(_pBlock);
+	}
+
+public:
+
+
+	TCSimpleBlockManager()
+	{
+		m_pBlockStart = NULL;
+		m_pBlockEnd = NULL;
+		m_pFirstBlock = NULL;
+		gf_RDSendRegisterHeap((mint)this, "TCSimpleBlockManager", 0, 0);
+	}
+
+	~TCSimpleBlockManager()
+	{	
+
+		// Memory leak
+		M_ASSERT(m_pFirstBlock->m_pNextBlock == NULL, "[TCSimpleBlockManager] Memory leak! (1)");
+		M_ASSERT(m_pFirstBlock->m_Free, "[TCSimpleBlockManager] Memory leak! (2)");
+
+		RemoveFreeBlock(m_pFirstBlock);
+		m_BlockPool.Delete(m_pFirstBlock);
+	}
+
+	uint32 GetFreeMemory()
+	{
+		return m_FreeMemory;
+	}
+	uint32 GetLargestFreeBlock()
+	{
+		CBlockSize *pLargest = m_FreeSizeTree.FindLargest();
+		if (pLargest)
+		{
+			return pLargest->m_Size;
+		}
+		return 0;
+	}
+
+	CBlock *GetBlockFromAddress(uint32 _Address)
+	{
+		return m_BlockTree.FindEqual(_Address);
+	}
+
+	uint32 GetBlockSize(CBlock *_pBlock)
+	{		
+		if (_pBlock->m_pNextBlock)
+			return _pBlock->m_pNextBlock->GetMemory() - _pBlock->GetMemory();
+		else
+			return m_pBlockEnd - _pBlock->GetMemory();
+	}
+
+	CBlock *Alloc(uint32 _Size, uint32 _Alignment)
+	{
+		if (_Alignment < m_Align)
+			_Alignment = m_Align;
+
+		// Align all allocated sizes to keep alignment in heap
+		_Size = (_Size + (m_Align - 1)) & (~(m_Align - 1));
+		uint32 OriginalSize = _Size;
+		uint32 AlignmentSearch = _Alignment;
+
+		// First try to allocate a block that is just the right size and see if we are good alignmentwise
+
+	RestartSearch:
+
+		CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindSmallestGreaterThanEqual(_Size);
+		
+		if (!pSizeClass)
+		{
+			return NULL;
+		}
+		
+		CBlock * pBlock = pSizeClass->GetBlock(AlignmentSearch);
+		if (!pBlock)
+		{
+			// No block met out alignment requirement, lets restart search with a size that will allow alignment
+			if (_Size != OriginalSize)
+				AlignmentSearch = m_Align; // The default alignment
+			else
+				_Size = OriginalSize + _Alignment;
+			goto RestartSearch;
+		}
+
+		uint32 BlockSize = pSizeClass->m_Size;
+		
+		RemoveFreeBlock(pBlock);
+		m_FreeMemory -= BlockSize;
+		
+
+		if (pBlock->GetMemory() & (_Alignment - 1))
+		{
+			// We need to put a free block between our block and the previous block
+			uint32 MemoryPos = (pBlock->GetMemory() + (_Alignment - 1)) & (~(_Alignment - 1));
+			M_ASSERT(MemoryPos != pBlock->GetMemory(), "Duh");
+			uint32 SizeLeftPre = MemoryPos - pBlock->GetMemory();
+			m_FreeMemory += SizeLeftPre;
+			BlockSize -= SizeLeftPre;
+
+			// Pre block
+			{
+				// Add remainder of block to free blocks
+				CBlock * pNewBlock = m_BlockPool.New();
+				
+				pNewBlock->SetMemory(pBlock->GetMemory());
+				pNewBlock->m_pPrevBlock = pBlock->m_pPrevBlock;
+				if (pNewBlock->m_pPrevBlock)
+				{
+					pNewBlock->m_pPrevBlock->m_pNextBlock = pNewBlock;
+				}
+
+				pNewBlock->m_pNextBlock = pBlock;
+				pBlock->m_pPrevBlock = pNewBlock;
+				
+				CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindEqual(SizeLeftPre);
+				
+				if (!pSizeClass)
+				{
+					pSizeClass = m_BlockSizePool.New();
+					pSizeClass->m_Size = SizeLeftPre;
+					m_FreeSizeTree.f_Insert(pSizeClass);
+				}
+				
+				pSizeClass->AddBlock(pNewBlock);
+			}
+			pBlock->SetMemory(MemoryPos);
+
+			
+		}
+
+		{
+			uint32 SizeLeft = BlockSize - OriginalSize;
+			m_FreeMemory += SizeLeft;
+			
+			if (SizeLeft > 0)
+			{
+				// Add remainder of block to free blocks
+				CBlock * pNewBlock = m_BlockPool.New();
+				
+				pNewBlock->SetMemory((uint32)((uint32)pBlock->GetMemory() + OriginalSize));
+				pNewBlock->m_pNextBlock = pBlock->m_pNextBlock;
+				if (pNewBlock->m_pNextBlock)
+				{
+					pNewBlock->m_pNextBlock->m_pPrevBlock = pNewBlock;
+				}
+				pBlock->m_pNextBlock = pNewBlock;
+				pNewBlock->m_pPrevBlock = pBlock;
+				
+				CBlockSize *pSizeClass = (CBlockSize *)m_FreeSizeTree.FindEqual(SizeLeft);
+				
+				if (!pSizeClass)
+				{
+					pSizeClass = m_BlockSizePool.New();
+					pSizeClass->m_Size = SizeLeft;
+					m_FreeSizeTree.f_Insert(pSizeClass);
+				}
+				
+				pSizeClass->AddBlock(pNewBlock);
+			}
+		}
+		
+	#ifdef M_Profile
+		CheckHeap();
+	#endif
+		m_BlockTree.f_Insert(pBlock);
+
+		gf_RDSendHeapAlloc(pBlock, OriginalSize, this, gf_RDGetSequence(), 0);
+
+		return pBlock;
+	}
+	void Free(CBlock *&_pBlock)
+	{
+		gf_RDSendHeapFree(_pBlock, this, gf_RDGetSequence());
+		m_BlockTree.f_Remove(_pBlock);
+
+		M_ASSERT(!_pBlock->m_Free, "Must not be free already");
+		uint32 BlockSize = GetBlockSize(_pBlock);
+		uint32 pBlockPos = _pBlock->GetMemory();
+		CBlock *pFinalBlock = _pBlock;
+		CBlock *pPrevBlock = _pBlock->m_pPrevBlock;
+		CBlock *pNextBlock = _pBlock->m_pNextBlock;
+		bool bDeleteBlock1 = false;
+		bool bDeleteBlock2 = false;
+		
+		m_FreeMemory += BlockSize;
+		
+		if (pPrevBlock)
+		{
+			if (pPrevBlock->m_Free)
+			{
+				BlockSize += GetBlockSize(pPrevBlock);
+				pBlockPos = pPrevBlock->GetMemory();
+				pFinalBlock = pPrevBlock;
+				
+				RemoveFreeBlock(pPrevBlock);
+				
+				bDeleteBlock1 = true;
+			}
+		}
+		
+		if (pNextBlock)
+		{
+			if (pNextBlock->m_Free)
+			{
+				BlockSize += GetBlockSize(pNextBlock);
+				
+				RemoveFreeBlock(pNextBlock);
+				
+				bDeleteBlock2 = true;
+			}
+		}
+		
+		CBlockSize *pSizeClass = GetSizeBlock(BlockSize);
+		
+		pSizeClass->AddBlock(pFinalBlock);
+
+		if (bDeleteBlock1)
+			DeleteBlock(_pBlock);
+		if (bDeleteBlock2)
+			DeleteBlock(pNextBlock);
+
+	#ifdef M_Profile
+		// Reset Free Memory
+		CheckHeap();
+	#endif
+		_pBlock = NULL;
+	}
+
+	void Create(const char *_pHeapName, uint32 _pStartAddress, uint32 _Blocksize, uint32 _Alignment)
+	{
+		m_Align = _Alignment;
+		m_pBlockStart = _pStartAddress;
+		m_pBlockEnd = m_pBlockStart + _Blocksize;
+		
+		m_pFirstBlock = m_BlockPool.New();
+		
+		m_pFirstBlock->SetMemory(_pStartAddress);
+		m_pFirstBlock->m_pNextBlock = NULL;
+		m_pFirstBlock->m_pPrevBlock = NULL;
+		
+		CBlockSize *pSizeClass = m_BlockSizePool.New();
+		pSizeClass->m_Size = _Blocksize;
+		m_FreeSizeTree.f_Insert(pSizeClass);
+
+		m_FreeMemory = _Blocksize;
+
+		pSizeClass->AddBlock(m_pFirstBlock);
+
+		gf_RDSendRegisterHeap((mint)this, _pHeapName, _pStartAddress, _pStartAddress+_Blocksize);
+
+	#ifdef M_Profile
+		CheckHeap();
+	#endif
+	}
 
 };
 
-#ifdef PLATFORM_DOLPHIN
-class CBlockManagerAram : public CBlockManager
-{
-	virtual void MoveBlock(void *_From, void*_To, mint _Size);
-};
-typedef CBlockManager::CBlock CAramBlock;
-#ifndef USE_VIRTUAL_MEMORY
-extern CBlockManagerAram g_AramManagerMisc;
-#endif
-extern CBlockManager g_AramManagerSound;
-#endif
+
+
+
+
+
+
 
 /*class CDA_MemoryManager_Container
 {

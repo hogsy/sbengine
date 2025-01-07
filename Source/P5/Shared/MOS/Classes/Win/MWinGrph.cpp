@@ -2,8 +2,8 @@
 #include "MWinGrph.h"
 #include "../../XR/XR.h"
 #include "../../MSystem/Misc/MLocalizer.h"
-//#include "../../Classes/Win/MWindows.h"
-//#include "../../XR/XRShader.h"
+#include "../../Classes/Win/MWindows.h"
+#include "../../XR/XRShader.h"
 
 #ifdef COMPILER_CODEWARRIOR
 //	#ifdef COMPILER_RTTI
@@ -15,16 +15,6 @@ uint32 CRC_Util2D::ms_IndexRamp[16] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
 uint16 CRC_Util2D::ms_DualTringle[6] = { 0,1,2,0,2,3 };
 
 // -------------------------------------------------------------------
-int CRC_Util2D::GetTCIndex(CTextureContainer* _pTC)
-{
-	MAUTOSTRIP(CRC_Util2D_GetTCIndex, 0);
-	int nTC = m_lspTC.Len();
-	for(int i = 0; i < nTC; i++)
-		if (_pTC == (CTextureContainer*)m_lspTC[i]) return i;
-	return -1;
-}
-
-
 void CRC_Util2D::Clear()
 {
 	MAUTOSTRIP(CRC_Util2D_Clear, MAUTOSTRIP_VOID);
@@ -42,18 +32,18 @@ void CRC_Util2D::Clear()
 	m_CurTxtH = 1;
 	m_CurTransform.Unit();
 	m_CurTextureOrigo = CPnt(0, 0);
-	m_CurTextureScale.k[0] = 1.0f;
-	m_CurTextureScale.k[1] = 1.0f;
-	m_CurFontScale = 1.0f;
+	m_CurTextureScale.SetScalar(1.0f);
+	m_CurScale.SetScalar(1.0f);
+	m_CurFontScale.SetScalar(1.0f);
 	m_VBPriority = 0;
-	m_spWorldLightState = NULL;
+//	m_spWorldLightState = NULL;
 	m_SurfOptions = 0;
 	m_SurfCaps = 0;
 	SetPriorityValues(0);
 }
 
 
-void CRC_Util2D::SetPriorityValues(fp4 _PriorityBase, fp4 _PriorityAdd)
+void CRC_Util2D::SetPriorityValues(fp32 _PriorityBase, fp32 _PriorityAdd)
 {
 	MAUTOSTRIP(CRC_Util2D_SetPriorityValues, MAUTOSTRIP_VOID);
 	m_VBPriorityAdd = _PriorityAdd;
@@ -90,63 +80,25 @@ void CRC_Util2D::Flush()
 }
 
 // -------------------------------------------------------------------
-void CRC_Util2D::AddTxtContainer(spCTextureContainer _spTC)
-{
-	MAUTOSTRIP(CRC_Util2D_AddTxtContainer, MAUTOSTRIP_VOID);
-	int iTC = GetTCIndex(_spTC);
-	if (iTC > 0)
-		m_lTCRef[iTC]++;
-	else
-	{
-		iTC = m_lspTC.Add(_spTC);
-		M_TRY
-		{ 
-			m_lTCRef.Add(1);  
-		}
-		M_CATCH(
-		catch(CCException)
-		{ 
-			m_lspTC.Del(iTC); throw; 
-		}
-		)
-	}
-}
-
-
-void CRC_Util2D::RemoveTxtContainer(spCTextureContainer _spTC)
-{
-	MAUTOSTRIP(CRC_Util2D_RemoveTxtContainer, MAUTOSTRIP_VOID);
-	int iTC = GetTCIndex(_spTC);
-	if (iTC < 0) return;
-
-	if (--m_lTCRef[iTC] == 0)
-	{
-		m_lspTC.Del(iTC);
-		m_lTCRef.Del(iTC);
-	}
-}
-
-
-// -------------------------------------------------------------------
 void CRC_Util2D::UpdateTransform()
 {
 	MAUTOSTRIP(CRC_Util2D_UpdateTransform, MAUTOSTRIP_VOID);
 	CRct View = m_CurVP.GetViewRect();
 	CClipRect Clip = m_CurVP.GetViewClip();
-//	fp4 cw = Clip.clip.GetWidth();
-//	fp4 ch = Clip.clip.GetHeight();
-	fp4 w = View.GetWidth();
-	fp4 h = View.GetHeight();
-	fp4 dx = -w;
-	fp4 dy = -h;
+//	fp32 cw = Clip.clip.GetWidth();
+//	fp32 ch = Clip.clip.GetHeight();
+	fp32 w = View.GetWidth();
+	fp32 h = View.GetHeight();
+	fp32 dx = -w;
+	fp32 dy = -h;
 
 	m_CurTransform.Unit();
-//	CVec3Dfp4::GetMatrixRow(m_CurTransform, 3) = CVec3Dfp4(dx/2.0f, dy/2.0f, _pVP->GetXScale()*0.5f);
-//	const fp4 Z = 16.0f;
-	const fp4 Z = m_CurVP.GetBackPlane() - 16.0f;
+//	CVec3Dfp32::GetMatrixRow(m_CurTransform, 3) = CVec3Dfp32(dx/2.0f, dy/2.0f, _pVP->GetXScale()*0.5f);
+//	const fp32 Z = 16.0f;
+	const fp32 Z = m_CurVP.GetBackPlane() - 16.0f;
 
-	fp4 xScale = m_CurVP.GetXScale() * 0.5f;
-	fp4 yScale = m_CurVP.GetYScale() * 0.5f;
+	fp32 xScale = m_CurVP.GetXScale() * 0.5f;
+	fp32 yScale = m_CurVP.GetYScale() * 0.5f;
 
 	m_CurTransform.k[0][0] = Z / xScale * m_CurScale.k[0];
 	m_CurTransform.k[1][1] = Z / yScale * m_CurScale.k[1];
@@ -154,7 +106,7 @@ void CRC_Util2D::UpdateTransform()
 	m_CurTransform.k[3][1] = (Z*((dy)*(1.0f/2.0f) - m_TextOffset) / yScale);
 	m_CurTransform.k[3][2] = Z;
 
-//	CVec3Dfp4::GetMatrixRow(m_CurTransform, 3) = CVec3Dfp4(dx/2.0f, dy/2.0f, _pVP->GetXScale()*0.5f);
+//	CVec3Dfp32::GetMatrixRow(m_CurTransform, 3) = CVec3Dfp32(dx/2.0f, dy/2.0f, _pVP->GetXScale()*0.5f);
 
 //	m_CurTransform.k[2][0] += 0.375f;
 //	m_CurTransform.k[2][1] += 0.375f;
@@ -168,6 +120,13 @@ void CRC_Util2D::Begin(CRenderContext* _pRC, CRC_Viewport* _pVP, CXR_VBManager* 
 {
 	MAUTOSTRIP(CRC_Util2D_Begin, MAUTOSTRIP_VOID);
 	Clear();
+
+	if (!_pVBM)
+	{
+		M_TRACEALWAYS("(CRC_Util2D::Begin) _pVBM == NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+	}
+
+
 	m_pCurRC = _pRC;
 	m_TextOffset = 0;
 	m_pVBM = _pVBM;
@@ -196,19 +155,19 @@ void CRC_Util2D::End()
 }
 
 
-void CRC_Util2D::SetCoordinateScale(const CVec2Dfp4& _Scale)
+void CRC_Util2D::SetCoordinateScale(const CVec2Dfp32& _Scale)
 {
 	MAUTOSTRIP(CRC_Util2D_SetCoordinateScale, MAUTOSTRIP_VOID);
 	m_CurScale = _Scale;
 	UpdateTransform();
 }
-
+/*
 void CRC_Util2D::SetWorldLightState(spCXR_WorldLightState _spLightState)
 {
 	MAUTOSTRIP(CRC_Util2D_SetWorldLightState, MAUTOSTRIP_VOID);
 	m_spWorldLightState = _spLightState;
 }
-
+*/
 
 void CRC_Util2D::SetTexture(int _TextureID)
 {
@@ -237,7 +196,7 @@ void CRC_Util2D::SetTexture(int _TextureID)
 }
 
 
-void CRC_Util2D::SetTransform(const CMat4Dfp4& _Pos, const CVec2Dfp4& _Scale)
+void CRC_Util2D::SetTransform(const CMat4Dfp32& _Pos, const CVec2Dfp32& _Scale)
 {
 	MAUTOSTRIP(CRC_Util2D_SetTransform, MAUTOSTRIP_VOID);
 	// TODO
@@ -289,11 +248,12 @@ void CRC_Util2D::SetSurface(class CXW_Surface *_pSurf, CMTime _AnimTime, int _Se
 	}
 
 	m_pSurf = _pSurf;
-	m_pSurfKeyFrame = _pSurf->GetFrame(_Sequence, _AnimTime, *m_spTmpSurfKey);
+	m_pSurfKeyFrame = _pSurf->GetFrame(_Sequence, _AnimTime, m_spTmpSurfKey);
+	m_SurfTime = _AnimTime;
 //	m_pCurAttrib = NULL;
 	m_pLastSubmittedAttrib	= 0;
 
-	CVec3Dfp4 ReferenceDim = _pSurf->GetTextureMappingReferenceDimensions();
+	CVec3Dfp32 ReferenceDim = _pSurf->GetTextureMappingReferenceDimensions(m_pSurfKeyFrame);
 	m_CurTxtW = int(ReferenceDim[0]);
 	m_CurTxtH = int(ReferenceDim[1]);
 }
@@ -304,22 +264,6 @@ bool CRC_Util2D::SetTexture(const char* _pTxtName)
 	MAUTOSTRIP(CRC_Util2D_SetTexture_2, false);
 	SetTexture(m_pTC->GetTextureID(_pTxtName));
 	return m_Attrib.m_TextureID[0] != 0;
-
-/*	int nTC = m_lspTC.Len();
-	for(int i = 0; i < nTC; i++)
-	{
-		if (typeid(*m_lspTC[i]) == typeid(CTextureContainer_Plain))
-		{
-			CTextureContainer_Plain* pTC = TDynamicCast<CTextureContainer_Plain> (&(*m_lspTC[i]));
-			int iLocal;
-			if ((iLocal = pTC->GetLocal(_pTxtName)) >= 0)
-			{
-				SetTexture(m_lspTC[i]->GetTextureID(iLocal));
-				return true;
-			}
-		}
-	}
-	return false;*/
 }
 
 
@@ -330,7 +274,7 @@ void CRC_Util2D::SetTextureOrigo(const CClipRect& _Clip, const CPnt& _Origo)
 }
 
 
-void CRC_Util2D::SetTextureScale(fp4 _xScale, fp4 _yScale)
+void CRC_Util2D::SetTextureScale(fp32 _xScale, fp32 _yScale)
 {
 	MAUTOSTRIP(CRC_Util2D_SetTextureScale, MAUTOSTRIP_VOID);
 	m_CurTextureScale.k[0] = _xScale;
@@ -338,7 +282,7 @@ void CRC_Util2D::SetTextureScale(fp4 _xScale, fp4 _yScale)
 }
 
 
-void CRC_Util2D::SetFontScale(fp4 _xScale, fp4 _yScale)
+void CRC_Util2D::SetFontScale(fp32 _xScale, fp32 _yScale)
 {
 	m_CurFontScale[0] = _xScale;
 	m_CurFontScale[1] = _yScale;
@@ -355,7 +299,6 @@ void CRC_Util2D::Rects(const CClipRect& _Clip, const CRct *_Rect, const CPixel32
 void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32& _Color, CXR_Engine *_pEngine)
 {
 	MAUTOSTRIP(CRC_Util2D_Rect, MAUTOSTRIP_VOID);
-	/*
 	if (!_Clip.Visible(_Rect)) return;
 	CRct Rect = _Rect;
 	Rect += _Clip;
@@ -370,12 +313,12 @@ void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32&
 	Rect.p0.y = Max( Rect.p0.y, _Clip.clip.p0.y );
 	Rect.p1.y = Min( Rect.p1.y, _Clip.clip.p1.y );
 
-//	CVec3Dfp4 Verts[4];
-	CVec3Dfp4 Verts3D[4];
-	CVec2Dfp4 TVerts[4];
+//	CVec3Dfp32 Verts[4];
+	CVec3Dfp32 Verts3D[4];
+	CVec2Dfp32 TVerts[4];
 	CPixel32 Colors[4];
-	CVec3Dfp4 *pV = Verts3D;
-	CVec2Dfp4 *pTV = TVerts;
+	CVec3Dfp32 *pV = Verts3D;
+	CVec2Dfp32 *pTV = TVerts;
 	CPixel32 *pC = Colors;
 	if(m_pVBM)
 	{
@@ -391,20 +334,20 @@ void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32&
 	pV[1].k[0] = Rect.p1.x;		pV[1].k[1] = Rect.p0.y;		pV[1].k[2] = 0;
 	pV[2].k[0] = Rect.p1.x;		pV[2].k[1] = Rect.p1.y;		pV[2].k[2] = 0;
 	pV[3].k[0] = Rect.p0.x;		pV[3].k[1] = Rect.p1.y;		pV[3].k[2] = 0;
-	CVec3Dfp4::MultiplyMatrix(pV, pV, m_CurTransform, 4);
+	CVec3Dfp32::MultiplyMatrix(pV, pV, m_CurTransform, 4);
 
-	fp4 xs = 1.0f/fp4(m_CurTxtW) * m_CurTextureScale.k[0];
-	fp4 ys = 1.0f/fp4(m_CurTxtH) * m_CurTextureScale.k[1];
+	fp32 xs = 1.0f/fp32(m_CurTxtW) * m_CurTextureScale.k[0];
+	fp32 ys = 1.0f/fp32(m_CurTxtH) * m_CurTextureScale.k[1];
 	int txtox = m_CurTextureOrigo.x;
 	int txtoy = m_CurTextureOrigo.y;
-	pTV[0][0] = fp4(Rect.p0.x - txtox) * xs;
-	pTV[0][1] = fp4(Rect.p0.y - txtoy) * ys;
-	pTV[1][0] = fp4(Rect.p1.x - txtox) * xs;
-	pTV[1][1] = fp4(Rect.p0.y - txtoy) * ys;
-	pTV[2][0] = fp4(Rect.p1.x - txtox) * xs;
-	pTV[2][1] = fp4(Rect.p1.y - txtoy) * ys;
-	pTV[3][0] = fp4(Rect.p0.x - txtox) * xs;
-	pTV[3][1] = fp4(Rect.p1.y - txtoy) * ys;
+	pTV[0][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[0][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[1][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[1][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[2][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[2][1] = fp32(Rect.p1.y - txtoy) * ys;
+	pTV[3][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[3][1] = fp32(Rect.p1.y - txtoy) * ys;
 	pC[0] = _Color;
 	pC[1] = _Color;
 	pC[2] = _Color;
@@ -416,7 +359,7 @@ void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32&
 		if(pVB)
 		{
 			pVB->m_Priority = (m_VBPriority += m_VBPriorityAdd);
-			if (!pVB->SetVBChain(m_pVBM, false))
+			if (!pVB->AllocVBChain(m_pVBM, false))
 				return;
 			pVB->Geometry_VertexArray(pV, 4, true);
 			pVB->Geometry_TVertexArray(pTV, 0);
@@ -425,7 +368,7 @@ void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32&
 			if(m_pSurf)
 			{
 				pVB->Geometry_ColorArray(pC);
-				CXR_Util::Render_Surface(0, m_pSurf, m_pSurfKeyFrame, _pEngine, m_pVBM, NULL, NULL, (CMat43fp4*)NULL, pVB, m_VBPriority, 0.0001f);
+				CXR_Util::Render_Surface(0, m_SurfTime, m_pSurf, m_pSurfKeyFrame, _pEngine, m_pVBM, (CMat4Dfp32*) NULL, (CMat4Dfp32*) NULL, (CMat4Dfp32*)NULL, pVB, m_VBPriority, 0.0001f);
 			}
 			else
 			{
@@ -455,16 +398,95 @@ void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32&
 
 //		m_pCurRC->Render_Polygon(4, pV, pTV, &ms_IndexRamp[0], &ms_IndexRamp[0], _Color);
 	}
-	*/
 }
 
-void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32& _Color, class CXR_Shader* _pShader, const class CXR_ShaderParams* _pShaderParams, const CXR_Light& _Light)
+void CRC_Util2D::Rect(const CClipRect& _Clip, const CRct& _Rect, const CPixel32& _Color, class CXR_Shader* _pShader, const class CXR_ShaderParams* _pShaderParams, const class CXR_SurfaceShaderParams* _pSurfParams, const CXR_Light& _Light)
 {
 	MAUTOSTRIP(CRC_Util2D_Rect, MAUTOSTRIP_VOID);
+	if (!_Clip.Visible(_Rect))
+		return;
+	if (!m_pVBM)
+		return;
+	CRct Rect = _Rect;
+	Rect += _Clip;
+
+//	if (Rect.p0.x < _Clip.clip.p0.x) Rect.p0.x = _Clip.clip.p0.x;
+//	if (Rect.p1.x > _Clip.clip.p1.x) Rect.p1.x = _Clip.clip.p1.x;
+//	if (Rect.p0.y < _Clip.clip.p0.y) Rect.p0.y = _Clip.clip.p0.y;
+//	if (Rect.p1.y > _Clip.clip.p1.y) Rect.p1.y = _Clip.clip.p1.y;
+
+	Rect.p0.x = Max( Rect.p0.x, _Clip.clip.p0.x );
+	Rect.p1.x = Min( Rect.p1.x, _Clip.clip.p1.x );
+	Rect.p0.y = Max( Rect.p0.y, _Clip.clip.p0.y );
+	Rect.p1.y = Min( Rect.p1.y, _Clip.clip.p1.y );
+
+	CVec3Dfp32 *pV = m_pVBM->Alloc_V3(4);
+	CVec3Dfp32 *pN = m_pVBM->Alloc_V3(4);
+	CVec2Dfp32 *pTV = m_pVBM->Alloc_V2(4);
+	CVec3Dfp32 *pTangU = m_pVBM->Alloc_V3(4);
+	CVec3Dfp32 *pTangV = m_pVBM->Alloc_V3(4);
+	CPixel32 *pC = m_pVBM->Alloc_CPixel32(4);
+
+	if(!pV || !pN || !pTV || !pC || !pTangU || !pTangV)
+		return;
+
+	pV[0].k[0] = Rect.p0.x;		pV[0].k[1] = Rect.p0.y;		pV[0].k[2] = 0;
+	pV[1].k[0] = Rect.p1.x;		pV[1].k[1] = Rect.p0.y;		pV[1].k[2] = 0;
+	pV[2].k[0] = Rect.p1.x;		pV[2].k[1] = Rect.p1.y;		pV[2].k[2] = 0;
+	pV[3].k[0] = Rect.p0.x;		pV[3].k[1] = Rect.p1.y;		pV[3].k[2] = 0;
+	CVec3Dfp32::MultiplyMatrix(pV, pV, m_CurTransform, 4);
+
+	fp32 xs = 1.0f/fp32(m_CurTxtW) * m_CurTextureScale.k[0];
+	fp32 ys = 1.0f/fp32(m_CurTxtH) * m_CurTextureScale.k[1];
+	int txtox = m_CurTextureOrigo.x;
+	int txtoy = m_CurTextureOrigo.y;
+	pTV[0][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[0][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[1][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[1][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[2][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[2][1] = fp32(Rect.p1.y - txtoy) * ys;
+	pTV[3][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[3][1] = fp32(Rect.p1.y - txtoy) * ys;
+	pC[0] = _Color;
+	pC[1] = _Color;
+	pC[2] = _Color;
+	pC[3] = _Color;
+
+	CVec3Dfp32 Normal(0,0,-1);
+	CVec3Dfp32 TangU(Sign(m_CurTextureScale.k[0]),0,0);
+	CVec3Dfp32 TangV(0,Sign(m_CurTextureScale.k[1]),0);
+
+	for(int i = 0; i < 4; i++)
+	{
+		pTangU[i] = TangU;
+		pTangV[i] = TangV;
+		pN[i] = Normal;
+	}
+
+	CMat4Dfp32* pMat = m_pVBM->Alloc_M4();
+
+	CXR_VertexBuffer *pVB = m_pVBM->Alloc_VB();
+	if(pVB && pMat)
+	{
+		pMat->Unit();
+		if (!pVB->AllocVBChain(m_pVBM, false))
+			return;
+		pVB->Matrix_Set(pMat);
+		pVB->Geometry_VertexArray(pV, 4, true);
+		pVB->Geometry_Normal(pN);
+		pVB->Geometry_TVertexArray(pTV, 0);
+		pVB->Geometry_TVertexArray(pTangU, 1);
+		pVB->Geometry_TVertexArray(pTangV, 2);
+		pVB->Render_IndexedTriangles(ms_DualTringle, 2);
+
+		const CXR_SurfaceShaderParams* lpSSP[1] = { _pSurfParams };
+		_pShader->RenderShading(_Light, pVB, _pShaderParams, lpSSP);
+	}
 }
 
 #ifndef M_RTM
-void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp4& _Mid, fp4 _Radius, int32 _nSegments, const CPixel32& _Color, bool _bBorder, const CPixel32& _BorderColor)
+void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp32& _Mid, fp32 _Radius, int32 _nSegments, const CPixel32& _Color, bool _bBorder, const CPixel32& _BorderColor)
 {
 	MAUTOSTRIP(CRC_Util2D_Rect, MAUTOSTRIP_VOID);
 	if (!m_pVBM)
@@ -473,11 +495,11 @@ void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp4& _Mid, fp4 _Radi
 	// Num segs plus middle point
 	int32 NumPoints = _nSegments + 1;
 
-	CVec3Dfp4 *pV = m_pVBM->Alloc_V3(NumPoints);
-	/*CVec3Dfp4 *pN = m_pVBM->Alloc_V3(NumPoints);
-	CVec2Dfp4 *pTV = m_pVBM->Alloc_V2(NumPoints);
-	CVec3Dfp4 *pTangU = m_pVBM->Alloc_V3(NumPoints);
-	CVec3Dfp4 *pTangV = m_pVBM->Alloc_V3(NumPoints);*/
+	CVec3Dfp32 *pV = m_pVBM->Alloc_V3(NumPoints);
+	/*CVec3Dfp32 *pN = m_pVBM->Alloc_V3(NumPoints);
+	CVec2Dfp32 *pTV = m_pVBM->Alloc_V2(NumPoints);
+	CVec3Dfp32 *pTangU = m_pVBM->Alloc_V3(NumPoints);
+	CVec3Dfp32 *pTangV = m_pVBM->Alloc_V3(NumPoints);*/
 	uint16* pIndex = m_pVBM->Alloc_Int16(_nSegments * 3);
 	CPixel32 *pC = m_pVBM->Alloc_CPixel32(NumPoints);
 
@@ -490,7 +512,7 @@ void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp4& _Mid, fp4 _Radi
 	pV[0].k[2] = 0.0f;
 	pC[0] = _Color;
 
-	fp4 Part = 2*_PI / (fp4)_nSegments;
+	fp32 Part = 2*_PI / (fp32)_nSegments;
 	for (int32 i = 0; i < _nSegments; i++)
 	{
 		pC[i+1] = _Color;
@@ -508,15 +530,15 @@ void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp4& _Mid, fp4 _Radi
 			pIndex[i * 3+2] = i+2;
 	}
 
-	CVec3Dfp4::MultiplyMatrix(pV, pV, m_CurTransform, NumPoints);
+	CVec3Dfp32::MultiplyMatrix(pV, pV, m_CurTransform, NumPoints);
 
-	CMat4Dfp4* pMat = m_pVBM->Alloc_M4();
+	CMat4Dfp32* pMat = m_pVBM->Alloc_M4();
 
 	CXR_VertexBuffer *pVB = m_pVBM->Alloc_VB();
 	if(pVB && pMat)
 	{
 		pMat->Unit();
-		if (!pVB->SetVBChain(m_pVBM, false))
+		if (!pVB->AllocVBChain(m_pVBM, false))
 			return;
 		pVB->Matrix_Set(pMat);
 		pVB->Geometry_VertexArray(pV, NumPoints, true);
@@ -538,7 +560,7 @@ void CRC_Util2D::Circle(const CClipRect& _Clip, const CVec2Dfp4& _Mid, fp4 _Radi
 	}
 }
 
-void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp4& _Start, CVec2Dfp4& _End, fp4 _Width, const CPixel32& _Color)
+void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp32& _Start, CVec2Dfp32& _End, fp32 _Width, const CPixel32& _Color)
 {
 	if (!m_pVBM)
 		return;
@@ -547,15 +569,15 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp4& _Start, CVec2Dfp4
 
 	// Num segs plus middle point
 
-	CVec3Dfp4 *pV = m_pVBM->Alloc_V3(4);
+	CVec3Dfp32 *pV = m_pVBM->Alloc_V3(4);
 	CPixel32 *pC = m_pVBM->Alloc_CPixel32(4);
 
 	if(!pV || !pC)
 		return;
 
-	CVec2Dfp4 Dir = _End - _Start;
+	CVec2Dfp32 Dir = _End - _Start;
 	Dir.Normalize();
-	CVec2Dfp4 Right;
+	CVec2Dfp32 Right;
 	Right.k[0] = Dir.k[1];
 	Right.k[1] = -Dir.k[0];
 
@@ -565,7 +587,7 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp4& _Start, CVec2Dfp4
 	pC[2] = _Color;
 	pC[3] = _Color;
 
-	CVec2Dfp4 Point =  _Start - Right * _Width * 0.5f;
+	CVec2Dfp32 Point =  _Start - Right * _Width * 0.5f;
 	pV[0].k[0] = Point.k[0];
 	pV[0].k[1] = Point.k[1];
 	pV[0].k[2] = 0.0f;
@@ -584,15 +606,15 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp4& _Start, CVec2Dfp4
 	pV[3].k[0] = Point.k[0];
 	pV[3].k[1] = Point.k[1];
 	pV[3].k[2] = 0.0f;
-	CVec3Dfp4::MultiplyMatrix(pV, pV, m_CurTransform, 4);
+	CVec3Dfp32::MultiplyMatrix(pV, pV, m_CurTransform, 4);
 
-	CMat4Dfp4* pMat = m_pVBM->Alloc_M4();
+	CMat4Dfp32* pMat = m_pVBM->Alloc_M4();
 
 	CXR_VertexBuffer *pVB = m_pVBM->Alloc_VB();
 	if(pVB && pMat)
 	{
 		pMat->Unit();
-		if (!pVB->SetVBChain(m_pVBM, false))
+		if (!pVB->AllocVBChain(m_pVBM, false))
 			return;
 		pVB->Matrix_Set(pMat);
 		pVB->Geometry_VertexArray(pV, 4, true);
@@ -607,47 +629,47 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CVec2Dfp4& _Start, CVec2Dfp4
 }
 #endif
 
-void CRC_Util2D::AspectRect(const CClipRect& _Clip, const CRct& _Rect, const CPnt& _SourceSize, fp4 _SourcePixelAspect, const CPixel32& _Color)
+void CRC_Util2D::AspectRect(const CClipRect& _Clip, const CRct& _Rect, const CPnt& _SourceSize, fp32 _SourcePixelAspect, const CPixel32& _Color)
 {
 	int Width = _Rect.p1.x - _Rect.p0.x;
 	int Height = _Rect.p1.y - _Rect.p0.y;
-	fp4 OffsetX = 0;
-	fp4 OffsetY = 0;
+	fp32 OffsetX = 0;
+	fp32 OffsetY = 0;
 
-	fp4 PixelAspect = (GetRC()->GetDC()->GetPixelAspect() * GetRC()->GetDC()->GetScreenAspect() / (((fp4)Width / Height)*(3.0/4.0))) / _SourcePixelAspect;
-	fp4 AspectX = PixelAspect * fp4(Width) / _SourceSize.x;
-	fp4 AspectY = fp4(Height) / _SourceSize.y;
+	fp32 PixelAspect = (GetRC()->GetDC()->GetPixelAspect() * GetRC()->GetDC()->GetScreenAspect() / (((fp32)Width / Height)*(3.0/4.0))) / _SourcePixelAspect;
+	fp32 AspectX = PixelAspect * fp32(Width) / _SourceSize.x;
+	fp32 AspectY = fp32(Height) / _SourceSize.y;
 	if(AspectX < AspectY)
 	{
 		// Horizontal borders
 		OffsetY = (Height - AspectX / AspectY * Height) / 2;
-		fp4 Scale = _SourceSize.x / (fp4) Width;
+		fp32 Scale = _SourceSize.x / (fp32) Width;
 		SetTextureScale(Scale, Scale/PixelAspect);
 	}
 	else
 	{
 		// Vertical borders
 		OffsetX = (Width - AspectY / AspectX * Width) / 2;
-		fp4 Scale = _SourceSize.y / (fp4) Height;
+		fp32 Scale = _SourceSize.y / (fp32) Height;
 		SetTextureScale(Scale* PixelAspect, Scale);
 	}
 
 	SetTextureOrigo(_Clip, CPnt(int(_Rect.p0.x + OffsetX), int(_Rect.p0.y + OffsetY)));
-	Rect(_Clip, CRct::From_fp4(_Rect.p0.x + OffsetX, _Rect.p0.y + OffsetY, _Rect.p1.x - OffsetX, _Rect.p1.y - OffsetY),  0xffffffff);
+	Rect(_Clip, CRct::From_fp32(_Rect.p0.x + OffsetX, _Rect.p0.y + OffsetY, _Rect.p1.x - OffsetX, _Rect.p1.y - OffsetY),  _Color);
 }
 
-bool CRC_Util2D::DrawTexture(const CClipRect& _Clip, const CPnt& _Pos, const char *_pTexture, const CPixel32 _Color, const CVec2Dfp4& _Scale)
+bool CRC_Util2D::DrawTexture(const CClipRect& _Clip, const CPnt& _Pos, const char *_pTexture, const CPixel32 _Color, const CVec2Dfp32& _Scale)
 {
 	if(!SetTexture(_pTexture))
 		return false;
 	
 	SetTextureOrigo(_Clip, _Pos);
 	SetTextureScale(_Scale[0], _Scale[1]);
-	Rect(_Clip, CRct::From_fp4(_Pos.x, _Pos.y, _Pos.x + GetTextureWidth() / _Scale[0], _Pos.y + GetTextureHeight() / _Scale[1]), _Color);
+	Rect(_Clip, CRct::From_fp32(_Pos.x, _Pos.y, _Pos.x + GetTextureWidth() / _Scale[0], _Pos.y + GetTextureHeight() / _Scale[1]), _Color);
 	return true;
 }
 
-void CRC_Util2D::DrawSurface(const CClipRect& _Clip, const CPnt& _Pos, const char *_pSurface, const CPixel32 _Color, const CVec2Dfp4& _Scale)
+void CRC_Util2D::DrawSurface(const CClipRect& _Clip, const CPnt& _Pos, const char *_pSurface, const CPixel32 _Color, const CVec2Dfp32& _Scale)
 {
 	Error("DrawSurface", "TODO");
 }
@@ -683,9 +705,8 @@ void CRC_Util2D::Sprite(const CClipRect& _Clip, const CPnt& _Pos, const CPixel32
 //	GetRC()->Attrib_Pop();
 }
 
-void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const CPnt& _Range,  fp4 _Angle, const CPixel32& _Color)
+void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const CPnt& _Range,  fp32 _Angle, const CPixel32& _Color)
 {
-	/*
 	// Return if there are no texture set
 	if (m_Attrib.m_TextureID[0] == 0) return;
 
@@ -704,11 +725,11 @@ void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const C
 	Rect.p1.y = Min( Rect.p1.y, _Clip.clip.p1.y );
 
 
-	CVec3Dfp4 Verts3D[4];
-	CVec2Dfp4 TVerts[4];
+	CVec3Dfp32 Verts3D[4];
+	CVec2Dfp32 TVerts[4];
 	CPixel32 Colors[4];
-	CVec3Dfp4 *pV = Verts3D;
-	CVec2Dfp4 *pTV = TVerts;
+	CVec3Dfp32 *pV = Verts3D;
+	CVec2Dfp32 *pTV = TVerts;
 	CPixel32 *pC = Colors;
 	if(m_pVBM)
 	{
@@ -724,36 +745,36 @@ void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const C
 	pV[1].k[0] = Rect.p1.x;		pV[1].k[1] = Rect.p0.y;		pV[1].k[2] = 0;
 	pV[2].k[0] = Rect.p1.x;		pV[2].k[1] = Rect.p1.y;		pV[2].k[2] = 0;
 	pV[3].k[0] = Rect.p0.x;		pV[3].k[1] = Rect.p1.y;		pV[3].k[2] = 0;
-	CMat4Dfp4 InMat, OutMat, Rotate;
+	CMat4Dfp32 InMat, OutMat, Rotate;
 	InMat.Unit();
 	OutMat.Unit();
 	Rotate.Unit();
 
-	CVec3Dfp4(-_Pos.x, -_Pos.y,0).SetMatrixRow(InMat,3);
-	CVec3Dfp4(_Pos.x, _Pos.y,0).SetMatrixRow(OutMat,3);
+	CVec3Dfp32(-_Pos.x, -_Pos.y,0).SetMatrixRow(InMat,3);
+	CVec3Dfp32(_Pos.x, _Pos.y,0).SetMatrixRow(OutMat,3);
 	Rotate.SetZRotation3x3(_Angle);
 	InMat.Multiply(Rotate, Rotate);
 	Rotate.Multiply(OutMat, Rotate);
-	Rotate.Multiply(m_CurTransform.Get4x4(), Rotate);
+	Rotate.Multiply(m_CurTransform, Rotate);
 	
 	// Multiply to temporary vertices otherwise rotations may be f#)&/%# up
-	CVec3Dfp4 TempVerts[4];
-	CVec3Dfp4::MultiplyMatrix(pV, TempVerts, Rotate, 4);
+	CVec3Dfp32 TempVerts[4];
+	CVec3Dfp32::MultiplyMatrix(pV, TempVerts, Rotate, 4);
 	// Copy the temporary vertices back
-	memcpy(pV, TempVerts, sizeof(CVec3Dfp4)*4);
+	memcpy(pV, TempVerts, sizeof(CVec3Dfp32)*4);
 
-	fp4 xs = 1.0f/fp4(m_CurTxtW) * m_CurTextureScale.k[0];
-	fp4 ys = 1.0f/fp4(m_CurTxtH) * m_CurTextureScale.k[1];
+	fp32 xs = 1.0f/fp32(m_CurTxtW) * m_CurTextureScale.k[0];
+	fp32 ys = 1.0f/fp32(m_CurTxtH) * m_CurTextureScale.k[1];
 	int txtox = m_CurTextureOrigo.x;
 	int txtoy = m_CurTextureOrigo.y;
-	pTV[0][0] = fp4(Rect.p0.x - txtox) * xs;
-	pTV[0][1] = fp4(Rect.p0.y - txtoy) * ys;
-	pTV[1][0] = fp4(Rect.p1.x - txtox) * xs;
-	pTV[1][1] = fp4(Rect.p0.y - txtoy) * ys;
-	pTV[2][0] = fp4(Rect.p1.x - txtox) * xs;
-	pTV[2][1] = fp4(Rect.p1.y - txtoy) * ys;
-	pTV[3][0] = fp4(Rect.p0.x - txtox) * xs;
-	pTV[3][1] = fp4(Rect.p1.y - txtoy) * ys;
+	pTV[0][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[0][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[1][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[1][1] = fp32(Rect.p0.y - txtoy) * ys;
+	pTV[2][0] = fp32(Rect.p1.x - txtox) * xs;
+	pTV[2][1] = fp32(Rect.p1.y - txtoy) * ys;
+	pTV[3][0] = fp32(Rect.p0.x - txtox) * xs;
+	pTV[3][1] = fp32(Rect.p1.y - txtoy) * ys;
 	pC[0] = _Color;
 	pC[1] = _Color;
 	pC[2] = _Color;
@@ -765,7 +786,7 @@ void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const C
 		if(pVB)
 		{
 			pVB->m_Priority = (m_VBPriority += m_VBPriorityAdd);
-			if (!pVB->SetVBChain(m_pVBM, false))
+			if (!pVB->AllocVBChain(m_pVBM, false))
 				return;
 			pVB->Geometry_VertexArray(pV, 4, true);
 			pVB->Geometry_TVertexArray(pTV, 0);
@@ -774,7 +795,7 @@ void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const C
 			pVB->Render_IndexedTriangles(ms_DualTringle, 2);
 
 			if(m_pSurf)
-				CXR_Util::Render_Surface(0, m_pSurf, m_pSurfKeyFrame, NULL, m_pVBM, (CMat43fp4*)NULL, (CMat43fp4*)NULL, (CMat43fp4*)NULL, pVB, m_VBPriority, 0.0001f);
+				CXR_Util::Render_Surface(0, m_SurfTime, m_pSurf, m_pSurfKeyFrame, NULL, m_pVBM, (CMat4Dfp32*)NULL, (CMat4Dfp32*)NULL, (CMat4Dfp32*)NULL, pVB, m_VBPriority, 0.0001f);
 			else
 			{
 				pVB->m_pAttrib	= GetLastSubmitted();
@@ -801,7 +822,6 @@ void CRC_Util2D::RotatedSprite(const CClipRect& _Clip, const CPnt& _Pos, const C
 
 //		m_pCurRC->Render_Polygon(4, pV, pTV, &ms_IndexRamp[0], &ms_IndexRamp[0], _Color);
 	}
-	*/
 }
 
 void CRC_Util2D::ScaleSprite(const CClipRect& _Clip, const CPnt& _Pos, const CPnt& _Size, const CPixel32& _Color)
@@ -814,8 +834,8 @@ void CRC_Util2D::ScaleSprite(const CClipRect& _Clip, const CPnt& _Pos, const CPn
 
 //	GetRC()->Attrib_RasterMode(CRC_RASTERMODE_ALPHABLEND);
 	SetTextureOrigo(_Clip, _Pos);
-	m_CurTextureScale.k[0] = m_CurTxtW/fp4(_Size.x);
-	m_CurTextureScale.k[1] = m_CurTxtH/fp4(_Size.y);
+	m_CurTextureScale.k[0] = m_CurTxtW/fp32(_Size.x);
+	m_CurTextureScale.k[1] = m_CurTxtH/fp32(_Size.y);
 	Rect(_Clip, CRct(_Pos, _Pos + _Size), _Color);
 
 	m_CurTextureScale.k[0] = 1.0f;
@@ -823,54 +843,17 @@ void CRC_Util2D::ScaleSprite(const CClipRect& _Clip, const CPnt& _Pos, const CPn
 //	GetRC()->Attrib_Pop();
 }
 
-void CRC_Util2D::Lines(const CClipRect& _Clip, const CPnt *_p0, const CPnt *_p1, const CPixel32 *_Color0, const CPixel32 *_Color1, int _nLines)
+void CRC_Util2D::Lines(const CClipRect& _Clip, const CVec2Dfp32 *_p0, const CVec2Dfp32 *_p1, const CPixel32 *_Color0, const CPixel32 *_Color1, int _nLines)
 {
 
 	if(m_pVBM)
 	{
-		CXR_VertexBuffer *pVB = m_pVBM->Alloc_VB(CXR_VB_VERTICES|CXR_VB_COLORS, _nLines * 2);
-		if(!pVB)
-			return;
-		uint16 *pInd = (uint16 *)m_pVBM->Alloc_Int16(_nLines * 2);
-		if (!pInd)
-			return;
-
-		CXR_VBChain *pVBChain = pVB->GetVBChain();
-
-		CVec3Dfp4 Verts[2];
-		int iDest = 0;
-		for (int i = 0; i < _nLines; ++i)
-		{
-			CVec3Dfp4 *Verts3D = pVBChain->m_pV + i * 2;
-
-			CPnt p0 = _p0[i];
-			CPnt p1 = _p1[i];
-
-			p0 += _Clip.ofs;
-			p1 += _Clip.ofs;
-
-			if (!CImage::ClipLine(_Clip.clip, p0.x, p0.y, p1.x, p1.y)) 
-				continue;
-
-			pVBChain->m_pCol[i * 2] = _Color0[i];
-			pVBChain->m_pCol[i * 2 + 1] = _Color1[i];
-
-			Verts[0] = CVec3Dfp4(p0.x, p0.y, 0);
-			Verts[1] = CVec3Dfp4(p1.x, p1.y, 0);
-			CVec3Dfp4::MultiplyMatrix(Verts, Verts3D, m_CurTransform, 2);
-			pInd[iDest++] = i * 2;
-			pInd[iDest++] = i * 2 + 1;
-		}
-
-		GetAttrib()->Attrib_TextureID(0, 0);
-
-		if (!iDest)
+		CXR_VertexBuffer *pVB = CXR_Util::VBM_RenderWires2D(m_pVBM, _Clip, _p0, _p1, _Color0, _Color1, _nLines);
+		if (!pVB)
 			return;
 
 		pVB->m_Priority = (m_VBPriority += m_VBPriorityAdd);
-		pVB->Render_IndexedWires(pInd, iDest);
 		pVB->m_pAttrib = GetLastSubmitted();
-
 		if (pVB->m_pAttrib)
 		{
 			m_pVBM->AddVB(pVB);
@@ -880,10 +863,9 @@ void CRC_Util2D::Lines(const CClipRect& _Clip, const CPnt *_p0, const CPnt *_p1,
 	{
 		for (int i = 0; i < _nLines; ++i)
 		{
-			Line(_Clip, _p0[i], _p1[i], _Color0[i]);
+			Line(_Clip, CPnt::From_fp32(_p0[i][0], _p0[i][1]), CPnt::From_fp32(_p1[i][0], _p1[i][1]), _Color0[i]);
 		}
 	}
-
 }
 
 void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, const CPixel32& _Color)
@@ -896,8 +878,8 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, 
 			return;
 		CXR_VBChain *pVBChain = pVB->GetVBChain();
 
-		CVec3Dfp4 Verts[2];
-		CVec3Dfp4 *Verts3D = pVBChain->m_pV;
+		CVec3Dfp32 Verts[2];
+		CVec3Dfp32 *Verts3D = pVBChain->m_pV;
 
 		CPnt p0 = _p0;
 		CPnt p1 = _p1;
@@ -907,9 +889,9 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, 
 
 		if (!CImage::ClipLine(_Clip.clip, p0.x, p0.y, p1.x, p1.y)) return;
 
-		Verts[0] = CVec3Dfp4(p0.x, p0.y, 0);
-		Verts[1] = CVec3Dfp4(p1.x, p1.y, 0);
-		CVec3Dfp4::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 2);
+		Verts[0] = CVec3Dfp32(p0.x, p0.y, 0);
+		Verts[1] = CVec3Dfp32(p1.x, p1.y, 0);
+		CVec3Dfp32::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 2);
 		GetAttrib()->Attrib_TextureID(0, 0);
 
 		pVB->m_Priority = (m_VBPriority += m_VBPriorityAdd);
@@ -925,8 +907,8 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, 
 	}
 	else
 	{
-		CVec3Dfp4 Verts[4];
-		CVec3Dfp4 Verts3D[4];
+		CVec3Dfp32 Verts[4];
+		CVec3Dfp32 Verts3D[4];
 
 	//	if (!_Clip.Visible(CRct(_p0, _p1))) return;
 
@@ -938,27 +920,27 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, 
 
 		if (!CImage::ClipLine(_Clip.clip, p0.x, p0.y, p1.x, p1.y)) return;
 
-		Verts[0] = CVec3Dfp4(p0.x, p0.y, 0);
-		Verts[1] = CVec3Dfp4(p1.x, p1.y, 0);
-		CVec3Dfp4::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 2);
+		Verts[0] = CVec3Dfp32(p0.x, p0.y, 0);
+		Verts[1] = CVec3Dfp32(p1.x, p1.y, 0);
+		CVec3Dfp32::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 2);
 		m_pCurRC->Attrib_TextureID(0, 0);
 		m_pCurRC->Render_Wire(Verts3D[0], Verts3D[1], _Color);
 	}
 
 /*
-	CVec2Dfp4 LineN((p1.y - p0.y), -(p1.x - p0.x));
+	CVec2Dfp32 LineN((p1.y - p0.y), -(p1.x - p0.x));
 	LineN.Normalize();
 
-	Verts[0] = CVec3Dfp4(p0.x, p0.y, 0);
-	Verts[1] = CVec3Dfp4(p1.x, p1.y, 0);
-	Verts[2] = CVec3Dfp4(fp4(p1.x) + LineN.k[0], fp4(p1.y) + LineN.k[1], 0);
-	Verts[3] = CVec3Dfp4(fp4(p0.x) + LineN.k[0], fp4(p0.y) + LineN.k[1], 0);
+	Verts[0] = CVec3Dfp32(p0.x, p0.y, 0);
+	Verts[1] = CVec3Dfp32(p1.x, p1.y, 0);
+	Verts[2] = CVec3Dfp32(fp32(p1.x) + LineN.k[0], fp32(p1.y) + LineN.k[1], 0);
+	Verts[3] = CVec3Dfp32(fp32(p0.x) + LineN.k[0], fp32(p0.y) + LineN.k[1], 0);
 
-	CVec2Dfp4 TVerts[4];
+	CVec2Dfp32 TVerts[4];
 	if (m_CurTextureID)
 	{
-		fp4 xs = 1.0f/fp4(m_CurTxtW) * m_CurTextureScale.k[0];
-		fp4 ys = 1.0f/fp4(m_CurTxtH) * m_CurTextureScale.k[1];
+		fp32 xs = 1.0f/fp32(m_CurTxtW) * m_CurTextureScale.k[0];
+		fp32 ys = 1.0f/fp32(m_CurTxtH) * m_CurTextureScale.k[1];
 		int txtox = m_CurTextureOrigo.x;
 		int txtoy = m_CurTextureOrigo.y;
 		TVerts[0].k[0] = (Verts[0].k[0] - txtox) * xs;
@@ -973,7 +955,7 @@ void CRC_Util2D::Line(const CClipRect& _Clip, const CPnt& _p0, const CPnt& _p1, 
 	else
 		FillChar(&TVerts, sizeof(TVerts), 0);
 
-	CVec3Dfp4::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 4);
+	CVec3Dfp32::MultiplyMatrix(&Verts[0], &Verts3D[0], m_CurTransform, 4);
 	m_pCurRC->Attrib_TextureID(0, m_CurTextureID);
 	m_pCurRC->Render_Polygon(4, &Verts3D[0], &TVerts[0], &ms_IndexRamp[0], &ms_IndexRamp[0], _Color);
 */
@@ -1002,77 +984,77 @@ void CRC_Util2D::Frame(const CClipRect& _Clip, int _x0, int _y0, int _x1, int _y
 }
 
 
-int CRC_Util2D::TextHeight(CRC_Font* _pFont, const char* _pStr)
+int CRC_Util2D::TextHeight(CRC_Font* _pFont, const char* _pStr, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextHeight, 0);
 	if (_pStr)
-		return int(_pFont->GetHeight(_pFont->GetOriginalSize(), _pStr));
+		return int(_pFont->GetHeight(_pFont->GetOriginalSize() * _FontScale, _pStr));
 	else
 		return int(_pFont->GetOriginalSize());
 }
 
 
-int CRC_Util2D::TextHeight(CRC_Font* _pFont, const wchar* _pStr)
+int CRC_Util2D::TextHeight(CRC_Font* _pFont, const wchar* _pStr, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextHeight_2, 0);
 	if (_pStr)
-		return int(_pFont->GetHeight(_pFont->GetOriginalSize(), _pStr));
+		return int(_pFont->GetHeight(_pFont->GetOriginalSize() * _FontScale, _pStr));
 	else
 		return int(_pFont->GetOriginalSize());
 }
 
 
-int CRC_Util2D::TextHeight(CRC_Font* _pFont, const CStr& _Str)
+int CRC_Util2D::TextHeight(CRC_Font* _pFont, const CStr& _Str, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextHeight_3, 0);
 	if (_Str.Len())
-		return int(_pFont->GetHeight(_pFont->GetOriginalSize(), _Str));
+		return int(_pFont->GetHeight(_pFont->GetOriginalSize() * _FontScale, _Str));
 	else
 		return int(_pFont->GetOriginalSize());
 }
 
 
-int CRC_Util2D::TextWidth(CRC_Font* _pFont, const char* _pStr)
+int CRC_Util2D::TextWidth(CRC_Font* _pFont, const char* _pStr, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextWidth, 0);
-	return int(_pFont->GetWidth(_pFont->GetOriginalSize(), _pStr));
+	return int(_pFont->GetWidth(_pFont->GetOriginalSize() * _FontScale, _pStr));
 }
 
 
-int CRC_Util2D::TextWidth(CRC_Font* _pFont, const wchar* _pStr)
+int CRC_Util2D::TextWidth(CRC_Font* _pFont, const wchar* _pStr, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextWidth_2, 0);
-	return int(_pFont->GetWidth(_pFont->GetOriginalSize(), _pStr));
+	return int(_pFont->GetWidth(_pFont->GetOriginalSize() * _FontScale, _pStr));
 }
 
-int CRC_Util2D::TextWidth(CRC_Font* _pFont,const CStr& _Str)
+int CRC_Util2D::TextWidth(CRC_Font* _pFont,const CStr& _Str, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextWidth_3, 0);
-	return int(_pFont->GetWidth(_pFont->GetOriginalSize(), _Str));
+	return int(_pFont->GetWidth(_pFont->GetOriginalSize() * _FontScale, _Str));
 }
 
 
-int CRC_Util2D::TextFit(CRC_Font* _pFont, const char* _pStr, int _Width, bool _bWordWrap)
+int CRC_Util2D::TextFit(CRC_Font* _pFont, const char* _pStr, int _Width, bool _bWordWrap, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextFit, 0);
-	return _pFont->GetFit(_pFont->GetOriginalSize(), _pStr, _Width, _bWordWrap);
+	return _pFont->GetFit(_pFont->GetOriginalSize() * _FontScale, _pStr, _Width, _bWordWrap);
 }
 
 
-int CRC_Util2D::TextFit(CRC_Font* _pFont, const wchar* _pStr, int _Width, bool _bWordWrap)
+int CRC_Util2D::TextFit(CRC_Font* _pFont, const wchar* _pStr, int _Width, bool _bWordWrap, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextFit_2, 0);
-	return _pFont->GetFit(_pFont->GetOriginalSize(), _pStr, _Width, _bWordWrap);
+	return _pFont->GetFit(_pFont->GetOriginalSize() * _FontScale, _pStr, _Width, _bWordWrap);
 }
 
 
-int CRC_Util2D::TextFit(CRC_Font* _pFont, const CStr& _Str, int _Width, bool _bWordWrap)
+int CRC_Util2D::TextFit(CRC_Font* _pFont, const CStr& _Str, int _Width, bool _bWordWrap, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_TextFit_3, 0);
-	return _pFont->GetFit(_pFont->GetOriginalSize(), _Str, _Width, _bWordWrap);
+	return _pFont->GetFit(_pFont->GetOriginalSize() * _FontScale, _Str, _Width, _bWordWrap);
 }
 
-CFStr FormatFloat(fp4 _Value)
+CFStr FormatFloat(fp32 _Value)
 {
 	if (_Value < 0.000001f)
 		return CFStrF("%.1f n", _Value * 1000000000.0f);
@@ -1092,9 +1074,16 @@ CFStr FormatFloat(fp4 _Value)
 	return CFStrF("%.1f", _Value);	
 }
 
-void CRC_Util2D::DrawGraph(const CClipRect& _Clip, CRC_Font* _pF, const CRct &_Rect, const CPixel32 &_Background, const CPixel32 &_ColorLow, const CPixel32 &_ColorMid, const CPixel32 &_ColorHigh, fp4 _AvgValue, const fp4 *_pValues, int _nValues, fp4 _OriginalHeight, const ch8 *_pName)
+void CRC_Util2D::DrawGraph(const CClipRect& _Clip, CRC_Font* _pF, const CRct &_Rect, const CPixel32 &_Background, const CPixel32 &_ColorLow, const CPixel32 &_ColorMid, const CPixel32 &_ColorHigh, fp32 _AvgValue, const fp32 *_pValues, int _nValues, fp32 _OriginalHeight, const ch8 *_pName)
+{
+	DrawGraph(_Clip, _pF, _Rect, _Background, _nValues, _OriginalHeight, _pName, 1, &_ColorLow, &_ColorMid, &_ColorHigh, &_AvgValue, &_pValues);
+}
+
+void CRC_Util2D::DrawGraph(const CClipRect& _Clip, CRC_Font* _pF, const CRct &_Rect, const CPixel32 &_Background, int _nValues, fp32 _OriginalHeight, const ch8 *_pName, int _nGraphs, const CPixel32 *_pColorLow, const CPixel32 *_pColorMid, const CPixel32 *_pColorHigh, fp32 *_pAvgValue, const fp32 **_pValues)
 {
 
+	if (_nGraphs == 0)
+		return;
 	CRC_Attributes *pAttr = GetAttrib();
 	if (!pAttr)
 		return;
@@ -1102,23 +1091,24 @@ void CRC_Util2D::DrawGraph(const CClipRect& _Clip, CRC_Font* _pF, const CRct &_R
 	if (!m_pVBM)
 		return;
 
-	fp4 X = _Rect.p1.x; 
-	int Bottom = _Rect.p1.y-2;
+	fp32 X = _Rect.p1.x; 
+	fp32 Bottom = fp32(_Rect.p1.y - 2);
 
 	int nToDraw = _nValues;
+	fp32 nToDrawf = (fp32)_nValues;
 
-	int HistPtr = _nValues -1;
-	fp4 Step = fp4(_Rect.GetWidth()-2) / nToDraw - 1;
+	int FirstPtr = _nValues -1;
+	fp32 Step = fp32(_Rect.GetWidth()-2) / nToDraw - 1;
 
 	pAttr->Attrib_Disable(CRC_FLAGS_ZCOMPARE);
 	pAttr->Attrib_RasterMode(CRC_RASTERMODE_ALPHABLEND);
 
-	CPnt *Line00 = (CPnt *)m_pVBM->Alloc((nToDraw*2+3) * sizeof(CPnt));
-	CPnt *Line01 = (CPnt *)m_pVBM->Alloc((nToDraw*2+3) * sizeof(CPnt));
-	CPixel32 *ColorLine0 = (CPixel32 *)m_pVBM->Alloc((nToDraw*2+3) * sizeof(CPixel32));
-	CPixel32 *ColorLine1 = (CPixel32 *)m_pVBM->Alloc((nToDraw*2+3) * sizeof(CPixel32));
+	CVec2Dfp32 *pLine00 = (CVec2Dfp32 *)m_pVBM->Alloc((nToDraw*2*_nGraphs+3) * sizeof(CVec2Dfp32));
+	CVec2Dfp32 *pLine01 = (CVec2Dfp32 *)m_pVBM->Alloc((nToDraw*2*_nGraphs+3) * sizeof(CVec2Dfp32));
+	CPixel32 *pColorLine0 = (CPixel32 *)m_pVBM->Alloc((nToDraw*2*_nGraphs+3) * sizeof(CPixel32));
+	CPixel32 *pColorLine1 = (CPixel32 *)m_pVBM->Alloc((nToDraw*2*_nGraphs+3) * sizeof(CPixel32));
 
-	if (!Line00 || !Line01 || !ColorLine0 || !ColorLine1)
+	if (!pLine00 || !pLine01 || !pColorLine0 || !pColorLine1)
 		return;
 
 	CRct Rects[2];
@@ -1126,111 +1116,202 @@ void CRC_Util2D::DrawGraph(const CClipRect& _Clip, CRC_Font* _pF, const CRct &_R
 
 	int iRectStart = 0;
 
-	fp4 ValueScale = 1.0;
-	fp4 TargetScale = 1.0;
+	fp32 ValueScale = 1.0;
+	fp32 TargetScale = 1.0;
 
-	fp4 AvgValue = _AvgValue;
+	fp32 AvgValueMax = _pAvgValue[0];
+	for (int i = 1; i < _nGraphs; ++i)
+	{
+		AvgValueMax = Max(_pAvgValue[i], AvgValueMax);
+	}
 
-	fp4 Target = _OriginalHeight * 1.16666666666666f;
+	fp32 Target = _OriginalHeight * 1.16666666666666f;
 
-	while (AvgValue * TargetScale > Target)
+	while (AvgValueMax * TargetScale > Target)
 	{
 		TargetScale *= 0.5f;
 	}	
 
 
-	fp4 HeightFull = _Rect.GetHeight()-2;
-	fp4 Height = HeightFull - 27.0f;
-	fp4 Height100 = Height / 1.25f;
-	fp4 Height50 = Height100 * 0.5f;
+	fp32 HeightFull = _Rect.GetHeight()-2;
+	fp32 Height = HeightFull - 27.0f;
+	fp32 Height100 = Height / 1.25f;
+	fp32 Height50 = Height100 * 0.5f;
 
 	ValueScale = Height100 / (_OriginalHeight / TargetScale);
 
-	fp4 LastValue = _pValues[HistPtr] * ValueScale;
-	fp4 CurrentValue = _pValues[HistPtr];
 	
 	int StartX = int(X-60);
-	Rects[iRectStart] = CRct::From_fp4(StartX - nToDraw * Step-2, Bottom - HeightFull, X, Bottom+2);
+	fp32 StartXf = fp32(StartX);
+	Rects[iRectStart] = CRct::From_fp32(StartX - nToDraw * Step-2, Bottom - HeightFull, X, Bottom+2);
 	X -= 60;
 	ColorRect[iRectStart] = _Background;
 	++iRectStart;
 
 	int iStart = 0;
-	ColorLine0[iStart] = CPixel32(0,0,55,255);
-	ColorLine1[iStart] = CPixel32(0,0,55,255);
-	Line00[iStart] = CPnt::From_fp4(X - (nToDraw) * Step, Bottom);
-	Line01[iStart] = CPnt::From_fp4(X, Bottom);
+	pColorLine0[iStart] = CPixel32(0,0,55,255);
+	pColorLine1[iStart] = CPixel32(0,0,55,255);
+	pLine00[iStart] = CVec2Dfp32(X - (nToDrawf) * Step, Bottom);
+	pLine01[iStart] = CVec2Dfp32(X, Bottom);
 	++iStart;
 
-	ColorLine0[iStart] = CPixel32(200,200,255,255);
-	ColorLine1[iStart] = CPixel32(200,200,255,255);
-	Line00[iStart] = CPnt::From_fp4(X - (nToDraw) * Step, Bottom+1);
-	Line01[iStart] = CPnt::From_fp4(X, Bottom+1);
+	pColorLine0[iStart] = CPixel32(200,200,255,255);
+	pColorLine1[iStart] = CPixel32(200,200,255,255);
+	pLine00[iStart] = CVec2Dfp32(X - (nToDraw) * Step, Bottom+1);
+	pLine01[iStart] = CVec2Dfp32(X, Bottom+1);
 	++iStart;
 
-	ColorLine0[iStart] = CPixel32(128,128,128,255);
-	ColorLine1[iStart] = CPixel32(128,128,128,255);
-	Line00[iStart] = CPnt::From_fp4(X - (nToDraw) * Step, Bottom - Height50);
-	Line01[iStart] = CPnt::From_fp4(X, Bottom - Height50);
+	pColorLine0[iStart] = CPixel32(128,128,128,255);
+	pColorLine1[iStart] = CPixel32(128,128,128,255);
+	pLine00[iStart] = CVec2Dfp32(X - (nToDraw) * Step, Bottom - Height50);
+	pLine01[iStart] = CVec2Dfp32(X, Bottom - Height50);
 	++iStart;
 
-	ColorLine0[iStart] = CPixel32(200,200,200,255);
-	ColorLine1[iStart] = CPixel32(200,200,200,255);
-	Line00[iStart] = CPnt::From_fp4(X - (nToDraw) * Step, Bottom - Height100);
-	Line01[iStart] = CPnt::From_fp4(X, Bottom - Height100);
+	pColorLine0[iStart] = CPixel32(200,200,200,255);
+	pColorLine1[iStart] = CPixel32(200,200,200,255);
+	pLine00[iStart] = CVec2Dfp32(X - (nToDraw) * Step, Bottom - Height100);
+	pLine01[iStart] = CVec2Dfp32(X, Bottom - Height100);
 	++iStart;
 
-	CClipRect ClipRect = CRct::From_fp4(X - nToDraw * Step - 2, Bottom - Height - 1-2, X, Bottom+2);
-	for (int i = 0; i < nToDraw-1; ++i)
+	CClipRect ClipRect = CRct::From_fp32(X - nToDraw * Step - 2, Bottom - Height - 1-2, X, Bottom+2);
+
+	vec128 vHeight50 = M_VLdScalar(Height50);
+	vec128 vHeight50Rcp = M_VRcp(vHeight50);
+	vec128 vValueScale = M_VLdScalar(ValueScale);
+
+	for (int j = 0; j < _nGraphs; ++j)
 	{
-		--HistPtr;
 
-		fp4 Value = _pValues[HistPtr] * ValueScale;
-		Line00[iStart] = CPnt::From_fp4(X - Step-1, Bottom - Value - 1);
-		Line01[iStart] = CPnt::From_fp4(X-1, Bottom - LastValue - 1);
-		ColorLine0[iStart] = CPixel32::LinearRGBA(_ColorLow, _ColorMid,	Min(256, int((Value / Height50) * 256.0)));
-		ColorLine1[iStart] = CPixel32::LinearRGBA(_ColorLow, _ColorMid,	Min(256, int((LastValue / Height50) * 256.0)));
-		ColorLine0[iStart] = CPixel32::LinearRGBA(ColorLine0[iStart], _ColorHigh, Min(256, int((Max((Value - Height50) / Height50, 0.0f)) * 256.0)));
-		ColorLine1[iStart] = CPixel32::LinearRGBA(ColorLine1[iStart], _ColorHigh, Min(256, int((Max((LastValue - Height50) / Height50, 0.0f)) * 256.0)));
-		ColorLine0[iStart] = CPixel32::LinearRGBA(ColorLine0[iStart], CPixel32(0,0,0,255), 100);
-		ColorLine1[iStart] = CPixel32::LinearRGBA(ColorLine1[iStart], CPixel32(0,0,0,255), 100);
-		++iStart;
+		fp32 LastValue = _pValues[j][FirstPtr] * ValueScale;
+		vec128 vLastValue = M_VMul(M_VLdScalar(_pValues[j][FirstPtr]), vValueScale);
+		int HistPtr = _nValues -1;
 
-		Line00[iStart] = CPnt::From_fp4(X - Step, Bottom - Value);
-		Line01[iStart] = CPnt::From_fp4(X, Bottom - LastValue);
-		ColorLine0[iStart] = CPixel32::LinearRGBA(_ColorLow, _ColorMid,	Min(256, int((Value / Height50) * 256.0)));
-		ColorLine1[iStart] = CPixel32::LinearRGBA(_ColorLow, _ColorMid,	Min(256, int((LastValue / Height50) * 256.0)));
-		ColorLine0[iStart] = CPixel32::LinearRGBA(ColorLine0[iStart], _ColorHigh, Min(256, int((Max((Value - Height50) / Height50, 0.0f)) * 256.0)));
-		ColorLine1[iStart] = CPixel32::LinearRGBA(ColorLine1[iStart], _ColorHigh, Min(256, int((Max((LastValue - Height50) / Height50, 0.0f)) * 256.0)));
+		vec128 vColorLow = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VCnvL_u8_u16(M_VLd32(&_pColorLow[j]))));
+		vec128 vColorMid = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VCnvL_u8_u16(M_VLd32(&_pColorMid[j]))));
+		vec128 vColorHigh = M_VCnv_i32_f32(M_VCnvL_u16_u32(M_VCnvL_u8_u16(M_VLd32(&_pColorHigh[j]))));
 
-		++iStart;
+		const CPixel32 &ColorLow = _pColorLow[j];
+		const CPixel32 &ColorMid = _pColorMid[j];
+		const CPixel32 &ColorHigh = _pColorHigh[j];
+		X = StartXf;
 
-		LastValue = Value;
 
-		X -= Step;
+		vec128 vZero = M_VZero();
+		vec128 vOne = M_VOne();
+		vec128 vFade = M_VScalar(0.4f);
+		vec128 vFadeCol = M_VConst(0.0f, 0.0f, 0.0f, 255.0f);
+
+		vec128 ColLast = M_VLrp(vColorLow, vColorMid, M_VMin(M_VMul(vLastValue, vHeight50Rcp), vOne));
+		ColLast = M_VLrp(ColLast, vColorHigh, M_VMin(vOne, M_VMax(M_VMul(M_VSub(vLastValue, vHeight50), vHeight50Rcp), vZero)));
+
+		vec128 tmp0 = M_VCnv_f32_i32(ColLast);
+		vec128 tmp1 = M_VCnvS_i32_i16(tmp0, tmp0);
+		vec128 ColLast_u8 = M_VCnvS_i16_u8(tmp1, tmp1);
+
+		tmp0 = M_Vfp32toi32(M_VLrp(ColLast, vFadeCol, vFade));
+		tmp1 = M_VCnvS_i32_i16(tmp0, tmp0);
+		vec128 ColLastf_u8 = M_VCnvS_i16_u8(tmp1, tmp1);
+
+		for (int i = 0; i < nToDraw-1; ++i)
+		{
+			--HistPtr;
+
+			fp32 Value = _pValues[j][HistPtr] * ValueScale;
+			vec128 vValue = M_VMul(M_VLdScalar(_pValues[j][HistPtr]), vValueScale);
+//			pLine00[iStart] = CVec2Dfp32(X - Step-1.0f, Bottom - Value - 1.0f);
+//			pLine01[iStart] = CVec2Dfp32(X-1.0f, Bottom - LastValue - 1.0f);
+			pLine00[iStart][0] = X - Step-1.0f;
+			pLine00[iStart][1] = Bottom - Value - 1.0f;
+			pLine01[iStart][0] = X-1.0f;
+			pLine01[iStart][1] = Bottom - LastValue - 1.0f;
+
+/*	pLine00[iStart][0] = Random * 700.0f - 300.0f + ClipRect.clip.p0.x;
+	pLine00[iStart][1] = Random * 200.0f - 50.0f + ClipRect.clip.p0.y;
+	pLine01[iStart][0] = Random * 700.0f - 300.0f + ClipRect.clip.p0.x;
+	pLine01[iStart][1] = Random * 200.0f - 50.0f + ClipRect.clip.p0.y;
+*/
+			vec128 Col0 = M_VLrp(vColorLow, vColorMid, M_VMin(M_VMul(vValue, vHeight50Rcp), vOne));
+			Col0 = M_VLrp(Col0, vColorHigh, M_VMin(vOne, M_VMax(M_VMul(M_VSub(vValue, vHeight50), vHeight50Rcp), vZero)));
+
+			vec128 tmp0 = M_VCnv_f32_i32(Col0);
+			vec128 tmp1 = M_VCnvS_i32_i16(tmp0, tmp0);
+			vec128 Col0_u8 = M_VCnvS_i16_u8(tmp1, tmp1);
+			tmp0 = M_Vfp32toi32(M_VLrp(Col0, vFadeCol, vFade));
+			tmp1 = M_VCnvS_i32_i16(tmp0, tmp0);
+			vec128 Col0f_u8 = M_VCnvS_i16_u8(tmp1, tmp1);
+
+			M_VStAny32(Col0f_u8, &pColorLine0[iStart]);
+			M_VStAny32(ColLastf_u8, &pColorLine1[iStart]);
+
+/*			pColorLine0[iStart] = CPixel32::LinearRGBA(ColorLow, ColorMid,	Min(256, int((Value / Height50) * 256.0)));
+			pColorLine1[iStart] = CPixel32::LinearRGBA(ColorLow, ColorMid,	Min(256, int((LastValue / Height50) * 256.0)));
+			pColorLine0[iStart] = CPixel32::LinearRGBA(pColorLine0[iStart], ColorHigh, Min(256, int((Max((Value - Height50) / Height50, 0.0f)) * 256.0)));
+			pColorLine1[iStart] = CPixel32::LinearRGBA(pColorLine1[iStart], ColorHigh, Min(256, int((Max((LastValue - Height50) / Height50, 0.0f)) * 256.0)));
+			pColorLine0[iStart] = CPixel32::LinearRGBA(pColorLine0[iStart], CPixel32(0,0,0,255), 100);
+			pColorLine1[iStart] = CPixel32::LinearRGBA(pColorLine1[iStart], CPixel32(0,0,0,255), 100);*/
+			++iStart;
+
+//			pLine00[iStart] = CVec2Dfp32(X - Step, Bottom - Value);
+//			pLine01[iStart] = CVec2Dfp32(X, Bottom - LastValue);
+			pLine00[iStart][0] = X - Step;
+			pLine00[iStart][1] = Bottom - Value;
+			pLine01[iStart][0] = X;
+			pLine01[iStart][1] = Bottom - LastValue;
+/*	pLine00[iStart][0] = Random * 700.0f - 300.0f + ClipRect.clip.p0.x;
+	pLine00[iStart][1] = Random * 200.0f - 50.0f + ClipRect.clip.p0.y;
+	pLine01[iStart][0] = Random * 700.0f - 300.0f + ClipRect.clip.p0.x;
+	pLine01[iStart][1] = Random * 200.0f - 50.0f + ClipRect.clip.p0.y;
+*/
+			M_VStAny32(Col0_u8, &pColorLine0[iStart]);
+			M_VStAny32(ColLast_u8, &pColorLine1[iStart]);
+/*			pColorLine0[iStart] = CPixel32::LinearRGBA(ColorLow, ColorMid,	Min(256, int((Value / Height50) * 256.0)));
+			pColorLine1[iStart] = CPixel32::LinearRGBA(ColorLow, ColorMid,	Min(256, int((LastValue / Height50) * 256.0)));
+			pColorLine0[iStart] = CPixel32::LinearRGBA(pColorLine0[iStart], ColorHigh, Min(256, int((Max((Value - Height50) / Height50, 0.0f)) * 256.0)));
+			pColorLine1[iStart] = CPixel32::LinearRGBA(pColorLine1[iStart], ColorHigh, Min(256, int((Max((LastValue - Height50) / Height50, 0.0f)) * 256.0)));
+*/
+			++iStart;
+
+			LastValue = Value;
+			ColLast_u8 = Col0_u8;
+			ColLastf_u8 = Col0f_u8;
+
+			X -= Step;
+		}
 	}
 
 //	Rects(_Clip, Rects, ColorRect, iRectStart);
 	this->Rects(_Clip, Rects, ColorRect, iRectStart);
-	Lines(ClipRect, Line00, Line01, ColorLine0, ColorLine1, iStart);
+	Lines(ClipRect, pLine00, pLine01, pColorLine0, pColorLine1, iStart);
 
 	Text(_Clip, _pF, int(X + 5), int(Bottom - HeightFull) + 5, _pName, CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
-	Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height), FormatFloat(_OriginalHeight / TargetScale).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
-	Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height)+20, FormatFloat(AvgValue).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
-	Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height)+40, FormatFloat(CurrentValue).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
+
+	if (_nGraphs == 1)
+	{
+		fp32 CurrentValue = _pValues[0][FirstPtr];
+		Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height), FormatFloat(_OriginalHeight / TargetScale).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
+		Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height)+20, FormatFloat(AvgValueMax).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
+		Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height)+40, FormatFloat(CurrentValue).Str(), CPixel32(255,255,255,255), _pF->GetOriginalSize() * 2.0);
+	}
+	else
+	{
+		for (int j = 0; j < _nGraphs; ++j)
+		{
+			Text(_Clip, _pF, int(StartX + 10), int(Bottom - Height) + j * 20, FormatFloat(_pAvgValue[j]).Str(), _pColorHigh[j], _pF->GetOriginalSize() * 2.0);
+		}
+	}
 }
 
-void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const char* _pStr, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const char* _pStr, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Text, MAUTOSTRIP_VOID);
 	_x0 += _Clip.ofs.x;
 	_y0 += _Clip.ofs.y;
 
-	CVec3Dfp4 v(_x0, _y0, 0);
+	CVec3Dfp32 v(_x0, _y0, 0);
 	v *= m_CurTransform;
 
-	CVec3Dfp4 xv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
-	CVec3Dfp4 yv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
+	CVec3Dfp32 xv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
+	CVec3Dfp32 yv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
 
 	if (m_pVBM)
 	{
@@ -1242,8 +1323,8 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 			*pVB->m_pAttrib	= *GetLastSubmitted();
 
 			if (_pFont->Write(m_pVBM, pVB, v, xv, yv, _pStr, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-				CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-				CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
+				CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+				CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
 			{
 				m_pVBM->AddVB(pVB);
 			}
@@ -1252,24 +1333,24 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 	else
 	{
 		_pFont->Write(m_pCurRC, v, xv, yv, _pStr, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-			CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-			CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
+			CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+			CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
 	}
 }
 
 
-void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const wchar* _pStr, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const wchar* _pStr, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_2, MAUTOSTRIP_VOID);
 	_x0 += _Clip.ofs.x;
 	_y0 += _Clip.ofs.y;
 
-	CVec3Dfp4 v(_x0, _y0, 0);
+	CVec3Dfp32 v(_x0, _y0, 0);
 	v *= m_CurTransform;
 
-	CVec3Dfp4 xv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
-	CVec3Dfp4 yv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
-//	fp4 screen_aspect = GetRC()->GetDC()->GetScreenAspect();
+	CVec3Dfp32 xv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
+	CVec3Dfp32 yv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
+//	fp32 screen_aspect = GetRC()->GetDC()->GetScreenAspect();
 //	xv.k[0] = xv.k[0] / screen_aspect;
 
 	if (m_pVBM)
@@ -1282,8 +1363,8 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 			*pVB->m_pAttrib	= *GetLastSubmitted();
 
 			if (_pFont->Write(m_pVBM, pVB, v, xv, yv, _pStr, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-				CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-				CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
+				CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+				CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
 			{
 				m_pVBM->AddVB(pVB);
 			}
@@ -1292,23 +1373,23 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 	else
 	{
 		_pFont->Write(m_pCurRC, v, xv, yv, _pStr, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-			CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-			CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
+			CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+			CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
 	}
 }
 
 
-void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const CStr& _Str, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const CStr& _Str, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_3, MAUTOSTRIP_VOID);
 	_x0 += _Clip.ofs.x;
 	_y0 += _Clip.ofs.y;
 
-	CVec3Dfp4 v(_x0, _y0, 0);
+	CVec3Dfp32 v(_x0, _y0, 0);
 	v *= m_CurTransform;
 
-	CVec3Dfp4 xv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
-	CVec3Dfp4 yv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
+	CVec3Dfp32 xv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
+	CVec3Dfp32 yv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
 
 	if (m_pVBM)
 	{
@@ -1320,8 +1401,8 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 			*pVB->m_pAttrib	= *GetLastSubmitted();
 
 			if (_pFont->Write(m_pVBM, pVB, v, xv, yv, _Str, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-				CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-				CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
+				CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+				CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0)))
 			{
 				m_pVBM->AddVB(pVB);
 			}
@@ -1330,24 +1411,24 @@ void CRC_Util2D::Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0
 	else
 	{
 		_pFont->Write(m_pCurRC, v, xv, yv, _Str, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-			CVec2Dfp4(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
-			CVec2Dfp4(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
+			CVec2Dfp32(_Clip.clip.p0.x - _x0, _Clip.clip.p0.y - _y0),
+			CVec2Dfp32(_Clip.clip.p1.x - _x0, _Clip.clip.p1.y - _y0));
 	}
 }
 
 // PC PORT: Print using float position
-void CRC_Util2D::TextFloat(const CClipRect& _Clip, CRC_Font* _pFont, fp4 _x0, fp4 _y0, const CStr& _Str, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::TextFloat(const CClipRect& _Clip, CRC_Font* _pFont, fp32 _x0, fp32 _y0, const CStr& _Str, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_TextFloat, MAUTOSTRIP_VOID);
 
-	const fp4 x0 = (fp4)_x0 + _Clip.ofs.x;
-	const fp4 y0 = (fp4)_y0 + _Clip.ofs.y;
+	const fp32 x0 = (fp32)_x0 + _Clip.ofs.x;
+	const fp32 y0 = (fp32)_y0 + _Clip.ofs.y;
 
-	CVec3Dfp4 v(x0, y0, 0.0f);
+	CVec3Dfp32 v(x0, y0, 0.0f);
 	v *= m_CurTransform;
 
-	CVec3Dfp4 xv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
-	CVec3Dfp4 yv = CVec3Dfp4::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
+	CVec3Dfp32 xv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 0) * m_CurFontScale[0];
+	CVec3Dfp32 yv = CVec3Dfp32::GetMatrixRow(m_CurTransform, 1) * m_CurFontScale[1];
 
 	if (m_pVBM)
 	{
@@ -1359,8 +1440,8 @@ void CRC_Util2D::TextFloat(const CClipRect& _Clip, CRC_Font* _pFont, fp4 _x0, fp
 			*pVB->m_pAttrib	= *GetLastSubmitted();
 
 			if (_pFont->Write(m_pVBM, pVB, v, xv, yv, _Str, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-				CVec2Dfp4((fp4)_Clip.clip.p0.x - x0, (fp4)_Clip.clip.p0.y - y0),
-				CVec2Dfp4((fp4)_Clip.clip.p1.x - x0, (fp4)_Clip.clip.p1.y - y0)))
+				CVec2Dfp32((fp32)_Clip.clip.p0.x - x0, (fp32)_Clip.clip.p0.y - y0),
+				CVec2Dfp32((fp32)_Clip.clip.p1.x - x0, (fp32)_Clip.clip.p1.y - y0)))
 			{
 				m_pVBM->AddVB(pVB);
 			}
@@ -1369,36 +1450,40 @@ void CRC_Util2D::TextFloat(const CClipRect& _Clip, CRC_Font* _pFont, fp4 _x0, fp
 	else
 	{
 		_pFont->Write(m_pCurRC, v, xv, yv, _Str, (_Size < 0) ? _pFont->GetOriginalSize() : _Size, _Color, 
-			CVec2Dfp4((fp4)_Clip.clip.p0.x - x0, (fp4)_Clip.clip.p0.y - y0),
-			CVec2Dfp4((fp4)_Clip.clip.p1.x - x0, (fp4)_Clip.clip.p1.y - y0));
+			CVec2Dfp32((fp32)_Clip.clip.p0.x - x0, (fp32)_Clip.clip.p0.y - y0),
+			CVec2Dfp32((fp32)_Clip.clip.p1.x - x0, (fp32)_Clip.clip.p1.y - y0));
 	}
 }
 		
-void CRC_Util2D::Text_Draw(const CClipRect& _Clip, CRC_Font* _pF, wchar* _pStr, int _x, int _y, int _Style, int ColM, int ColH, int ColD)
+void CRC_Util2D::Text_Draw(const CClipRect& _Clip, CRC_Font* _pF, wchar* _pStr, int _x, int _y, int _Style, int ColM, int ColH, int ColD, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_Draw, MAUTOSTRIP_VOID);
-
-//	int bShw = _Style & WSTYLE_TEXT_SHADOW;
-//	int bHL = _Style & WSTYLE_TEXT_HIGHLIGHT;
-//	int bCut = _Style & WSTYLE_TEXT_CUTOUT;
+	int bShw = _Style & WSTYLE_TEXT_SHADOW;
+	int bHL = _Style & WSTYLE_TEXT_HIGHLIGHT;
+	int bCut = _Style & WSTYLE_TEXT_CUTOUT;
 	
+	if(_FontScale == 1.0f) // Text() takes -1 as default....
+		_FontScale = -1.0f;
+	else
+		_FontScale = _pF->GetOriginalSize() * _FontScale;
+
 	int xhl = _x;
 	int yhl = _y;
 	int xsh = 2+_x;
 	int ysh = 2+_y;
-//	if (bCut) { Swap(xhl, xsh); Swap(yhl, ysh); }
+	if (bCut) { Swap(xhl, xsh); Swap(yhl, ysh); }
 	
 	int x = _x;
 	int y = _y;
-//	if (bShw || bHL) { x += 1; y += 1; }
+	if (bShw || bHL) { x += 1; y += 1; }
 	
-//	if (bHL) Text(_Clip, _pF, xhl, yhl, _pStr, ColH);
-//	if (bShw) Text(_Clip, _pF, xsh, ysh, _pStr, ColD);
-	Text(_Clip, _pF, x, y, _pStr, ColM);
+	if (bHL) Text(_Clip, _pF, xhl, yhl, _pStr, ColH, _FontScale);
+	if (bShw) Text(_Clip, _pF, xsh, ysh, _pStr, ColD, _FontScale);
+	Text(_Clip, _pF, x, y, _pStr, ColM, _FontScale);
 }
 
 
-int CRC_Util2D::Text_WordWrap(CRC_Font* _pF, int _Width, wchar* _pStr, int _Len, wchar** _ppLines, int _MaxLines)
+int CRC_Util2D::Text_WordWrap(CRC_Font* _pF, int _Width, wchar* _pStr, int _Len, wchar** _ppLines, int _MaxLines, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_WordWrap, 0);
 	int last = 0;
@@ -1423,9 +1508,9 @@ int CRC_Util2D::Text_WordWrap(CRC_Font* _pF, int _Width, wchar* _pStr, int _Len,
 		_ppLines[nLines][n + CtrlCodesBufLen] = 0;
 		
 		//LogFile(CStrF("Ick       %d, %d, %d", last, _Len, n));
-		int nFit = TextFit(_pF, &_ppLines[nLines][0], _Width, true);
+		int nFit = TextFit(_pF, &_ppLines[nLines][0], _Width, true, _FontScale);
 		//LogFile(CStrF("Bla   %d, %d, %d, %d", nFit, last, _Len, n));
-		if (!nFit) nFit = TextFit(_pF, &_ppLines[nLines][0], _Width, false);
+		if (!nFit) nFit = TextFit(_pF, &_ppLines[nLines][0], _Width, false, _FontScale);
 		if (!nFit) return nLines;
 		_ppLines[nLines][nFit] = 0;
 		
@@ -1450,16 +1535,21 @@ int CRC_Util2D::Text_WordWrap(CRC_Font* _pF, int _Width, wchar* _pStr, int _Len,
 }
 
 
-int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const CStr& _Text, int& _x, int& _y, int _Style, int _ColM, int _ColH, int _ColD, int _Width, int _Height, fp4 _PercentVis)
+int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const CStr& _Text, int& _x, int& _y, int _Style, int _ColM, int _ColH, int _ColD, int _Width, int _Height, fp32 _PercentVis, int _ExtraHeight, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_DrawFormatted, 0);
-/*
 	wchar Text[1024];
 	//wchar PartialText[1024];
 	Localize_Str(_Text, Text, 1023);
 	_PercentVis = Min(1.0f, Max(0.f, _PercentVis));
 	
 	int visIndex = 0;
+/*	if(Text[0] == 167) // Remove the size stuff
+	{
+		visIndex = (CStrBase::StrLen(Text) - 4) * _PercentVis;
+		visIndex += 4; 
+	}
+	else*/
 	{
 		visIndex = int(CStrBase::StrLen(Text) * _PercentVis);
 	}
@@ -1474,7 +1564,7 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	int bWW = _Style & WSTYLE_TEXT_WORDWRAP;
 	int nLines = 0;
 	if(bWW)
-		nLines += Text_WordWrap(_pF, _Width, (wchar*) Text, Len, &lpLines[nLines], 15-nLines);
+		nLines += Text_WordWrap(_pF, _Width, (wchar*) Text, Len, &lpLines[nLines], 15-nLines, _FontScale);
 	else if (_Text.Find("|") >= 0)
 	{
 		const char* pStr = _Text;
@@ -1511,7 +1601,7 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	int y = 0;
 	if (_Style & WSTYLE_TEXT_CENTERY)
 	{
-		th = TextHeight(_pF, (wchar*)Text);
+		th = TextHeight(_pF, (wchar*)Text, _FontScale);
 		int Add = (_Height - th*nLines) >> 1;
 		y += Add;
 	}
@@ -1523,16 +1613,16 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	{
 		int x = 0;
 		if (_Style & WSTYLE_TEXT_CENTER)
-			x += (_Width - TextWidth(_pF, &Lines[ln][0])) >> 1;
+			x += (_Width - TextWidth(_pF, &Lines[ln][0],  _FontScale)) >> 1;
 
 		nVisibleCharsOnLine = CStrBase::StrLen(lpLines[ln]);
 		
 		if(nVisibleChars + nVisibleCharsOnLine > visIndex)
 			Lines[ln][visIndex - nVisibleChars] = NULL;
 
-		Text_Draw(_Clip, _pF, &Lines[ln][0], _x + x, _y + y, _Style, _ColM, _ColH, _ColD);
-		th = TextHeight(_pF, &Lines[ln][0]);
-		y += th;
+		Text_Draw(_Clip, _pF, &Lines[ln][0], _x + x, _y + y, _Style, _ColM, _ColH, _ColD, _FontScale);
+		/*if (nLines > 1 && th < 0)*/ th = TextHeight(_pF, &Lines[ln][0], _FontScale);
+		y += th + _ExtraHeight;
 
 		nVisibleChars += nVisibleCharsOnLine;
 		if(nVisibleChars > visIndex)
@@ -1546,18 +1636,14 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	}
 	
 	_y += y;
-	_x += TextWidth(_pF, lpLines[ln-1]);
+	_x += TextWidth(_pF, lpLines[ln-1], _FontScale);
 	
 	return nLines;
-*/
-	return 0;
 }
 
-int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const CStr& _Text, int _x, int _y, int _Style, int _ColM, int _ColH, int _ColD, int _Width, int _Height, bool _bShadow)
+int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const CStr& _Text, int _x, int _y, int _Style, int _ColM, int _ColH, int _ColD, int _Width, int _Height, bool _bShadow, int _ExtraHeight, fp32 _FontScale)
 {
 	MAUTOSTRIP(CRC_Util2D_Text_DrawFormatted_2, 0);
-	return 0;
-/*
 	wchar Text[1024];
 	Localize_Str(_Text, Text, 1023);
 	int Len = CStrBase::StrLen(Text);
@@ -1570,7 +1656,7 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	int bWW = _Style & WSTYLE_TEXT_WORDWRAP;
 	int nLines = 0;
 	if(bWW)
-		nLines += Text_WordWrap(_pF, _Width, (wchar*) Text, Len, &lpLines[nLines], 31-nLines);
+		nLines += Text_WordWrap(_pF, _Width, (wchar*) Text, Len, &lpLines[nLines], 31-nLines, _FontScale);
 	else if (_Text.Find("|") >= 0)
 	{
 		const char* pStr = _Text;
@@ -1612,7 +1698,7 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 	int y = 0;
 	if (_Style & WSTYLE_TEXT_CENTERY)
 	{
-		th = TextHeight(_pF, (wchar*)Text);
+		th = TextHeight(_pF, (wchar*)Text, _FontScale);
 		int Add = (_Height - th*nLines) >> 1;
 		y += Add;
 	}
@@ -1625,16 +1711,16 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 			if (_Style & WSTYLE_TEXT_CENTER)
 				x += (_Width - TextWidth(_pF, &Lines[ln][0])) >> 1;
 
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)-1, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)+0, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)+1, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+0, (_y + y)-1, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+0, (_y + y)+1, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)-1, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)+0, _Style, _ColM, _ColH, _ColD);
-			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)+1, _Style, _ColM, _ColH, _ColD);
-			th = TextHeight(_pF, &Lines[ln][0]);
-			y += th;
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)-1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)+0, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)-1, (_y + y)+1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+0, (_y + y)-1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+0, (_y + y)+1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)-1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)+0, _Style, _ColM, _ColH, _ColD, _FontScale);
+			Text_Draw(_Clip, _pF, &Lines[ln][0], (_x + x)+1, (_y + y)+1, _Style, _ColM, _ColH, _ColD, _FontScale);
+			/*if (nLines > 1 && th < 0)*/ th = TextHeight(_pF, &Lines[ln][0], _FontScale);
+			y += th + _ExtraHeight;
 		}
 	}
 	else
@@ -1643,20 +1729,19 @@ int CRC_Util2D::Text_DrawFormatted(const CClipRect& _Clip, CRC_Font* _pF, const 
 		{
 			int x = 0;
 			if (_Style & WSTYLE_TEXT_CENTER)
-				x += (_Width - TextWidth(_pF, &Lines[ln][0])) >> 1;
+				x += (_Width - TextWidth(_pF, &Lines[ln][0], _FontScale)) >> 1;
 
-			Text_Draw(_Clip, _pF, &Lines[ln][0], _x + x, _y + y, _Style, _ColM, _ColH, _ColD);
-			th = TextHeight(_pF, &Lines[ln][0]);
-			y += th;
+			Text_Draw(_Clip, _pF, &Lines[ln][0], _x + x, _y + y, _Style, _ColM, _ColH, _ColD, _FontScale);
+			/*if (nLines > 1 && th < 0)*/ th = TextHeight(_pF, &Lines[ln][0], _FontScale);
+			y += th + _ExtraHeight;
 		}
 	}
 	
 	return nLines;
-*/
 }
 
 
-void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const char* _pStr, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const char* _pStr, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Localize_Text, MAUTOSTRIP_VOID);
 	wchar Buffer[1024];
@@ -1664,7 +1749,7 @@ void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0
 	Text(_Clip, _pFont, _x0, _y0, Buffer, _Color, _Size);
 }
 
-void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const wchar* _pStr, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const wchar* _pStr, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Localize_Text_2, MAUTOSTRIP_VOID);
 	wchar Buffer[1024];
@@ -1672,7 +1757,7 @@ void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0
 	Text(_Clip, _pFont, _x0, _y0, Buffer, _Color, _Size);
 }
 
-void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const CStr& _Str, const CPixel32& _Color, fp4 _Size)
+void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0, int _y0, const CStr& _Str, const CPixel32& _Color, fp32 _Size)
 {
 	MAUTOSTRIP(CRC_Util2D_Localize_Text_3, MAUTOSTRIP_VOID);
 	wchar Buffer[1024];
@@ -1680,48 +1765,10 @@ void CRC_Util2D::Localize_Text(const CClipRect& _Clip, CRC_Font* _pFont, int _x0
 	Text(_Clip, _pFont, _x0, _y0, Buffer, _Color, _Size);
 }
 
-void CRC_Util2D::View_Init(int _iView, CXR_Engine* _pEngine, CRenderContext* _pRender, CXR_ViewClipInterface* _pViewClip,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags)
-{
-}
 
-void CRC_Util2D::View_Init(int _iView, CXR_Engine* _pEngine, CRenderContext* _pRender, CVec3Dfp4* _pVPortal, int _nVPortal,
-		const CXR_AnimState* _pAnimState, const CMat43fp4& _WMat, const CMat43fp4& _VMat, int _Flags)
-{
-}
+#if 0
 
-void CRC_Util2D::View_SetCurrent(int _iView, CXR_SceneGraphInstance* _pSceneGraphInstance)
-{
-	MAUTOSTRIP(CRC_Util2D_View_SetCurrent, MAUTOSTRIP_VOID);
-}
-
-bool CRC_Util2D::View_GetClip_Sphere(CVec3Dfp4 _v0, fp4 _Radius, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo)
-{
-	MAUTOSTRIP(CRC_Util2D_View_GetClip_Sphere, false);
-	if(_pRenderInfo)
-	{
-		_pRenderInfo->Clear(_pRenderInfo->m_pCurrentEngine);
-		_pRenderInfo->m_BasePriority_Opaque = m_VBPriority += m_VBPriorityAdd;
-		_pRenderInfo->m_BasePriority_Transparent = _pRenderInfo->m_BasePriority_Opaque;
-	}
-	return true;
-}
-
-bool CRC_Util2D::View_GetClip_Box(CVec3Dfp4 _min, CVec3Dfp4 _max, int _MediumFlags, int _ObjectMask, CRC_ClipVolume* _pClipVolume, CXR_RenderInfo* _pRenderInfo)
-{
-	MAUTOSTRIP(CRC_Util2D_View_GetClip_Box, false);
-	if(_pRenderInfo)
-	{
-		_pRenderInfo->Clear(_pRenderInfo->m_pCurrentEngine);
-		_pRenderInfo->m_BasePriority_Opaque = m_VBPriority += m_VBPriorityAdd;
-		_pRenderInfo->m_BasePriority_Transparent = _pRenderInfo->m_BasePriority_Opaque;
-	}
-	return true;
-}
-
-
-
-void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct& _Rect, class CXR_Model *_pModel, class CXR_AnimState *_pAnimState, CMat43fp4* _Mat)
+void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct& _Rect, class CXR_Model *_pModel, class CXR_AnimState *_pAnimState, CMat4Dfp32* _Mat)
 {
 	MAUTOSTRIP(CRC_Util2D_Model, MAUTOSTRIP_VOID);
 //	int x0 = 0;
@@ -1748,18 +1795,18 @@ void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct&
 
 //	pRC->Attrib_Pop();
 
-	CBox3Dfp4 Bound;
+	CBox3Dfp32 Bound;
 	_pModel->GetBound_Box(Bound, _pAnimState);
 
-	CVec3Dfp4 Size;
+	CVec3Dfp32 Size;
 	Bound.m_Max.Sub(Bound.m_Min, Size);
-	fp4 SizeX = Length2(Size[0], Size[1]);
-	fp4 SizeY = Size[2];
+	fp32 SizeX = Length2(Size[0], Size[1]);
+	fp32 SizeY = Size[2];
 
 	//pRC->Viewport_Get()->GetFOV()
-	const fp4 FOV = 20;
+	const fp32 FOV = 20;
 
-	CVec2Dfp4 Scale = GetCoordinateScale();
+	CVec2Dfp32 Scale = GetCoordinateScale();
 	CRct Rect = _Rect;
 	CClipRect Clip = _Clip;
 	Rect += Clip.ofs;
@@ -1788,11 +1835,11 @@ void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct&
 		View.SetAspectRatio(pSys->m_spDisplay->GetPixelAspect());
 	}
 
-	fp4 Dist = SizeX * View.GetScale() * 0.33f;
-	fp4 DistY = SizeY * View.GetScale() * 0.33f;
+	fp32 Dist = SizeX * View.GetScale() * 0.33f;
+	fp32 DistY = SizeY * View.GetScale() * 0.33f;
 	
-	fp4 w = Rect.GetWidth();
-	fp4 h = Rect.GetHeight();
+	fp32 w = Rect.GetWidth();
+	fp32 h = Rect.GetHeight();
 
 	if (w > h)
 	{
@@ -1805,9 +1852,9 @@ void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct&
 			Dist = DistY / h * w;
 	}
 
-//	fp4 Dist = Max(SizeX / m_Pos.GetWidth(), SizeY / m_Pos.GetHeight());
+//	fp32 Dist = Max(SizeX / m_Pos.GetWidth(), SizeY / m_Pos.GetHeight());
 
-	CMat43fp4 Camera;
+	CMat4Dfp32 Camera;
 	Camera.Unit();
 	Camera.RotX_x_M(0.25f);
 	Camera.RotY_x_M(-0.25f);
@@ -1816,21 +1863,21 @@ void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct&
 	Camera.k[3][2] = 0;
 
 	
-	CMat43fp4 Mat;
+	CMat4Dfp32 Mat;
 	if(_Mat != NULL)
 		Mat = *_Mat;
 	else
 		Mat.Unit();
 	Mat.RotZ_x_M(_pAnimState->m_AnimTime1.GetTimeModulusScaled(-0.1f, _PI2));
 
-	CVec3Dfp4 Center;
+	CVec3Dfp32 Center;
 	Bound.GetCenter(Center);
 	Center.MultiplyMatrix3x3(Mat);
-	CVec3Dfp4::GetMatrixRow(Mat, 3) -= Center;
+	CVec3Dfp32::GetMatrixRow(Mat, 3) -= Center;
 
 	if (m_pVBM->Viewport_Push(&View))
 	{
-		CMat43fp4 VMat;
+		CMat4Dfp32 VMat;
 		Camera.InverseOrthogonal(VMat);
 
 		_pModel->OnRender(_pEngine, pRC, m_pVBM, this, m_spWorldLightState, _pAnimState, Mat, VMat, CXR_MODEL_ONRENDERFLAGS_MAXLOD);
@@ -1840,9 +1887,10 @@ void CRC_Util2D::Model(CXR_Engine* _pEngine, const CClipRect& _Clip, const CRct&
 }
 
 
-void CRC_Util2D::Model(const CClipRect& _Clip, const CRct& _Rect, class CXR_Model *_pModel, class CXR_AnimState *_pAnimState, CMat43fp4* _Mat)
+void CRC_Util2D::Model(const CClipRect& _Clip, const CRct& _Rect, class CXR_Model *_pModel, class CXR_AnimState *_pAnimState, CMat4Dfp32* _Mat)
 {
 	MAUTOSTRIP(CRC_Util2D_Model_2, MAUTOSTRIP_VOID);
+	Model(NULL, _Clip, _Rect, _pModel, _pAnimState, _Mat);
 }
 
 
@@ -1850,14 +1898,152 @@ void CRC_Util2D::Model(const CClipRect& _Clip, const CRct& _Rect, class CXR_Mode
 void CRC_Util2D::Model(CXR_Engine* _pEngine, class CWorld_Client* _pWClient, const CClipRect& _Clip, const CRct& _Rect, CXR_Anim_Base* _pAnim, class CXR_Model* _pModel, class CXR_AnimState *_pAnimState)
 {	
 	MAUTOSTRIP(CRC_Util2D_Model_3, MAUTOSTRIP_VOID);
+	if (_pModel == NULL)
+		return;
+	
+	CXR_Skeleton* pSkeleton = (CXR_Skeleton*)_pModel->GetParam(MODEL_PARAM_SKELETON);
+	
+	// Return success, for we have a model, but it has no skeleton, and is thus not skeleton animated.
+	// Though the AnimState is properly default initialised for a regular non-skeleton animated model.
+	if (pSkeleton == NULL)
+		return ; 
+
+	CMat4Dfp32 Mat;
+	Mat.Unit();
+
+	CBox3Dfp32 Box; 
+	_pModel->GetBound_Box(Box);
+	
+	CVec3Dfp32 middle;
+	Box.GetCenter(middle); 
+	middle[0] = -middle[0];
+	middle[1] = -middle[1];
+	middle[2] = -middle[2];
+	middle.AddMatrixRow(Mat, 3); 
+
+	if(_pAnim)
+	{
+		// Eval animation
+		CXR_AnimLayer Layer;
+		Layer.Create2(_pAnim, _pAnimState->m_Anim0, _pAnimState->m_AnimTime1, 1.0f, 1.0f, 0);
+		pSkeleton->EvalAnim(&Layer, 1, _pAnimState->m_pSkeletonInst, Mat);
+	}
+
+	// =====================================================================================
+
+//	int x0 = 0;
+//	int y0 = 0;
+//	int x1 = _Rect.GetWidth();
+//	int y1 = _Rect.GetHeight();
+	
+	CRenderContext* pRC = GetRC();
+	
+//	pRC->Attrib_Push();
+	
+	GetAttrib()->Attrib_RasterMode(CRC_RASTERMODE_ALPHABLEND);
+	GetAttrib()->Attrib_ZCompare(CRC_COMPARE_ALWAYS);
+	GetAttrib()->Attrib_Enable(CRC_FLAGS_ZWRITE | CRC_FLAGS_ZCOMPARE);
+	//		pRC->Attrib_Disable(CRC_FLAGS_ZCOMPARE);
+	//		Rect(_Clip, CRct(x0,y0,x1,y1), 0x00000000);
+	//		Rect(_Clip, _Rect, 0x00000000);
+	SetTexture(0);
+	Rect(_Clip, _Rect, 0x00000000);
+	
+//	pRC->Attrib_Pop();
+	
+	CBox3Dfp32 Bound;
+	_pModel->GetBound_Box(Bound, _pAnimState);
+	
+	CVec3Dfp32 Size;
+	Bound.m_Max.Sub(Bound.m_Min, Size);
+	fp32 SizeX = Length2(Size[0], Size[1]);
+	fp32 SizeY = Size[2];
+
+	//pRC->Viewport_Get()->GetFOV()
+	const fp32 FOV = 20;
+
+	CVec2Dfp32 Scale = GetCoordinateScale();
+	CClipRect Clip = _Clip;
+	CRct Rect = _Rect;
+	Rect += Clip.ofs;
+	Rect.p0.x = int(Rect.p0.x * Scale[0]);
+	Rect.p0.y = int(Rect.p0.y * Scale[1]);
+	Rect.p1.x = int(Rect.p1.x * Scale[0]);
+	Rect.p1.y = int(Rect.p1.y * Scale[1]);
+	Clip.clip.p0.x = int(Clip.clip.p0.x * Scale[0]);
+	Clip.clip.p0.y = int(Clip.clip.p0.y * Scale[1]);
+	Clip.clip.p1.x = int(Clip.clip.p1.x * Scale[0]);
+	Clip.clip.p1.y = int(Clip.clip.p1.y * Scale[1]);
+	Clip.ofs.x = int(Clip.ofs.x * Scale[0]);
+	Clip.ofs.y = int(Clip.ofs.y * Scale[1]);
+
+	Clip += m_CurVP.GetViewClip();
+	Rect += m_CurVP.GetViewClip().ofs;
+
+	CRC_Viewport View;
+	View.SetView(Clip, Rect);
+	View.SetFOV(FOV);
+	
+	MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
+	if(pSys && pSys->m_spDisplay)
+	{
+		View.SetAspectRatio(pSys->m_spDisplay->GetPixelAspect());
+	}
+
+	fp32 Dist = SizeX * View.GetScale() * 0.33f;
+	fp32 DistY = SizeY * View.GetScale() * 0.33f;
+	
+	fp32 w = Rect.GetWidth();
+	fp32 h = Rect.GetHeight();
+
+	if (w > h)
+	{
+		if (Dist / w > DistY / h)
+			DistY = Dist / w * h;
+	}
+	else
+	{
+		if (Dist / w < DistY / h)
+			Dist = DistY / h * w;
+	}
+
+//	fp32 Dist = Max(SizeX / m_Pos.GetWidth(), SizeY / m_Pos.GetHeight());
+
+	CMat4Dfp32 Camera;
+	Camera.Unit();
+	Camera.RotX_x_M(0.25f);
+	Camera.RotY_x_M(-0.25f);
+	Camera.RotZ_x_M(0.5f);
+	Camera.k[3][0] = Max(Dist, DistY) * 1.0f;
+	Camera.k[3][2] = 0;
+
+
+	//Mat.RotZ_x_M(-_pAnimState->m_AnimTime1 * 0.1);
+
+	CVec3Dfp32 Center;
+	Bound.GetCenter(Center);
+	Center.MultiplyMatrix3x3(Mat);
+	CVec3Dfp32::GetMatrixRow(Mat, 3) -= Center;
+
+	if (m_pVBM->Viewport_Push(&View))
+	{
+		CMat4Dfp32 VMat;
+		Camera.InverseOrthogonal(VMat);
+		_pModel->OnRender(_pEngine, pRC, m_pVBM, this, m_spWorldLightState, _pAnimState, Mat, VMat, CXR_MODEL_ONRENDERFLAGS_MAXLOD);
+
+		m_pVBM->Viewport_Pop();
+	}
 }
 
 
 void CRC_Util2D::Model(class CWorld_Client* _pWClient, const CClipRect& _Clip, const CRct& _Rect, CXR_Anim_Base* _pAnim, class CXR_Model* _pModel, class CXR_AnimState *_pAnimState)
 {
 	MAUTOSTRIP(CRC_Util2D_Model_4, MAUTOSTRIP_VOID);
+	Model(NULL, _pWClient, _Clip, _Rect, _pAnim, _pModel, _pAnimState);
+
 }
-	
+#endif
+
 CRC_Attributes* CRC_Util2D::GetAttrib()
 {
 	if(m_pVBM == 0)

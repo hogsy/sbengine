@@ -10,7 +10,7 @@ void CImage::Compress_Sound(const char * _pFormat, CImage* _pDestImg, float _Pri
 #ifdef	SOUND_IO_NOCOMPRESS
 	Error("Compress", "Soundcompression has been disabled in this build.");
 #else
-	TList_Vector<uint8> lFile;
+	TArray<uint8> lFile;
 	CCFile File;
 	File.Open(lFile, CFILE_WRITE | CFILE_BINARY);
 
@@ -184,11 +184,11 @@ void CImage::Decompress_Sound(CImage* _pDestImg)
 	_pCodec->m_Format.UpdateSize();
 	// Decompress it all
 
-	TList_Vector<uint8> lFileOut;
+	TArray<uint8> lFileOut;
 	CCFile FileOut;
 	FileOut.Open(lFileOut, CFILE_WRITE | CFILE_BINARY);
 
-	TList_Vector<uint8> TempBuffer;
+	TArray<uint8> TempBuffer;
 	TempBuffer.SetLen(_pCodec->m_Format.m_TotalSize);
 //	char buffer[4096];
 
@@ -205,13 +205,12 @@ void CImage::Decompress_Sound(CImage* _pDestImg)
 		FileOut.Write(TempBuffer.GetBasePtr(), _pCodec->m_Format.m_TotalSize - BytesDownCount);
 	}
 
-	FileOut.Close();
-
-
 	mint AllocSize = OriginalFormat.m_Data.GetNumSamples() * _pCodec->m_Format.m_Data.GetChannels()*(_pCodec->m_Format.m_Data.GetSampleSize());
 
 	M_ASSERT(FileOut.Length() >= AllocSize, "Something wrong with encode ??");
 		//- (SilentAddAmount*(_pCodec->m_Format.m_nChannels)*(_pCodec->m_Format.m_SampleSize));
+
+	FileOut.Close();	// MikeW: Moved to after assert as FileOut.Length() is no longer valid after a close call.
 
 	int ImageFormat = 0;
 	switch (_pCodec->m_Format.m_Data.GetSampleSize())

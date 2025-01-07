@@ -42,7 +42,7 @@ bool CTC_TheoraTexture::CTheora::DoWork()
 #endif
 
 //						int64 Pos = m_pTheoraDecodeContext-> .granulepos;
-						fp8 Time = theora_granule_time(m_pTheoraDecodeContext, Pos);
+						fp64 Time = theora_granule_time(m_pTheoraDecodeContext, Pos);
 						m_Time = Time;
 						pFrame->m_Time = m_SoundOffset + Time;
 						if (pFrame->m_Time < m_LastAddedTime)
@@ -69,10 +69,6 @@ bool CTC_TheoraTexture::CTheora::DoWork()
 			{
 				theora_ycbcr_buffer yuv;
 				theora_decode_ycbcr_out(m_pTheoraDecodeContext,yuv);
-
-
-				//M_ASSERT(yuv.y_stride == pFrame->m_Y.GetWidth() && yuv.y_height == pFrame->m_Y.GetHeight(), "Dimension missmatch");
-				//M_ASSERT(yuv.uv_stride == pFrame->m_UV.GetWidth() && yuv.uv_height == pFrame->m_UV.GetHeight(), "Dimension missmatch");
 
 				{
 					TMeasure(Timer);
@@ -105,41 +101,11 @@ bool CTC_TheoraTexture::CTheora::DoWork()
 
 							for (int x = 0; x < (Width >> 1); ++x)
 							{
-
 #ifdef CPU_LITTLEENDIAN
-//								uint16 u = ((uint16 *)pU)[x];
-//								uint16 v = ((uint16 *)pV)[x];
-//								((uint32 *)pUV)[x] = (u&0xff00) << 8 | (u&0xff) >> 0 | (v&0xff00) << 16 | (v&0xff) << 8;
-
 								((uint32 *)pUV)[x] = pU[x*2] << 0 | pV[x*2] << 8 | pU[x*2+1] << 16 | pV[x*2+1] << 24;
-
-/*								uint32 u = ((uint16 *)pU)[x];
-								uint32 v = ((uint16 *)pV)[x];
-								((uint32 *)pUV)[x*2]	= (u&0xff000000) >> 8 | (u&0x00ff0000) >> 16			| (v&0xff000000) << 0| (v&0x00ff0000) >> 8;
-								((uint32 *)pUV)[x*2+1]	= (u&0xff00) << 8 | (u&0xff) >> 0			| (v&0xff00) << 16 | (v&0xff) << 8;*/
-
-//								((uint16 *)pUV)[x] = pU[x] << 8 | pV[x];
-								
-/*								uint32 Forced; 
-								uint8 *pForced = (uint8 *)&Forced;
-								pForced[0] = pU[x*2];
-								pForced[1] = pV[x*2];
-								pForced[2] = pU[x*2+1];
-								pForced[3] = pV[x*2+1];
-								((uint32 *)pUV)[x] = Forced;
-
-//								if (((uint32 *)pUV)[x] != Forced)
-//									M_BREAKPOINT;*/
 #else
 								((uint32 *)pUV)[x] = pU[x*2] << 0 | pV[x*2] << 8 | pU[x*2+1] << 16 | pV[x*2+1] << 24;
-//								((uint32 *)pUV)[x] = pU[x*2] << 8 | pV[x*2] << 0 | pU[x*2+1] << 24 | pV[x*2+1] << 16;
-//								((uint32 *)pUV)[x] = pU[x*2] << 0 | pV[x*2] << 8 | pU[x*2+1] << 16 | pV[x*2+1] << 24;
-//								((uint32 *)pUV)[x] = 0x7f7f7f7f;
-//								((uint32 *)pUV)[x] = pU[x*2] << 24 | pV[x*2] << 16| pU[x*2+1] << 8 | pV[x*2+1] << 0;
-//#error "Implement this"
 #endif
-//								pUV[x*2] = pU[x];
-//								pUV[x*2+1] = pV[x];
 							}
 						}
 						pFrame->m_UV.Unlock();
@@ -162,7 +128,7 @@ bool CTC_TheoraTexture::CTheora::DoWork()
 
 		if (m_bEOF)
 		{
-			MRTC_SystemInfo::OS_Trace("%s %d frames (%f fps)\n", TString("Theora time", Timer).Str(), nFrames + 1, 1.0 / (Timer.GetTime() / fp4(nFrames +1)));				
+			MRTC_SystemInfo::OS_Trace("%s %d frames (%f fps)\n", TString("Theora time", Timer).Str(), nFrames + 1, 1.0 / (Timer.GetTime() / fp32(nFrames +1)));				
 			nFrames = 0;
 			Timer.Reset();
 		}
@@ -186,9 +152,13 @@ bool CTC_TheoraTexture::CTheora::DoWork()
 #include "XTL.h"
 #endif
 
+const char* CTC_TheoraTexture::CTheora::Thread_GetName() const
+{
+	return "Theora unpacker";
+}
+
 int CTC_TheoraTexture::CTheora::Thread_Main()
 {
-	MRTC_SystemInfo::Thread_SetName("Threora unpacker");
 //	MRTC_SystemInfo::Thread_SetProcessor(4);
 
 	while (!Thread_IsTerminating() && m_bIsOpen)
@@ -254,9 +224,9 @@ CMTime CTC_TheoraTexture::CTheora::GetNextFrameTime()
 
 	if (m_pFinishedFrames[m_iFinishedConsume])
 	{
-		fp8 Scaled = (m_pFinishedFrames[m_iFinishedConsume]->m_Time / m_OriginalFrameTime) * m_FrameTime;
+		fp64 Scaled = (m_pFinishedFrames[m_iFinishedConsume]->m_Time / m_OriginalFrameTime) * m_FrameTime;
 		int64 Ticks = Scaled;
-		fp4 Fraction = Scaled - Ticks;
+		fp32 Fraction = Scaled - Ticks;
 
 		return CMTime::CreateFromTicks(Ticks, 1, Fraction);
 	}
@@ -264,9 +234,9 @@ CMTime CTC_TheoraTexture::CTheora::GetNextFrameTime()
 		return CMTime::CreateInvalid();
 	else			
 	{
-		fp8 Scaled = (m_LastAddedTime + m_FrameTime);
+		fp64 Scaled = (m_LastAddedTime + m_FrameTime);
 		int64 Ticks = Scaled;
-		fp4 Fraction = Scaled - Ticks;
+		fp32 Fraction = Scaled - Ticks;
 
 		return CMTime::CreateFromTicks(Ticks, 1, Fraction);
 	}
@@ -518,7 +488,7 @@ bool CTC_TheoraTexture::CTheora::Init(CSoundContext *_pSC)
 	m_iFinishedConsume = 0;
 	m_Time = 0;
 
-	m_OriginalFrameTime = m_FrameTime = (fp8)m_TheoraInfo.fps_denominator / (fp8)m_TheoraInfo.fps_numerator;
+	m_OriginalFrameTime = m_FrameTime = (fp64)m_TheoraInfo.fps_denominator / (fp64)m_TheoraInfo.fps_numerator;
 
 
 	CStr FileName = m_File.GetFileName();
@@ -596,7 +566,7 @@ void CTC_TheoraTexture::CTheora::ResumeSound()
 			{
 				if (m_SoundVoices.m_iVoices[i] >= 0)
 				{
-					m_pSC->Voice_Play(m_SoundVoices.m_iVoices[i]);
+					m_pSC->Voice_Unpause(m_SoundVoices.m_iVoices[i]);
 				}
 			}
 		}
@@ -651,12 +621,17 @@ void CTC_TheoraTexture::CTheora::PlaySound(int _iChannel)
 			{
 				MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
 
-				fp4 Vol = 1.0;
+				fp32 Vol = 1.0;
 				if (pSys)
 					Vol = pSys->GetRegistry()->GetValuef("SND_VIDEO_VOLUME", 1.0);
 
 				m_SoundVoices.Destroy(m_pSC);
-                m_SoundVoices.m_iVoices[0] = m_pSC->Voice_Create(_iChannel, WaveId, 0, 1.0, Vol);
+				CSC_VoiceCreateParams CreateParams;
+				m_pSC->Voice_InitCreateParams(CreateParams, 203);
+				CreateParams.m_Volume = Vol;
+				CreateParams.m_hChannel = _iChannel;
+				CreateParams.m_WaveID = WaveId;
+				m_SoundVoices.m_iVoices[0] = m_pSC->Voice_Create(CreateParams);
 				m_bPausedSound = false;
 			}
 		}
@@ -686,7 +661,6 @@ CTC_TheoraTexture::CTC_TheoraTexture()
 	m_pFrame	= 0;
 	m_LastFrame = 0;
 	m_bOnLastFrame = false;
-	m_CloseTimeoutDelay = 0;
 	m_bBroken = false;
 	m_bWasRendered = false;
 
@@ -753,8 +727,6 @@ void CTC_TheoraTexture::Close()
 	}
 
 	m_bWasRendered = false;
-
-	m_bOnLastFrame = false;
 }
 
 
@@ -796,19 +768,18 @@ void CTC_TheoraTexture::Open()
 	}
 	m_pDecoder->m_pTexture = this;
 
-#ifdef PLATFORM_XENON
+//#ifdef PLATFORM_XENON
 	m_TextureWidth = m_pDecoder->m_TheoraInfo.frame_width;
 	m_TextureHeight = m_pDecoder->m_TheoraInfo.frame_height;
-#else
-	m_TextureWidth = GetGEPow2(m_pDecoder->m_TheoraInfo.frame_width);
-	m_TextureHeight = GetGEPow2(m_pDecoder->m_TheoraInfo.frame_height);
-#endif
+//#else
+	//m_TextureWidth = GetGEPow2(m_pDecoder->m_TheoraInfo.frame_width);
+	//m_TextureHeight = GetGEPow2(m_pDecoder->m_TheoraInfo.frame_height);
+//#endif
 	m_FrameTime = m_pDecoder->m_FrameTime;
 
 	//
 	m_TimeLastVisible = CMTime::GetCPU();
 	m_bOnLastFrame = false;
-	m_CloseTimeoutDelay	= 0;
 }
 
 //
@@ -1115,11 +1086,14 @@ void CTextureContainer_Video_Theora::OnRefresh()
 		if(pVideo->IsOpen())
 		{
 			//
-			fp4 Time1 = (Time - pVideo->m_TimeLastVisible).GetTime();
+			fp32 Time1 = (Time - pVideo->m_TimeLastVisible).GetTime();
 			// Only autoclose video if no sound is playing on it
-			if(pVideo->m_pDecoder->m_SoundVoices.m_iVoicesOwn[0] && Time1 > m_CloseTimeOut && pVideo->m_pFrame && !pVideo->m_pFrame->m_bFrameShown)// || !pVideo->m_bWasRendered)
+			if(pVideo->m_pDecoder->m_SoundVoices.m_iVoicesOwn[0] && Time1 > m_CloseTimeOut && pVideo->m_pFrame && (pVideo->m_bOnLastFrame == 1 || !pVideo->m_pFrame->m_bFrameShown || pVideo->m_pFrame->m_bFrameShown == 2))//!pVideo->m_pFrame->m_bFrameShown)// || !pVideo->m_bWasRendered)
+//			if(pVideo->m_pDecoder->m_SoundVoices.m_iVoicesOwn[0] && Time1 > m_CloseTimeOut && pVideo->m_pFrame && !pVideo->m_pFrame->m_bFrameShown)// || !pVideo->m_bWasRendered)
 			{
-				if ((pVideo->m_CloseTimeoutDelay++) >= 5)
+				if (!pVideo->m_bOnLastFrame)
+					pVideo->m_bOnLastFrame = 5;
+				else if (pVideo->m_bOnLastFrame == 1)
 				{
 					pVideo->Close();
 					if(pVideo->m_TextureID[0]) m_pTC->MakeDirty(pVideo->m_TextureID[0]);
@@ -1144,7 +1118,6 @@ void CTextureContainer_Video_Theora::OnRefresh()
 
 				if (!bClosed)
 				{
-					pVideo->m_CloseTimeoutDelay = 0;
 
 					// Check if new frame should be obtained
 					bool bFinishedFrame = false;
@@ -1189,7 +1162,10 @@ void CTextureContainer_Video_Theora::OnRefresh()
 							{
 								CTC_TheoraTexture::CTheora::CFrame *pOldFrame = pVideo->m_pFrame;
 								if (pOldFrame && pOldFrame->m_bFrameShown == 1)
+								{
+									if(pVideo->m_TextureID[2]) m_pTC->MakeDirty(pVideo->m_TextureID[2]);
 									break;
+								}
 
 								CTC_TheoraTexture::CTheora::CFrame *pFrame = pVideo->m_pDecoder->GetFrame(false);
 
@@ -1212,7 +1188,7 @@ void CTextureContainer_Video_Theora::OnRefresh()
 									bFinishedFrame = true;
 									/*if (Gap.Compare(pVideo->m_FrameTime * 2) > 0)
 									{
-										fp4 Slack = Gap.GetTime();
+										fp32 Slack = Gap.GetTime();
 
 										pVideo->m_pDecoder->m_pSC->Chn_SetPitch(m_iSoundChannel, 0.5);
 					//					pVideo->m_pDecoder->PauseSound();
@@ -1225,9 +1201,9 @@ void CTextureContainer_Video_Theora::OnRefresh()
 									*/
 									if (Gap.Compare(pVideo->m_FrameTime * 2) > 0)
 									{
-										fp4 Slack = Gap.GetTime() - pVideo->m_FrameTime * 2;
+										fp32 Slack = Gap.GetTime() - pVideo->m_FrameTime * 2;
 
-										fp4 Pitch = (pVideo->m_FrameTime * 10 - Slack) / (pVideo->m_FrameTime * 10);
+										fp32 Pitch = (pVideo->m_FrameTime * 10 - Slack) / (pVideo->m_FrameTime * 10);
 										Pitch = Max(Pitch, 0.1f);
 										Pitch = Min(Pitch, 1.0f);
 
@@ -1338,7 +1314,7 @@ bool CTextureContainer_Video_Theora::IsOnLastFrame(int _iLocal)
 	CTC_TheoraTexture* pVideo = m_lspVideos[iLocal];
 	M_LOCK(pVideo->m_TextureLock);
 		
-	return pVideo->m_bOnLastFrame == 1;
+	return pVideo->m_bOnLastFrame != 0;
 }
 
 
@@ -1410,10 +1386,21 @@ void CTextureContainer_Video_Theora::BuildInto(int _iLocal, CImage** _ppImg, int
 	if (_BuildFlags & ETCBuildFlags_NewTexture || !pVideo->m_pFrame)
 	{
 		uint8 *pDest = (uint8*)(*_ppImg)->Lock();
+		
+		uint32 Modulo = (*_ppImg)->GetModulo();
+		uint32 Height = (*_ppImg)->GetHeight();
+		uint32 LastModulo = (*_ppImg)->GetWidth() * (*_ppImg)->GetPixelSize();
 		if( iSub != 2 )
-			memset( pDest, 0, (*_ppImg)->GetModulo() * (*_ppImg)->GetHeight());
+		{
+			memset( pDest, 0, Modulo * (Height-1));
+			memset( pDest+Modulo * (Height-1), 0, LastModulo);
+		}
 		else
-			memset( pDest, 128, (*_ppImg)->GetModulo() * (*_ppImg)->GetHeight());
+		{
+			memset( pDest, 128, Modulo * (Height-1));
+			memset( pDest+Modulo * (Height-1), 128, LastModulo);
+		}
+			
 		(*_ppImg)->Unlock();
 	}
 
@@ -1580,12 +1567,16 @@ void CTextureContainer_Video_Theora::BuildInto(int _iLocal, CImage** _ppImg, int
 								int nDestMod = (*_ppImg)->GetModulo();
 								if( nSrcMod == nDestMod )
 								{
-									memcpy( pDestData, pSrcData, pFrame->m_Y.GetSize() );
+									int height = Min(pFrame->m_Y.GetHeight(), (*_ppImg)->GetHeight());
+									int rowlength = Min( nSrcMod, nDestMod );
+									uint32 LastModulo = (*_ppImg)->GetWidth() * (*_ppImg)->GetPixelSize();
+									memcpy( pDestData, pSrcData, (height-1) * rowlength);
+									memcpy( pDestData + (height-1) * rowlength, pSrcData + (height-1) * rowlength, LastModulo);
 								}
 								else
 								{
 									int height = Min(pFrame->m_Y.GetHeight(), (*_ppImg)->GetHeight());
-									int rowlength = Min( nSrcMod, nDestMod );
+									int rowlength = (*_ppImg)->GetWidth() * (*_ppImg)->GetPixelSize();
 									for( int y = 0; y < height; y++ )
 									{
 										memcpy( pDestData, pSrcData, rowlength );
@@ -1615,12 +1606,16 @@ void CTextureContainer_Video_Theora::BuildInto(int _iLocal, CImage** _ppImg, int
 								int nDestMod = (*_ppImg)->GetModulo();
 								if( nSrcMod == nDestMod )
 								{
-									memcpy( pDestData, pSrcData, pFrame->m_UV.GetSize() );
+									int height = Min(pFrame->m_Y.GetHeight(), (*_ppImg)->GetHeight());
+									int rowlength = Min( nSrcMod, nDestMod );
+									uint32 LastModulo = (*_ppImg)->GetWidth() * (*_ppImg)->GetPixelSize();
+									memcpy( pDestData, pSrcData, (height-1) * rowlength);
+									memcpy( pDestData + (height-1) * rowlength, pSrcData + (height-1) * rowlength, LastModulo);
 								}
 								else
 								{
 									int height = Min(pFrame->m_UV.GetHeight(), (*_ppImg)->GetHeight());
-									int rowlength = Min( nSrcMod, nDestMod );
+									int rowlength = (*_ppImg)->GetWidth() * (*_ppImg)->GetPixelSize();
 									for( int y = 0; y < height; y++ )
 									{
 										memcpy( pDestData, pSrcData, rowlength );
@@ -1652,7 +1647,7 @@ void CTextureContainer_Video_Theora::BuildInto(int _iLocal, CImage** _ppImg, int
 
 }
 
-fp4 CTextureContainer_Video_Theora::GetTime(int _iLocal)
+fp32 CTextureContainer_Video_Theora::GetTime(int _iLocal)
 {
 	int iLocal = _iLocal / 3;
 	int iSub = _iLocal - iLocal * 3;
@@ -1682,7 +1677,7 @@ bool CTextureContainer_Video_Theora::MoveToLastFrame(int _iLocal)
 {
 	return 0;
 }
-void CTextureContainer_Video_Theora::SetVolume(int _iLocal, fp4 fpVol)
+void CTextureContainer_Video_Theora::SetVolume(int _iLocal, fp32 fpVol)
 {}
 
 void CTextureContainer_Video_Theora::Pause(int _iLocal, bool _Paused)

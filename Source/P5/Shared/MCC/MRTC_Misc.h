@@ -30,7 +30,7 @@ void MRTC_InstallProgressHandler(spCReferenceCount _spObj);
 void MRTC_RemoveProgressHandler(spCReferenceCount _spObj);
 void MRTC_PushProgress(const char* _pLevelName = NULL);
 void MRTC_PopProgress();
-void MRTC_SetProgress(fp4 _p, const char* _pTaskName = NULL);
+void MRTC_SetProgress(fp32 _p, const char* _pTaskName = NULL);
 void MRTC_SetProgressText(const char* _pTaskName = NULL);
 void MRTC_InitProgressCount(int _Count, const char* _pTaskName = NULL);
 void MRTC_IncProgress(const char* _pTaskName = NULL);
@@ -81,17 +81,6 @@ void LogToSystemLog(const char* _pStr);
 	#define LogFile(_Msg) ((void)(0))
 #endif
 
-#if !defined(M_RTM) || defined(M_Profile)
-	#define M_TRACEALWAYS              MRTC_SystemInfo::OS_Trace
-#else
-	#define M_TRACEALWAYS              1 ? (void)0 : MRTC_SystemInfo::OS_Trace
-#endif
-
-#ifndef M_RTM
-	#define M_TRACE              MRTC_SystemInfo::OS_Trace
-#else
-	#define M_TRACE              1 ? (void)0 : MRTC_SystemInfo::OS_Trace
-#endif
 
 /*************************************************************************************************\
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯

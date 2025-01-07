@@ -219,7 +219,7 @@ MRTC_DVDFileInfo::Status MRTC_DVDFileInfo::CheckStatus()
 	}
 
 	// There was an error!
-	fp8 t0 = GetCPUTime();
+	fp64 t0 = GetCPUTime();
 	OSReport("File error, start\n");
 	if (pSystem)
 		pSystem->System_BroadcastMessage( CSS_Msg(CSS_MSG_GLOBAL_PAUSE, 0,0,0,0, t0) );
@@ -282,7 +282,7 @@ MRTC_DVDFileInfo::Status MRTC_DVDFileInfo::CheckStatus()
 	MRTC_SystemInfo_CPU_ResetClockToMark();
 
 	OSReport("File error, done\n");
-	fp8 t1 = GetCPUTime();
+	fp64 t1 = GetCPUTime();
 	if (pSystem)
 		pSystem->System_BroadcastMessage( CSS_Msg(CSS_MSG_GLOBAL_RESUME, 0,0,0,0, t0, t1) );
 

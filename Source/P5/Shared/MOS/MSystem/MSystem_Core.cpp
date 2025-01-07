@@ -7,6 +7,8 @@
 #include "../XR/XRSurfaceContext.h"
 #include "../XR/XRVBContext.h"
 
+#include "MContentContext.h"
+
 // -------------------------------------------------------------------
 //  CSubSystem
 // -------------------------------------------------------------------
@@ -185,6 +187,12 @@ void CSystemCore::Create(char* _cmdline, const char* _pAppClassName)
 
 	ConOutL(CStrF("Processor detected: %s", (char*) GetCPUName(true) ));
 
+	for(int i = 1 ; i < CONTENT_MAX; i++)
+	{
+		CContentContext* pCC = GetContentContext(i);
+		if(pCC) pCC->Create();
+	}
+
 	if (_pAppClassName)
 	{
 LogFile(CStrF("(CSystemCore::Create) Creating application: %s", _pAppClassName));
@@ -216,6 +224,13 @@ void CSystemCore::Destroy()
 
 	// Destroy application.
 	m_spApp = NULL;
+
+
+	for(int i = 1 ; i < CONTENT_MAX; i++)
+	{
+		CContentContext* pCC = GetContentContext(i);
+		if(pCC) pCC->Destroy();
+	}
 
 	// Destroy InputContext
 	m_spInput = NULL;
@@ -249,6 +264,11 @@ void CSystemCore::Destroy()
 		)
 		m_bMXRLoaded = false;
 	}
+
+	// Unregister WaveContet
+	if (m_spWC != NULL) MRTC_GOM()->UnregisterObject((CReferenceCount*)m_spWC, "SYSTEM.WAVECONTEXT");
+	
+	m_spWC = NULL;
 
 	// Unregister Console
 	if (m_spCon != NULL)
@@ -553,6 +573,8 @@ void CSystemCore::CreateSystems()
 				// If it starts with a quotation marker.. then hunt for the next marker	
 				const char *pStr = CmdLine;
 				int Mode = 1;
+				 // If a word contains 1+ "//" sequences we need the number of extra chars to clip away at the end.
+				int nExtraChars = 0;
 				while (pStr && *pStr)
 				{		
 					char Char = *pStr;
@@ -590,8 +612,10 @@ void CSystemCore::CreateSystems()
 								Word += Temp;
 								Mode = 0;
 							}
-							else 
+							else {
+								nExtraChars++;
 								Mode = 2;
+							}
 							++pStr;
 						}
 						break;
@@ -608,7 +632,7 @@ void CSystemCore::CreateSystems()
 
 				}
 
-				CmdLine = CmdLine.DelTo( Word.Len() + 2 );
+				CmdLine = CmdLine.DelTo( Word.Len() + 2 + nExtraChars );
 			}
 			else
 			{
@@ -631,6 +655,14 @@ void CSystemCore::CreateSystems()
 		int Lines = GetEnvironment()->GetValuei("CON_LINES", 1024);
 		m_spCon->Create(Lines, "SYSTEM.CONSOLE");
 		MRTC_GOM()->RegisterObject((CReferenceCount*)m_spCon, "SYSTEM.CONSOLE");
+	}
+
+	{
+		MSCOPESHORT(WaveContext);
+		LogFile("(CSystemCore::CreateSystems) Creating WaveContext...");
+		int MaxWaveIDs = GetEnvironment()->GetValuei("SND_MAXWAVES", 32768);
+		if ((m_spWC = MNew1(CWaveContext, MaxWaveIDs)) == NULL) MemError("Init");
+		MRTC_GOM()->RegisterObject((CReferenceCount*)m_spWC, "SYSTEM.WAVECONTEXT");
 	}
 
 	m_spCon->AddSubSystem(this);
@@ -907,6 +939,33 @@ void CSystemCore::ExitProcess()
 	m_bBreakRequested = true;
 }
 
+CStr CSystemCore::Parser_GetPlatformName()
+{
+	int Platform = D_MPLATFORM;
+	switch(Platform)
+	{
+	case 0:
+		return "";
+	case 1:
+		return "_Xbox";
+	case 2:
+		return "_GC";
+	case 3:
+		return "_PS2";
+	case 4:
+		return "_Xenon";
+	case 5:
+		return "_PS3";
+	}
+
+	return "Unknown";
+}
+
+CStr CSystemCore::Parser_GetExePath()
+{
+	return m_ExePath;
+}
+
 void CSystemCore::Register(CScriptRegisterContext & _RegContext)
 {
 	CSystem::Register(_RegContext);
@@ -931,6 +990,10 @@ void CSystemCore::Register(CScriptRegisterContext & _RegContext)
 
 	_RegContext.RegFunction("sys_memoryshowallocs", this, &CSystemCore::Parser_MemShowAllocs);
 	_RegContext.RegFunction("sys_memoryhideallocs", this, &CSystemCore::Parser_MemHideAllocs);
+
+
+	_RegContext.RegFunction("GetPlatformName", this, &CSystemCore::Parser_GetPlatformName);
+	_RegContext.RegFunction("GetExePath", this, &CSystemCore::Parser_GetExePath);
 	
 };
 
@@ -1138,7 +1201,8 @@ void CSystemCore::DC_SetName(const char *_pClassName)
 #if defined(PLATFORM_XENON)
 CDisplayContext *gf_CreateDisplayContextStatic();
 #elif defined(PLATFORM_PS3)
-CDisplayContext *gf_CreateDisplayContextPS3Static();
+CDisplayContext* gf_CreateDisplayContextPS3Static();
+CDisplayContext* gf_CreateDisplayContextPS3GCMStatic();
 #endif
 
 void CSystemCore::DC_SetPtr(spCReferenceCount _spDisplayContext)
@@ -1230,7 +1294,11 @@ void CSystemCore::DC_Set(int _nr)
 #if defined(PLATFORM_XENON)
 	spCReferenceCount spObj = gf_CreateDisplayContextStatic();
 #elif defined(PLATFORM_PS3)
-	spCReferenceCount spObj = gf_CreateDisplayContextPS3Static();
+	#ifdef PS3_RENDERER_GCM
+		spCReferenceCount spObj = gf_CreateDisplayContextPS3GCMStatic();
+	#elif defined(PS3_RENDERER_PSGL)
+		spCReferenceCount spObj = gf_CreateDisplayContextPS3Static();
+	#endif
 #else
 	spCReferenceCount spObj = (CReferenceCount*) MRTC_GOM()->CreateObject(m_lspDC[m_iCurrentDC]->m_DCClass);
 #endif
@@ -1301,8 +1369,8 @@ void CSystemCore::DC_InitVidModeFromEnvironment()
 	
 	CRegistry* pEnv = GetEnvironment();
 #if defined(M_RTM) || defined(PLATFORM_CONSOLE)
-#if defined(PLATFORM_XENON) 
-	CStr Mode = pEnv->GetValue("VID_MODE", "1280 720 32 85");
+#if defined(PLATFORM_XENON) || defined(PLATFORM_PS3)
+	CStr Mode = pEnv->GetValue("VID_MODE", "1024 576 32 85");
 #else
 	CStr Mode = pEnv->GetValue("VID_MODE", "640 480 32 85");
 #endif

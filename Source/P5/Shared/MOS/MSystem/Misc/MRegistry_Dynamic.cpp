@@ -7,11 +7,11 @@
 mint CRegistry_Dynamic::ms_lTypeSize[REGISTRY_TYPE_MAX] = {
 	0, 
 	sizeof(CStr::spCStrData),
-	sizeof(TList_Vector<uint8>),
+	sizeof(TArray<uint8>),
 	sizeof(uint8), 
 	sizeof(int16), 
 	sizeof(int32), 
-	sizeof(fp4), 
+	sizeof(fp32), 
 	sizeof(fp2), 
 	sizeof(uint32), 
 };
@@ -19,7 +19,7 @@ mint CRegistry_Dynamic::ms_lTypeSize[REGISTRY_TYPE_MAX] = {
 FRegistryTypeDestructor *CRegistry_Dynamic::ms_lTypeDestructor[REGISTRY_TYPE_MAX] = {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeDestructor<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeDestructor<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeDestructor<TArray<uint8> >,
 	NULL, 
 	NULL,
 	NULL,
@@ -32,11 +32,11 @@ FRegistryTypeConstructor *CRegistry_Dynamic::ms_lTypeConstructor[REGISTRY_TYPE_M
 {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructor<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructor<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeConstructor<TArray<uint8> >,
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<uint8>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<int16>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<int32>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp4>, 
+	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp32>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp2>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<uint32>, 
 };
@@ -45,11 +45,11 @@ FRegistryTypeConstructor *CRegistry_Dynamic::ms_lTypeConstructor[REGISTRY_TYPE_M
 FRegistryTypeDestructor *CRegistry_Dynamic::ms_lTypeDestructorPtr[REGISTRY_TYPE_MAX] = {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<TArray<uint8> >,
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<uint8>,
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<int16>,
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<int32>,
-	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<fp4>,
+	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<fp32>,
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<fp2>,
 	CRegistry_Shared_Helpers::RegistryTypeDestructorPtr<uint32>,
 	};
@@ -58,11 +58,11 @@ FRegistryTypeConstructor *CRegistry_Dynamic::ms_lTypeConstructorPtr[REGISTRY_TYP
 {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtr<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructorPtr<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeConstructorPtr<TArray<uint8> >,
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<uint8>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<int16>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<int32>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<fp4>, 
+	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<fp32>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<fp2>,
 	CRegistry_Shared_Helpers::RegistryTypeConstructorPtrClear<uint32>, 
 };
@@ -70,7 +70,7 @@ FRegistryTypeConstructor *CRegistry_Dynamic::ms_lTypeConstructorPtr[REGISTRY_TYP
 FRegistryTypeDestructor *CRegistry_Dynamic::ms_lTypeDestructorAnim[REGISTRY_TYPE_MAX] = {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeDestructor<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeDestructor<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeDestructor<TArray<uint8> >,
 	NULL, 
 	NULL,
 	NULL,
@@ -83,11 +83,11 @@ FRegistryTypeConstructor *CRegistry_Dynamic::ms_lTypeConstructorAnim[REGISTRY_TY
 {
 	NULL, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructor<CStr::spCStrData>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructor<TList_Vector<uint8> >,
+	CRegistry_Shared_Helpers::RegistryTypeConstructor<TArray<uint8> >,
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<uint8>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<int16>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<int32>, 
-	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp4>, 
+	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp32>, 
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<fp2>,
 	CRegistry_Shared_Helpers::RegistryTypeConstructorClear<uint32>
 };
@@ -99,11 +99,11 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertDefault<CStr::spCStrData>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistry_Shared_Helpers::RegistryConvertClear<uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<int16>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<int32>,
-		CRegistry_Shared_Helpers::RegistryConvertClear<fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertClear<fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<uint32>
 	}
@@ -116,8 +116,8 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 		CRegistry_Shared_Helpers::RegistryConvertStrToInt<uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertStrToInt<int16>,
 		CRegistry_Shared_Helpers::RegistryConvertStrToInt<int32>,
-		CRegistry_Shared_Helpers::RegistryConvertStrToFloat<fp4, fp4>,
-		CRegistry_Shared_Helpers::RegistryConvertStrToFloat<fp2, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertStrToFloat<fp32, fp32>,
+		CRegistry_Shared_Helpers::RegistryConvertStrToFloat<fp2, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertStrToInt<uint32>
 	}
 	,
@@ -125,11 +125,11 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertDataToStr,
-		CRegistry_Shared_Helpers::RegistryConvertCopyListVector,
+		CRegistry_Shared_Helpers::RegistryConvertCopyArray,
 		CRegistry_Shared_Helpers::RegistryConvertClear<uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<int16>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<int32>,
-		CRegistry_Shared_Helpers::RegistryConvertClear<fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertClear<fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertClear<uint32>
 	}
@@ -138,11 +138,11 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertIntToStr<uint8>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistry_Shared_Helpers::RegistryConvertSame<uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, int16>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, int32>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint8, uint32>
 	}
@@ -151,11 +151,11 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertIntToStr<int16>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertSame<int16>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, int32>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int16, uint32>
 	}
@@ -164,50 +164,50 @@ FRegistryTypeConvert *CRegistry_Dynamic::ms_lTypeConvert[REGISTRY_TYPE_MAX][REGI
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertIntToStr<int32>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, int16>,
 		CRegistry_Shared_Helpers::RegistryConvertSame<int32>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<int32, uint32>
 	}
 	,
-	// fp4
+	// fp32
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
-		CRegistry_Shared_Helpers::RegistryConvertFloatToStr<fp4>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp4, uint8>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp4, int16>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp4, int32>,
-		CRegistry_Shared_Helpers::RegistryConvertSame<fp4>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp4, fp2>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp4, uint32>,
+		CRegistry_Shared_Helpers::RegistryConvertFloatToStr<fp32>,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp32, uint8>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp32, int16>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp32, int32>,
+		CRegistry_Shared_Helpers::RegistryConvertSame<fp32>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp32, fp2>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp32, uint32>,
 	}
 	,
 	// fp2
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
-		CRegistry_Shared_Helpers::RegistryConvertFloatToStr<fp2>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp2, uint8>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp2, int16>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp2, int32>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp2, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertfp16ToStr<fp2>,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertfp16<fp2, uint8>,
+		CRegistry_Shared_Helpers::RegistryConvertfp16<fp2, int16>,
+		CRegistry_Shared_Helpers::RegistryConvertfp16<fp2, int32>,
+		CRegistry_Shared_Helpers::RegistryConvertfp16<fp2, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertSame<fp2>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<fp2, int32>,
+		CRegistry_Shared_Helpers::RegistryConvertfp16<fp2, int32>,
 	}
 	,
 	// uint32
 	{
 		CRegistry_Shared_Helpers::RegistryConvertDummy,
 		CRegistry_Shared_Helpers::RegistryConvertIntToStrHex<uint32>,
-		CRegistry_Shared_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistry_Shared_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, uint8>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, int16>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, int32>,
-		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, fp4>,
+		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, fp32>,
 		CRegistry_Shared_Helpers::RegistryConvertCompatible<uint32, fp2>,
 		CRegistry_Shared_Helpers::RegistryConvertSame<uint32>,
 	}
@@ -289,13 +289,13 @@ void CRegistry_Dynamic::Type_Set(int _Type, int _nDim)
 				int nNew = pSeq->m_nKeyFrames;
 				if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
 				{
-					mint NewItemSize = ms_lTypeSize[_Type] * _nDim + sizeof(fp4);
+					mint NewItemSize = ms_lTypeSize[_Type] * _nDim + sizeof(fp32);
 					mint NewSize = nNew * NewItemSize;
 					
 					uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
 					uint8 *pOldData = (uint8 *)pSeq->m_pData;
 					
-//					fp4 LastTime = 0;
+//					fp32 LastTime = 0;
 
 					Private_Anim_CopyDataTimedTyped(pNewData, pOldData, 0, 0, _nDim, m_Dimensions+1, nNew, true, OldType);
 
@@ -310,7 +310,7 @@ void CRegistry_Dynamic::Type_Set(int _Type, int _nDim)
 					uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
 					uint8 *pOldData = (uint8 *)pSeq->m_pData;
 					
-//					fp4 LastTime = 0;
+//					fp32 LastTime = 0;
 
 					Private_Anim_CopyDataTyped(pNewData, pOldData, 0, 0, _nDim, m_Dimensions+1, nNew, true, OldType);
 
@@ -388,7 +388,7 @@ void CRegistry_Dynamic::ConvertToType(int _Type, int _nDim)
 
 int CRegistry_Dynamic::MRTC_AddRef()
 {
-	if (m_RefCount == (DBit(11) - 1))
+	if (m_RefCount == (M_Bit(11) - 1))
 	{
 		Error_static("CRegistry_Dynamic::MRTC_AddRef", "Registry dynamic only supports 2047 references");
 	}
@@ -438,7 +438,7 @@ void CRegistry_Dynamic::Private_CopyValueFromRegistryDynamic(const CRegistry_Dyn
 			pSeq->m_LoopEnd = pSeqSrc->m_LoopEnd;
 			mint Size;
 			if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4);
+				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32);
 			else
 				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1);
 			pSeq->m_pData = M_ALLOC(Size * pSeqSrc->m_nKeyFrames);
@@ -520,7 +520,7 @@ void CRegistry_Dynamic::CopyValueFromRegistry(const CRegistry& _Reg)
 			pSeq->m_LoopEnd = _Reg.Anim_ThisGetSeqLoopEnd(i);
 			mint Size;
 			if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4);
+				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32);
 			else
 				Size = ms_lTypeSize[m_Type] * (m_Dimensions+1);
 			pSeq->m_pData = M_ALLOC(Size * pSeq->m_nKeyFrames);
@@ -579,14 +579,14 @@ void CRegistry_Dynamic::CopyValueFromRegistry(const CRegistry& _Reg)
 					}
 				}
 				break;
-			case REGISTRY_TYPE_FP4:
+			case REGISTRY_TYPE_FP32:
 			case REGISTRY_TYPE_FP2:
 				{
-					fp4 Data[EMaxDimensions];
+					fp32 Data[EMaxDimensions];
 					for (int j = 0; j < pSeq->m_nKeyFrames; ++j)
 					{
 						_Reg.Anim_ThisGetKFValueaf(i, j, (m_Dimensions+1), Data);
-						Private_Anim_SetItem(pSeq, j, Data, REGISTRY_TYPE_FP4, (m_Dimensions+1));
+						Private_Anim_SetItem(pSeq, j, Data, REGISTRY_TYPE_FP32, (m_Dimensions+1));
 						if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
 							Private_Anim_SetKFTime(pSeq->m_pData, j, _Reg.Anim_ThisGetKFTime(i, j));
 					}
@@ -632,12 +632,12 @@ void CRegistry_Dynamic::CopyValueFromRegistry(const CRegistry& _Reg)
 				ms_lTypeConvert[REGISTRY_TYPE_INT32][m_Type](Data, nDim, Type_GetValue(), nDim);
 			}
 			break;
-		case REGISTRY_TYPE_FP4:
+		case REGISTRY_TYPE_FP32:
 		case REGISTRY_TYPE_FP2:
 			{
-				fp4 Data[EMaxDimensions];
+				fp32 Data[EMaxDimensions];
 				_Reg.GetThisValueaf(nDim, Data);
-				ms_lTypeConvert[REGISTRY_TYPE_FP4][m_Type](Data, nDim, Type_GetValue(), nDim);
+				ms_lTypeConvert[REGISTRY_TYPE_FP32][m_Type](Data, nDim, Type_GetValue(), nDim);
 			}
 		}
 	}
@@ -1077,7 +1077,7 @@ void CRegistry_Dynamic::CopyDir(const CRegistry* _pReg, bint _bRecursive)
 void CRegistry_Dynamic::AddReg(spCRegistry _spReg)
 {
 	_spReg->SetParent(this);
-	m_lChildren.SetGrow(GetGEPow2(m_lChildren.Len()) >> 0);
+	m_lChildren.SetGrow(Max(32, GetGEPow2(m_lChildren.Len()) >> 0));
 	m_lChildren.Add(CPtrKeyHash(_spReg));	
 	Private_Hash_Invalidate();
 }
@@ -1185,14 +1185,14 @@ void CRegistry_Dynamic::SetThisValuei(int32 _Value, int _StoreType)
 	}
 }
 
-void CRegistry_Dynamic::SetThisValuef(fp4 _Value, int _StoreType)
+void CRegistry_Dynamic::SetThisValuef(fp32 _Value, int _StoreType)
 {
 	Private_Anim_CheckAnimDisabled();
 	Type_SetNew(_StoreType, 1);
 	switch (_StoreType)
 	{
-	case REGISTRY_TYPE_FP4:
-		Type_Get_fp4() = _Value;
+	case REGISTRY_TYPE_FP32:
+		Type_Get_fp32() = _Value;
 		break;
 	}
 }
@@ -1265,12 +1265,12 @@ void CRegistry_Dynamic::SetThisValueai(int _nDim, const int32 *_Value, int _Stor
 	ms_lTypeConvert[REGISTRY_TYPE_INT32][_StoreType](_Value, _nDim, Type_GetValue(), (m_Dimensions+1));
 }
 
-void CRegistry_Dynamic::SetThisValueaf(int _nDim, const fp4 *_Value, int _StoreType)
+void CRegistry_Dynamic::SetThisValueaf(int _nDim, const fp32 *_Value, int _StoreType)
 {
 	Private_Anim_CheckAnimDisabled();
 	Type_SetNew(_StoreType, _nDim);
 
-	ms_lTypeConvert[REGISTRY_TYPE_FP4][_StoreType](_Value, _nDim, Type_GetValue(), (m_Dimensions+1));
+	ms_lTypeConvert[REGISTRY_TYPE_FP32][_StoreType](_Value, _nDim, Type_GetValue(), (m_Dimensions+1));
 }
 
 
@@ -1331,15 +1331,15 @@ int32 CRegistry_Dynamic::GetThisValuei() const
 	return Ret;
 }
 
-fp4 CRegistry_Dynamic::GetThisValuef() const
+fp32 CRegistry_Dynamic::GetThisValuef() const
 {
 	if (m_InternalFlags & ERegistryDynamicFlags_Animated)
 		return Anim_ThisGetKFValuef(0, 0);
 
-	if (m_Type == REGISTRY_TYPE_FP4)
-		return Type_Get_fp4();
-	fp4 Ret;
-	ms_lTypeConvert[m_Type][REGISTRY_TYPE_FP4](Type_GetValue(), (m_Dimensions+1), &Ret, 1);
+	if (m_Type == REGISTRY_TYPE_FP32)
+		return Type_Get_fp32();
+	fp32 Ret;
+	ms_lTypeConvert[m_Type][REGISTRY_TYPE_FP32](Type_GetValue(), (m_Dimensions+1), &Ret, 1);
 	return Ret;
 }
 
@@ -1388,13 +1388,13 @@ void CRegistry_Dynamic::GetThisValueai(int _nDim, int32 *_pDest) const
 	ms_lTypeConvert[m_Type][REGISTRY_TYPE_INT32](Type_GetValue(), (m_Dimensions+1), _pDest, _nDim);
 }
 
-void CRegistry_Dynamic::GetThisValueaf(int _nDim, fp4 *_pDest) const
+void CRegistry_Dynamic::GetThisValueaf(int _nDim, fp32 *_pDest) const
 {
 	if (m_InternalFlags & ERegistryDynamicFlags_Animated)
 		return Anim_ThisGetKFValueaf(0, 0, _nDim, _pDest);
 	Private_CheckDim(_nDim);
 
-	ms_lTypeConvert[m_Type][REGISTRY_TYPE_FP4](Type_GetValue(), (m_Dimensions+1), _pDest, _nDim);
+	ms_lTypeConvert[m_Type][REGISTRY_TYPE_FP32](Type_GetValue(), (m_Dimensions+1), _pDest, _nDim);
 }
 
 void CRegistry_Dynamic::GetThisValuead(int _nDim, TArray<uint8> *_pDest) const
@@ -1441,8 +1441,8 @@ public:
 	int m_Type;
 	uint32 m_UserFlags;
 	int m_AnimIP;
-	fp4 m_AnimIPData[16];
-	TThinArray<fp4> m_lAnimIPData;
+	fp32 m_AnimIPData[16];
+	TThinArray<fp32> m_lAnimIPData;
 	int m_nAnimIPData;
 	uint32 m_AnimFlags;
 	bint m_bValueEscaped;
@@ -1533,7 +1533,7 @@ public:
 				int nFloat = 0;
 				while (*pParse2)
 				{
-					fp4 Float = CMClosestAssign::Assign((fp4)0, NStr::StrToFloatParse(pParse2, -465465.0, " ;"));
+					fp32 Float = CMClosestAssign::Assign((fp32)0, NStr::StrToFloatParse(pParse2, -465465.0, " ;"));
 					if (Float != -465465.0f)
 						++nFloat;
 
@@ -1549,7 +1549,7 @@ public:
 
 				while (*pParse2)
 				{
-					fp4 Float = CMClosestAssign::Assign((fp4)0, NStr::StrToFloatParse(pParse2, -465465.0, " ;"));
+					fp32 Float = CMClosestAssign::Assign((fp32)0, NStr::StrToFloatParse(pParse2, -465465.0, " ;"));
 					if (Float != -465465.0f)
 					{
 						if (nFloat >= 16)
@@ -1785,9 +1785,9 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 				else
 				{
 					pStr = _Value.Str();
-					fp4 Float = NStr::StrToFloatParse(pStr, -654654.0," ");
+					fp32 Float = NStr::StrToFloatParse(pStr, -654654.0," ");
 					if (Float != -654654.0f && *pStr == 0)
-						Type = REGISTRY_TYPE_FP4;
+						Type = REGISTRY_TYPE_FP32;
 				}
 			}
 		}
@@ -1813,9 +1813,9 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 				else
 				{
 					pStr = _Value.StrW();
-					fp4 Float = NStr::StrToFloatParse(pStr, -654654.0," ");
+					fp32 Float = NStr::StrToFloatParse(pStr, -654654.0," ");
 					if (Float != -654654.0f && *pStr == 0)
-						Type = REGISTRY_TYPE_FP4;
+						Type = REGISTRY_TYPE_FP32;
 				}
 			}
 		}
@@ -1858,8 +1858,8 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 		{
 			NScript::ParseWhiteSpace(pParse);
 
-			fp4 SeqStart = -1;
-			fp4 SeqEnd = -1;
+			fp32 SeqStart = -1;
+			fp32 SeqEnd = -1;
 			if (*pParse == '<')
 			{
 				++pParse;
@@ -1884,11 +1884,11 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 
 					if (Ident == "ls")
 					{
-						SeqStart = CMClosestAssign::Assign((fp4)0, NStr::StrToFloatParse(pParse, 0.0, ",>"));
+						SeqStart = CMClosestAssign::Assign((fp32)0, NStr::StrToFloatParse(pParse, 0.0, ",>"));
 					}
 					else if (Ident == "le")
 					{
-						SeqEnd = CMClosestAssign::Assign((fp4)0, NStr::StrToFloatParse(pParse, 0.0, ",>"));
+						SeqEnd = CMClosestAssign::Assign((fp32)0, NStr::StrToFloatParse(pParse, 0.0, ",>"));
 					}
 					if (*pParse == ',')
 						++pParse;
@@ -1910,7 +1910,7 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 				nKF = ParseNumKF(pParse);
 				spReg->Anim_ThisSetNumKF(s, nKF);
 
-				fp4 Time = 0;
+				fp32 Time = 0;
 				for (int i = 0; i < nKF; ++i)
 				{
 					CStr Value;
@@ -1935,7 +1935,7 @@ spCRegistry CRegistry_Dynamic::XRG_AddParseKey(CStr _Key, CStr _Value, CRegistry
 						{
 							NScript::ParseWhiteSpace(pParse);
 							// Parse time
-							fp4 NewTime = CMClosestAssign::Assign((fp4)0, NStr::StrToFloatParse(pParse, 0.0, ";<"));
+							fp32 NewTime = CMClosestAssign::Assign((fp32)0, NStr::StrToFloatParse(pParse, 0.0, ";<"));
 
 							if (NewTime < Time)
 								Time += 1.0f;
@@ -2622,7 +2622,7 @@ int CRegistry_Dynamic::XRG_Preprocess(const wchar* _pSrc, int _Len, wchar* _pDst
 
 			if ((lStack[iStack] & (XRG_PREPROCESS_SCOPEENABLE | XRG_PREPROCESS_PARENTSCOPEENABLE)) == (XRG_PREPROCESS_SCOPEENABLE | XRG_PREPROCESS_PARENTSCOPEENABLE))
 			{
-				memcpy(_pDst+DstPos, _pSrc + Pos, EOL*sizeof(wchar));
+				memmove(_pDst+DstPos, _pSrc + Pos, EOL*sizeof(wchar));
 				DstPos += EOL;
 			}
 			Pos += EOL;
@@ -2707,8 +2707,8 @@ void CRegistry_Dynamic::XRG_Read(CCFile *_pFile, CStr _ThisFileName, TArray<CStr
 	catch(CCException)
 	{
 		delete[] pData;
-		throw;
-//		Error_static("CRegistry_Dynamic::XRG_Read", CStrF("Exception reading file %s", _Filename.Str()));
+//		throw;
+		Error_static("CRegistry_Dynamic::XRG_Read", CStrF("Exception reading file %s", _ThisFileName.Str()));
 	}
 	)
 	delete[] pData;
@@ -2834,8 +2834,8 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 
 		case 4: //REGISTRY_TYPE_FLOAT
 			{
-				Type_SetNew(REGISTRY_TYPE_FP4, 1);
-				_pFile->ReadLE(Type_Get_fp4());
+				Type_SetNew(REGISTRY_TYPE_FP32, 1);
+				_pFile->ReadLE(Type_Get_fp32());
 			}
 			break;
 		default :
@@ -2908,9 +2908,9 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 				_pFile->ReadLE(Type_Get_uint32());
 			}
 			break;
-		case REGISTRY_TYPE_FP4:
+		case REGISTRY_TYPE_FP32:
 			{
-				_pFile->ReadLE(Type_Get_fp4());
+				_pFile->ReadLE(Type_Get_fp32());
 			}
 			break;
 		default :
@@ -3010,7 +3010,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 
 				mint Size;
 				if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-					Size = ms_lTypeSize[m_Type] * nDim + sizeof(fp4);
+					Size = ms_lTypeSize[m_Type] * nDim + sizeof(fp32);
 				else
 					Size = ms_lTypeSize[m_Type] * nDim;
 				pSeq->m_pData = M_ALLOC(Size * pSeq->m_nKeyFrames);
@@ -3041,7 +3041,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							}
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3062,7 +3062,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							}
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3077,7 +3077,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							_pFile->ReadLE(((uint8 *)pData), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3092,7 +3092,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							_pFile->ReadLE(((int16 *)pData), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3107,7 +3107,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							_pFile->ReadLE(((int32 *)pData), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3122,22 +3122,22 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							_pFile->ReadLE(((uint32 *)pData), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
 						}
 					}
 					break;
-				case REGISTRY_TYPE_FP4:
+				case REGISTRY_TYPE_FP32:
 					{
 						for (int j = 0; j < pSeq->m_nKeyFrames; ++j)
 						{
 							void *pData = Private_Anim_GetKFData(pSeq, j);
-							_pFile->ReadLE(((fp4 *)pData), nDim);
+							_pFile->ReadLE(((fp32 *)pData), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3152,7 +3152,7 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 							_pFile->ReadLE((((uint16 *)pData)), nDim);
 							if (bTimed)
 							{
-								fp4 Time;
+								fp32 Time;
 								_pFile->ReadLE(Time);
 								Private_Anim_SetKFTime(pSeq->m_pData, j, Time);
 							}
@@ -3219,9 +3219,9 @@ void CRegistry_Dynamic::Read(CCFile* _pFile, int _Version)
 					_pFile->ReadLE((uint32 *)Type_GetValue(), nDim);
 				}
 				break;
-			case REGISTRY_TYPE_FP4:
+			case REGISTRY_TYPE_FP32:
 				{
-					_pFile->ReadLE((fp4 *)Type_GetValue(), nDim);
+					_pFile->ReadLE((fp32 *)Type_GetValue(), nDim);
 				}
 				break;
 			case REGISTRY_TYPE_FP2:
@@ -3358,12 +3358,12 @@ void CRegistry_Dynamic::Write(CCFile* _pFile) const
 					}
 				}
 				break;
-			case REGISTRY_TYPE_FP4:
+			case REGISTRY_TYPE_FP32:
 				{
 					for (int j = 0; j < pSeq->m_nKeyFrames; ++j)
 					{
 						const void *pData = Private_Anim_GetKFData(pSeq, j);
-						_pFile->WriteLE(((fp4 *)pData), (m_Dimensions+1));
+						_pFile->WriteLE(((fp32 *)pData), (m_Dimensions+1));
 						if (bTimed)
 							_pFile->WriteLE(Private_Anim_GetKFTimeTimed(pSeq, j));
 					}
@@ -3434,9 +3434,9 @@ void CRegistry_Dynamic::Write(CCFile* _pFile) const
 				_pFile->WriteLE((uint32 *)Type_GetValue(), (m_Dimensions+1));
 			}
 			break;
-		case REGISTRY_TYPE_FP4:
+		case REGISTRY_TYPE_FP32:
 			{
-				_pFile->WriteLE((fp4 *)Type_GetValue(), (m_Dimensions+1));
+				_pFile->WriteLE((fp32 *)Type_GetValue(), (m_Dimensions+1));
 			}
 			break;
 		case REGISTRY_TYPE_FP2:
@@ -3537,7 +3537,7 @@ void CRegistry_Dynamic::Private_Anim_DestroyDataTimed(void *_pDst, int _iStartDs
 	if (ms_lTypeDestructorAnim[m_Type])
 	{
 		int iEnd = _iStartDst + _nItems;
-		mint ItemSize = ms_lTypeSize[m_Type] * _nDim + sizeof(fp4);
+		mint ItemSize = ms_lTypeSize[m_Type] * _nDim + sizeof(fp32);
 		for (int i = _iStartDst; i < iEnd; ++i)
 		{
 			uint8 *pDstItem = (uint8 *)_pDst + ItemSize * (i);
@@ -3551,7 +3551,7 @@ void CRegistry_Dynamic::Private_Anim_ConstructDataTimed(void *_pDst, int _iStart
 	if (ms_lTypeConstructorAnim[m_Type])
 	{
 		int iEnd = _iStartDst + _nItems;
-		mint ItemSize = ms_lTypeSize[m_Type] * _nDim + sizeof(fp4);
+		mint ItemSize = ms_lTypeSize[m_Type] * _nDim + sizeof(fp32);
 		for (int i = _iStartDst; i < iEnd; ++i)
 		{
 			uint8 *pDstItem = (uint8 *)_pDst + ItemSize * (i);
@@ -3583,7 +3583,7 @@ void CRegistry_Dynamic::Private_Anim_CopyDataSrcTimed(void *_pDst, void *_pSrc, 
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
 	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst;
-	mint ItemSizeSrc = ms_lTypeSize[m_Type] * _nDimSrc + sizeof(fp4);
+	mint ItemSizeSrc = ms_lTypeSize[m_Type] * _nDimSrc + sizeof(fp32);
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
@@ -3601,13 +3601,13 @@ void CRegistry_Dynamic::Private_Anim_CopyDataDstTimed(void *_pDst, void *_pSrc, 
 {
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
-	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp4);
+	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp32);
 	mint ItemSizeSrc = ms_lTypeSize[m_Type] * _nDimSrc;
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
 		uint8 *pDstItem = (uint8 *)_pDst + ItemSizeDst * (i);
-		fp4 *pTimeDst = (fp4 *)(pDstItem + ItemSizeDst - sizeof(fp4));
+		fp32 *pTimeDst = (fp32 *)(pDstItem + ItemSizeDst - sizeof(fp32));
 		*pTimeDst = i;
 		
 		if (ms_lTypeConstructorAnim[m_Type])
@@ -3622,14 +3622,14 @@ void CRegistry_Dynamic::Private_Anim_CopyDataTimed(void *_pDst, void *_pSrc, int
 {
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
-	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp4);
-	mint ItemSizeSrc = ms_lTypeSize[m_Type] * _nDimSrc + sizeof(fp4);
+	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp32);
+	mint ItemSizeSrc = ms_lTypeSize[m_Type] * _nDimSrc + sizeof(fp32);
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
 		uint8 *pDstItem = (uint8 *)_pDst + ItemSizeDst * (i);
-		fp4 *pTimeSrc = (fp4 *)(pSrcItem + ItemSizeSrc - sizeof(fp4));
-		fp4 *pTimeDst = (fp4 *)(pDstItem + ItemSizeDst - sizeof(fp4));
+		fp32 *pTimeSrc = (fp32 *)(pSrcItem + ItemSizeSrc - sizeof(fp32));
+		fp32 *pTimeDst = (fp32 *)(pDstItem + ItemSizeDst - sizeof(fp32));
 		*pTimeDst = *pTimeSrc;
 		
 		if (ms_lTypeConstructorAnim[m_Type])
@@ -3664,7 +3664,7 @@ void CRegistry_Dynamic::Private_Anim_CopyDataSrcTimedTyped(void *_pDst, void *_p
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
 	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst;
-	mint ItemSizeSrc = ms_lTypeSize[_Type] * _nDimSrc + sizeof(fp4);
+	mint ItemSizeSrc = ms_lTypeSize[_Type] * _nDimSrc + sizeof(fp32);
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
@@ -3682,13 +3682,13 @@ void CRegistry_Dynamic::Private_Anim_CopyDataDstTimedTyped(void *_pDst, void *_p
 {
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
-	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp4);
+	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp32);
 	mint ItemSizeSrc = ms_lTypeSize[_Type] * _nDimSrc;
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
 		uint8 *pDstItem = (uint8 *)_pDst + ItemSizeDst * (i);
-		fp4 *pTimeDst = (fp4 *)(pDstItem + ItemSizeDst - sizeof(fp4));
+		fp32 *pTimeDst = (fp32 *)(pDstItem + ItemSizeDst - sizeof(fp32));
 		*pTimeDst = i;
 		
 		if (ms_lTypeConstructorAnim[m_Type])
@@ -3703,14 +3703,14 @@ void CRegistry_Dynamic::Private_Anim_CopyDataTimedTyped(void *_pDst, void *_pSrc
 {
 	int iDiff = _iStartSrc - _iStartDst;
 	int iEnd = _iStartDst + _nItems;
-	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp4);
-	mint ItemSizeSrc = ms_lTypeSize[_Type] * _nDimSrc + sizeof(fp4);
+	mint ItemSizeDst = ms_lTypeSize[m_Type] * _nDimDst + sizeof(fp32);
+	mint ItemSizeSrc = ms_lTypeSize[_Type] * _nDimSrc + sizeof(fp32);
 	for (int i = _iStartDst; i < iEnd; ++i)
 	{
 		uint8 *pSrcItem = (uint8 *)_pSrc + ItemSizeSrc * (i + iDiff);
 		uint8 *pDstItem = (uint8 *)_pDst + ItemSizeDst * (i);
-		fp4 *pTimeSrc = (fp4 *)(pSrcItem + ItemSizeSrc - sizeof(fp4));
-		fp4 *pTimeDst = (fp4 *)(pDstItem + ItemSizeDst - sizeof(fp4));
+		fp32 *pTimeSrc = (fp32 *)(pSrcItem + ItemSizeSrc - sizeof(fp32));
+		fp32 *pTimeDst = (fp32 *)(pDstItem + ItemSizeDst - sizeof(fp32));
 		*pTimeDst = *pTimeSrc;
 		
 		if (ms_lTypeConstructorAnim[m_Type])
@@ -3815,7 +3815,7 @@ void CRegistry_Dynamic::Private_Anim_TimedPromote()
 		{
 			CAnimationSequence *pSeq = AnimData.m_Sequences[i];
 			mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1);
-			mint NewItemSize = ItemSize + sizeof(fp4);
+			mint NewItemSize = ItemSize + sizeof(fp32);
 			mint NewSize = pSeq->m_nKeyFrames * NewItemSize;
 			
 			uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
@@ -3841,7 +3841,7 @@ void CRegistry_Dynamic::Private_Anim_TimedDemote()
 		for (int i = 0; i < nSeq; ++i)
 		{
 			CAnimationSequence *pSeq = AnimData.m_Sequences[i];
-//			mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4);
+//			mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32);
 			mint NewItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1);
 			mint NewSize = pSeq->m_nKeyFrames * NewItemSize;
 			
@@ -3908,23 +3908,23 @@ uint32 CRegistry_Dynamic::Anim_ThisGetFlags() const
 	return AnimData.m_AnimFlags;
 }
 
-void CRegistry_Dynamic::Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp4 *_pParams, int _nParams)
+void CRegistry_Dynamic::Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp32 *_pParams, int _nParams)
 {
 	Private_Anim_CheckAnimEnabled();
 
 	CAnimationData &AnimData = Type_GetAnimationData();
 	AnimData.m_AnimIPType = _InterpolateType;
 	AnimData.m_InterpolateData.SetLen(_nParams);
-	memcpy(AnimData.m_InterpolateData.GetBasePtr(), _pParams, _nParams * sizeof(fp4));
+	memcpy(AnimData.m_InterpolateData.GetBasePtr(), _pParams, _nParams * sizeof(fp32));
 }
 
-uint32 CRegistry_Dynamic::Anim_ThisGetInterpolate(fp4 *_pParams, int &_nParams) const
+uint32 CRegistry_Dynamic::Anim_ThisGetInterpolate(fp32 *_pParams, int &_nParams) const
 {
 	Private_Anim_CheckAnimEnabled();
 	const CAnimationData &AnimData = Type_GetAnimationData();
 	if (_pParams)
 	{
-		memcpy(_pParams, AnimData.m_InterpolateData.GetBasePtr(), Min(_nParams, AnimData.m_InterpolateData.Len()) * sizeof(fp4));
+		memcpy(_pParams, AnimData.m_InterpolateData.GetBasePtr(), Min(_nParams, AnimData.m_InterpolateData.Len()) * sizeof(fp32));
 	}
 	_nParams = AnimData.m_InterpolateData.Len();
 	return AnimData.m_AnimIPType;
@@ -4043,7 +4043,7 @@ int CRegistry_Dynamic::Anim_ThisGetNumSeq() const
 	return AnimData.m_Sequences.Len();
 }
 
-fp4 CRegistry_Dynamic::Anim_ThisGetSeqLoopStart(int _iSeq) const
+fp32 CRegistry_Dynamic::Anim_ThisGetSeqLoopStart(int _iSeq) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 
@@ -4053,7 +4053,7 @@ fp4 CRegistry_Dynamic::Anim_ThisGetSeqLoopStart(int _iSeq) const
 }
 
 
-fp4 CRegistry_Dynamic::Anim_ThisGetSeqLength(int _iSeq) const
+fp32 CRegistry_Dynamic::Anim_ThisGetSeqLength(int _iSeq) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 
@@ -4065,7 +4065,7 @@ fp4 CRegistry_Dynamic::Anim_ThisGetSeqLength(int _iSeq) const
 		return pSeq->m_nKeyFrames;
 }
 
-fp4 CRegistry_Dynamic::Anim_ThisGetSeqLoopEnd(int _iSeq) const
+fp32 CRegistry_Dynamic::Anim_ThisGetSeqLoopEnd(int _iSeq) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 
@@ -4074,7 +4074,7 @@ fp4 CRegistry_Dynamic::Anim_ThisGetSeqLoopEnd(int _iSeq) const
 	return pSeq->m_LoopEnd;
 }
 
-void CRegistry_Dynamic::Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time)
+void CRegistry_Dynamic::Anim_ThisSetSeqLoopStart(int _iSeq, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 
@@ -4083,7 +4083,7 @@ void CRegistry_Dynamic::Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time)
 	pSeq->m_LoopStart = _Time;
 }
 
-void CRegistry_Dynamic::Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time)
+void CRegistry_Dynamic::Anim_ThisSetSeqLoopEnd(int _iSeq, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 
@@ -4093,17 +4093,17 @@ void CRegistry_Dynamic::Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time)
 }
 
 
-fp4 CRegistry_Dynamic::Private_Anim_GetKFTimeTimed(const CAnimationSequence *_pSeq, int _iKeyFrame) const
+fp32 CRegistry_Dynamic::Private_Anim_GetKFTimeTimed(const CAnimationSequence *_pSeq, int _iKeyFrame) const
 {
 	M_ASSERT(Type_GetAnimationData().m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed && _iKeyFrame >= 0 && _iKeyFrame < _pSeq->m_nKeyFrames, "");
-	return *((fp4 *)(((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4)) * _iKeyFrame + ms_lTypeSize[m_Type] * (m_Dimensions+1)));
+	return *((fp32 *)(((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32)) * _iKeyFrame + ms_lTypeSize[m_Type] * (m_Dimensions+1)));
 }
 
-fp4 CRegistry_Dynamic::Private_Anim_GetKFTime(const CAnimationSequence *_pSeq, int _iKeyFrame) const
+fp32 CRegistry_Dynamic::Private_Anim_GetKFTime(const CAnimationSequence *_pSeq, int _iKeyFrame) const
 {
 	M_ASSERT(_iKeyFrame >= 0 && _iKeyFrame < _pSeq->m_nKeyFrames, "");
 	if (Type_GetAnimationData().m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-		return *((fp4 *)(((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4)) * _iKeyFrame + ms_lTypeSize[m_Type] * (m_Dimensions+1)));
+		return *((fp32 *)(((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32)) * _iKeyFrame + ms_lTypeSize[m_Type] * (m_Dimensions+1)));
 	else
 		return _iKeyFrame;
 }
@@ -4112,7 +4112,7 @@ const void *CRegistry_Dynamic::Private_Anim_GetKFData(const CAnimationSequence *
 {
 	const CAnimationData &AnimData = Type_GetAnimationData();
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4)) * _iKeyFrame);
+		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32)) * _iKeyFrame);
 	else
 		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1)) * _iKeyFrame);
 }
@@ -4121,12 +4121,12 @@ void *CRegistry_Dynamic::Private_Anim_GetKFData(CAnimationSequence *_pSeq, int _
 {
 	CAnimationData &AnimData = Type_GetAnimationData();
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4)) * _iKeyFrame);
+		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32)) * _iKeyFrame);
 	else
 		return (((uint8 *)_pSeq->m_pData) + (ms_lTypeSize[m_Type] * (m_Dimensions+1)) * _iKeyFrame);
 }
 
-fp4 CRegistry_Dynamic::Private_Anim_GetSequenceLength(const CAnimationSequence *_pSeq) const
+fp32 CRegistry_Dynamic::Private_Anim_GetSequenceLength(const CAnimationSequence *_pSeq) const
 {
 	if (_pSeq->m_nKeyFrames < 1)
 		return 0;
@@ -4138,7 +4138,7 @@ fp4 CRegistry_Dynamic::Private_Anim_GetSequenceLength(const CAnimationSequence *
 		return _pSeq->m_nKeyFrames;
 }
 
-int CRegistry_Dynamic::Private_Anim_FindKeyByTime(const CAnimationSequence *_pSeq, fp4 _Time) const
+int CRegistry_Dynamic::Private_Anim_FindKeyByTime(const CAnimationSequence *_pSeq, fp32 _Time) const
 {
 	const CAnimationData &AnimData = Type_GetAnimationData();
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
@@ -4146,7 +4146,7 @@ int CRegistry_Dynamic::Private_Anim_FindKeyByTime(const CAnimationSequence *_pSe
 		int nKF = _pSeq->m_nKeyFrames;
 		int iIndexSearch = 0;
 
-		fp4 Hash = _Time;
+		fp32 Hash = _Time;
 
 		int Low = 0;
 		int High = nKF;
@@ -4154,7 +4154,7 @@ int CRegistry_Dynamic::Private_Anim_FindKeyByTime(const CAnimationSequence *_pSe
 		{
 			iIndexSearch = (Low + High) >> 1;
 
-			fp4 CurrHash = Private_Anim_GetKFTimeTimed(_pSeq, iIndexSearch);
+			fp32 CurrHash = Private_Anim_GetKFTimeTimed(_pSeq, iIndexSearch);
 
 			if (CurrHash < Hash)
 				Low = iIndexSearch + 1;
@@ -4185,14 +4185,14 @@ int CRegistry_Dynamic::Private_Anim_FindKeyByTime(const CAnimationSequence *_pSe
 	}
 }
 
-void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost, int _Flags) const
+void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost, int _Flags) const
 {
 	if (_pTimeDeltas)
 	{
 		const CAnimationSequence *pSeq = _pSeq;
-		fp4 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
-		fp4 LoopStart = (_pSeq->m_LoopStart < 0 ? 0 : _pSeq->m_LoopStart);
-		fp4 LoopEnd = (_pSeq->m_LoopEnd < 0 ? SeqLen : _pSeq->m_LoopEnd);
+		fp32 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
+		fp32 LoopStart = (_pSeq->m_LoopStart < 0 ? 0 : _pSeq->m_LoopStart);
+		fp32 LoopEnd = (_pSeq->m_LoopEnd < 0 ? SeqLen : _pSeq->m_LoopEnd);
 		M_ASSERT(LoopEnd > LoopStart, "");
 		if (LoopEnd <= LoopStart)
 			return;
@@ -4202,7 +4202,7 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 		
 		if (nTimeDeltas > 128)
 		{
-			fp4 *pDeltas = new fp4[nTimeDeltas * 2];
+			fp32 *pDeltas = new fp32[nTimeDeltas * 2];
 			
 			Private_Anim_ThisGetKF(_pSeq, _Time, _Fraction, _pKeys, pDeltas, _nPre, _nPost, _Flags);
 			for (int i = 0; i < nTimeDeltas; ++i)
@@ -4227,18 +4227,18 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 	}
 }
 
-void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost, int _Flags) const
+void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost, int _Flags) const
 {
 //	const CAnimationData &AnimData = Type_GetAnimationData();
 	const CAnimationSequence *pSeq = _pSeq;
 
-	fp4 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
-	fp4 Time = 0;
+	fp32 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
+	fp32 Time = 0;
 	int nLoops = 0;
-	fp4 LoopStart = 0;
-	fp4 LoopEnd = 0;
-	fp4 LoopLength = 0;
-	fp4 LoopTime = -1;
+	fp32 LoopStart = 0;
+	fp32 LoopEnd = 0;
+	fp32 LoopLength = 0;
+	fp32 LoopTime = -1;
 	if (_Flags & REGISTRY_ANIMFLAGS_LOOP)
 	{
 		LoopStart = (_pSeq->m_LoopStart < 0 ? 0 : _pSeq->m_LoopStart);
@@ -4308,7 +4308,7 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 			Time = _Time.GetTime();
 	}
 
-	fp4 LowTime = Private_Anim_GetKFTime(pSeq, 0);
+	fp32 LowTime = Private_Anim_GetKFTime(pSeq, 0);
 	if (Time < LowTime)
 		Time = LowTime;
 
@@ -4645,17 +4645,17 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 			}
 		}
 
-		fp4 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
+		fp32 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
 		if (_nPost)
 		{
-			fp4 Duration = CRegistry_Shared_Helpers::Private_Anim_GetKFDelta(this, pSeq, _pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart);
+			fp32 Duration = CRegistry_Shared_Helpers::Private_Anim_GetKFDelta(this, pSeq, _pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart);
 
 			if (_Flags & REGISTRY_ANIMFLAGS_LOOP_PINGPONG)
 			{
 				if (Duration > 0)
 				{
-					fp4 Time0 = Private_Anim_GetKFTime(pSeq, _pKeys[_nPre]);
-					fp4 Time1 = Private_Anim_GetKFTime(pSeq, _pKeys[_nPre+1]);
+					fp32 Time0 = Private_Anim_GetKFTime(pSeq, _pKeys[_nPre]);
+					fp32 Time1 = Private_Anim_GetKFTime(pSeq, _pKeys[_nPre+1]);
 					if (Time1 > Time0)
 					{
 						_Fraction = (Time - Time0) / Duration;
@@ -4688,7 +4688,7 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 		}
 		else
 		{
-			fp4 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
+			fp32 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
 			Time = Min(Max(LowTime, Time), HighTime);
 			if (HighTime != LowTime)
 				_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -4742,10 +4742,10 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 			_pKeys[_nPre+i+1] = iCur;
 		}
 
-		fp4 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
+		fp32 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
 		if (_nPost)
 		{
-			fp4 Duration = CRegistry_Shared_Helpers::Private_Anim_GetKFDelta(this, pSeq, _pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart);
+			fp32 Duration = CRegistry_Shared_Helpers::Private_Anim_GetKFDelta(this, pSeq, _pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart);
 			if (Duration > 0)
 			{
 				if (LowTime > Time)
@@ -4760,7 +4760,7 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 		}
 		else
 		{
-			fp4 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
+			fp32 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
 			Time = Min(Max(LowTime, Time), HighTime);
 			if (HighTime != LowTime)
 				_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -4780,8 +4780,8 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 		}
 		iCur = iStart;
 
-		fp4 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
-		fp4 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
+		fp32 LowTime = Private_Anim_GetKFTime(pSeq, iStart);
+		fp32 HighTime = Private_Anim_GetKFTime(pSeq, Min(iStart + 1, nKF - 1));
 		Time = Min(Max(LowTime, Time), HighTime);
 		if (HighTime != LowTime)
 			_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -4805,9 +4805,9 @@ void CRegistry_Dynamic::Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, 
 	}
 }
 
-fp4 CRegistry_Dynamic::Private_Anim_GetWrappedTime(const CAnimationSequence *_pSeq, const CMTime &_Time, uint32 _Flags) const
+fp32 CRegistry_Dynamic::Private_Anim_GetWrappedTime(const CAnimationSequence *_pSeq, const CMTime &_Time, uint32 _Flags) const
 {
-	fp4 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
+	fp32 SeqLen = Private_Anim_GetSequenceLength(_pSeq);
 
 	if (_Time.Compare(SeqLen) > 0)
 	{
@@ -4815,12 +4815,12 @@ fp4 CRegistry_Dynamic::Private_Anim_GetWrappedTime(const CAnimationSequence *_pS
 		{
 			CMTime WrapTime = _Time - CMTime::CreateFromSeconds(SeqLen);
 			
-			fp4 LoopStart = (_pSeq->m_LoopStart < 0 ? 0 : _pSeq->m_LoopStart);
-			fp4 LoopEnd = (_pSeq->m_LoopEnd < 0 ? SeqLen : _pSeq->m_LoopEnd);
+			fp32 LoopStart = (_pSeq->m_LoopStart < 0 ? 0 : _pSeq->m_LoopStart);
+			fp32 LoopEnd = (_pSeq->m_LoopEnd < 0 ? SeqLen : _pSeq->m_LoopEnd);
 			M_ASSERT(LoopEnd > LoopStart, "");
 
-			fp4 LoopLength = LoopEnd - LoopStart;
-			fp4 LoopTime = WrapTime.GetTimeModulus(LoopLength);
+			fp32 LoopLength = LoopEnd - LoopStart;
+			fp32 LoopTime = WrapTime.GetTimeModulus(LoopLength);
 
 			if (_Flags & REGISTRY_ANIMFLAGS_LOOP_PINGPONG)
 			{
@@ -4841,7 +4841,7 @@ fp4 CRegistry_Dynamic::Private_Anim_GetWrappedTime(const CAnimationSequence *_pS
 
 }
 
-void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, fp32 _Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	const CAnimationData &AnimData = Type_GetAnimationData();
@@ -4849,21 +4849,21 @@ void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int
 	return Private_Anim_ThisGetKF(pSeq, CMTime::CreateFromSeconds(_Time), _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost, AnimData.m_AnimFlags);
 }
 
-void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	const CAnimationData &AnimData = Type_GetAnimationData();
 	const CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
-//	fp4 WrappedTime = Private_Anim_GetWrappedTime(pSeq, _Time, AnimData.m_AnimFlags);
+//	fp32 WrappedTime = Private_Anim_GetWrappedTime(pSeq, _Time, AnimData.m_AnimFlags);
 	return Private_Anim_ThisGetKF(pSeq, _Time, _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost, AnimData.m_AnimFlags);
 }
 
-void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
+void CRegistry_Dynamic::Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	const CAnimationData &AnimData = Type_GetAnimationData();
 	const CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
-//	fp4 WrappedTime = Private_Anim_GetWrappedTime(pSeq, _Time, AnimData.m_AnimFlags);
+//	fp32 WrappedTime = Private_Anim_GetWrappedTime(pSeq, _Time, AnimData.m_AnimFlags);
 	return Private_Anim_ThisGetKF(pSeq, _Time, _Fraction, _pKeys, _pDeltasCalc, _nPre, _nPost, AnimData.m_AnimFlags);
 }
 
@@ -4875,7 +4875,7 @@ void CRegistry_Dynamic::Anim_ThisSetNumKF(int _iSeq, int _nKF)
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
 	{
 		mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1);
-		mint NewItemSize = ItemSize + sizeof(fp4);
+		mint NewItemSize = ItemSize + sizeof(fp32);
 		mint NewSize = _nKF * NewItemSize;
 		
 		uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
@@ -4883,7 +4883,7 @@ void CRegistry_Dynamic::Anim_ThisSetNumKF(int _iSeq, int _nKF)
 		
 		int nKeys = Min(pSeq->m_nKeyFrames, _nKF);
 
-//		fp4 LastTime = 0;
+//		fp32 LastTime = 0;
 
 		Private_Anim_CopyDataTimed(pNewData, pOldData, 0, 0, (m_Dimensions+1), (m_Dimensions+1), nKeys, true);
 		Private_Anim_DestroyDataTimed(pOldData, nKeys, pSeq->m_nKeyFrames - nKeys, (m_Dimensions+1));
@@ -4932,13 +4932,13 @@ void CRegistry_Dynamic::Anim_ThisDeleteKF(int _iSeq, int _iKF)
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
 	{
 		mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1);
-		mint NewItemSize = ItemSize + sizeof(fp4);
+		mint NewItemSize = ItemSize + sizeof(fp32);
 		mint NewSize = nNew * NewItemSize;
 		
 		uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
 		uint8 *pOldData = (uint8 *)pSeq->m_pData;
 		
-//		fp4 LastTime = 0;
+//		fp32 LastTime = 0;
 
 		Private_Anim_CopyDataTimed(pNewData, pOldData, 0, 0, (m_Dimensions+1), (m_Dimensions+1), _iKF, true);
 		Private_Anim_DestroyDataTimed(pOldData, _iKF, 1, (m_Dimensions+1));
@@ -4958,7 +4958,7 @@ void CRegistry_Dynamic::Anim_ThisDeleteKF(int _iSeq, int _iKF)
 		uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
 		uint8 *pOldData = (uint8 *)pSeq->m_pData;
 		
-//		fp4 LastTime = 0;
+//		fp32 LastTime = 0;
 
 		Private_Anim_CopyData(pNewData, pOldData, 0, 0, (m_Dimensions+1), (m_Dimensions+1), _iKF, true);
 		Private_Anim_DestroyData(pOldData, _iKF, 1, (m_Dimensions+1));
@@ -4971,7 +4971,7 @@ void CRegistry_Dynamic::Anim_ThisDeleteKF(int _iSeq, int _iKF)
 	}
 }
 
-int CRegistry_Dynamic::Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time) 
+int CRegistry_Dynamic::Anim_ThisSetKFTime(int _iSeq, int _iKF, fp32 _Time) 
 {
 	Private_Anim_CheckValidSequenceKeyFrame(_iSeq, _iKF);
 	CAnimationData &AnimData = Type_GetAnimationData();
@@ -4992,7 +4992,7 @@ int CRegistry_Dynamic::Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time)
 	}
 
 	int nNew = pSeq->m_nKeyFrames;
-	mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp4);
+	mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1) + sizeof(fp32);
 	mint NewSize = nNew * ItemSize;
 	
 	uint8 *pNewData = (uint8 *)M_ALLOC(NewSize);
@@ -5021,7 +5021,7 @@ int CRegistry_Dynamic::Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time)
 	return iNewPos;
 }
 
-fp4 CRegistry_Dynamic::Anim_ThisGetKFTime(int _iSeq, int _iKF) const
+fp32 CRegistry_Dynamic::Anim_ThisGetKFTime(int _iSeq, int _iKF) const
 {
 	Private_Anim_CheckValidSequenceKeyFrame(_iSeq, _iKF);
 	const CAnimationData &AnimData = Type_GetAnimationData();
@@ -5030,7 +5030,7 @@ fp4 CRegistry_Dynamic::Anim_ThisGetKFTime(int _iSeq, int _iKF) const
 }
 
 
-fp4 CRegistry_Dynamic::Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq) const
+fp32 CRegistry_Dynamic::Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq) const
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	const CAnimationData &AnimData = Type_GetAnimationData();
@@ -5039,12 +5039,12 @@ fp4 CRegistry_Dynamic::Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq) c
 }
 
 
-int CRegistry_Dynamic::Private_Anim_GetKFInsertPos(const CAnimationSequence *_pSeq, fp4 _Time) const
+int CRegistry_Dynamic::Private_Anim_GetKFInsertPos(const CAnimationSequence *_pSeq, fp32 _Time) const
 {
 	if (_pSeq->m_nKeyFrames < 1)
 		return 0;
 
-	fp4 Frac;
+	fp32 Frac;
 	int Key;
 	Private_Anim_ThisGetKF(_pSeq, CMTime::CreateFromSeconds(_Time), Frac, &Key, (uint32 *)NULL, 0, 0, 0);
 	return Min(Key + 1, _pSeq->m_nKeyFrames);
@@ -5060,7 +5060,7 @@ void CRegistry_Dynamic::Private_Anim_SetItem(CAnimationSequence *_pSeq, int _iKF
 	
 }
 
-int CRegistry_Dynamic::Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp4 _Time, const void *_pData, int _Type, int _nDim)
+int CRegistry_Dynamic::Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp32 _Time, const void *_pData, int _Type, int _nDim)
 {
 	CAnimationData &AnimData = Type_GetAnimationData();
 	int iInsert = Private_Anim_GetKFInsertPos(_pSeq, _Time);
@@ -5070,7 +5070,7 @@ int CRegistry_Dynamic::Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp4 _T
 	int nNew = pSeq->m_nKeyFrames + 1;
 	mint ItemSize = ms_lTypeSize[m_Type] * (m_Dimensions+1);
 	if (AnimData.m_InternalAnimFlags & ERegistryDynamicAnimFlag_Timed)
-		ItemSize +=  sizeof(fp4);
+		ItemSize +=  sizeof(fp32);
 
 	mint NewSize = nNew * ItemSize;
 
@@ -5105,7 +5105,7 @@ int CRegistry_Dynamic::Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp4 _T
 }
 
 // Adds
-int CRegistry_Dynamic::Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKF(int _iSeq, CStr _Val, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(REGISTRY_TYPE_STR, 1);
@@ -5117,7 +5117,7 @@ int CRegistry_Dynamic::Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time)
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(_StoreType, 1);
@@ -5128,18 +5128,18 @@ int CRegistry_Dynamic::Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType, fp
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFf(int _iSeq, fp4 _Val, int _StoreType, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFf(int _iSeq, fp32 _Val, int _StoreType, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(_StoreType, 1);
 	CAnimationData &AnimData = Type_GetAnimationData();
 	CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
 
-	int iInsert = Private_Anim_InsertItem(pSeq, _Time, &_Val, REGISTRY_TYPE_FP4, 1);
+	int iInsert = Private_Anim_InsertItem(pSeq, _Time, &_Val, REGISTRY_TYPE_FP32, 1);
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(REGISTRY_TYPE_DATA, 1);
@@ -5155,7 +5155,7 @@ int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Siz
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference, fp32 _Time)
 {
 	if (_bReference)
 	{
@@ -5171,7 +5171,7 @@ int CRegistry_Dynamic::Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _b
 		return Anim_ThisAddKFd(_iSeq, _lValue.GetBasePtr(), _lValue.Len(), false);
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(REGISTRY_TYPE_STR, _nDim);
@@ -5187,7 +5187,7 @@ int CRegistry_Dynamic::Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, 
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(_StoreType, _nDim);
@@ -5198,18 +5198,18 @@ int CRegistry_Dynamic::Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp4 *_pVal, int _StoreType, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp32 *_pVal, int _StoreType, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(_StoreType, _nDim);
 	CAnimationData &AnimData = Type_GetAnimationData();
 	CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
 
-	int iInsert = Private_Anim_InsertItem(pSeq, _Time, _pVal, REGISTRY_TYPE_FP4, _nDim);
+	int iInsert = Private_Anim_InsertItem(pSeq, _Time, _pVal, REGISTRY_TYPE_FP32, _nDim);
 	return iInsert;
 }
 
-int CRegistry_Dynamic::Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference, fp4 _Time)
+int CRegistry_Dynamic::Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference, fp32 _Time)
 {
 	Private_Anim_CheckValidSequence(_iSeq);
 	Type_Set(REGISTRY_TYPE_DATA, _nDim);
@@ -5221,7 +5221,7 @@ int CRegistry_Dynamic::Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8
 }
 
 // Set
-void CRegistry_Dynamic::Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp4 _Time)
+void CRegistry_Dynamic::Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp32 _Time)
 {
 	Private_Anim_CheckValidSequenceKeyFrame(_iSeq, _iKF);
 
@@ -5275,14 +5275,14 @@ void CRegistry_Dynamic::Anim_ThisSetKFValuei(int _iSeq, int _iKF, int32 _Val, in
 	Private_Anim_SetItem(pSeq, _iKF, &_Val, REGISTRY_TYPE_INT32, 1);
 }
 
-void CRegistry_Dynamic::Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp4 _Val, int _StoreType)
+void CRegistry_Dynamic::Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp32 _Val, int _StoreType)
 {
 	Private_Anim_CheckValidSequenceKeyFrame(_iSeq, _iKF);
 	Type_Set(_StoreType, 1);
 	CAnimationData &AnimData = Type_GetAnimationData();
 	CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
 
-	Private_Anim_SetItem(pSeq, _iKF, &_Val, REGISTRY_TYPE_FP4, 1);
+	Private_Anim_SetItem(pSeq, _iKF, &_Val, REGISTRY_TYPE_FP32, 1);
 }
 
 void CRegistry_Dynamic::Anim_ThisSetKFValued(int _iSeq, int _iKF, const uint8* _pValue, int _Size, bint _bQuick)
@@ -5339,14 +5339,14 @@ void CRegistry_Dynamic::Anim_ThisSetKFValueai(int _iSeq, int _iKF, int _nDim, co
 	Private_Anim_SetItem(pSeq, _iKF, _pVal, REGISTRY_TYPE_INT32, _nDim);
 }
 
-void CRegistry_Dynamic::Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp4 *_pVal, int _StoreType)
+void CRegistry_Dynamic::Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp32 *_pVal, int _StoreType)
 {
 	Private_Anim_CheckValidSequenceKeyFrame(_iSeq, _iKF);
 	Type_Set(_StoreType, _nDim);
 	CAnimationData &AnimData = Type_GetAnimationData();
 	CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
 
-	Private_Anim_SetItem(pSeq, _iKF, _pVal, REGISTRY_TYPE_FP4, _nDim);
+	Private_Anim_SetItem(pSeq, _iKF, _pVal, REGISTRY_TYPE_FP32, _nDim);
 }
 
 void CRegistry_Dynamic::Anim_ThisSetKFValuead(int _iSeq, int _iKF, int _nDim, const TArray<uint8> *_lValue, bint _bReference)
@@ -5397,7 +5397,7 @@ int32 CRegistry_Dynamic::Anim_ThisGetKFValuei(int _iSeq, int _iKF) const
 	return Val;
 }
 
-fp4 CRegistry_Dynamic::Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
+fp32 CRegistry_Dynamic::Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
 {
 	if (!(m_InternalFlags & ERegistryDynamicFlags_Animated))
 		return GetThisValuef();
@@ -5406,8 +5406,8 @@ fp4 CRegistry_Dynamic::Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
 		return 0;
 	
 	const CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
-	fp4 Val;
-	Private_Anim_GetItem(pSeq, _iKF, &Val, REGISTRY_TYPE_FP4, 1);
+	fp32 Val;
+	Private_Anim_GetItem(pSeq, _iKF, &Val, REGISTRY_TYPE_FP32, 1);
 	return Val;
 }
 
@@ -5472,7 +5472,7 @@ void CRegistry_Dynamic::Anim_ThisGetKFValueai(int _iSeq, int _iKF, int _nDim, in
 	Private_Anim_GetItem(pSeq, _iKF, _pDest, REGISTRY_TYPE_INT32, _nDim);
 }
 
-void CRegistry_Dynamic::Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const
+void CRegistry_Dynamic::Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const
 {
 	if (!(m_InternalFlags & ERegistryDynamicFlags_Animated))
 		return GetThisValueaf(_nDim, _pDest);
@@ -5489,7 +5489,7 @@ void CRegistry_Dynamic::Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp
 	}
 	
 	const CAnimationSequence *pSeq = AnimData.m_Sequences[_iSeq];
-	Private_Anim_GetItem(pSeq, _iKF, _pDest, REGISTRY_TYPE_FP4, _nDim);
+	Private_Anim_GetItem(pSeq, _iKF, _pDest, REGISTRY_TYPE_FP32, _nDim);
 }
 
 void CRegistry_Dynamic::Anim_ThisGetKFValuead(int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest) const
@@ -5717,7 +5717,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::SetThisValuei(_Value, _StoreType);
 	}
-	virtual void SetThisValuef(fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4)
+	virtual void SetThisValuef(fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::SetThisValuef(_Value, _StoreType);
@@ -5748,7 +5748,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::SetThisValueai(_nDim, _Value, _StoreType);
 	}
-	virtual void SetThisValueaf(int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4)
+	virtual void SetThisValueaf(int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::SetThisValueaf(_nDim, _Value, _StoreType);
@@ -5795,7 +5795,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::GetThisValuei();
 	}
-	virtual fp4 GetThisValuef() const
+	virtual fp32 GetThisValuef() const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::GetThisValuef();
@@ -5821,7 +5821,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::GetThisValueai(_nDim, _pDest);
 	}
-	virtual void GetThisValueaf(int _nDim, fp4 *_pDest) const
+	virtual void GetThisValueaf(int _nDim, fp32 *_pDest) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::GetThisValueaf(_nDim, _pDest);
@@ -5880,12 +5880,12 @@ public:
 		return CRegistry_Dynamic::Anim_ThisGetFlags();
 	}
 
-	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp4 *_pParams, int _nParams)
+	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp32 *_pParams, int _nParams)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetInterpolate(_InterpolateType, _pParams, _nParams);
 	}
-	virtual uint32 Anim_ThisGetInterpolate(fp4 *_pParams, int &_nParams) const
+	virtual uint32 Anim_ThisGetInterpolate(fp32 *_pParams, int &_nParams) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetInterpolate(_pParams, _nParams);
@@ -5923,46 +5923,46 @@ public:
 		return CRegistry_Dynamic::Anim_ThisGetNumSeq();
 	}
 
-	virtual fp4 Anim_ThisGetSeqLoopStart(int _iSeq) const
+	virtual fp32 Anim_ThisGetSeqLoopStart(int _iSeq) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetSeqLoopStart(_iSeq);
 	}
-	virtual fp4 Anim_ThisGetSeqLoopEnd(int _iSeq) const
+	virtual fp32 Anim_ThisGetSeqLoopEnd(int _iSeq) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetSeqLoopEnd(_iSeq);
 	}
 
-	virtual fp4 Anim_ThisGetSeqLength(int _iSeq) const
+	virtual fp32 Anim_ThisGetSeqLength(int _iSeq) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetSeqLength(_iSeq);
 	}
 
-	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time)
+	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp32 _Time)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetSeqLoopStart(_iSeq, _Time);
 	}
-	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time)
+	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp32 _Time)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetSeqLoopEnd(_iSeq, _Time);
 	}
 
-	virtual void Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+	virtual void Anim_ThisGetKF(int _iSeq, fp32 _Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost);
 	}
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost);
 	}
 
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, _pDeltasCalc, _nPre, _nPost);
@@ -5985,73 +5985,73 @@ public:
 		return CRegistry_Dynamic::Anim_ThisDeleteKF(_iSeq, _iKF);
 	}
 
-	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time)
+	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp32 _Time)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFTime(_iSeq, _iKF, _Time);
 	}
-	virtual fp4 Anim_ThisGetKFTime(int _iSeq, int _iKF) const
+	virtual fp32 Anim_ThisGetKFTime(int _iSeq, int _iKF) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKFTime(_iSeq, _iKF);
 	}
 
-	virtual fp4 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const
+	virtual fp32 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetWrappedTime(_Time, _iSeq);
 	}
 
 	// Adds
-	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time = -1)
+	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKF(_iSeq, _Val, _Time);
 	}
-	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFi(_iSeq, _Val, _StoreType, _Time);
 	}
-	virtual int Anim_ThisAddKFf(int _iSeq, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFf(int _iSeq, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFf(_iSeq, _Val, _StoreType, _Time);
 	}
-	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFd(_iSeq, _pValue, _Size, _bQuick, _Time);
 	}
-	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFd(_iSeq, _lValue, _bReference, _Time);
 	}
 
-	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFa(_iSeq, _nDim, _pVal, _Time);
 	}
-	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFai(_iSeq, _nDim, _pVal, _StoreType, _Time);
 	}
-	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFaf(_iSeq, _nDim, _pVal, _StoreType, _Time);
 	}
-	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp4 _Time = -1)
+	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp32 _Time = -1)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisAddKFad(_iSeq, _nDim, _lValue, _bReference, _Time);
 	}
 
 	// Set
-	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp4 _Time)
+	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp32 _Time)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFValueConvert(_iSeq, _iKF, _Val, _nDim, _StoreType, _Time);
@@ -6067,7 +6067,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFValuei(_iSeq, _iKF, _Val, _StoreType);
 	}
-	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4)
+	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFValuef(_iSeq, _iKF, _Val, _StoreType);
@@ -6093,7 +6093,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFValueai(_iSeq, _iKF, _nDim, _pVal, _StoreType);
 	}
-	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4)
+	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32)
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisSetKFValueaf(_iSeq, _iKF, _nDim, _pVal, _StoreType);
@@ -6115,7 +6115,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKFValuei(_iSeq, _iKF);
 	}
-	virtual fp4 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
+	virtual fp32 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKFValuef(_iSeq, _iKF);
@@ -6136,7 +6136,7 @@ public:
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKFValueai(_iSeq, _iKF, _nDim, _pDest);
 	}
-	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const
+	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const
 	{
 		M_LOCK(m_Lock);
 		return CRegistry_Dynamic::Anim_ThisGetKFValueaf(_iSeq, _iKF, _nDim, _pDest);

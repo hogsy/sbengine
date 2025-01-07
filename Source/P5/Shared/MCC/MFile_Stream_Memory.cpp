@@ -37,7 +37,7 @@ CStream_Memory::CStream_Memory()
 	m_FileMaxLen = 0;
 }
 
-CStream_Memory::CStream_Memory(TList_Vector<uint8> _lFileMem, int _MinGrow)
+CStream_Memory::CStream_Memory(TArray<uint8> _lFileMem, int _MinGrow)
 {
 	Open(_lFileMem, CFILE_READ | CFILE_WRITE, _MinGrow);
 }
@@ -103,7 +103,7 @@ void CStream_Memory::Open(uint8* _pMem, int _CurrentLen, int _MaxLen, int _Mode)
 	m_Mode = _Mode;
 }
 
-void CStream_Memory::Open(TList_Vector<uint8> _lFileMem, int _Mode, int _MinGrow)
+void CStream_Memory::Open(TArray<uint8> _lFileMem, int _Mode, int _MinGrow)
 {
 	m_Mode = _Mode;
 	m_MinGrow = _MinGrow;

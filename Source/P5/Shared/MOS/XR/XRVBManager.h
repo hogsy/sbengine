@@ -7,23 +7,31 @@
 // -------------------------------------------------------------------
 //  CXR_VBManager
 // -------------------------------------------------------------------
+#define XR_VBMLINKEDLIST
+
+#ifndef XR_VBMLINKEDLIST
 class CXR_VBPtr
 {
 public:
 	CXR_VertexBuffer* m_pVB;
+	fp32 m_Priority;
+	DLinkDS_Link(CXR_VBPtr, m_Link);
 
 	CXR_VBPtr()
 	{
 		m_pVB = NULL;
+		m_Priority = 0.0f;
 	}
 
 	CXR_VBPtr(CXR_VertexBuffer* _pVB)
 	{
 		m_pVB = _pVB;
+		m_Priority = _pVB->m_Priority;
 	}
 
 	int Compare(const CXR_VBPtr& _pVB) const;
 };
+#endif
 
 enum
 {
@@ -34,8 +42,8 @@ enum
 
 enum
 {
-	VBMSCOPE_FL_NEEDSORT	= DBit(0),
-	VBMSCOPE_FL_RENDERWIRE	= DBit(1),
+	VBMSCOPE_FL_NEEDSORT	= M_Bit(0),
+	VBMSCOPE_FL_RENDERWIRE	= M_Bit(1),
 
 	VBMCONTEXT_ENGINE	= 0,
 	VBMCONTEXT_RENDER	= 1,
@@ -66,23 +74,25 @@ enum
 class CXR_ClipStackEntry
 {
 public:
-	CPlane3Dfp4 m_lPlanes[CXR_CLIPMAXPLANES];
+	CPlane3Dfp32 m_lPlanes[CXR_CLIPMAXPLANES];
 	int m_nPlanes;
 
 	CXR_ClipStackEntry();
-	void Create(const CPlane3Dfp4* _pPlanes, int _nPlanes, const CMat4Dfp4* _pTransform = NULL);
-	void Copy(const CXR_ClipStackEntry& _Src, const CMat4Dfp4* _pTransform = NULL);
+	void Create(const CPlane3Dfp32* _pPlanes, int _nPlanes, const CMat4Dfp32* _pTransform = NULL);
+	void Copy(const CXR_ClipStackEntry& _Src, const CMat4Dfp32* _pTransform = NULL);
 };
 
 class CXR_VBMScope
 {
 public:
+#ifndef XR_VBMLINKEDLIST
 	class CVBM_SortableVector
 	{
 	protected:
 		CXR_VBPtr*	m_lpVBP;
 		uint32 m_nMax;
 		uint32 m_iCurrent;
+
 	public:
 		CVBM_SortableVector() : m_lpVBP(NULL),m_nMax(0),m_iCurrent(0) {}
 
@@ -99,18 +109,100 @@ public:
 
 		int Len() const;
 	};
+#endif
 
-	CXR_VBMScope() {}
-	CXR_VBMScope(bool _bSort) : m_pLO(0), m_nMaxLights(0), m_nBufferSkip(0)
+#ifdef XR_VBMLINKEDLIST
+	class M_ALIGN(128) CBucketContainer
 	{
-		m_Flags	= _bSort?VBMSCOPE_FL_NEEDSORT:0;
-	}
-	void Create(uint32 _MaxVB);
+	public:
+		enum 
+		{
+			ENumBuckets0 = 512,
+			ENumBuckets1 = 512,
+			ENumBuckets = ENumBuckets0 + ENumBuckets1
+
+		};
+
+		class CContainer
+		{
+		public:
+			DLinkDA_List(CXR_VertexBuffer, m_Link) m_VBs;
+			DLinkDA_Link(CContainer, m_Link);
+		};
+
+		DLinkDA_List(CContainer, m_Link) m_UsedContainers;
+		typedef DLinkD_Iter(CContainer, m_Link) CContaireIter;
+		CContainer m_Containers[ENumBuckets0 + ENumBuckets1];
+		//		 m_VBs;
+	};
+
+	CBucketContainer *m_pContainer;
+
+	typedef DLinkD_Iter(CXR_VertexBuffer, m_Link) CVBIterator;
+	int m_nVBs;
+#else
 	CVBM_SortableVector	m_lpVB;
+#endif
+	int GetNumVBs()
+	{
+	#ifdef XR_VBMLINKEDLIST
+		return m_nVBs;
+	#else
+		return m_lpVB.Len();
+	#endif
+	}
+
+
+	const char* m_pName;
 	int	m_Flags;
 	class CXR_LightOcclusionInfo* m_pLO;
 	int m_nMaxLights;
 	int	m_nBufferSkip;
+
+
+	CXR_VBMScope() 
+	{
+#ifdef XR_VBMLINKEDLIST
+		m_pContainer = NULL;
+#endif
+	}
+
+	CXR_VBMScope(bool _bSort) : m_pLO(0), m_nMaxLights(0), m_nBufferSkip(0)
+	{
+		m_Flags	= _bSort?VBMSCOPE_FL_NEEDSORT:0;
+#ifdef XR_VBMLINKEDLIST
+		m_nVBs = 0;
+		m_pContainer = NULL;
+//		m_VBs.Construct();
+#endif
+		m_pName = NULL;
+	}
+
+	void Create(uint32 _MaxVB, const char* _pName);
+
+#ifdef XR_VBMLINKEDLIST
+	CXR_VBMScope& operator = (CXR_VBMScope &_Src)
+	{
+		m_pContainer = _Src.m_pContainer;
+#if 0
+		if (!_Src.m_VBs.IsEmpty())
+		{
+			m_VBs.Transfer(_Src.m_VBs);
+		}
+		else
+		{
+			m_VBs.Construct();
+		}
+#endif
+		m_nVBs = _Src.m_nVBs;
+		m_Flags = _Src.m_Flags;
+		m_pLO = _Src.m_pLO;
+		m_nMaxLights = _Src.m_nMaxLights;
+		m_nBufferSkip = _Src.m_nBufferSkip;
+		m_pName = _Src.m_pName;
+		return *this;
+	}
+#endif
 };
 
 class CXR_VBCallback
@@ -123,6 +215,7 @@ public:
 
 	virtual void Callback(CRenderContext* _pRC, CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, CXR_VBMScope* _pScope, int _Flags) pure;
 };
+
 
 class CXR_VBManager : public CReferenceCount
 {
@@ -158,6 +251,28 @@ class CXR_VBManager : public CReferenceCount
 		}
 	};
 */
+public:
+	class CVBAddCollector
+	{
+	public:
+		CVBAddCollector(CXR_VertexBuffer** _pVBs, mint _MaxLen)
+		{
+			m_iIndex = 0;
+			m_pVBs = _pVBs;
+			m_MaxLen = _MaxLen;
+		}
+
+		mint m_iIndex;
+		mint m_MaxLen;
+		CXR_VertexBuffer**m_pVBs;
+	};
+//#define VBM_OVERWRITE_DEBUGGING 1
+
+#if VBM_OVERWRITE_DEBUGGING
+	const static int ms_MatchBufferSize = 16;
+	uint8 m_MatchBuffer[ms_MatchBufferSize];
+#endif
+
 protected:
 //	TArray<uint8> m_lHeap;	// This points at a context's array
 	uint8 *m_pHeap;
@@ -166,6 +281,9 @@ protected:
 	CXR_VBMScope* m_pActiveScope;
 	TStaticArray<int, 8> m_lScopeStack;
 	TStaticArray<CXR_VBMScope, 32> m_lSortScopes;
+
+
+	TMRTC_ThreadLocal<CVBAddCollector *> m_CurrentCollector;
 
 	int	m_iScopeStack;
 	int	m_MaxVB;
@@ -186,20 +304,26 @@ protected:
 	int m_HeapSizeHW;
 	int m_AllocPosHW;
 
-	TList_Vector<uint8> m_lVertexUseMap;
+	TArray<uint8> m_lVertexUseMap;
 
 	bool m_bOutOfMemory;
 
 	int m_nBuffers;
+	int m_nVBs;
 	CMTime m_TSort;
+	CMTime m_TRender;
 
 	CRenderContext* m_pCurrentRC;		// Only valid between Begin()/End()
+
+
 
 #ifdef PLATFORM_DOLPHIN
 	int m_nToken;
 #endif
 
 #ifdef M_Profile
+	CXR_VertexBuffer* m_pLastSelectedVB;
+
 	int m_Stats_nVB;
 	int m_Stats_nAttrib;
 	int m_Stats_nLights;
@@ -210,15 +334,17 @@ protected:
 	int m_Stats_nV2;
 	int m_Stats_nInt16;
 	int m_Stats_nInt32;
-	int m_Stats_nFp4;
+	int m_Stats_nFp32;
 	int m_Stats_nPixel32;
 	int m_Stats_nOpen;
 	int m_Stats_nChains;
 	int m_Stats_nChainVBs;
+	int m_Stats_nMP;
 public:
 	int m_Stats_nRenderSurface;
 #endif
 
+public:
 
 	// -------------------------------
 	// Viewport stack
@@ -242,13 +368,23 @@ public:
 	// Internal functions, these assume locking has been done
 	void Internal_Begin(CRenderContext* _pRC, const CRC_Viewport* _pVP);
 	void Internal_End();
-	void Internal_Render(CXR_VBMScope* _pScope, CRenderContext* _pRC, int _Flags, fp4 _StartPrio, fp4 _EndPrio);
+	void Internal_Render(CXR_VBMScope* _pScope, CRenderContext* _pRC, int _Flags, fp32 _StartPrio, fp32 _EndPrio, int _iVB = 0, int _nVB = 0);
+	void Internal_SortScope(CXR_VBMScope* _pScope);
 	void Internal_Sort();
 
-	void Internal_Viewport_Set(CRC_Viewport* _pVP, fp4 _Priority);
+	void Internal_Viewport_Set(CRC_Viewport* _pVP, fp32 _Priority);
+
+	int VBE_RenderScope(CXR_VBMScope* _pScope, CPnt _Pos, class CXR_VBEContext& _EC, uint _bSelected);
+	int VBE_RenderVBInfo(class CXR_VBEContext& _EC, CPnt _Pos, const CXR_VertexBuffer* _pVB, const CRC_Attributes* _pA);
+	void VBE_Render(CRenderContext* _pRC, int _Flags, class CXR_VBEContext& _EC);
+	dllvirtual void VBE_GetScopeInfo(class CXR_VBEContext& _EC);
+	dllvirtual bool VBE_ProcessKey(class CXR_VBEContext& _EC, CScanKey _Key) const;
+
 public:
-	MRTC_SpinLock m_AddLock;
-	MRTC_SpinLock m_AllocLock;
+	MRTC_SpinLock m_AddLock;			// Must be re-entrant due to a fucking nasty hack in trimesh
+//	MRTC_SpinLock m_AllocLock;
+//	NThread::CSpinLock m_AddLock;		// Not re-entrant, will deadlock if used incorrectly
+	NThread::CSpinLock m_AllocLock;		// Not re-entrant, will deadlock if used incorrectly
 
 #ifdef MRTC_ENABLE_REMOTEDEBUGGER
 	void RecordFrame()
@@ -263,7 +399,7 @@ public:
 	dllvirtual void Create(int _HeapSize, int _MaxVB);
 
 	dllvirtual uint8* GetVertexUseMap(int _nV);
-	void GetAllocParams(int* _pAllocPos,MRTC_SpinLock* _pLock,uint8** _pHeap,mint* _pHeapSize);
+	void GetAllocParams(int*& _pAllocPos,NThread::CSpinLock*& _pLock,uint8**& _pHeap,mint*& _pHeapSize);
 	void *GetHeapPtr()
 	{
 		return m_pHeap;
@@ -288,7 +424,7 @@ public:
 #endif
 
 	// Allocation
-	dllvirtual void* Alloc(int _Size);
+	dllvirtual void* Alloc(int _Size, uint _bCacheZeroAll = false);
 	dllvirtual void* AllocHW(int _Size);
 	dllvirtual void* AllocArray(int _Size);										// Tries to allocate in HW heap if possible.
 	dllvirtual CXR_VertexBuffer* Alloc_VB();
@@ -298,39 +434,52 @@ public:
 	dllvirtual CXR_VBIDChain* Alloc_VBIDChain();
 	dllvirtual CXR_VBChain* Alloc_VBChain();
 	dllvirtual CXR_VertexBuffer_PreRender* Alloc_PreRender(PFN_VERTEXBUFFER_PRERENDER _pFunc, void *_pContext);
-	dllvirtual const CMat4Dfp4** Alloc_TextureMatrixArray();
+	dllvirtual const CMat4Dfp32** Alloc_TextureMatrixArray();
+	dllvirtual CRC_MatrixPalette* Alloc_MP();
 
-	dllvirtual bool Alloc_VBChainCopy(CXR_VertexBuffer* _pDst, CXR_VertexBuffer* _pSrc);					// Only allocates chain. no attrib. :No geometry can be alloced with Alloc_VBChain
+	dllvirtual CMat4Dfp32* Alloc_M4_Proj2D(fp32 _Z);
+	dllvirtual CMat4Dfp32* Alloc_M4_Proj2DRelBackPlane(fp32 _BackPlaneOfs = -16.0f);
+	dllvirtual CMat4Dfp32* Alloc_M4_Proj2D(CRC_Viewport* _pVP, fp32 _Z);
+	dllvirtual CMat4Dfp32* Alloc_M4_Proj2DRelBackPlane(CRC_Viewport* _pVP, fp32 _BackPlaneOfs = -16.0f);
+
+	dllvirtual bool Alloc_VBChainCopy(CXR_VertexBuffer* _pDst, CXR_VertexBufferGeometry* _pSrc);					// Only allocates chain. no attrib. :No geometry can be alloced with Alloc_VBChain
 //	dllvirtual CXR_VertexBuffer* Alloc_VBChain(int _Contents, int _Len = 1);		// No geometry can be alloced with Alloc_VBChain
 //	dllvirtual CXR_VertexBuffer* Alloc_VBChainOnly(CXR_VertexBuffer* _pSrc);					// Only allocates chain. no attrib. :No geometry can be alloced with Alloc_VBChain
 //	dllvirtual CXR_VertexBuffer* Alloc_VBChainAttrib(int _Len = 1);					// Allocates chain and attrib :No geometry can be alloced with Alloc_VBChain
 	dllvirtual CRC_Attributes* Alloc_Attrib();
+	dllvirtual CRC_Attributes* Alloc_Attrib(int _nCount);
 	dllvirtual class CXR_Light* Alloc_XRLights(int _nCount);
 	dllvirtual CRC_Light* Alloc_Lights(int _nLights);
-	dllvirtual CMat4Dfp4* Alloc_M4();
-	dllvirtual CMat4Dfp4* Alloc_M4(const CMat4Dfp4& _Mat);
-	dllvirtual CMat43fp4* Alloc_M43();
-	dllvirtual CMat43fp4* Alloc_M43(const CMat43fp4& _Mat);
-#ifndef DEFINE_MAT43_IS_MAT4D
-	dllvirtual CMat4Dfp4* Alloc_M4(const CMat43fp4& _Mat);
-	dllvirtual CMat43fp4* Alloc_M43(const CMat4Dfp4& _Mat);
-#endif
+	dllvirtual CMat4Dfp32* Alloc_M4();
+	dllvirtual CMat4Dfp32* Alloc_M4(const CMat4Dfp32& _Mat);
+	dllvirtual CMat43fp32* Alloc_M43();
+	dllvirtual CMat43fp32* Alloc_M43(const CMat43fp32& _Mat);
+	dllvirtual CMat4Dfp32* Alloc_M4(const CMat43fp32& _Mat);
+	dllvirtual CMat43fp32* Alloc_M43(const CMat4Dfp32& _Mat);
 
-	dllvirtual CVec4Dfp4* Alloc_V4(int _nV);
-	dllvirtual CVec3Dfp4* Alloc_V3(int _nV);
-	dllvirtual CVec2Dfp4* Alloc_V2(int _nV);
+	dllvirtual CVec4Dfp32* Alloc_V4(int _nV);
+	dllvirtual CVec3Dfp32* Alloc_V3(int _nV);
+	dllvirtual CVec2Dfp32* Alloc_V2(int _nV);
 	dllvirtual uint16* Alloc_Int16(int _nV);
 	dllvirtual uint32* Alloc_Int32(int _nV);
-	dllvirtual fp4* Alloc_fp4(int _nV);
+	dllvirtual fp32* Alloc_fp32(int _nV);
 	dllvirtual CPixel32* Alloc_CPixel32(int _nV);
+	dllvirtual char* Alloc_Str(const char* _pStr);
 
 	// !!! _pVB and _pAttrib must be a pointer to m_lHeap unless they're guaranteed to be valid over several frames !!!
+
+#ifdef M_VBDEBUG
+	dllvirtual void AddVBImp(CXR_VertexBuffer* _pVB, const char *_pFile, int _Line);
+	dllvirtual void AddVBImp(const CXR_VertexBuffer& _VB, const char *_pFile, int _Line);
+#else
 	dllvirtual void AddVB(CXR_VertexBuffer* _pVB);
 	dllvirtual void AddVB(const CXR_VertexBuffer& _VB);
-	dllvirtual bool AddCallback(PFN_VERTEXBUFFER_PRERENDER _pfnCallback, void* _pContext, fp4 _Priority);
+#endif
+	dllvirtual void AddVBArray(CXR_VertexBuffer** _lpVB, uint _nVB);
+	dllvirtual bool AddCallback(PFN_VERTEXBUFFER_PRERENDER _pfnCallback, void* _pContext, fp32 _Priority, uint32 _VBEColor = 0xff404000);
 
 	template<typename t_CCallback>
-	t_CCallback* AddCallbackClass(fp4 _Priority)
+	t_CCallback* AddCallbackClass(fp32 _Priority)
 	{
 		t_CCallback* pData = (t_CCallback*)Alloc(sizeof(t_CCallback));
 		if (!pData)
@@ -345,17 +494,27 @@ public:
 
 	}
 
-	dllvirtual bool AddRenderOptions(fp4 _Priority, uint32 _Options, uint32 _Format = 0xffffffff);
-	dllvirtual bool AddRenderRange(fp4 _Priority, fp4 _StartRenderPrio, fp4 _EndRenderPrio);
-	dllvirtual bool AddClearRenderTarget(fp4 _Priority, int _WhatToClear, CPixel32 _ColorClearTo, fp4 _ZClearTo, int _StencilClearTo, CRct _ClearArea = CRct(-1,-1,-1,-1));
-	dllvirtual bool AddCopyToTexture(fp4 _Priority, CRct _SrcRect, CPnt _Dst, uint16 _TextureID, bint _bContinueTiling, uint16 _Slice = 0);
+	dllvirtual bool AddRenderOptions(fp32 _Priority, uint32 _Options, uint32 _Format = 0xffffffff);
+	dllvirtual bool AddRenderRange(fp32 _Priority, fp32 _StartRenderPrio, fp32 _EndRenderPrio);
+	dllvirtual bool AddClearRenderTarget(fp32 _Priority, int _WhatToClear, CPixel32 _ColorClearTo, fp32 _ZClearTo, int _StencilClearTo, CRct _ClearArea = CRct(-1,-1,-1,-1));
+	dllvirtual bool AddCopyToTexture(fp32 _Priority, CRct _SrcRect, CPnt _Dst, uint16 _TextureID, bint _bContinueTiling, uint16 _Slice = 0, uint32 _iMRT = 0);
 
+	dllvirtual bool AddRenderTargetEnableMasks(fp32 _Priority, uint32 _And);
 
-	dllvirtual bool AddNextClearParams(fp4 _Priority, int _WhatToClear, CPixel32 _ColorClearTo, fp4 _ZClearTo, int _StencilClearTo, CRct _ClearArea = CRct(-1,-1,-1,-1));
+	dllvirtual bool AddNextClearParams(fp32 _Priority, int _WhatToClear, CPixel32 _ColorClearTo, fp32 _ZClearTo, int _StencilClearTo, CRct _ClearArea = CRct(-1,-1,-1,-1));
 
+	dllvirtual bool AddSetRenderTarget(fp32 _Priority, const CRC_RenderTargetDesc &_Desc);
+
+#if 0
 	// These won't work properly with scopes
-	int GetNextVBIndex();
-	CXR_VertexBuffer* GetVB(int _iVB);
+
+	mint GetCurrentVB();
+	mint GetNextVB(mint _pVB);
+	CXR_VertexBuffer* GetVB(mint _hVB);
+#endif
+
+
+	dllvirtual void SetVBAddCollector(CVBAddCollector *_pCollector);
 
 protected:
 
@@ -363,15 +522,15 @@ protected:
 
 public:
 
-	dllvirtual void Begin(CRenderContext* _pRC, const CRC_Viewport* _pVP);// , int _nBuckets = 0, fp4 _BucketPriorityStart = 0.0f, fp4 _BucketPriorityEnd = 0.0f
+	dllvirtual void Begin(CRenderContext* _pRC, const CRC_Viewport* _pVP);// , int _nBuckets = 0, fp32 _BucketPriorityStart = 0.0f, fp32 _BucketPriorityEnd = 0.0f
 	dllvirtual void End();
 //	dllvirtual void Render(CRenderContext* _pRC, int _Flags, int _nBufferSkip = 0, class CXR_ViewClipInterface* _pViewClip = NULL);
-	dllvirtual void Render(CRenderContext* _pRC, int _Flags);
+	dllvirtual void Render(CRenderContext* _pRC, int _Flags, class CXR_VBEContext* _pEC = NULL);
 	dllvirtual bool IsRendering();
 
 	dllvirtual void Flush(CRenderContext* _pRC, int _Flags,  int _nBufferSkip = 0, class CXR_ViewClipInterface* _pViewClip = NULL);
 
-	dllvirtual void ScopeBegin(bool _bNeedSort, int _MaxVB = 0);	// 0 means use default value
+	dllvirtual void ScopeBegin(const char* _pName, bool _bNeedSort, int _MaxVB = 0);	// 0 means use default value
 	dllvirtual void ScopeEnd();
 	dllvirtual void ScopeSetLightOcclusionMask(class CXR_LightOcclusionInfo* _pLO, int _nMaxLights);
 	dllvirtual void ScopeSetBufferskip(int _nBufferskip);
@@ -392,8 +551,8 @@ public:
 
 	// Clipping
 	dllvirtual CXR_ClipStackEntry* Clip_Get(int _iClip);
-	dllvirtual int Clip_Add(const CPlane3Dfp4* _pPlanes, int _nPlanes, const CMat4Dfp4* _pTransform = NULL);		// 0 == Out of VB heap
-	dllvirtual bool Clip_Push(const CPlane3Dfp4* _pPlanes, int _nPlanes, const CMat4Dfp4* _pTransform = NULL);		// false == Out of VB heap, don't Clip_Pop()
+	dllvirtual int Clip_Add(const CPlane3Dfp32* _pPlanes, int _nPlanes, const CMat4Dfp32* _pTransform = NULL);		// 0 == Out of VB heap
+	dllvirtual bool Clip_Push(const CPlane3Dfp32* _pPlanes, int _nPlanes, const CMat4Dfp32* _pTransform = NULL);		// false == Out of VB heap, don't Clip_Pop()
 	dllvirtual void Clip_Pop();
 
 	// Debug
@@ -406,21 +565,22 @@ public:
 
 	dllvirtual bint ConvertVertexBuildBuffer(CRC_VertexBuffer &_Dest, const CRC_BuildVertexBuffer&_Source);
 
-	dllvirtual void RenderBox(const CMat4Dfp4& _Transform, const CBox3Dfp4& _Box, CPixel32 _Color);
-	dllvirtual void RenderWire(const CMat4Dfp4& _Transform, const CVec3Dfp4& _p0, const CVec3Dfp4& _p1, CPixel32 _Color);
-	dllvirtual void RenderBox(const CBox3Dfp4& _Box, CPixel32 _Color);
-	dllvirtual void RenderWire(const CVec3Dfp4& _p0, const CVec3Dfp4& _p1, CPixel32 _Color);
-	dllvirtual void RenderWires(const CMat4Dfp4& _Transform, const CVec3Dfp4* _pV, int _nVertices, CPixel32 _Color, bool bLoop);
-	dllvirtual void RenderWires(const CMat4Dfp4& _Transform, const CVec3Dfp4* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color, bool bLoop);
-	dllvirtual void RenderWires(const CMat4Dfp4& _Transform, const CVec3Dfp4* _pV, const uint32* _piV, int _nVertices, CPixel32 _Color, bool bLoop);
+	dllvirtual void RenderBox(const CMat4Dfp32& _Transform, const CBox3Dfp32& _Box, CPixel32 _Color);
+	dllvirtual void RenderWire(const CMat4Dfp32& _Transform, const CVec3Dfp32& _p0, const CVec3Dfp32& _p1, CPixel32 _Color);
+	dllvirtual void RenderBox(const CBox3Dfp32& _Box, CPixel32 _Color);
+	dllvirtual void RenderWire(const CVec3Dfp32& _p0, const CVec3Dfp32& _p1, CPixel32 _Color);
+	dllvirtual void RenderWires(const CMat4Dfp32& _Transform, const CVec3Dfp32* _pV, int _nVertices, CPixel32 _Color, bool bLoop);
+	dllvirtual void RenderWires(const CMat4Dfp32& _Transform, const CVec3Dfp32* _pV, const uint16* _piV, int _nVertices, CPixel32 _Color, bool bLoop);
+	dllvirtual void RenderWires(const CMat4Dfp32& _Transform, const CVec3Dfp32* _pV, const uint32* _piV, int _nVertices, CPixel32 _Color, bool bLoop);
+	dllvirtual void RenderWires(const CMat4Dfp32& _Transform, const CVec3Dfp32* _pV, const uint32* _piV, int _nVertices, const CPixel32* _pColors, bool _bLoop);
 
-	dllvirtual bool InsertTexGen(CRC_Attributes* _pA, int _nTexGen, const int* _pTexGenModes, const int* _pTexGenComp, const int* _piTexGenChannel, fp4** _pTexGenAttr);
+	dllvirtual bool InsertTexGen(CRC_Attributes* _pA, int _nTexGen, const int* _pTexGenModes, const int* _pTexGenComp, const int* _piTexGenChannel, fp32** _pTexGenAttr);
 
 	class CXR_VBManager_RenderRange
 	{
 	public:
-		fp4 m_StartPrio;
-		fp4 m_EndPrio;
+		fp32 m_StartPrio;
+		fp32 m_EndPrio;
 
 		static void RenderCallback(CRenderContext* _pRC, CXR_VBManager* _pVBM, CXR_VertexBuffer* _pVB, void* _pContext, CXR_VBMScope* _pScope, int _Flags)
 		{
@@ -434,6 +594,10 @@ public:
 		}
 	};
 };
+
+#ifdef M_VBDEBUG
+#define AddVB(_x) AddVBImp(_x, __FILE__, __LINE__)
+#endif
 
 typedef TPtr<CXR_VBManager> spCXR_VBManager;
 
@@ -489,7 +653,7 @@ public:
 		//m_AllDoneEvent.SetSignaled();
 	}
 
-	CXR_VBManager* GetAvailVBM(fp8 _Timeout = 0.0)
+	CXR_VBManager* GetAvailVBM(fp64 _Timeout = 0.0)
 	{
 		M_LOCK(m_Lock);
 		while (Volatile(m_bBlockUntilFree))
@@ -534,7 +698,7 @@ public:
 	}
 
 
-	bool WaitForVBMAdd(fp8 _Timeout)
+	bool WaitForVBMAdd(fp64 _Timeout)
 	{
 		M_LOCK(m_Lock);
 		while (Volatile(m_bBlockUntilFree))
@@ -556,7 +720,7 @@ public:
 	}
 
 
-	bool BlockUntilSingleVBMFree(fp8 _Timeout = 0.0)
+	bool BlockUntilSingleVBMFree(fp64 _Timeout = 0.0)
 	{
 		M_LOCK(m_Lock);
 		while (Volatile(m_bBlockUntilFree))
@@ -577,7 +741,7 @@ public:
 		return !m_Available.IsEmpty();
 	}
 
-	CXR_VBManager* GetDirtyVBM(fp8 _Timeout = 0.0)
+	CXR_VBManager* GetDirtyVBM(fp64 _Timeout = 0.0)
 	{
 		M_LOCK(m_Lock);
 		m_DirtyEvent.TryWait();
@@ -667,7 +831,7 @@ public:
 		m_AllDoneEvent.SetSignaled();
 	}
 
-	CXR_VBManager* GetAvailVBM(fp8 _Timeout = 0.0)
+	CXR_VBManager* GetAvailVBM(fp64 _Timeout = 0.0)
 	{
 		M_LOCK(m_Lock);
 		if(!m_AvailableEvent.TryWait())
@@ -694,7 +858,7 @@ public:
 		m_AllDoneEvent.Wait();
 	}
 
-	CXR_VBManager* GetDirtyVBM(fp8 _Timeout = 0.0)
+	CXR_VBManager* GetDirtyVBM(fp64 _Timeout = 0.0)
 	{
 		M_LOCK(m_Lock);
 		if(!m_DirtyEvent.TryWait())

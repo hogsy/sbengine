@@ -359,7 +359,7 @@ static void ATI3DC_Decompress(CImage* _pSrc, uint8* _pDest, int _DestModulo)
 						
 	Comments:			Longer_description_not_mandatory
 \*_____________________________________________________________________________*/
-void CImage::Compress_3DC(fp4 _Quality, CImage* _pDestImage)
+void CImage::Compress_3DC(fp32 _Quality, CImage* _pDestImage)
 {
 #ifndef	IMAGE_IO_3DC
 	Error("Compress_3DC", "3DC support disabled in this build.");

@@ -68,10 +68,10 @@ int CImageCubemapSampler::GetSideTransform(int _iSide)
 	return 0;
 }
 
-CPixel32 CImageCubemapSampler::SampleVector(const CVec3Dfp4& _Vector) const
+CPixel32 CImageCubemapSampler::SampleVector(const CVec3Dfp32& _Vector) const
 {
 	int iSide = -1;
-	fp4 sc, tc, ma;
+	fp32 sc, tc, ma;
 	if(M_Fabs(_Vector.k[0]) > M_Fabs(_Vector.k[1]))
 	{
 		if(M_Fabs(_Vector.k[0]) > M_Fabs(_Vector.k[2]))
@@ -143,10 +143,10 @@ CPixel32 CImageCubemapSampler::SampleVector(const CVec3Dfp4& _Vector) const
 		}
 	}
 
-	fp4 s = (sc / M_Fabs(ma)) * 0.5f + 0.5f;
-	fp4 t = (tc / M_Fabs(ma)) * 0.5f + 0.5f;
+	fp32 s = (sc / M_Fabs(ma)) * 0.5f + 0.5f;
+	fp32 t = (tc / M_Fabs(ma)) * 0.5f + 0.5f;
 
-	CPixel32 Color = m_lpSides[iSide]->GetPixelUV_Bilinear(CVec2Dfp4(s, t), IMAGE_GETPIXEL_EDGECLAMP);
+	CPixel32 Color = m_lpSides[iSide]->GetPixelUV_Bilinear(CVec2Dfp32(s, t), IMAGE_GETPIXEL_EDGECLAMP);
 
 	return Color;
 }
@@ -402,30 +402,30 @@ void CTextureContainer_Plain::FilterCubemap(int _iTexture, const CTC_CubeFilterP
 				spCImage aSides[6];
 				// Check postfilter list to see if this texture should be processed any further
 
-				fp4 FilterRadius = _Params.m_aParams[0];
+				fp32 FilterRadius = _Params.m_aParams[0];
 
 				int Width = aRefSides[0]->GetWidth();
 				int Height = aRefSides[0]->GetHeight();
-				fp4 HalfWidth = (Width - 1) * 0.5f;
-				fp4 HalfHeight = (Height - 1) * 0.5f;
+				fp32 HalfWidth = (Width - 1) * 0.5f;
+				fp32 HalfHeight = (Height - 1) * 0.5f;
 				CClipRect Cliprect = aRefSides[0]->GetClipRect();
 
 				int KernelMax = FilterRadius;//M_Ceil(FilterRadius * M_Sqrt(3.0f));
 				int KernelWidth = KernelMax * 2 + 1;
 
-				fp4 XAxisScale = 1.0f / (Width);
-				fp4 YAxisScale = 1.0f / (Height);
+				fp32 XAxisScale = 1.0f / (Width);
+				fp32 YAxisScale = 1.0f / (Height);
 
-				TThinArray<fp4> lCalcWeights;
+				TThinArray<fp32> lCalcWeights;
 				lCalcWeights.SetLen( Sqr(KernelWidth) );
-				fp4* pCalcWeights = lCalcWeights.GetBasePtr();
-				fp4 Sigma = M_Sqrt( -Sqr(KernelWidth/2) / (2 * (logf(0.125f) / logf(expf(1.0f)))) );
-				fp4 WeightSum = 0.0f;
+				fp32* pCalcWeights = lCalcWeights.GetBasePtr();
+				fp32 Sigma = M_Sqrt( -Sqr(KernelWidth/2) / (2 * (logf(0.125f) / logf(expf(1.0f)))) );
+				fp32 WeightSum = 0.0f;
 				for(int ky = -KernelMax; ky <= KernelMax; ky++)
 				{
 					for(int kx = -KernelMax; kx <= KernelMax; kx++)
 					{
-						fp4 Weight	= (2 * 3.14159265f * Sqr(Sigma)) * expf(-(Sqr(kx) + Sqr(ky)) / (2 * Sqr(Sigma)));
+						fp32 Weight	= (2 * 3.14159265f * Sqr(Sigma)) * expf(-(Sqr(kx) + Sqr(ky)) / (2 * Sqr(Sigma)));
 						pCalcWeights[(KernelMax + ky) * KernelWidth + (KernelMax + kx)]	= Weight;
 						WeightSum	+= Weight;
 					}
@@ -440,38 +440,38 @@ void CTextureContainer_Plain::FilterCubemap(int _iTexture, const CTC_CubeFilterP
 					{
 						for(int x = 0; x < Width; x++)
 						{
-							CVec3Dfp4 CenterVector = CImageCubemapSampler::CreateSampleVector(iSide, (x - HalfWidth) / HalfWidth, (HalfHeight - y) / HalfHeight);
+							CVec3Dfp32 CenterVector = CImageCubemapSampler::CreateSampleVector(iSide, (x - HalfWidth) / HalfWidth, (HalfHeight - y) / HalfHeight);
 							CenterVector.Normalize();
-							CVec3Dfp4 XAxis, YAxis;
+							CVec3Dfp32 XAxis, YAxis;
 
-							if(CenterVector * CVec3Dfp4(0, 1, 0) > 0.99f)
+							if(CenterVector * CVec3Dfp32(0, 1, 0) > 0.99f)
 							{
-								CenterVector.CrossProd(CVec3Dfp4(1, 0, 0), YAxis);
+								CenterVector.CrossProd(CVec3Dfp32(1, 0, 0), YAxis);
 								YAxis.CrossProd(CenterVector, XAxis);
 							}
 							else
 							{
-								CVec3Dfp4(0, 1, 0).CrossProd(CenterVector, XAxis);
+								CVec3Dfp32(0, 1, 0).CrossProd(CenterVector, XAxis);
 								CenterVector.CrossProd(XAxis, YAxis);
 							}
 
 							XAxis.SetLength(XAxisScale);
 							YAxis.SetLength(YAxisScale);
 
-							CVec4Dfp4 Pixel(0);
+							CVec4Dfp32 Pixel(0);
 							for(int ky = -KernelMax; ky <= KernelMax; ky++)
 							{
 								for(int kx = -KernelMax; kx <= KernelMax; kx++)
 								{
-									CVec3Dfp4 SampleVector = CenterVector + (XAxis * (fp4)kx) + (YAxis *(fp4)ky);
-									Pixel	+= (CVec4Dfp4)CubeSampler.SampleVector(SampleVector) * pCalcWeights[(KernelMax + ky) * KernelWidth + (KernelMax + kx)];
+									CVec3Dfp32 SampleVector = CenterVector + (XAxis * (fp32)kx) + (YAxis *(fp32)ky);
+									Pixel	+= (CVec4Dfp32)CubeSampler.SampleVector(SampleVector) * pCalcWeights[(KernelMax + ky) * KernelWidth + (KernelMax + kx)];
 								}
 							}
 
 							Pixel	= Pixel * (1.0f / WeightSum);
 
-							CVec2Dfp4 InVector(x / (fp4)Width, y / (fp4)Height);
-							CVec2Dfp4 OutVector = CImage::TransformSampleVector(CubeSampler.GetSideTransform(iSide), InVector, 1.0f / Width, 1.0f / Height);
+							CVec2Dfp32 InVector(x / (fp32)Width, y / (fp32)Height);
+							CVec2Dfp32 OutVector = CImage::TransformSampleVector(CubeSampler.GetSideTransform(iSide), InVector, 1.0f / Width, 1.0f / Height);
 
 							aSides[iSide]->SetPixel(Cliprect, CPnt(OutVector.k[0] * Width, OutVector.k[1] * Height), CPixel32(Pixel));
 						}

@@ -111,22 +111,22 @@ namespace NScript
 		class CMath : public CClient
 		{
 			// Commands.
-			static fp8 Cos(fp8 x) { return M_Cos(x); };
-			static fp8 Sin(fp8 x) { return M_Sin(x); };
-			static fp8 Tan(fp8 x) { return M_Tan(x); };
-			static fp8 Acos(fp8 x) { return M_ACos(x); };
-			static fp8 Asin(fp8 x) { return M_ASin(x); };
-			static fp8 Atan(fp8 x) { return M_ATan(x); };
-			static fp8 Cosh(fp8 x) { return M_Cosh(x); };
-			static fp8 Sinh(fp8 x) { return M_Sinh(x); };
-			static fp8 Tanh(fp8 x) { return M_Tanh(x); };
-			static fp8 Exp(fp8 x) { return M_Exp(x); };
-			static fp8 Abs(fp8 x) { return M_Fabs(x); };
-			static fp8 Log(fp8 x) { return M_Log(x); };
-			static fp8 Log10(fp8 x) { return M_Log10(x); };
-			static fp8 Floor(fp8 x) { return ::Floor(x); };
-			static fp8 Ceil(fp8 x) { return ::Ceil(x); };
-			static fp8 Mod(fp8 x,fp8 y) { return M_FMod(x,y); };
+			static fp64 Cos(fp64 x) { return M_Cos(x); };
+			static fp64 Sin(fp64 x) { return M_Sin(x); };
+			static fp64 Tan(fp64 x) { return M_Tan(x); };
+			static fp64 Acos(fp64 x) { return M_ACos(x); };
+			static fp64 Asin(fp64 x) { return M_ASin(x); };
+			static fp64 Atan(fp64 x) { return M_ATan(x); };
+			static fp64 Cosh(fp64 x) { return M_Cosh(x); };
+			static fp64 Sinh(fp64 x) { return M_Sinh(x); };
+			static fp64 Tanh(fp64 x) { return M_Tanh(x); };
+			static fp64 Exp(fp64 x) { return M_Exp(x); };
+			static fp64 Abs(fp64 x) { return M_Fabs(x); };
+			static fp64 Log(fp64 x) { return M_Log(x); };
+			static fp64 Log10(fp64 x) { return M_Log10(x); };
+			static fp64 Floor(fp64 x) { return ::Floor(x); };
+			static fp64 Ceil(fp64 x) { return ::Ceil(x); };
+			static fp64 Mod(fp64 x,fp64 y) { return M_FMod(x,y); };
 			static void Srand(int32 Seed) { MRTC_GetRand()->InitRand(Seed); };
 			static int32 Rand() { return MRTC_RAND(); };
 
@@ -202,10 +202,11 @@ namespace NScript
 				_RegContext.RegClass<uint16>("uint16");
 				_RegContext.RegClass<uint32>("uint32");
 				_RegContext.RegClass<uint64>("uint64");
-				_RegContext.RegClass<fp4>("fp4");
-				_RegContext.RegClass<fp8>("fp8");
+				_RegContext.RegClass<fp32>("fp32");
+				_RegContext.RegClass<fp64>("fp64");
 				_RegContext.RegClass<const char *>("str");
 				_RegContext.RegClass<CStr>("CStr");
+	
 
 				// Constants
 				_RegContext.RegConstant("true",1);
@@ -399,13 +400,116 @@ namespace NScript
 				_RegContext.RegConversion<t_CType, uint16>();
 				_RegContext.RegConversion<t_CType, uint32>();
 				_RegContext.RegConversion<t_CType, uint64>();
-				_RegContext.RegConversion<t_CType, fp4>();
-				_RegContext.RegConversion<t_CType, fp8>();
+				_RegContext.RegConversion<t_CType, fp32>();
+				_RegContext.RegConversion<t_CType, fp64>();
 
 				_RegContext.RegFunction(CStr("Convert_") + ScriptTypeName<t_CType>(), Convert);
 
 			}
 		};
+
+		class CStrOperators : public CClient
+		{
+
+			static CStr Add_CStr_str(CStr _Var0, const char *_Var1)
+			{
+				return _Var0 + _Var1;
+			}
+
+			static CStr Add_str_CStr(const char * _Var0, CStr _Var1)
+			{
+				return CStr(_Var0) + _Var1;
+			}
+
+			static CStr Add_str_str(const char * _Var0, const char * _Var1)
+			{
+				return CStr(_Var0) + CStr(_Var1);
+			}
+
+			static CStr Add_CStr_CStr(CStr _Var0, CStr _Var1)
+			{
+				return _Var0 + _Var1;
+			}
+
+			// Assignment Operators
+			static CStr Assign_CStr_CStr(CStr _Var0, CStr _Var1)
+			{
+				return _Var1;
+			}
+
+			static CStr Assign_CStr_str(CStr _Var0, const char *_Var1)
+			{
+				return _Var1;
+			}
+
+			static int Equal_CStr_CStr(CStr _Var0, CStr _Var1)
+			{
+				return _Var0 == _Var1;
+			}
+
+			static int Equal_str_str(const char *_Var0, const char *_Var1)
+			{
+				return CStr(_Var0) == CStr(_Var1);
+			}
+
+			static int Equal_str_CStr(const char *_Var0, CStr _Var1)
+			{
+				return CStr(_Var0) == _Var1;
+			}
+
+			static int Equal_CStr_str(CStr _Var0, const char * _Var1)
+			{
+				return _Var0 == CStr(_Var1);
+			}
+
+
+			static int NotEqual_CStr_CStr(CStr _Var0, CStr _Var1)
+			{
+				return _Var0 != _Var1;
+			}
+
+			static int NotEqual_str_str(const char *_Var0, const char *_Var1)
+			{
+				return CStr(_Var0) != CStr(_Var1);
+			}
+
+			static int NotEqual_str_CStr(const char *_Var0, CStr _Var1)
+			{
+				return CStr(_Var0) != _Var1;
+			}
+
+			static int NotEqual_CStr_str(CStr _Var0, const char * _Var1)
+			{
+				return _Var0 != CStr(_Var1);
+			}
+
+
+			public:
+			void Register(CRegisterContext & _RegContext)
+			{
+				// Operators
+				_RegContext.RegBinaryOperator("+",Add_CStr_CStr);
+				_RegContext.RegBinaryOperator("+",Add_CStr_str);
+				_RegContext.RegBinaryOperator("+",Add_str_str);
+				_RegContext.RegBinaryOperator("+",Add_str_CStr);
+
+				_RegContext.RegBinaryOperator("==",Equal_CStr_CStr);
+				_RegContext.RegBinaryOperator("==",Equal_str_CStr);
+				_RegContext.RegBinaryOperator("==",Equal_CStr_str);
+				_RegContext.RegBinaryOperator("==",Equal_str_str);
+
+				_RegContext.RegBinaryOperator("!=",NotEqual_CStr_CStr);
+				_RegContext.RegBinaryOperator("!=",NotEqual_str_CStr);
+				_RegContext.RegBinaryOperator("!=",NotEqual_CStr_str);
+				_RegContext.RegBinaryOperator("!=",NotEqual_str_str);
+
+				// Assignment Operators
+				_RegContext.RegAssignmentOperator("=",Assign_CStr_CStr);
+				_RegContext.RegAssignmentOperator("=",Assign_CStr_str);
+
+			}
+		};
+
 #ifdef PLATFORM_WIN
 	#pragma warning(pop)
 #endif
@@ -553,16 +657,16 @@ namespace NScript
 				_RegContext.RegConversion<t_CType, uint16>();
 				_RegContext.RegConversion<t_CType, uint32>();
 				_RegContext.RegConversion<t_CType, uint64>();
-				_RegContext.RegConversion<t_CType, fp4>();
-				_RegContext.RegConversion<t_CType, fp8>();
+				_RegContext.RegConversion<t_CType, fp32>();
+				_RegContext.RegConversion<t_CType, fp64>();
 
 				_RegContext.RegFunction(CStr("Convert_") + ScriptTypeName<t_CType>(), Convert);
 
 			}
 		};
 
-		TCFloatOperators<fp4> m_FloatOperators_fp4;
-		TCFloatOperators<fp8> m_FloatOperators_fp8;
+		TCFloatOperators<fp32> m_FloatOperators_fp32;
+		TCFloatOperators<fp64> m_FloatOperators_fp64;
 
 		class CBooleanOperators : public CClient
 		{
@@ -604,6 +708,8 @@ namespace NScript
 
 		CConversions m_Conversions;
 
+		CStrOperators m_StrOperators;
+
 	/*
 		// Commands.
 		static CScriptMultiType IfElse(CScriptInstance& _Script, CScriptNode& _Node);
@@ -617,12 +723,12 @@ namespace NScript
 		static int32 Throw(CScriptNode& _Node, CScriptInstance& _Script);
 
 		// Numerical operators.
-		static int32 Equal(fp8 a, fp8 b);
-		static int32 NotEqual(fp8 a, fp8 b);
-		static int32 LessThan(fp8 a, fp8 b);
-		static int32 GreaterThan(fp8 a, fp8 b);
-		static int32 LessEqual(fp8 a, fp8 b);
-		static int32 GreaterEqual(fp8 a, fp8 b);
+		static int32 Equal(fp64 a, fp64 b);
+		static int32 NotEqual(fp64 a, fp64 b);
+		static int32 LessThan(fp64 a, fp64 b);
+		static int32 GreaterThan(fp64 a, fp64 b);
+		static int32 LessEqual(fp64 a, fp64 b);
+		static int32 GreaterEqual(fp64 a, fp64 b);
 		static int32 Not(int32 a);
 		static CScriptMultiType And(CScriptInstance& _Script, CScriptNode& _Node);
 		static CScriptMultiType Or(CScriptInstance& _Script, CScriptNode& _Node);
@@ -650,6 +756,7 @@ namespace NScript
 			m_StdTypes.RegisterToParser(_pParser);
 			m_BoleanOperators.RegisterToParser(_pParser);
 			m_Conversions.RegisterToParser(_pParser);
+			m_StrOperators.RegisterToParser(_pParser);
 			CClient::RegisterToParser(_pParser);
 #ifdef M_SEPARATETYPE_int
 			m_IntOperators_int.RegisterToParser(_pParser);
@@ -662,8 +769,8 @@ namespace NScript
 			m_IntOperators_uint16.RegisterToParser(_pParser);
 			m_IntOperators_uint32.RegisterToParser(_pParser);
 			m_IntOperators_uint64.RegisterToParser(_pParser);
-			m_FloatOperators_fp4.RegisterToParser(_pParser);
-			m_FloatOperators_fp8.RegisterToParser(_pParser);
+			m_FloatOperators_fp32.RegisterToParser(_pParser);
+			m_FloatOperators_fp64.RegisterToParser(_pParser);
 			m_Math.RegisterToParser(_pParser);
 		}
 
@@ -681,9 +788,10 @@ namespace NScript
 			m_IntOperators_uint16.UnRegister(_pParser);
 			m_IntOperators_uint32.UnRegister(_pParser);
 			m_IntOperators_uint64.UnRegister(_pParser);
-			m_FloatOperators_fp4.UnRegister(_pParser);
-			m_FloatOperators_fp8.UnRegister(_pParser);
+			m_FloatOperators_fp32.UnRegister(_pParser);
+			m_FloatOperators_fp64.UnRegister(_pParser);
 			CClient::UnRegister(_pParser);
+			m_StrOperators.UnRegister(_pParser);
 			m_Conversions.UnRegister(_pParser);
 			m_BoleanOperators.UnRegister(_pParser);
 			m_StdTypes.UnRegister(_pParser);
@@ -703,9 +811,10 @@ namespace NScript
 			m_IntOperators_uint16.UnRegister();
 			m_IntOperators_uint32.UnRegister();
 			m_IntOperators_uint64.UnRegister();
-			m_FloatOperators_fp4.UnRegister();
-			m_FloatOperators_fp8.UnRegister();
+			m_FloatOperators_fp32.UnRegister();
+			m_FloatOperators_fp64.UnRegister();
 			CClient::UnRegister();
+			m_StrOperators.UnRegister();
 			m_Conversions.UnRegister();
 			m_BoleanOperators.UnRegister();
 			m_StdTypes.UnRegister();

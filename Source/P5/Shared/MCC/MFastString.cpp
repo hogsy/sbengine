@@ -105,10 +105,10 @@ public:
 		return res;
 	};
 
-	fp8 CFStrCore::Val_fp8()
+	fp64 CFStrCore::Val_fp64()
 	{
 		errno = 0;
-		fp8 res = strtod(m_Str, NULL);
+		fp64 res = strtod(m_Str, NULL);
 		if (errno != 0) return 0;
 		return res;
 	};

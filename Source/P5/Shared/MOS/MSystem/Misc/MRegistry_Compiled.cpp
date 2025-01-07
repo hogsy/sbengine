@@ -433,9 +433,9 @@ public:
 			CRegistry_Const::GetThisValueai(1, &Ret);
 			return Ret;
 		}
-		virtual fp4 GetThisValuef() const
+		virtual fp32 GetThisValuef() const
 		{
-			fp4 Ret;
+			fp32 Ret;
 			CRegistry_Const::GetThisValueaf(1, &Ret);
 			return Ret;
 		}
@@ -481,7 +481,7 @@ public:
 			const void *pDataPtr2 = pData->GetData((*((uint16 *)(pDataPtr + 2))) << 1);
 			CRegistryCompiledInternal::ms_lTypeConvert[Type][REGISTRY_TYPE_INT32](this, pDataPtr2, nDim, _pDest, _nDim);
 		}
-		virtual void GetThisValueaf(int _nDim, fp4 *_pDest) const
+		virtual void GetThisValueaf(int _nDim, fp32 *_pDest) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -493,7 +493,7 @@ public:
 			uint32 Type = (Header & DBitRange(1,4)) >> 1;
 			uint32 nDim = ((Header & DBitRange(5,9)) >> 5) + 1;
 			const void *pDataPtr2 = pData->GetData((*((uint16 *)(pDataPtr + 2))) << 1);
-			CRegistryCompiledInternal::ms_lTypeConvert[Type][REGISTRY_TYPE_FP4](this, pDataPtr2, nDim, _pDest, _nDim);
+			CRegistryCompiledInternal::ms_lTypeConvert[Type][REGISTRY_TYPE_FP32](this, pDataPtr2, nDim, _pDest, _nDim);
 		}
 		virtual void GetThisValuead(int _nDim, TArray<uint8> *_pDest) const
 		{
@@ -558,7 +558,7 @@ public:
 			return (AnimHeader0 >> 1) & DBitRange(0,6);
 		}
 
-		virtual uint32 Anim_ThisGetInterpolate(fp4 *_pParams, int &_nParams) const
+		virtual uint32 Anim_ThisGetInterpolate(fp32 *_pParams, int &_nParams) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -578,8 +578,8 @@ public:
 			_nParams = nData;
 			if (ToCopy)
 			{
-				const fp4 *pParams = (const fp4 *)pData->GetData((*((uint16 *)(pDataPtr2))) << 2);
-				memcpy(_pParams, pParams, ToCopy * sizeof(fp4));
+				const fp32 *pParams = (const fp32 *)pData->GetData((*((uint16 *)(pDataPtr2))) << 2);
+				memcpy(_pParams, pParams, ToCopy * sizeof(fp32));
 			}
 			return AnimHeader1 & DBitRange(0,7);
 		}
@@ -660,7 +660,7 @@ public:
 			return *((uint16 *)pSequenceData);
 		}
 
-		virtual fp4 Anim_ThisGetSeqLoopStart(int _iSeq) const
+		virtual fp32 Anim_ThisGetSeqLoopStart(int _iSeq) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -682,11 +682,11 @@ public:
 			const uint8 *pSequenceData = (const uint8 *)pData->GetData(((uint16 *)pDataPtr2)[_iSeq] << 1);
 //			int nKF = *((uint16 *)pSequenceData);pSequenceData += sizeof(uint16);
 			pSequenceData += sizeof(uint16);
-			const fp4 *pLoopData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
+			const fp32 *pLoopData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
 			return pLoopData[0];
 		}
 
-		virtual fp4 Anim_ThisGetSeqLoopEnd(int _iSeq) const
+		virtual fp32 Anim_ThisGetSeqLoopEnd(int _iSeq) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -708,11 +708,11 @@ public:
 			const uint8 *pSequenceData = (const uint8 *)pData->GetData(((uint16 *)pDataPtr2)[_iSeq] << 1);
 //			int nKF = *((uint16 *)pSequenceData);pSequenceData += sizeof(uint16);
 			pSequenceData += sizeof(uint16);
-			const fp4 *pLoopData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
+			const fp32 *pLoopData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
 			return pLoopData[1];
 		}
 
-		virtual fp4 Anim_ThisGetSeqLength(int _iSeq) const
+		virtual fp32 Anim_ThisGetSeqLength(int _iSeq) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -736,7 +736,7 @@ public:
 
 			if (AnimHeader0 & 1)
 			{
-				const fp4 *pTimedData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 1);
+				const fp32 *pTimedData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 1);
 				return pTimedData[nKF - 1];                
 			}
 			else
@@ -745,7 +745,7 @@ public:
 			}
 		}
 
-		virtual fp4 Anim_ThisGetKFTime(int _iSeq, int _iKF) const
+		virtual fp32 Anim_ThisGetKFTime(int _iSeq, int _iKF) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -772,7 +772,7 @@ public:
 
 			if (AnimHeader0 & 1)
 			{
-				const fp4 *pTimedData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
+				const fp32 *pTimedData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
 				return pTimedData[_iKF];                
 			}
 			else
@@ -869,7 +869,7 @@ ReturnNull:
 			}
 		}
 
-		virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const
+		virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -901,7 +901,7 @@ ReturnNull:
 
 					const uint8 *pPtr = (const uint8 *)pData->GetData(((uint16 *)pSequenceData)[_iKF] << 1);
 
-					CRegistryCompiledInternal::ms_lTypeConvert[Type][REGISTRY_TYPE_FP4](this, pPtr, nDim, _pDest, _nDim);
+					CRegistryCompiledInternal::ms_lTypeConvert[Type][REGISTRY_TYPE_FP32](this, pPtr, nDim, _pDest, _nDim);
 					return;
 				}
 			}
@@ -967,9 +967,9 @@ ReturnNull:
 			CRegistry_Const::Anim_ThisGetKFValueai(_iSeq, _iKF, 1, &Ret);
 			return Ret;
 		}
-		virtual fp4 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
+		virtual fp32 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const
 		{
-			fp4 Ret;
+			fp32 Ret;
 			CRegistry_Const::Anim_ThisGetKFValueaf(_iSeq, _iKF, 1, &Ret);
 			return Ret;
 		}
@@ -982,19 +982,19 @@ ReturnNull:
 
 		// Get kf times
 
-		virtual fp4 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const
+		virtual fp32 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const
 		{
 			return 0;
 		}
 
 
-		int Private_Anim_FindKeyByTime(fp4 _Time, const fp4 *_pTimedData, int nKF) const
+		int Private_Anim_FindKeyByTime(fp32 _Time, const fp32 *_pTimedData, int nKF) const
 		{
 			if (_pTimedData)
 			{
 				int iIndexSearch = 0;
 
-				fp4 Hash = _Time;
+				fp32 Hash = _Time;
 
 				int Low = 0;
 				int High = nKF;
@@ -1002,7 +1002,7 @@ ReturnNull:
 				{
 					iIndexSearch = (Low + High) >> 1;
 
-					fp4 CurrHash = _pTimedData[iIndexSearch];
+					fp32 CurrHash = _pTimedData[iIndexSearch];
 
 					if (CurrHash < Hash)
 						Low = iIndexSearch + 1;
@@ -1033,7 +1033,7 @@ ReturnNull:
 			}
 		}
 
-		static fp4 Private_Anim_GetKFTime(int _iKF, const fp4 *_pTimedData)
+		static fp32 Private_Anim_GetKFTime(int _iKF, const fp32 *_pTimedData)
 		{
 			if (_pTimedData)
 				return _pTimedData[_iKF];
@@ -1041,9 +1041,9 @@ ReturnNull:
 				return _iKF;
 		}
 
-		static fp4 Private_Anim_GetKFDelta(uint32 _Calc0, uint32 _Calc1, fp4 _SecLen, fp4 _LoopEnd, fp4 _LoopStart, const fp4 *_pTimedData)
+		static fp32 Private_Anim_GetKFDelta(uint32 _Calc0, uint32 _Calc1, fp32 _SecLen, fp32 _LoopEnd, fp32 _LoopStart, const fp32 *_pTimedData)
 		{
-			fp4 Duration = 0;
+			fp32 Duration = 0;
 			if (_Calc0 & EGetKFFlags_Type)
 			{
 				uint32 Value0 = _Calc0 & EGetKFFlags_Value;
@@ -1069,7 +1069,7 @@ ReturnNull:
 			return Duration;
 		}
 
-		void Private_Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+		void Private_Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 		{
 			if (_pTimeDeltas)
 			{
@@ -1092,21 +1092,21 @@ ReturnNull:
 					pDataPtr2 += sizeof(uint16);
 				const uint8 *pSequenceData = (const uint8 *)pData->GetData(((uint16 *)pDataPtr2)[_iSeq] << 1);
 				int nKF = *((uint16 *)pSequenceData);pSequenceData += sizeof(uint16); // Jump over loop daat
-				const fp4 *pLoopData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);pSequenceData += sizeof(uint16);
+				const fp32 *pLoopData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);pSequenceData += sizeof(uint16);
 
-				const fp4 *pTimedData = NULL;
-				fp4 SeqLen;
+				const fp32 *pTimedData = NULL;
+				fp32 SeqLen;
 				if (AnimHeader0 & 1)
 				{
-					pTimedData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
+					pTimedData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
 					pSequenceData += sizeof(uint16);
 					SeqLen = pTimedData[nKF-1];
 				}
 				else
 					SeqLen = nKF;
 
-				fp4 LoopStart = (pLoopData[0] < 0 ? 0 : pLoopData[0]);
-				fp4 LoopEnd = (pLoopData[1] < 0 ? SeqLen : pLoopData[1]);
+				fp32 LoopStart = (pLoopData[0] < 0 ? 0 : pLoopData[0]);
+				fp32 LoopEnd = (pLoopData[1] < 0 ? SeqLen : pLoopData[1]);
 				M_ASSERT(LoopEnd > LoopStart, "");
 				if (LoopEnd <= LoopStart)
 					return;
@@ -1116,7 +1116,7 @@ ReturnNull:
 				
 				if (nTimeDeltas > 128)
 				{
-					fp4 *pDeltas = new fp4[nTimeDeltas * 2];
+					fp32 *pDeltas = new fp32[nTimeDeltas * 2];
 					
 					Private_Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, pDeltas, _nPre, _nPost);
 					for (int i = 0; i < nTimeDeltas; ++i)
@@ -1141,7 +1141,7 @@ ReturnNull:
 			}
 		}
 
-		void Private_Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
+		void Private_Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
 		{
 			uint32 ValIndex = Private_Get_ValueIndex();
 			const CRegistryCompiledInternal::CCompiledData *pData = Private_GetData();
@@ -1162,13 +1162,13 @@ ReturnNull:
 				pDataPtr2 += sizeof(uint16);
 			const uint8 *pSequenceData = (const uint8 *)pData->GetData(((uint16 *)pDataPtr2)[_iSeq] << 1);
 			int nKF = *((uint16 *)pSequenceData);pSequenceData += sizeof(uint16); // Jump over loop daat
-			const fp4 *pLoopData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);pSequenceData += sizeof(uint16);
+			const fp32 *pLoopData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);pSequenceData += sizeof(uint16);
 
-			const fp4 *pTimedData = NULL;
-			fp4 SeqLen;
+			const fp32 *pTimedData = NULL;
+			fp32 SeqLen;
 			if (AnimHeader0 & 1)
 			{
-				pTimedData = (const fp4 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
+				pTimedData = (const fp32 *)pData->GetData((*((uint16 *)pSequenceData)) << 2);
 				pSequenceData += sizeof(uint16);
 				SeqLen = pTimedData[nKF-1];
 			}
@@ -1177,12 +1177,12 @@ ReturnNull:
 
 			uint32 AnimFlags = (AnimHeader0 >> 1) & DBitRange(0,6);
 
-			fp4 Time = 0;
+			fp32 Time = 0;
 			int nLoops = 0;
-			fp4 LoopStart = 0;
-			fp4 LoopEnd = 0;
-			fp4 LoopLength = 0;
-			fp4 LoopTime = -1;
+			fp32 LoopStart = 0;
+			fp32 LoopEnd = 0;
+			fp32 LoopLength = 0;
+			fp32 LoopTime = -1;
 			if (AnimFlags & REGISTRY_ANIMFLAGS_LOOP)
 			{
 				LoopStart = (pLoopData[0] < 0 ? 0 : pLoopData[0]);
@@ -1252,7 +1252,7 @@ ReturnNull:
 					Time = _Time.GetTime();
 			}
 
-			fp4 LowTime = Private_Anim_GetKFTime(0, pTimedData);
+			fp32 LowTime = Private_Anim_GetKFTime(0, pTimedData);
 			if (Time < LowTime)
 				Time = LowTime;
 
@@ -1587,17 +1587,17 @@ ReturnNull:
 					}
 				}
 
-				fp4 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
+				fp32 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
 				if (_nPost)
 				{
-					fp4 Duration = Private_Anim_GetKFDelta(_pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart, pTimedData);
+					fp32 Duration = Private_Anim_GetKFDelta(_pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart, pTimedData);
 
 					if (AnimFlags & REGISTRY_ANIMFLAGS_LOOP_PINGPONG)
 					{
 						if (Duration > 0)
 						{
-							fp4 Time0 = Private_Anim_GetKFTime(_pKeys[_nPre], pTimedData);
-							fp4 Time1 = Private_Anim_GetKFTime(_pKeys[_nPre+1], pTimedData);
+							fp32 Time0 = Private_Anim_GetKFTime(_pKeys[_nPre], pTimedData);
+							fp32 Time1 = Private_Anim_GetKFTime(_pKeys[_nPre+1], pTimedData);
 							if (Time1 > Time0)
 							{
 								_Fraction = (Time - Time0) / Duration;
@@ -1630,7 +1630,7 @@ ReturnNull:
 				}
 				else
 				{
-					fp4 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
+					fp32 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
 					Time = Min(Max(LowTime, Time), HighTime);
 					if (HighTime != LowTime)
 						_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -1684,10 +1684,10 @@ ReturnNull:
 					_pKeys[_nPre+i+1] = iCur;
 				}
 
-				fp4 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
+				fp32 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
 				if (_nPost)
 				{
-					fp4 Duration = Private_Anim_GetKFDelta(_pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart, pTimedData);
+					fp32 Duration = Private_Anim_GetKFDelta(_pDeltasCalc[_nPre*2], _pDeltasCalc[_nPre*2+1], SeqLen, LoopEnd, LoopStart, pTimedData);
 					if (Duration > 0)
 					{
 						if (LowTime > Time)
@@ -1702,7 +1702,7 @@ ReturnNull:
 				}
 				else
 				{
-					fp4 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
+					fp32 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
 					Time = Min(Max(LowTime, Time), HighTime);
 					if (HighTime != LowTime)
 						_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -1722,8 +1722,8 @@ ReturnNull:
 				}
 				iCur = iStart;
 
-				fp4 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
-				fp4 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
+				fp32 LowTime = Private_Anim_GetKFTime(iStart, pTimedData);
+				fp32 HighTime = Private_Anim_GetKFTime(Min(iStart + 1, nKF - 1), pTimedData);
 				Time = Min(Max(LowTime, Time), HighTime);
 				if (HighTime != LowTime)
 					_Fraction = (Time - LowTime) / (HighTime - LowTime);
@@ -1747,17 +1747,17 @@ ReturnNull:
 			}
 		}
 
-		void Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+		void Anim_ThisGetKF(int _iSeq, fp32 _Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 		{
 			return Private_Anim_ThisGetKF(_iSeq, CMTime::CreateFromSeconds(_Time), _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost);
 		}
 
-		void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const
+		void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const
 		{
 			return Private_Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, _pTimeDeltas, _nPre, _nPost);
 		}
 
-		void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
+		void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const
 		{
 			return Private_Anim_ThisGetKF(_iSeq, _Time, _Fraction, _pKeys, _pDeltasCalc, _nPre, _nPost);
 		}
@@ -1809,48 +1809,48 @@ ReturnNull:
 		virtual void SetThisValue(const wchar* _pValue) NOIMPVOID;
 		virtual void SetThisValue(CStr _Value) NOIMPVOID;
 		virtual void SetThisValuei(int32 _Value, int _StoreType = REGISTRY_TYPE_INT32) NOIMPVOID;
-		virtual void SetThisValuef(fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4) NOIMPVOID;
+		virtual void SetThisValuef(fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32) NOIMPVOID;
 		virtual void SetThisValued(const uint8* _pValue, int _Size, bint _bQuick = true) NOIMPVOID;
 		virtual void SetThisValued(TArray<uint8> _lValue, bint _bReference = true) NOIMPVOID;
 		virtual void SetThisValuea(int _nDim, const CStr *_Value) NOIMPVOID;
 		virtual void SetThisValuead(int _nDim, const TArray<uint8> *_lValue, bint _bReference = true) NOIMPVOID;
 		virtual void SetThisValueai(int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32) NOIMPVOID;
-		virtual void SetThisValueaf(int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4) NOIMPVOID;
+		virtual void SetThisValueaf(int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32) NOIMPVOID;
 		// Anim
 		virtual void Anim_ThisSetNumKF(int _iSeq, int _nKF) NOIMPVOID;
 		virtual void Anim_ThisDeleteKF(int _iSeq, int _iKF) NOIMPVOID;
-		virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time)  NOIMPZERO;
+		virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp32 _Time)  NOIMPZERO;
 		virtual void Anim_ThisSetAnimated(bint _bEnable) NOIMPVOID;
 		virtual void Anim_ThisSetDisableAutoDemote(bint _bEnable) NOIMPVOID;
 		virtual void Anim_ThisSetEnableTimed(bint _bEnable) NOIMPVOID;
 		virtual void Anim_ThisSetFlags(uint32 _Flags) NOIMPVOID;
-		virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp4 *_pParams, int _nParams) NOIMPVOID;
+		virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp32 *_pParams, int _nParams) NOIMPVOID;
 		virtual int Anim_ThisAddSeq() NOIMPZERO;
 		virtual int Anim_ThisInsertSeq(int _iSeqAfter) NOIMPZERO;
 		virtual void Anim_ThisDeleteSeq(int _iSeq) NOIMPVOID;
 		virtual void Anim_ThisSetNumSeq(int _nSeq) NOIMPVOID;
-		virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time) NOIMPVOID;
-		virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time) NOIMPVOID;
+		virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp32 _Time) NOIMPVOID;
+		virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp32 _Time) NOIMPVOID;
 		// Adds
-		virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFf(int _iSeq, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1) NOIMPZERO;
-		virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp4 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFf(int _iSeq, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1) NOIMPZERO;
+		virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp32 _Time = -1) NOIMPZERO;
 		// Set
-		virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp4 _Time) NOIMPVOID;
+		virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp32 _Time) NOIMPVOID;
 		virtual void Anim_ThisSetKFValue(int _iSeq, int _iKF, CStr _Val) NOIMPVOID;
 		virtual void Anim_ThisSetKFValuei(int _iSeq, int _iKF, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32) NOIMPVOID;
-		virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4) NOIMPVOID;
+		virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32) NOIMPVOID;
 		virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, const uint8* _pValue, int _Size, bint _bQuick = true) NOIMPVOID;
 		virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, TArray<uint8> _lValue, bint _bReference = true) NOIMPVOID;
 		virtual void Anim_ThisSetKFValuea(int _iSeq, int _iKF, int _nDim, const CStr *_pVal) NOIMPVOID;
 		virtual void Anim_ThisSetKFValueai(int _iSeq, int _iKF, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32) NOIMPVOID;
-		virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4) NOIMPVOID;
+		virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32) NOIMPVOID;
 		virtual void Anim_ThisSetKFValuead(int _iSeq, int _iKF, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true) NOIMPVOID;
 		////////////////// IO
 		// Get/Set user flags, user flags are 8-bit
@@ -1889,8 +1889,8 @@ ReturnNull:
 	{
 	public:
 		CMemoryStreamData *m_pData;
-		TDA_Pool<CMemoryStreamData> *m_pPool;
-		CMemoryStream(TDA_Pool<CMemoryStreamData> &_Pool)
+		TCPool<CMemoryStreamData, 2> *m_pPool;
+		CMemoryStream(TCPool<CMemoryStreamData, 2> &_Pool)
 		{
 			m_pData = _Pool.New();
 			m_pPool = &_Pool;
@@ -2009,7 +2009,7 @@ ReturnNull:
 				uint16 *pSource = (uint16 *)_pSource;
 				CStr *pDest = (CStr *)_pDest;
 
-				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 1);
+				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 2);
 				if (Source.IsAnsi())
 				{
 					const ch8 *pParse = Source.Str();
@@ -2034,7 +2034,7 @@ ReturnNull:
 
 				int nMin = Min(_nDimSrc, _nDimDst);
 				for (int i = 0; i < nMin; ++i)
-					pDest[i] = _pConstReg->Private_GetData()->GetString((pSource[i]) << 1);
+					pDest[i] = _pConstReg->Private_GetData()->GetString((pSource[i]) << 2);
 
 				for (int i = nMin; i < _nDimDst; ++i)
 					pDest[i] = CStr();
@@ -2071,12 +2071,12 @@ ReturnNull:
 		
 		static void RegistryConvertStrToData(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 		{
-			typedef TList_Vector<uint8> t_CType;
+			typedef TArray<uint8> t_CType;
 			if (_nDimSrc == 1 && _nDimDst > 1)
 			{
 				uint16 *pSource = (uint16 *)_pSource;
 				t_CType *pDest = (t_CType *)_pDest;
-				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 1);
+				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 2);
 				Source = Source.Ansi();
 
 				const ch8 *pParse = Source.Str();
@@ -2096,7 +2096,7 @@ ReturnNull:
 				int nMin = Min(_nDimSrc, _nDimDst);
 				for (int i = 0; i < nMin; ++i)
 				{
-					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 1);
+					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 2);
 					Source = Source.Ansi();
 
 					if (Source != "")
@@ -2120,7 +2120,7 @@ ReturnNull:
 			{
 				uint16 *pSource = (uint16 *)_pSource;
 				t_CType *pDest = (t_CType *)_pDest;
-				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 1);
+				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 2);
 
 				if (Source.IsAnsi())
 				{
@@ -2148,7 +2148,7 @@ ReturnNull:
 				t_CType *pDest = (t_CType *)_pDest;
 				for (int i = 0; i < nMin; ++i)
 				{
-					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 1);
+					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 2);
 					if (Source.IsAnsi())
 						pDest[i] = NStr::StrToInt(Source.Str(), (t_CType)0);
 					else	
@@ -2167,7 +2167,7 @@ ReturnNull:
 			{
 				uint16 *pSource = (uint16 *)_pSource;
 				t_CType *pDest = (t_CType *)_pDest;
-				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 1);
+				CStr Source = _pConstReg->Private_GetData()->GetString((*pSource) << 2);
 
 				if (Source.IsAnsi())
 				{
@@ -2175,7 +2175,7 @@ ReturnNull:
 					for (int i = 0; i < _nDimDst; ++i)
 					{
 						CStr Dst = ParseEsqSeqCompatible(pParse, NStr::StrLen(pParse), true, ",");
-						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.Str(),(fp8)0));
+						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.Str(),(fp64)0));
 					}
 				}
 				else
@@ -2184,7 +2184,7 @@ ReturnNull:
 					for (int i = 0; i < _nDimDst; ++i)
 					{
 						CStr Dst = ParseEsqSeqCompatible(pParse, NStr::StrLen(pParse), true, ",");
-						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.StrW(),(fp8)0));
+						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Dst.StrW(),(fp64)0));
 					}
 				}
 			}
@@ -2195,11 +2195,11 @@ ReturnNull:
 				t_CType *pDest = (t_CType *)_pDest;
 				for (int i = 0; i < nMin; ++i)
 				{
-					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 1);
+					CStr Source = _pConstReg->Private_GetData()->GetString((pSource[i]) << 2);
 					if (Source.IsAnsi())
-						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source.Str(), (fp8)0));
+						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source.Str(), (fp64)0));
 					else
-						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source.StrW(), (fp8)0));
+						pDest[i] = CMClosestAssign::Assign((t_CType)0, NStr::StrToFloat(Source.StrW(), (fp64)0));
 				}
 				for (int i = nMin; i < _nDimDst; ++i)
 					pDest[i] = 0;
@@ -2289,9 +2289,9 @@ ReturnNull:
 					t_CType &Source = pSource[i];
 
 					if (i == 0)
-						Dest = CStrF("%f", (fp4)(Source));
+						Dest = CStrF("%f", (fp32)(Source));
 					else
-						Dest += CStrF(",%f", (fp4)(Source));
+						Dest += CStrF(",%f", (fp32)(Source));
 				}
 				*pDest = Dest;
 			}
@@ -2302,7 +2302,41 @@ ReturnNull:
 				int nMin = Min(_nDimSrc, _nDimDst);
 				for (int i = 0; i < nMin; ++i)
 				{
-					pDest[i] = CStrF("%f", (fp4)(pSource[i]));
+					pDest[i] = CStrF("%f", (fp32)(pSource[i]));
+				}
+				for (int i = nMin; i < _nDimDst; ++i)
+					pDest[i] = CStr();
+			}
+		}
+
+		template <typename t_CType>
+		static void RegistryConvertfp16ToStr(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+		{
+			if (_nDimSrc > 1 && _nDimDst == 1)
+			{
+				t_CType *pSource = (t_CType *)_pSource;
+				CStr *pDest = (CStr *)_pDest;
+
+				CStr Dest;
+				for (int i = 0; i < _nDimSrc; ++i)
+				{
+					t_CType &Source = pSource[i];
+
+					if (i == 0)
+						Dest = CStrF("%f", Source.Getfp32());
+					else
+						Dest += CStrF(",%f", Source.Getfp32());
+				}
+				*pDest = Dest;
+			}
+			else
+			{
+				t_CType *pSource = (t_CType *)_pSource;
+				CStr *pDest = (CStr *)_pDest;
+				int nMin = Min(_nDimSrc, _nDimDst);
+				for (int i = 0; i < nMin; ++i)
+				{
+					pDest[i] = CStrF("%f", pSource[i].Getfp32());
 				}
 				for (int i = nMin; i < _nDimDst; ++i)
 					pDest[i] = CStr();
@@ -2323,6 +2357,20 @@ ReturnNull:
 				(((t_CType1 *)(_pDest)))[i] = t_CType1();
 		}
 
+		template <typename t_CType0, typename t_CType1>
+		static void RegistryConvertfp16Compatible(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+		{
+			int nMin = Min(_nDimSrc, _nDimDst);
+			for (int i = 0; i < nMin; ++i)
+			{
+				t_CType0 &Source = ((t_CType0 *)_pSource)[i];
+				t_CType1 &Dest = ((t_CType1 *)_pDest)[i];
+				Dest = (t_CType1)Source.Getfp32();
+			}
+			for (int i = nMin; i < _nDimDst; ++i)
+				(((t_CType1 *)(_pDest)))[i] = t_CType1();
+		}
+
 		template <typename t_CType0>
 		static void RegistryConvertSame(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 		{
@@ -2337,7 +2385,7 @@ ReturnNull:
 				(((t_CType0 *)(_pDest)))[i] = t_CType0();
 		}
 
-		static void RegistryConvertCopyListVector(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
+		static void RegistryConvertCopyArray(const CRegistry_Const *_pConstReg, const void *_pSource, int _nDimSrc, void *_pDest, int _nDimDst)
 		{
 			uint16 *pSource = (uint16 *)_pSource;
 
@@ -2346,14 +2394,14 @@ ReturnNull:
 			{
 				uint32 *pSourcePtr = ((uint32 *)_pConstReg->Private_GetData()->GetData((pSource[i]) << 2));
 
-				TList_Vector<uint8> &Dest = ((TList_Vector<uint8> *)_pDest)[i];
+				TArray<uint8> &Dest = ((TArray<uint8> *)_pDest)[i];
 
 				mint Len = *pSourcePtr;
 				Dest.SetLen(Len);
 				memcpy(Dest.GetBasePtr(), pSourcePtr+1, Len);
 			}
 			for (int i = nMin; i < _nDimDst; ++i)
-				((TList_Vector<uint8> *)_pDest)[i].Clear();
+				((TArray<uint8> *)_pDest)[i].Clear();
 		}
 	};
 
@@ -2363,8 +2411,7 @@ ReturnNull:
 	class CCompileContext
 	{
 	public:
-		CCompileContext():
-			m_MemoryStreamDataPool(512 * 1024)
+		CCompileContext()
 		{
 			m_iCurrentCompiledData = 0;
 			m_bFastSearch = 0;
@@ -2379,7 +2426,7 @@ ReturnNull:
 			}
 		}
 
-		TDA_Pool<CMemoryStreamData> m_MemoryStreamDataPool;
+		TCPool<CMemoryStreamData, 2> m_MemoryStreamDataPool;
 
 		int m_bRoot;
 		int m_iCurrentCompiledData;
@@ -2494,7 +2541,7 @@ ReturnNull:
 			DAVLAligned_Tree(CIndex, m_Link, CIndex::CEntry, CIndex::CCompare) m_Index;
 			typedef DIdsTreeAVLAligned_Iterator(CIndex, m_Link, CIndex::CEntry, CIndex::CCompare) CIndexIter;
 			typedef DLinkD_Iter(CIndex::CEntry, m_Link) CIndexEntryIter;
-			TDA_Pool<CIndex> m_IndexPool;
+			TCPool<CIndex> m_IndexPool;
 
 			void IndexAddedData(int _Pos, int _Len)
 			{
@@ -2668,7 +2715,7 @@ ReturnNull:
 			return NULL;
 		}
 
-		TList_Vector<CCompiledDataCompile*> m_CompiledData;
+		TArray<CCompiledDataCompile*> m_CompiledData;
 
 		template <int _bLE>
 		void ChecksumData(CRegistryCompiledInternal::CRegistry_Const &_Node, CMD5 &_MD5, int _Type, int _nDim, int _iData)
@@ -2691,7 +2738,7 @@ ReturnNull:
 					{
 						uint16 iStr;
 						DataStream.Read<_bLE>(iStr);
-						CStr::CStrData *pStr = pCompiledData->GetString(iStr << 1);
+						CStr::CStrData *pStr = pCompiledData->GetString(iStr << 2);
 						void *pData = pStr->StrData();
 						int Len = pStr->Len() * (pStr->IsUnicode() + 1);
 						if (pData)
@@ -2712,7 +2759,7 @@ ReturnNull:
 
 						uint32 Length;
 						DataDataStream.Read<_bLE>(Length);
-						TList_Vector<uint8> Temp;
+						TArray<uint8> Temp;
 						Temp.SetLen(Length);
 						DataDataStream.m_File.Read(Temp.GetBasePtr(), Length);
 						_MD5.f_AddData(Temp.GetBasePtr(), Length);
@@ -2753,12 +2800,12 @@ ReturnNull:
 					}
 				}
 				break;
-			case REGISTRY_TYPE_FP4:
+			case REGISTRY_TYPE_FP32:
 				{
 					CMemoryStream DataStream(pCompiledData->GetData(_iData << 1));
 					for (int d = 0; d < nDim; ++d)
 					{
-						fp4 Data;
+						fp32 Data;
 						DataStream.Read<_bLE>(Data);
 						_MD5.f_AddData(&Data, sizeof(Data));
 					}
@@ -2830,7 +2877,7 @@ ReturnNull:
 					CMemoryStream DataStream(pCompiledData->GetData(IPIndex << 2));
 					for (int i = 0; i < nParams; ++i)
 					{
-						fp4 Data;
+						fp32 Data;
 						DataStream.Read<_bLE>(Data);
 						_MD5.f_AddData(&Data, sizeof(Data));
 					}
@@ -2853,8 +2900,8 @@ ReturnNull:
 							uint16 LoopIndex;
 							SequenceStream.Read<_bLE>(LoopIndex);
 
-							fp4 *LoopData = (fp4 *)pCompiledData->GetData(LoopIndex << 2);
-							_MD5.f_AddData(LoopData, sizeof(fp4) * 2);
+							fp32 *LoopData = (fp32 *)pCompiledData->GetData(LoopIndex << 2);
+							_MD5.f_AddData(LoopData, sizeof(fp32) * 2);
 
 							if (bTimed)
 							{			
@@ -2864,7 +2911,7 @@ ReturnNull:
 
 								for (int j = 0; j < nKF; ++j)
 								{
-									fp4 Data;
+									fp32 Data;
 									TimeStream.Read<_bLE>(Data);
 									_MD5.f_AddData(&Data, sizeof(Data));
 								}
@@ -2982,7 +3029,7 @@ ReturnNull:
 		}
 
 		template <int f_bLE>
-		int AddHeapStr(CStr _String, int _Alignment = 2)
+		int AddHeapStr(CStr _String, int _Alignment)
 		{
 			CStr Dupl = _String;
 			Dupl.MakeUnique();
@@ -3017,7 +3064,7 @@ ReturnNull:
 			{
 				++DataLen;
 				bint bAlloc = pStrData->f_bIsAllocated();
-				mint RefCount = pStrData->f_bIsAllocated();
+				mint RefCount = pStrData->f_MRTC_ReferenceCount();
 				pStrData->f_bIsAllocated(0);
 				pStrData->f_MRTC_ReferenceCount(2);
 #ifdef CPU_LITTLEENDIAN
@@ -3040,50 +3087,6 @@ ReturnNull:
 				return iRet;
 			}
 		}
-#if 0
-		int AddHeapDataOld(void *_pData, mint _DataSize, bint _bString, int _Alignment)
-		{
-			CCompiledDataCompile* pCompiledData = m_CompiledData[m_iCurrentCompiledData];
-			uint8 *pData = pCompiledData->m_DataHeap.GetBasePtr();
-			uint8 *pStrMask = pCompiledData->m_lStrDataHeaderMask.GetBasePtr();
-			int iMax = pCompiledData->m_UsedDataHeap - _DataSize;
-			for (int i = 0; i <= iMax; i += _Alignment)
-			{
-				if (_bString)
-				{
-					if (!pStrMask[i >> 1])
-						continue;
-				}
-				else
-				{
-					int PreI = i;
-					mint Max = (i + _DataSize + 1);
-					if (Max > iMax)
-						Max = iMax;
-					for (int j = i >> 1; j < Max >> 1; ++j)
-					{
-						if (pStrMask[j])
-						{
-							i = (((((j+1) << 1) + _Alignment - 1) / _Alignment) * _Alignment);
-							break;
-						}
-					}
-					if (PreI != i)
-					{
-						i = i - _Alignment;
-						continue;
-					}
-				}
-
-				if (memcmp(pData + i, _pData, _DataSize) == 0)
-				{
-					pCompiledData->m_ReusedDataHeap += _DataSize;
-					return i / _Alignment;
-				}
-			}
-			return -1;
-		}
-#endif
 
 		int AddHeapData(void *_pData, mint _DataSize, bint _bString, int _Alignment)
 		{
@@ -3290,10 +3293,10 @@ ReturnNull:
 				_pReg->Anim_ThisGetKFValuea(_iSeq, _iKF, nDim, Data);
 				for (int d = 0; d < nDim; ++d)
 				{
-					int iStr = _Context.AddHeapStr<_bLE>(Data[d]);
+					int iStr = _Context.AddHeapStr<_bLE>(Data[d], 4);
 					if (iStr < 0)
 						return -1;
-                    DataStream.Write<_bLE>((uint16)iStr);
+                    DataStream.Write<_bLE>((uint16)(iStr));
 				}
 				int iData0 = _Context.AddHeapData(DataStream.GetPtr(), DataStream.GetLen(), false, 2);
 				if (iData0 < 0)
@@ -3367,10 +3370,10 @@ ReturnNull:
 				iRet = iData0 << 1;
 			}
 			break;
-		case REGISTRY_TYPE_FP4:
+		case REGISTRY_TYPE_FP32:
 			{
 				CMemoryStream DataStream(_Context.m_MemoryStreamDataPool);
-				fp4 Data[REGISTRY_MAX_DIMENSIONS];
+				fp32 Data[REGISTRY_MAX_DIMENSIONS];
 				_pReg->Anim_ThisGetKFValueaf(_iSeq, _iKF, nDim, Data);
 				for (int d = 0; d < nDim; ++d)
 					DataStream.Write<_bLE>(Data[d]);
@@ -3384,7 +3387,7 @@ ReturnNull:
 		case REGISTRY_TYPE_FP2:
 			{
 				CMemoryStream DataStream(_Context.m_MemoryStreamDataPool);
-				fp4 Data[REGISTRY_MAX_DIMENSIONS];
+				fp32 Data[REGISTRY_MAX_DIMENSIONS];
 				_pReg->Anim_ThisGetKFValueaf(_iSeq, _iKF, nDim, Data);
 				for (int d = 0; d < nDim; ++d)
 					DataStream.Write<_bLE>(fp2(Data[d]).m_Half);
@@ -3522,7 +3525,7 @@ NormalBranch:
 				//uint32 m_nData:8;
 				bint bTimed = _pReg->Anim_ThisGetEnableTimed();
 				uint32 AnimFlags = _pReg->Anim_ThisGetFlags();
-				fp4 Params[256];
+				fp32 Params[256];
 				int nParams = 256;
 				uint32 Interpolate = _pReg->Anim_ThisGetInterpolate(Params, nParams);
 				uint16 AnimHeader0 = 0;
@@ -3563,7 +3566,7 @@ NormalBranch:
 						{
 							uint16 nKF = _pReg->Anim_ThisGetNumKF(i);
 							SequenceStream.Write<_bLE>(nKF);
-							fp4 LoopData[2];
+							fp32 LoopData[2];
 							LoopData[0] = _pReg->Anim_ThisGetSeqLoopStart(i);
 							LoopData[1] = _pReg->Anim_ThisGetSeqLoopEnd(i);
 
@@ -3578,7 +3581,7 @@ NormalBranch:
 								CMemoryStream TimeStream(_Context.m_MemoryStreamDataPool);
 
 								for (int j = 0; j < nKF; ++j)
-									TimeStream.Write<_bLE>((fp4)_pReg->Anim_ThisGetKFTime(i, j));
+									TimeStream.Write<_bLE>((fp32)_pReg->Anim_ThisGetKFTime(i, j));
 
 								int Index =_Context.AddHeapData(TimeStream.GetPtr(), TimeStream.GetLen(), false, 4);
 								if (Index < 0)
@@ -4172,7 +4175,7 @@ CRegistryCompiled::~CRegistryCompiled()
 		delete m_pInternal;
 }
 
-#define REGISTRY_COMPILED_VERSION 0x0202
+#define REGISTRY_COMPILED_VERSION 0x0203
 
 #ifndef PLATFORM_CONSOLE
 void CRegistryCompiled::Write(CDataFile* _pDFile)
@@ -4254,17 +4257,16 @@ void CRegistryCompiled::Read(CDataFile* _pDFile)
 	CCFile* pFile = _pDFile->GetFile();
 
 #ifdef PLATFORM_WIN_PC
-	int Platform = D_MPLATFORM;
 	int bXDF = D_MXDFCREATE;
 
-	if (bXDF && Platform == 4)	// Add other platforms here
+	if (bXDF && D_MBIGENDIAN)	// Add other platforms here
 	{
 		// Read Big endian
 		_pDFile->PushPosition();
 		if (!_pDFile->GetNext("XCR_BE"))
 			Error("Read", "XCR_BE not found.");
 		int Version = _pDFile->GetUserData();
-		if (Version != 0x0202)
+		if (Version != 0x0203)
 			M_BREAKPOINT;
 		m_pInternal->Read(pFile, Version);
 		delete m_pInternal;
@@ -4279,7 +4281,7 @@ void CRegistryCompiled::Read(CDataFile* _pDFile)
 			if (!_pDFile->GetNext("XCR_LE"))
 				Error("Read", "XCR_LE not found.");
 			int Version = _pDFile->GetUserData();
-			if (Version != 0x0202)
+			if (Version != 0x0203)
 				M_BREAKPOINT;
 			m_pInternal->Read(pFile, Version);
 		#else
@@ -4287,7 +4289,7 @@ void CRegistryCompiled::Read(CDataFile* _pDFile)
 			if (!_pDFile->GetNext("XCR_BE"))
 				Error("Read", "XCR_BE not found.");
 			int Version = _pDFile->GetUserData();
-			if (Version != 0x0202)
+			if (Version != 0x0203)
 				M_BREAKPOINT;
 			m_pInternal->Read(pFile, Version);
 		#endif
@@ -4301,7 +4303,7 @@ void CRegistryCompiled::Read(CDataFile* _pDFile)
 		if (!_pDFile->GetNext("XCR_LE"))
 			Error("Read", "XCR_LE not found.");
 		int Version = _pDFile->GetUserData();
-		if (Version != 0x0202)
+		if (Version != 0x0203)
 			M_BREAKPOINT;
 		m_pInternal->Read(pFile, Version);
 	#else
@@ -4309,7 +4311,7 @@ void CRegistryCompiled::Read(CDataFile* _pDFile)
 		if (!_pDFile->GetNext("XCR_BE"))
 			Error("Read", "XCR_BE not found.");
 		int Version = _pDFile->GetUserData();
-		if (Version != 0x0202)
+		if (Version != 0x0203)
 			M_BREAKPOINT;
 		m_pInternal->Read(pFile, Version);
 	#endif
@@ -4346,11 +4348,11 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<CStr>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<uint32>
 	}
@@ -4363,8 +4365,8 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToInt<uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToInt<int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToInt<int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToFloat<fp4, fp4>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToFloat<fp2, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToFloat<fp32, fp32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToFloat<fp2, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertStrToInt<uint32>
 	}
 	,
@@ -4372,11 +4374,11 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDataToStr,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCopyListVector,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCopyArray,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertClear<uint32>
 	}
@@ -4385,11 +4387,11 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertIntToStr<uint8>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint8, uint32>
 	}
@@ -4398,11 +4400,11 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertIntToStr<int16>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int16, uint32>
 	}
@@ -4411,50 +4413,50 @@ CRegistryCompiledInternal::FRegistryCompiledTypeConvert *CRegistryCompiledIntern
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertIntToStr<int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<int32, uint32>
 	}
 	,
-	// fp4
+	// fp32
 	{
 		NULL,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertFloatToStr<fp4>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp4, uint8>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp4, int16>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp4, int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<fp4>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp4, fp2>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp4, uint32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertFloatToStr<fp32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp32, uint8>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp32, int16>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp32, int32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<fp32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp32, fp2>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp32, uint32>,
 	}
 	,
 	// fp2
 	{
 		NULL,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertFloatToStr<fp2>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp2, uint8>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp2, int16>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp2, int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp2, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16ToStr<fp2>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16Compatible<fp2, uint8>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16Compatible<fp2, int16>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16Compatible<fp2, int32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16Compatible<fp2, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<fp2>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<fp2, int32>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertfp16Compatible<fp2, int32>,
 	}
 	,
 	// uint32
 	{
 		NULL,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertIntToStrHex<uint32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TList_Vector<uint8> >,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertDefault<TArray<uint8> >,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, uint8>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, int16>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, int32>,
-		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, fp4>,
+		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, fp32>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertCompatible<uint32, fp2>,
 		CRegistryCompiledInternal::CRegistry_RegistryCompiled_Helpers::RegistryConvertSame<uint32>,
 	}

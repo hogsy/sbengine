@@ -72,20 +72,20 @@ private:
 		}
 		void *m_pData;
 		int m_nKeyFrames;
-		fp4 m_LoopStart;
-		fp4 m_LoopEnd;
+		fp32 m_LoopStart;
+		fp32 m_LoopEnd;
 	};
 
 	enum
 	{
-		ERegistryDynamicFlags_Animated = DBit(0),
-		ERegistryDynamicFlags_HashDirty = DBit(1),
-		ERegistryDynamicFlags_DisableAnimAutoDemote = DBit(2),
+		ERegistryDynamicFlags_Animated = M_Bit(0),
+		ERegistryDynamicFlags_HashDirty = M_Bit(1),
+		ERegistryDynamicFlags_DisableAnimAutoDemote = M_Bit(2),
 #ifdef REGISTRY_COMPILEDORDERSIMULATE
-		ERegistryDynamicFlags_SimulateRegistryCompiled = DBit(3),
+		ERegistryDynamicFlags_SimulateRegistryCompiled = M_Bit(3),
 #endif
 
-		ERegistryDynamicAnimFlag_Timed = DBit(0),
+		ERegistryDynamicAnimFlag_Timed = M_Bit(0),
 
 		EMaxDimensions = 32,
 	};
@@ -97,7 +97,7 @@ private:
 		uint32 m_AnimFlags:16;
 		uint32 m_AnimIPType:8;
 		TThinArray<CAnimationSequence *> m_Sequences;
-		TThinArray<fp4> m_InterpolateData;
+		TThinArray<fp32> m_InterpolateData;
 
 		M_INLINE bint IsValidSequenceKeyframe(int _iSeq, int _iKF) const
 		{
@@ -123,12 +123,12 @@ private:
 #endif
 
 	CStr::spCStrData m_spName;	// 4
-	TList_Vector<CPtrKeyHash, TList_Vector_AutoAlign<>, CListVectorCoreDummy> m_lChildren;	// 4
+	TArray<CPtrKeyHash, TArray_AutoAlign<>, CArrayCoreDummy> m_lChildren;	// 4
 
 	enum
 	{
 		ETempStorage0 = sizeof(void *) * 2,
-		ETempStorage1 = sizeof(fp4) * 3 > ETempStorage0 ? sizeof(fp4) * 3 : ETempStorage0,
+		ETempStorage1 = sizeof(fp32) * 3 > ETempStorage0 ? sizeof(fp32) * 3 : ETempStorage0,
 		ETempStorage2 = sizeof(CAnimationData) > ETempStorage1 ? sizeof(CAnimationData) : ETempStorage1,
 		EDataStorage = ETempStorage2
 	};
@@ -251,31 +251,31 @@ private:
 
 	void Private_Anim_DestroySequence(CAnimationSequence *_pSeq);
 
-	int Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp4 _Time, const void *_pData, int _Type, int _nDim);
+	int Private_Anim_InsertItem(CAnimationSequence *_pSeq, fp32 _Time, const void *_pData, int _Type, int _nDim);
 	void Private_Anim_SetItem(CAnimationSequence *_pSeq, int _iKF, const void *_pData, int _Type, int _nDim);
 	void Private_Anim_GetItem(const CAnimationSequence *_pSeq, int _iKF, void *_pData, int _Type, int _nDim) const;
 
-	int Private_Anim_GetKFInsertPos(const CAnimationSequence *_pSeq, fp4 _Time) const;
-	fp4 Private_Anim_GetKFTimeTimed(const CAnimationSequence *_pSeq, int _iKeyFrame) const;
-	fp4 Private_Anim_GetKFTime(const CAnimationSequence *_pSeq, int _iKeyFrame) const;
+	int Private_Anim_GetKFInsertPos(const CAnimationSequence *_pSeq, fp32 _Time) const;
+	fp32 Private_Anim_GetKFTimeTimed(const CAnimationSequence *_pSeq, int _iKeyFrame) const;
+	fp32 Private_Anim_GetKFTime(const CAnimationSequence *_pSeq, int _iKeyFrame) const;
 	const void *Private_Anim_GetKFData(const CAnimationSequence *_pSeq, int _iKeyFrame) const;
 	void *Private_Anim_GetKFData(CAnimationSequence *_pSeq, int _iKeyFrame);
 
-	M_INLINE void Private_Anim_SetKFTime(void *_pData, int _Type, int _nDim, int _iKeyFrame, fp4 _Time)
+	M_INLINE void Private_Anim_SetKFTime(void *_pData, int _Type, int _nDim, int _iKeyFrame, fp32 _Time)
 	{
-		*((fp4 *)(((uint8 *)_pData) + (ms_lTypeSize[_Type]*_nDim + sizeof(fp4)) * (_iKeyFrame + 1) - sizeof(fp4))) = _Time;
+		*((fp32 *)(((uint8 *)_pData) + (ms_lTypeSize[_Type]*_nDim + sizeof(fp32)) * (_iKeyFrame + 1) - sizeof(fp32))) = _Time;
 	}
 
-	M_INLINE void Private_Anim_SetKFTime(void *_pData, int _iKeyFrame, fp4 _Time)
+	M_INLINE void Private_Anim_SetKFTime(void *_pData, int _iKeyFrame, fp32 _Time)
 	{
-		*((fp4 *)(((uint8 *)_pData) + (ms_lTypeSize[m_Type]*(m_Dimensions+1) + sizeof(fp4)) * (_iKeyFrame + 1) - sizeof(fp4))) = _Time;
+		*((fp32 *)(((uint8 *)_pData) + (ms_lTypeSize[m_Type]*(m_Dimensions+1) + sizeof(fp32)) * (_iKeyFrame + 1) - sizeof(fp32))) = _Time;
 	}
 
-	fp4 Private_Anim_GetSequenceLength(const CAnimationSequence *_pSeq) const;
-	fp4 Private_Anim_GetWrappedTime(const CAnimationSequence *_pSeq, const CMTime &_Time, uint32 _Flags) const;
-	void Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost, int _Flags) const;
-	void Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost, int _Flags) const;
-	int Private_Anim_FindKeyByTime(const CAnimationSequence *_pSeq, fp4 _Time) const;
+	fp32 Private_Anim_GetSequenceLength(const CAnimationSequence *_pSeq) const;
+	fp32 Private_Anim_GetWrappedTime(const CAnimationSequence *_pSeq, const CMTime &_Time, uint32 _Flags) const;
+	void Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost, int _Flags) const;
+	void Private_Anim_ThisGetKF(const CAnimationSequence *_pSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost, int _Flags) const;
+	int Private_Anim_FindKeyByTime(const CAnimationSequence *_pSeq, fp32 _Time) const;
 
 
 	void Private_Anim_Promote();
@@ -369,14 +369,14 @@ private:
 		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_INT32, "");
 		return *((uint32 *)m_Value);
 	}
-	fp4 &Type_Get_fp4()
+	fp32 &Type_Get_fp32()
 	{
-		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP4, "");
-		return *((fp4 *)m_Value);
+		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP32, "");
+		return *((fp32 *)m_Value);
 	}
 	fp2 &Type_Get_fp2()
 	{
-		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP4, "");
+		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP32, "");
 		return *((fp2 *)m_Value);
 	}
 
@@ -410,15 +410,15 @@ private:
 		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_INT32, "");
 		return *((const uint32 *)m_Value);
 	}
-	const fp4 &Type_Get_fp4() const
+	const fp32 &Type_Get_fp32() const
 	{
-		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP4, "");
-		return *((const fp4 *)m_Value);
+		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP32, "");
+		return *((const fp32 *)m_Value);
 	}
 
 	const fp2 &Type_Get_fp2() const
 	{
-		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP4, "");
+		M_ASSERT((!(m_InternalFlags & ERegistryDynamicFlags_Animated)) && m_Type == REGISTRY_TYPE_FP32, "");
 		return *((const fp2 *)m_Value);
 	}
 
@@ -516,14 +516,14 @@ public:
 	virtual void SetThisValue(const wchar* _pValue) ;
 	virtual void SetThisValue(CStr _Value) ;
 	virtual void SetThisValuei(int32 _Value, int _StoreType = REGISTRY_TYPE_INT32) ;
-	virtual void SetThisValuef(fp4 _Value, int _StoreType = REGISTRY_TYPE_FP4) ;
+	virtual void SetThisValuef(fp32 _Value, int _StoreType = REGISTRY_TYPE_FP32) ;
 	virtual void SetThisValued(const uint8* _pValue, int _Size, bint _bQuick = true) ;
 	virtual void SetThisValued(TArray<uint8> _lValue, bint _bReference = true) ;
 
 	virtual void SetThisValuea(int _nDim, const CStr *_Value);
 	virtual void SetThisValuead(int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 	virtual void SetThisValueai(int _nDim, const int32 *_Value, int _StoreType = REGISTRY_TYPE_INT32);
-	virtual void SetThisValueaf(int _nDim, const fp4 *_Value, int _StoreType = REGISTRY_TYPE_FP4);
+	virtual void SetThisValueaf(int _nDim, const fp32 *_Value, int _StoreType = REGISTRY_TYPE_FP32);
 
 
 	// Getting value from this
@@ -538,13 +538,13 @@ public:
 
 	virtual CStr GetThisValue() const ;
 	virtual int32 GetThisValuei() const ;
-	virtual fp4 GetThisValuef() const ;
+	virtual fp32 GetThisValuef() const ;
 	virtual const TArray<uint8> GetThisValued() const ;
 	virtual TArray<uint8> GetThisValued() ;
 
 	virtual void GetThisValuea(int _nDim, CStr *_pDest) const;
 	virtual void GetThisValueai(int _nDim, int32 *_pDest) const;
-	virtual void GetThisValueaf(int _nDim, fp4 *_pDest) const;
+	virtual void GetThisValueaf(int _nDim, fp32 *_pDest) const;
 	virtual void GetThisValuead(int _nDim, TArray<uint8> *_pDest) const;
 
 
@@ -565,8 +565,8 @@ public:
 	virtual void Anim_ThisSetFlags(uint32 _Flags);
 	virtual uint32 Anim_ThisGetFlags() const;
 
-	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp4 *_pParams, int _nParams);
-	virtual uint32 Anim_ThisGetInterpolate(fp4 *_pParams, int &_nParams) const;
+	virtual void Anim_ThisSetInterpolate(uint32 _InterpolateType, const fp32 *_pParams, int _nParams);
+	virtual uint32 Anim_ThisGetInterpolate(fp32 *_pParams, int &_nParams) const;
 
 	virtual bint Anim_ThisIsValidSequenceKeyframe(int _iSec, int _iKF) const;
 
@@ -576,63 +576,63 @@ public:
 	virtual void Anim_ThisSetNumSeq(int _nSeq);
 	virtual int Anim_ThisGetNumSeq() const;
 
-	virtual fp4 Anim_ThisGetSeqLoopStart(int _iSeq) const;
-	virtual fp4 Anim_ThisGetSeqLoopEnd(int _iSeq) const;
+	virtual fp32 Anim_ThisGetSeqLoopStart(int _iSeq) const;
+	virtual fp32 Anim_ThisGetSeqLoopEnd(int _iSeq) const;
 
-	virtual fp4 Anim_ThisGetSeqLength(int _iSeq) const;
+	virtual fp32 Anim_ThisGetSeqLength(int _iSeq) const;
 
-	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp4 _Time);
-	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp4 _Time);
+	virtual void Anim_ThisSetSeqLoopStart(int _iSeq, fp32 _Time);
+	virtual void Anim_ThisSetSeqLoopEnd(int _iSeq, fp32 _Time);
 
-	virtual void Anim_ThisGetKF(int _iSeq, fp4 _Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const;
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, fp4 *_pTimeDeltas, int _nPre, int _nPost) const;
-	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp4 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const;
+	virtual void Anim_ThisGetKF(int _iSeq, fp32 _Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const;
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, fp32 *_pTimeDeltas, int _nPre, int _nPost) const;
+	virtual void Anim_ThisGetKF(int _iSeq, const CMTime &_Time, fp32 &_Fraction, int *_pKeys, uint32 *_pDeltasCalc, int _nPre, int _nPost) const;
 
 	virtual void Anim_ThisSetNumKF(int _iSeq, int _nKF);
 	virtual int Anim_ThisGetNumKF(int _iSeq = 0) const;
 
 	virtual void Anim_ThisDeleteKF(int _iSeq, int _iKF);
 
-	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp4 _Time) ;
-	virtual fp4 Anim_ThisGetKFTime(int _iSeq, int _iKF) const;
+	virtual int Anim_ThisSetKFTime(int _iSeq, int _iKF, fp32 _Time) ;
+	virtual fp32 Anim_ThisGetKFTime(int _iSeq, int _iKF) const;
 
-	virtual fp4 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const;
+	virtual fp32 Anim_ThisGetWrappedTime(const CMTime &_Time, int _iSeq = 0) const;
 
 	// Adds
-	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFf(int _iSeq, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp4 _Time = -1);
+	virtual int Anim_ThisAddKF(int _iSeq, CStr _Val, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFi(int _iSeq, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFf(int _iSeq, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFd(int _iSeq, const uint8* _pValue, int _Size, bint _bQuick = true, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFd(int _iSeq, TArray<uint8> _lValue, bint _bReference = true, fp32 _Time = -1);
 
-	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4, fp4 _Time = -1);
-	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp4 _Time = -1);
+	virtual int Anim_ThisAddKFa(int _iSeq, int _nDim, const CStr *_pVal, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFai(int _iSeq, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFaf(int _iSeq, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32, fp32 _Time = -1);
+	virtual int Anim_ThisAddKFad(int _iSeq, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true, fp32 _Time = -1);
 
 	// Set
-	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp4 _Time);
+	virtual void Anim_ThisSetKFValueConvert(int _iSeq, int _iKF, CStr _Val, int _nDim, int _StoreType, fp32 _Time);
 
 	virtual void Anim_ThisSetKFValue(int _iSeq, int _iKF, CStr _Val);
 	virtual void Anim_ThisSetKFValuei(int _iSeq, int _iKF, int32 _Val, int _StoreType = REGISTRY_TYPE_INT32);
-	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp4 _Val, int _StoreType = REGISTRY_TYPE_FP4);
+	virtual void Anim_ThisSetKFValuef(int _iSeq, int _iKF, fp32 _Val, int _StoreType = REGISTRY_TYPE_FP32);
 	virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, const uint8* _pValue, int _Size, bint _bQuick = true);
 	virtual void Anim_ThisSetKFValued(int _iSeq, int _iKF, TArray<uint8> _lValue, bint _bReference = true);
 
 	virtual void Anim_ThisSetKFValuea(int _iSeq, int _iKF, int _nDim, const CStr *_pVal);
 	virtual void Anim_ThisSetKFValueai(int _iSeq, int _iKF, int _nDim, const int32 *_pVal, int _StoreType = REGISTRY_TYPE_INT32);
-	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp4 *_pVal, int _StoreType = REGISTRY_TYPE_FP4);
+	virtual void Anim_ThisSetKFValueaf(int _iSeq, int _iKF, int _nDim, const fp32 *_pVal, int _StoreType = REGISTRY_TYPE_FP32);
 	virtual void Anim_ThisSetKFValuead(int _iSeq, int _iKF, int _nDim, const TArray<uint8> *_lValue, bint _bReference = true);
 
 	// Get Value
 	virtual CStr Anim_ThisGetKFValue(int _iSeq, int _iKF) const;
 	virtual int32 Anim_ThisGetKFValuei(int _iSeq, int _iKF) const;
-	virtual fp4 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const;
+	virtual fp32 Anim_ThisGetKFValuef(int _iSeq, int _iKF) const;
 	virtual TArray<uint8> Anim_ThisGetKFValued(int _iSeq, int _iKF) const;
 
 	virtual void Anim_ThisGetKFValuea(int _iSeq, int _iKF, int _nDim, CStr *_pDest) const;
 	virtual void Anim_ThisGetKFValueai(int _iSeq, int _iKF, int _nDim, int32 *_pDest) const;
-	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp4 *_pDest) const;
+	virtual void Anim_ThisGetKFValueaf(int _iSeq, int _iKF, int _nDim, fp32 *_pDest) const;
 	virtual void Anim_ThisGetKFValuead(int _iSeq, int _iKF, int _nDim, TArray<uint8> *_pDest) const;
 
 	////////////////// IO

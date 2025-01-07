@@ -62,27 +62,28 @@ public:
 	void CopyReturnValues(const CCollisionInfo& _CInfo);	// Copy return values from _CInfo to *this
 	bool Improve(const CCollisionInfo& _CInfo);				// Copies _CInfo to *this if _CInfo collision is more recent than *this.
 	bool IsImprovement(const CCollisionInfo& _CInfo) const;	// returns true if _CInfo's collision is more recent than *this's collision.
-	bool IsImprovement(fp4 _Time, fp4 _Distance = 0.0f) const;	// returns true if a collision at _Time/_Distance is more recent than *this's collision.
+	bool IsImprovement(fp32 _Time, fp32 _Distance = 0.0f) const;	// returns true if a collision at _Time/_Distance is more recent than *this's collision.
 	bool IsComplete() const;								// returns true if no more collision tests need to be done, ie. if it m_bIsCollision and !m_bIsValid or no return values are needed.
 
+	CMat4Dfp32			m_LocalNodePos;				// (note: also reused by rigid body physics events)
+	CPlane3Dfp32		m_Plane;
 	uint32	m_bIsCollision : 1;			// True if the collision info represent a collision.
 	uint32	m_bIsValid : 1;				// True if the collision time could be calculated. False if collision at start position. If true, m_bIsCollision is also true.
 	uint32	m_bIsContact : 1;			// Not used for anything yet.
 	uint32	m_CollisionType : 5;		// Not a return value
 	uint32	m_ReturnValues : 8;			// You MUST use SetReturnValues to initialize this field properly. The default value is all fields.
 	uint32	m_iObject : 16;
-	uint8			m_IN1N2Flags;				// Intersect and Notify flags
-	fp4				m_Time;						// -> interval [0,1]
-	fp4				m_Distance;					// This should be named PenetrationDepth. It is the distance along the collision plane normal between two colliding objects. Since the objects are intersecting, the distance is negative.
-	CVec3Dfp4		m_Pos;
-	CVec3Dfp4		m_LocalPos;
-	int				m_LocalNode;
-	CMat43fp4		m_LocalNodePos;
-	CVec3Dfp4		m_Velocity;
-	fp4				m_RotVelocity;				// Rotation around m_Plane.n
-	CPlane3Dfp4		m_Plane;
+	uint8				m_IN1N2Flags;				// Intersect and Notify flags
+	fp32				m_Time;						// -> interval [0,1]
+	fp32				m_Distance;					// This should be named PenetrationDepth. It is the distance along the collision plane normal between two colliding objects. Since the objects are intersecting, the distance is negative.
+	CVec3Dfp32			m_Pos;
+	CVec3Dfp32			m_LocalPos;
+	int					m_LocalNode;
+	CVec3Dfp32			m_Velocity;
+	fp32				m_RotVelocity;				// Rotation around m_Plane.n
 	const CXW_Surface*	m_pSurface;
-	int				m_SurfaceType;
+	int					m_SurfaceType;
+	fp32				m_Friction;
 };
 
 #endif

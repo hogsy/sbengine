@@ -18,6 +18,7 @@
 #define	CTC_CONVERT_ANISOTROPICDIRECTION	7
 #define CTC_CONVERT_CUBEFROMCYLINDER		8
 #define	CTC_CONVERT_GB2GA		9
+#define CTC_CONVERT_CUBEFROMSPHERE			10
 
 #ifdef CopyFile
 #undef CopyFile
@@ -38,7 +39,7 @@ class CTEX_CubeFromCylinderSettings
 public:
 	bool	m_bIsEnvMap;
 	uint8	m_iSide;
-	fp4		m_ViewHeight;
+	fp32		m_ViewHeight;
 	uint16	m_Width,m_Height;
 	TArray<CPixel32> m_lLow[4],m_lHigh[4];
 };
@@ -161,10 +162,10 @@ class CFilterWeight
 public:
 	int m_dX;
 	int m_dY;
-	fp4 m_Weight;
+	fp32 m_Weight;
 };
 
-const fp4 Scale = 1.0f / 10.0f;
+const fp32 Scale = 1.0f / 10.0f;
 
 static CFilterWeight Sharpen[9] =
 {
@@ -173,7 +174,7 @@ static CFilterWeight Sharpen[9] =
 	-1,  1, -1.0f * Scale,	0,   1, -2.0f * Scale,	1,   1, -1.0f * Scale,
 };
 
-const fp4 Scale2 = 1.0f / 20.0f;
+const fp32 Scale2 = 1.0f / 20.0f;
 
 static CFilterWeight Sharpen2[9] =
 {
@@ -205,24 +206,24 @@ static spCImage Filter(CImage* _pImg, CFilterWeight* _pWeights, int _nWeights, i
 	{
 		for(int x = 0; x < w; x++)
 		{
-			fp4 r,g,b,a;
+			fp32 r,g,b,a;
 			r = g = b = a = 0;
 			if(((_ClampFlags & CTC_TEXTUREFLAGS_CLAMP_V) && ((y == 0) || (y == (h - 1)))) || ((_ClampFlags & CTC_TEXTUREFLAGS_CLAMP_U) && ((x == 0) || (x == (w - 1)))))
 			{
 				if (Fmt == IMAGE_FORMAT_RGB32_F)
 				{
-					CVec3Dfp4 Pixel = _pImg->GetPixel3f(cr, CPnt(x,y));
-					r = fp4(Pixel[0]);
-					g = fp4(Pixel[1]);
-					b = fp4(Pixel[2]);
+					CVec3Dfp32 Pixel = _pImg->GetPixel3f(cr, CPnt(x,y));
+					r = fp32(Pixel[0]);
+					g = fp32(Pixel[1]);
+					b = fp32(Pixel[2]);
 				}
 				else
 				{
 					CPixel32 Pixel = _pImg->GetPixel(cr, CPnt(x,y));
-					r = fp4(Pixel.GetR());
-					g = fp4(Pixel.GetG());
-					b = fp4(Pixel.GetB());
-					a = fp4(Pixel.GetA());
+					r = fp32(Pixel.GetR());
+					g = fp32(Pixel.GetG());
+					b = fp32(Pixel.GetB());
+					a = fp32(Pixel.GetA());
 				}
 			}
 			else
@@ -234,27 +235,27 @@ static spCImage Filter(CImage* _pImg, CFilterWeight* _pWeights, int _nWeights, i
 
 					if (Fmt == IMAGE_FORMAT_RGB32_F)
 					{
-						CVec3Dfp4 Pixel = _pImg->GetPixel3f(cr, CPnt(xr,yr));
-						fp4 w = _pWeights[iW].m_Weight;
-						r += fp4(Pixel[0]) * w;
-						g += fp4(Pixel[1]) * w;
-						b += fp4(Pixel[2]) * w;
+						CVec3Dfp32 Pixel = _pImg->GetPixel3f(cr, CPnt(xr,yr));
+						fp32 w = _pWeights[iW].m_Weight;
+						r += fp32(Pixel[0]) * w;
+						g += fp32(Pixel[1]) * w;
+						b += fp32(Pixel[2]) * w;
 					}
 					else
 					{
 						CPixel32 Pixel = _pImg->GetPixel(cr, CPnt(xr,yr));
-						fp4 w = _pWeights[iW].m_Weight;
-						r += fp4(Pixel.GetR()) * w;
-						g += fp4(Pixel.GetG()) * w;
-						b += fp4(Pixel.GetB()) * w;
-						a += fp4(Pixel.GetA()) * w;
+						fp32 w = _pWeights[iW].m_Weight;
+						r += fp32(Pixel.GetR()) * w;
+						g += fp32(Pixel.GetG()) * w;
+						b += fp32(Pixel.GetB()) * w;
+						a += fp32(Pixel.GetA()) * w;
 					}
 				}
 			}
 
 			if (Fmt == IMAGE_FORMAT_RGB32_F)
 			{
-				spDst->SetPixel3f(cr, CPnt(x, y), CVec3Dfp4(Max(0.0f, r),Max(0.0f, g),Max(0.0f,b)) );
+				spDst->SetPixel3f(cr, CPnt(x, y), CVec3Dfp32(Max(0.0f, r),Max(0.0f, g),Max(0.0f,b)) );
 			}
 			else
 			{
@@ -290,7 +291,7 @@ static spCImage NormalizeTexture(CImage* _pImg, CFilterWeight* _pWeights, int _n
 		{
 			if (Fmt == IMAGE_FORMAT_RGB32_F)
 			{
-				CVec3Dfp4 Pixel = _pImg->GetPixel3f(cr, CPnt(x,y));
+				CVec3Dfp32 Pixel = _pImg->GetPixel3f(cr, CPnt(x,y));
 				Pixel.Normalize();
 				spDst->SetPixel3f(cr, CPnt(x, y), Pixel );
 			}
@@ -301,7 +302,7 @@ static spCImage NormalizeTexture(CImage* _pImg, CFilterWeight* _pWeights, int _n
 				{
 					Pixel = CPixel32(255,127,127, Pixel.GetA());
 				}
-				CVec3Dfp4 Vec(Pixel.GetR()-127, Pixel.GetG()-127, Pixel.GetB()-127);
+				CVec3Dfp32 Vec(Pixel.GetR()-127, Pixel.GetG()-127, Pixel.GetB()-127);
 				Vec.Normalize();
 				Vec += 1.0f;
 				Vec *= 127.0f;
@@ -435,7 +436,7 @@ void CTexture::Create(spCImage _spTxt, int _nMipmaps, int _DestFormat, int _Imag
 }
 #endif
 
-void CTexture::Read(CDataFile* _pDFile, TList_Vector<spCImagePalette>* _plspPalettes, int _iPalBase)
+void CTexture::Read(CDataFile* _pDFile, TArray<spCImagePalette>* _plspPalettes, int _iPalBase)
 {
 	MAUTOSTRIP(CTexture_Read, MAUTOSTRIP_VOID);
 
@@ -455,107 +456,124 @@ void CTexture::Read(CDataFile* _pDFile, TList_Vector<spCImagePalette>* _plspPale
 		while((NodeName = _pDFile->GetNext()) != (const char *)"")
 		{
 			CCFile* pFile = _pDFile->GetFile();
-			if (NodeName == (const char *)"NAME")
+			uint32 NodeHash = StringToHash(NodeName.GetStr());
+			switch(NodeHash)
 			{
-				if (_pDFile->GetUserData())
+			case MHASH1('NAME'):
 				{
-					if (_pDFile->GetUserData() > 31) Error("Read", "Too long texture-name.");
+					if (_pDFile->GetUserData())
+					{
+						if (_pDFile->GetUserData() > 31) Error("Read", "Too long texture-name.");
 #ifdef USE_HASHED_TEXTURENAME
-					char Tmp[32];
-					pFile->Read(&Tmp, _pDFile->GetUserData()-1);
-					Tmp[_pDFile->GetUserData()-1] = 0;
-					m_NameID = StringToHash(Tmp);
+						char Tmp[32];
+						pFile->Read(&Tmp, _pDFile->GetUserData()-1);
+						Tmp[_pDFile->GetUserData()-1] = 0;
+						m_NameID = StringToHash(Tmp);
 #else					
-					pFile->Read(&m_Name, _pDFile->GetUserData()-1);
-					m_Name[_pDFile->GetUserData()-1] = 0;
+						pFile->Read(&m_Name, _pDFile->GetUserData()-1);
+						m_Name[_pDFile->GetUserData()-1] = 0;
 #endif					
-				}
-				else
-				{
-					CFStr TmpStr;
-					TmpStr.Read(pFile);
-					if (TmpStr.Len() > 31) Error("Read", "Too long texture-name.");
+					}
+					else
+					{
+						CFStr TmpStr;
+						TmpStr.Read(pFile);
+						if (TmpStr.Len() > 31) Error("Read", "Too long texture-name.");
 #ifdef USE_HASHED_TEXTURENAME
-					m_NameID = StringToHash(TmpStr);
+						m_NameID = StringToHash(TmpStr);
 #else					
-					strcpy(m_Name, (char*)TmpStr);
+						strcpy(m_Name, (char*)TmpStr);
 #endif					
+					}
 				}
-			}
-			else if (NodeName == (const char *)"PROPERTIES")
-			{
-				m_Properties.Read(pFile);
-			}
-			else if (NodeName == (const char *)"TXTPROP_FLAGS")
-			{
-				m_Properties.m_Flags = _pDFile->GetUserData();
-			}
-			else if (NodeName == (const char *)"TXTPROP_FILTER")
-			{
-				m_Properties.m_MagFilter = _pDFile->GetUserData() & 0xff;
-				m_Properties.m_MinFilter = (_pDFile->GetUserData() >> 8) & 0xff;
-				m_Properties.m_MIPFilter = (_pDFile->GetUserData() >> 16) & 0xff;
-			#ifndef USE_PACKED_TEXTUREPROPERTIES
-				m_Properties.m_MIPMapLODBias = (_pDFile->GetUserData() >> 24) & 0xff;
-			#endif
-			}
-			else if (NodeName == (const char *)"PALETTEINDEX")
-			{
-				m_iPalette = _pDFile->GetUserData();
-				if (m_iPalette != -1) m_iPalette += _iPalBase;
-			}
-			else if (NodeName == (const char *)"PALETTE")
-			{
-				if (spPal == NULL) spPal = MNew(CImagePalette);
-				if (spPal == NULL) MemError("Read");
-				if (_pDFile->GetUserData() != 256) Error("Read", "Supports only 256 color palettes.");
+				break;
 
-				uint8 Tmp[256*4];
-				pFile->Read(&Tmp, sizeof(Tmp));
-
-				CPixel32 Pal[256];
-				for (int i=0; i<256; i++)
-					Pal[i] = CPixel32(Tmp[i*4+2], Tmp[i*4+1], Tmp[i*4+0], Tmp[i*4+3]);
-
-				spPal->SetPalette(Pal, 0, 256);
-			}
-			else if (NodeName == (const char *)"MIPMAP")
-			{
-				if (m_nMipmaps == 0)
+			case MHASH3('PROP', 'ERTI', 'ES'):
 				{
-					if ((m_iPalette != -1) && (_plspPalettes)) spPal = (*_plspPalettes)[m_iPalette];
-					m_LargestMapFilePos = pFile->Pos();
-					m_LargestMap.Read(pFile, IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM, spPal);
-					if (spPal != NULL)
-						m_LargestMap.SetPalette(spPal);				
-					w = m_LargestMap.GetWidth() >> 1;
-					h = m_LargestMap.GetHeight() >> 1;
-					d = m_LargestMap.GetPixelSize();
+					m_Properties.Read(pFile);
 				}
-				else
+				break;
+
+			case MHASH4('TXTP', 'ROP_', 'FLAG', 'S'):
 				{
-					// Just skip to the next mipmap
-					m_lMapFilePos[m_nMipmaps] = pFile->Pos();
-					/*				int DataSize = 0x10 + (w*h*d);
-					w >>= 1; h >>= 1;
-					pFile->Seek(pFile->Pos() + DataSize);*/
-					
-					spCImage spImg = MNew(CImage);
-					if (spImg == NULL) MemError("Read");
-					
-					if ((m_iPalette != -1) && (_plspPalettes)) spPal = (*_plspPalettes)[m_iPalette];
-					spImg->Read(pFile, IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM, spPal);
-					if (spPal != NULL)
-						spImg->SetPalette(spPal);				
-					if (m_nMipmaps > 1)
-						if ((spImg->GetWidth() != Max(1, m_lspMaps[m_nMipmaps-1]->GetWidth() >> 1)) ||
-							(spImg->GetHeight() != Max(1, m_lspMaps[m_nMipmaps-1]->GetHeight() >> 1)))
-							Error("Read", CStrF("Invalid mipmap size: %dx%d", spImg->GetWidth(), spImg->GetHeight()));
-						
-						m_lspMaps[m_nMipmaps] = spImg;
-						
+					m_Properties.m_Flags = _pDFile->GetUserData();
 				}
-				m_nMipmaps++;
+				break;
+
+			case MHASH4('TXTP', 'ROP_', 'FILT', 'ER'):
+				{
+					m_Properties.m_MagFilter = _pDFile->GetUserData() & 0xff;
+					m_Properties.m_MinFilter = (_pDFile->GetUserData() >> 8) & 0xff;
+					m_Properties.m_MIPFilter = (_pDFile->GetUserData() >> 16) & 0xff;
+				#ifndef USE_PACKED_TEXTUREPROPERTIES
+					m_Properties.m_MIPMapLODBias = (_pDFile->GetUserData() >> 24) & 0xff;
+				#endif
+				}
+				break;
+
+			case MHASH3('PALE', 'TTEI', 'NDEX'):
+				{
+					m_iPalette = _pDFile->GetUserData();
+					if (m_iPalette != -1) m_iPalette += _iPalBase;
+				}
+				break;
+
+			case MHASH2('PALE', 'TTE'):
+				{
+					if (spPal == NULL) spPal = MNew(CImagePalette);
+					if (spPal == NULL) MemError("Read");
+					if (_pDFile->GetUserData() != 256) Error("Read", "Supports only 256 color palettes.");
+
+					uint8 Tmp[256*4];
+					pFile->Read(&Tmp, sizeof(Tmp));
+
+					CPixel32 Pal[256];
+					for (int i=0; i<256; i++)
+						Pal[i] = CPixel32(Tmp[i*4+2], Tmp[i*4+1], Tmp[i*4+0], Tmp[i*4+3]);
+
+					spPal->SetPalette(Pal, 0, 256);
+				}
+				break;
+
+			case MHASH2('MIPM', 'AP'):
+				{
+					if (m_nMipmaps == 0)
+					{
+						if ((m_iPalette != -1) && (_plspPalettes)) spPal = (*_plspPalettes)[m_iPalette];
+						m_LargestMapFilePos = pFile->Pos();
+						m_LargestMap.Read(pFile, IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM, spPal);
+						if (spPal != NULL)
+							m_LargestMap.SetPalette(spPal);				
+						w = m_LargestMap.GetWidth() >> 1;
+						h = m_LargestMap.GetHeight() >> 1;
+						d = m_LargestMap.GetPixelSize();
+					}
+					else
+					{
+						// Just skip to the next mipmap
+						m_lMapFilePos[m_nMipmaps] = pFile->Pos();
+						/*				int DataSize = 0x10 + (w*h*d);
+						w >>= 1; h >>= 1;
+						pFile->Seek(pFile->Pos() + DataSize);*/
+						
+						spCImage spImg = MNew(CImage);
+						if (spImg == NULL) MemError("Read");
+						
+						if ((m_iPalette != -1) && (_plspPalettes)) spPal = (*_plspPalettes)[m_iPalette];
+						spImg->Read(pFile, IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM, spPal);
+						if (spPal != NULL)
+							spImg->SetPalette(spPal);				
+						if (m_nMipmaps > 1)
+							if ((spImg->GetWidth() != Max(1, m_lspMaps[m_nMipmaps-1]->GetWidth() >> 1)) ||
+								(spImg->GetHeight() != Max(1, m_lspMaps[m_nMipmaps-1]->GetHeight() >> 1)))
+								Error("Read", CStrF("Invalid mipmap size: %dx%d", spImg->GetWidth(), spImg->GetHeight()));
+							
+							m_lspMaps[m_nMipmaps] = spImg;
+							
+					}
+					m_nMipmaps++;
+				}
+				break;
 			}
 		}
 		
@@ -814,7 +832,7 @@ void CTexture::Write2(CDataFile* _pDFile, int32 *_PicMip)
 #endif
 
 
-void CTexture::ReadIndexData(CCFile* _pFile, TList_Vector<spCImagePalette>* _plspPalettes, int _iPalBase)
+void CTexture::ReadIndexData(CCFile* _pFile, TArray<spCImagePalette>* _plspPalettes, int _iPalBase)
 {
 	MAUTOSTRIP(CTexture_ReadIndexData, MAUTOSTRIP_VOID);
 
@@ -945,7 +963,7 @@ bool CTexture::IsCompressed()
 }
 
 #ifndef PLATFORM_CONSOLE
-void CTexture::Compress(int _Compression, fp4 _Quality)
+void CTexture::Compress(int _Compression, fp32 _Quality)
 {
 #ifdef USE_HASHED_TEXTURENAME
 	Error("CTexture::Compress", "Can't compress texture without name!");
@@ -1044,7 +1062,7 @@ void CTexture::Decompress(bool _DecompMipmap)
 #endif
 
 // Read the mipmap-headers
-void CTexture::Virtual_Read(CDataFile* _pDFile, TList_Vector<spCImagePalette>* _plspPalettes, int _iPalBase)
+void CTexture::Virtual_Read(CDataFile* _pDFile, TArray<spCImagePalette>* _plspPalettes, int _iPalBase)
 {
 	MAUTOSTRIP(CTexture_VirtualRead, MAUTOSTRIP_VOID);
 
@@ -1460,7 +1478,7 @@ void CTexture::SerializeRead(CDataFile* _pDFile)
 	_pDFile->GetParent();
 }
 #endif
-
+#if 0
 CTextureCache_Entry::CTextureCache_Entry()
 {
 	MAUTOSTRIP(CTextureCache_Entry_ctor, MAUTOSTRIP_VOID);
@@ -1493,7 +1511,7 @@ CTextureCache_Entry CTextureCache_Entry::operator=(CTextureCache_Entry _e)
 	m_MipMap = _e.GetMipMap();
 	return *this;
 };
-
+#endif
 
 // ----------------------------------------------------------------
 //  CTextureContainer_Plain
@@ -1502,32 +1520,6 @@ MRTC_IMPLEMENT_DYNAMIC(CTextureContainer_Plain, CReferenceCount);
 
 IMPLEMENT_OPERATOR_NEW(CTextureContainer_Plain);
 
-/*
-void CTextureContainer_Plain::DestroyHash()
-{
-	m_spHash = NULL;
-}
-
-void CTextureContainer_Plain::CreateHash()
-{
-	if (m_spHash != NULL) 
-		return;
-
-	m_spHash = DNew(CStringHash) CStringHash;
-	if (!m_spHash) MemError("CreateHash");
-
-	m_spHash->Create(m_lspTextures.Len(), false);
-	for(int i = 0; i < m_lspTextures.Len(); i++)
-		m_spHash->Insert(i, m_lspTextures[i]->m_Name, m_lspTextures[i]->m_HashLink);
-}
-*/
-/*
-void CTextureContainer_Plain::InsertHash(int _Texture)
-{
-	if (m_lspTextures[_Texture])
-		m_Hash.Insert(_Texture, m_lspTextures[_Texture]->m_Name, m_lspTextures[_Texture]->m_HashLink);
-}
-*/
 CTextureContainer_Plain::CTextureContainer_Plain()
 {
 	MAUTOSTRIP(CTextureContainer_Plain_ctor, MAUTOSTRIP_VOID);
@@ -1636,12 +1628,38 @@ int CTextureContainer_Plain::AddTexture(CStr _FileName, const CTC_TexturePropert
 	spImg->Read(_FileName, IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM);
 	return AddTexture(spImg, _Properties, 1, _Name);
 }
+
+void CTextureContainer_Plain::SetTexture(int _iLocal, spCImage _spImg, const CTC_TextureProperties& _Properties, int _ConvertType, void* _pConvertParam)
+{
+	if (!m_lspTextures.ValidPos(_iLocal))
+		Error("SetTexture", "Invalid position");
+
+	CTexture* pPrev = m_lspTextures[_iLocal];
+	if (!pPrev)
+		Error("SetTexture", "Missing texture");
+
+	spCTexture spTxt = MNew(CTexture);
+	if (!spTxt)
+		MemError("AddTexture");
+
+	spTxt->m_Properties = _Properties;
+	CreateTextureImage(spTxt, _spImg, _ConvertType, _pConvertParam);
+	spTxt->m_TextureID = pPrev->m_TextureID;
+#ifdef USE_HASHED_TEXTURENAME
+	spTxt->m_NameID = pPrev->m_NameID;
+#else
+	strcpy(spTxt->m_Name, pPrev->m_Name);
+#endif	
+	m_lspTextures[_iLocal] = spTxt;
+	m_pTC->MakeDirty(spTxt->m_TextureID);
+}
+
 #endif
 
 #ifndef PLATFORM_CONSOLE
 
 // -------------------------------------------------------------------
-static fp4 GetHeight(CImage* _pImg, int _x, int _y)
+static fp32 GetHeight(CImage* _pImg, int _x, int _y)
 {
 	MAUTOSTRIP(GetHeight_CImage_int_int, 0.0f);
 
@@ -1652,22 +1670,22 @@ static fp4 GetHeight(CImage* _pImg, int _x, int _y)
 	return Pixel.GetGray();
 }
 
-static CVec3Dfp4 GetNormal(CImage* _pImg, int _x, int _y, fp4 _Scale)
+static CVec3Dfp32 GetNormal(CImage* _pImg, int _x, int _y, fp32 _Scale)
 {
-	MAUTOSTRIP(GetNormal_CImage_int_int_fp4, CVec3Dfp4());
+	MAUTOSTRIP(GetNormal_CImage_int_int_fp32, CVec3Dfp32());
 
-	fp4 H00 = GetHeight(_pImg, _x + 0, _y + 0);
-	fp4 H10 = GetHeight(_pImg, _x + 1, _y + 0);
-	fp4 H01 = GetHeight(_pImg, _x + 0, _y + 1);
-	fp4 H11 = GetHeight(_pImg, _x + 1, _y + 1);
+	fp32 H00 = GetHeight(_pImg, _x + 0, _y + 0);
+	fp32 H10 = GetHeight(_pImg, _x + 1, _y + 0);
+	fp32 H01 = GetHeight(_pImg, _x + 0, _y + 1);
+	fp32 H11 = GetHeight(_pImg, _x + 1, _y + 1);
 
-	fp4 HeightScale = 1.0f / 255.0f * _Scale;
+	fp32 HeightScale = 1.0f / 255.0f * _Scale;
 //	HeightScale = 0;
 
-	CVec3Dfp4 TangX(1, 0, ((H10 - H00) + (H11 - H01))*0.5f*HeightScale);
-	CVec3Dfp4 TangY(0, 1, ((H01 - H00) + (H11 - H10))*0.5f*HeightScale);
+	CVec3Dfp32 TangX(1, 0, ((H10 - H00) + (H11 - H01))*0.5f*HeightScale);
+	CVec3Dfp32 TangY(0, 1, ((H01 - H00) + (H11 - H10))*0.5f*HeightScale);
 
-	CVec3Dfp4 Normal = TangX / TangY;
+	CVec3Dfp32 Normal = TangX / TangY;
 	Normal[2] *= 1;
 	Normal.Normalize();
 
@@ -1678,7 +1696,7 @@ static CVec3Dfp4 GetNormal(CImage* _pImg, int _x, int _y, fp4 _Scale)
 }
 
 
-static void CreateNormalMap(CImage* _pSrc, CImage* _pDst, fp4 _Scale, bool _bConstR)
+static void CreateNormalMap(CImage* _pSrc, CImage* _pDst, fp32 _Scale, bool _bConstR)
 {
 	MAUTOSTRIP(CreateNormalMap, MAUTOSTRIP_VOID);
 
@@ -1687,7 +1705,7 @@ static void CreateNormalMap(CImage* _pSrc, CImage* _pDst, fp4 _Scale, bool _bCon
 	for(int x = 0; x < _pSrc->GetWidth(); x++)
 		for(int y = 0; y < _pSrc->GetHeight(); y++)
 		{
-			CVec3Dfp4 N = GetNormal(_pSrc, x, y, _Scale);
+			CVec3Dfp32 N = GetNormal(_pSrc, x, y, _Scale);
 			if (_bConstR)
 			{
 				N -= 128.0f;
@@ -1720,9 +1738,9 @@ static void CreateTSVectorMap(CImage* _pSrc, CImage* _pDst)
 	for(int x = 0; x < _pSrc->GetWidth(); x++)
 		for(int y = 0; y < _pSrc->GetHeight(); y++)
 		{
-			fp4 Angle = fp4(pSrc[x + y*SrcModulo]) / 256.0f;
-			fp4 TangU = M_Cos(Angle*2.0f*_PI);
-			fp4 TangV = M_Sin(Angle*2.0f*_PI);
+			fp32 Angle = fp32(pSrc[x + y*SrcModulo]) / 256.0f;
+			fp32 TangU = M_Cos(Angle*2.0f*_PI);
+			fp32 TangV = M_Sin(Angle*2.0f*_PI);
 
 			int Alpha = (bAlpha) ? _pSrc->GetPixel(_pSrc->GetClipRect(), CPnt(x,y)).GetA() : 255;
 
@@ -1746,25 +1764,58 @@ Returns:	Interpolated pixel
 
 Comments:	Function used for cylinder map faking
 \*____________________________________________________________________*/ 
-CPixel32 GetPixel(CImage * _pImg,fp4 _TexX,fp4 _TexY)
+CPixel32 GetPixel(CImage * _pImg,fp32 _TexX,fp32 _TexY)
 {
-	_TexY = Clamp(_TexY,0.0f,(fp4)(_pImg->GetHeight()-1));
+	_TexY = Clamp(_TexY,0.0f,(fp32)(_pImg->GetHeight()-1));
 
-	fp4	IntX,IntY,FracX,FracY;
+	fp32	IntX,IntY,FracX,FracY;
 	IntX = Floor(_TexX);
 	IntY = Floor(_TexY);
 	FracX = _TexX - IntX;
 	FracY = _TexY - IntY;
 
-	CVec4Dfp4 Pixel[4];
+	CVec4Dfp32 Pixel[4];
 	Pixel[0] = _pImg->GetPixel3f(_pImg->GetClipRect(),CPnt(IntX,IntY));
 	Pixel[1] = _pImg->GetPixel3f(_pImg->GetClipRect(),CPnt(((int)IntX + 1)%_pImg->GetWidth(),IntY));
 	Pixel[2] = _pImg->GetPixel3f(_pImg->GetClipRect(),CPnt(IntX,(int)IntY + 1));
 	Pixel[3] = _pImg->GetPixel3f(_pImg->GetClipRect(),CPnt(((int)IntX + 1)%_pImg->GetWidth(),(int)IntY + 1));
 
-	CVec4Dfp4 FinalPixel = ((Pixel[1]*FracX + Pixel[0]*(1.0f-FracX)) * (1.0f - FracY) + 
+	CVec4Dfp32 FinalPixel = ((Pixel[1]*FracX + Pixel[0]*(1.0f-FracX)) * (1.0f - FracY) + 
 						    (Pixel[3]*FracX + Pixel[2]*(1.0f-FracX)) * FracY) * 255.0f;
 	return CPixel32(FinalPixel);
+}
+
+/*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
+Function:	Get UV coordinates by sphere map
+
+Parameters:		
+	_Pos:	Point to sample
+
+Returns:	UV coordinates of sphere map
+\*____________________________________________________________________*/ 
+CVec2Dfp32 SphereMap(const CVec3Dfp32 &_Pos)
+{
+	const fp32 PI = 3.14159265f;
+
+	fp32 Radius = _Pos.Length();
+	CVec2Dfp32 Ret;
+
+	fp32 Rto = _Pos.k[2] / Radius;
+	Ret.k[1] = AlmostEqual(Rto,0.0f,0.001f) ? ((_Pos.k[2] < 0) ? -0.5f : 0.5f) :
+		M_ACos(Rto) / PI;
+	
+	Rto = Radius * M_Sin(PI*Ret.k[1]);
+	fp32 Ang = AlmostEqual(Rto,0.0f,0.001f) ? PI :
+		M_ACos(_Pos.k[0] / Rto);
+
+	if( _Pos.k[1] >= 0 )
+		Ret.k[0] = Ang / (2 * PI);
+	else
+	{
+		Ret.k[0] = (PI * 2 - Ang) / (2 * PI);
+	}
+
+	return Ret;
 }
 
 // -------------------------------------------------------------------
@@ -1814,7 +1865,7 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 			spCImage spImg2 = MNew(CImage);
 			if (spImg2 == NULL) MemError("AddTexture");
 			_spImg = _spImg->Convert(IMAGE_FORMAT_I8);
-			fp4 Scale = (_pConvertParam) ? *((fp4*)_pConvertParam) : 1.0f;
+			fp32 Scale = (_pConvertParam) ? *((fp32*)_pConvertParam) : 1.0f;
 			CreateNormalMap(_spImg, spImg2, Scale, _ConvertType == CTC_CONVERT_BUMPENV);
 			_spImg = spImg2;
 		}
@@ -1839,36 +1890,36 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 			{
 				//Determine width and height of new image- so as not to loose any pixel information
 				spCImage spNewImg = MNew(CImage);
-				fp4 Diameter = ((fp4)_spImg->GetWidth()+4.0f) / 3.1415926535f;
-				fp4 Radius = Diameter / 2.0f;
+				fp32 Diameter = ((fp32)_spImg->GetWidth()+4.0f) / 3.1415926535f;
+				fp32 Radius = Diameter / 2.0f;
 				uint16 Width = (uint16)Ceil( Diameter );
 				
-				fp4 StartX = (fp4)((pSettings->m_iSide * _spImg->GetWidth()) / 4);
+				fp32 StartX = (fp32)((pSettings->m_iSide * _spImg->GetWidth()) / 4);
 
-				fp4 DepthInc = Radius * (M_Sqrt(2.0f)-1.0f);
+				fp32 DepthInc = Radius * (M_Sqrt(2.0f)-1.0f);
 				uint16 Height = _spImg->GetHeight();
-				uint16 EHeight = (uint16)(((fp4)Height / Radius) * DepthInc);
+				uint16 EHeight = (uint16)(((fp32)Height / Radius) * DepthInc);
 				Height += EHeight;
 				EHeight /= 2;
 
 				//Make sure wanted aspect ratio and current match
 				bool bResize = true;
-				fp4 Ratio = (fp4)Width / (fp4)Height;
+				fp32 Ratio = (fp32)Width / (fp32)Height;
 				if( (pSettings->m_Width == Width) && (pSettings->m_Height == Height) )
 					bResize = false;
 				else if( (pSettings->m_Width != 0) && (pSettings->m_Height != 0) )
 				{
-					fp4 NewRatio = (fp4)pSettings->m_Width / (fp4)pSettings->m_Height;
+					fp32 NewRatio = (fp32)pSettings->m_Width / (fp32)pSettings->m_Height;
 					if( NewRatio < Ratio )
 					{
-						Height = (fp4)Height * (Ratio / NewRatio);
+						Height = (fp32)Height * (Ratio / NewRatio);
 						EHeight = (Height - _spImg->GetHeight()) / 2;
 					}
 				}
 				else if(pSettings->m_Width != 0)
-					pSettings->m_Height = (fp4)pSettings->m_Width / Ratio;
+					pSettings->m_Height = (fp32)pSettings->m_Width / Ratio;
 				else if(pSettings->m_Height != 0)
-					pSettings->m_Width = (fp4)pSettings->m_Height * Ratio;
+					pSettings->m_Width = (fp32)pSettings->m_Height * Ratio;
 				else
 				{
 					pSettings->m_Height = Height;
@@ -1878,7 +1929,7 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 
 				spNewImg->Create(Width,Height,IMAGE_FORMAT_BGRA8,IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM);
 
-				CVec3Dfp4 Origin(0.0f,pSettings->m_ViewHeight * (fp4)_spImg->GetHeight(),0.0f);
+				CVec3Dfp32 Origin(0.0f,pSettings->m_ViewHeight * (fp32)_spImg->GetHeight(),0.0f);
 
 				TArray<CPixel32> & lLow = pSettings->m_lLow[pSettings->m_iSide];
 				TArray<CPixel32> & lHigh = pSettings->m_lHigh[pSettings->m_iSide];
@@ -1889,17 +1940,17 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 				int i;
 				for(i = 0;i < Width;i++)
 				{
-					CVec2Dfp4 Vec2D(-(fp4)Width/2.0f + (fp4)i,Radius);
-					CVec2Dfp4 Vec2Dunit = Vec2D;
+					CVec2Dfp32 Vec2D(-(fp32)Width/2.0f + (fp32)i,Radius);
+					CVec2Dfp32 Vec2Dunit = Vec2D;
 					Vec2Dunit.Normalize();
-					fp4 Angle = M_ACos(Vec2Dunit * CVec2Dfp4(-1.0f/M_Sqrt(2.0f),1.0f/M_Sqrt(2.0f))) / (3.1415926535f * 0.5f);
-					fp4 PosX = StartX + Angle*_spImg->GetWidth()/4;
+					fp32 Angle = M_ACos(Vec2Dunit * CVec2Dfp32(-1.0f/M_Sqrt(2.0f),1.0f/M_Sqrt(2.0f))) / (3.1415926535f * 0.5f);
+					fp32 PosX = StartX + Angle*_spImg->GetWidth()/4;
 					
 					for(int j = 0;j < Height;j++)
 					{
-						CVec3Dfp4 Target(Vec2D.k[0],(fp4)(j-EHeight),Radius);
+						CVec3Dfp32 Target(Vec2D.k[0],(fp32)(j-EHeight),Radius);
 
-						CVec3Dfp4 Vec,Pos;
+						CVec3Dfp32 Vec,Pos;
 						Vec = Target - Origin;
 						Vec = Vec.Normalize();
 						Vec *= (Vec2Dunit.k[1] * Radius / Vec.k[2]);
@@ -1967,7 +2018,7 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 					Width-=2;
 					for(int j = 0;j < Width;j++)
 					{
-						fp4 Frac = (fp4)i / (2.0f * (fp4)(nRows-Abs(nRows - j - ((pSettings->m_Width-Width)/2))));
+						fp32 Frac = (fp32)i / (2.0f * (fp32)(nRows-Abs(nRows - j - ((pSettings->m_Width-Width)/2))));
 						CPixel32 Color = _spImg->GetPixel(_spImg->GetClipRect(),CPnt(i+j+1,0)) * (1.0f-Frac) +
 							_spImg->GetPixel(_spImg->GetClipRect(),CPnt((i+j+1>pSettings->m_Width/2) ? pSettings->m_Width-1 : 0,
 							nRows - Abs(nRows-(i+j+1)))) * Frac;
@@ -1987,18 +2038,78 @@ void CTextureContainer_Plain::CreateTextureImage(spCTexture _spTxt, spCImage _sp
 					}
 				}
 			}
+		}
 
-			// Handle transformation of cubemaps
+	//Also do default... but skip this in CubeFromCylinder
+	case CTC_CONVERT_CUBEFROMSPHERE :
+		{
+			CTEX_CubeFromCylinderSettings *pSettings = (CTEX_CubeFromCylinderSettings*)_pConvertParam;
+
+			if(_ConvertType == CTC_CONVERT_CUBEFROMSPHERE)
+			{
+				spCImage spNewImg = MNew(CImage);
+
+				//Default to height of old image
+				int Width = _spImg->GetHeight();
+				CVec2Dfp32 Dim(fp32(_spImg->GetWidth()),fp32(_spImg->GetHeight()));
+				if( pSettings->m_Height )
+				{
+					Width = pSettings->m_Height;
+				}
+				else if( pSettings->m_Width )
+				{
+					Width = pSettings->m_Width;
+				}
+
+				spNewImg->Create(Width,Width,IMAGE_FORMAT_BGRA8,IMAGE_MEM_TEXTURE | IMAGE_MEM_SYSTEM);
+
+				fp32 HalfSide = fp32(Width) / 2.0f;
+				CVec2Dfp32 UV(-HalfSide-0.5f,-HalfSide-0.5f);
+				fp32 Inc = (fp32(Width) + 1.0f) / fp32(Width);
+
+				//Do image...
+				for(int i = 0;i < Width;i++)
+				{
+					CVec2Dfp32 Tmp = UV;
+
+					for(int j = 0;j < Width;j++)
+					{
+						CVec2Dfp32 TexCoord;
+						
+						//Depending on side...
+						if( pSettings->m_iSide == 0 ) TexCoord = SphereMap(CVec3Dfp32(Tmp.k[0],HalfSide,-Tmp.k[1]));
+						if( pSettings->m_iSide == 1 ) TexCoord = SphereMap(CVec3Dfp32(HalfSide,-Tmp.k[0],-Tmp.k[1]));
+						if( pSettings->m_iSide == 2 ) TexCoord = SphereMap(CVec3Dfp32(-Tmp.k[0],-HalfSide,-Tmp.k[1]));
+						if( pSettings->m_iSide == 3 ) TexCoord = SphereMap(CVec3Dfp32(-HalfSide,Tmp.k[0],-Tmp.k[1]));
+						if( pSettings->m_iSide == 4 ) TexCoord = SphereMap(CVec3Dfp32(Tmp.k[0],Tmp.k[1],HalfSide));
+						if( pSettings->m_iSide == 5 ) TexCoord = SphereMap(CVec3Dfp32(Tmp.k[0],-Tmp.k[1],-HalfSide));
+
+						//Mirror since we're looking at the inside
+						TexCoord.k[0] = -TexCoord.k[0];
+
+						//Finalize
+						CPixel32 Color = _spImg->GetPixelUV_Bilinear(TexCoord);
+						spNewImg->SetPixel(spNewImg->GetClipRect(),CPnt(i,j),Color);
+						Tmp.k[1] += Inc;
+					}
+					UV.k[0] += Inc;
+				}
+
+				//Done!
+				_spImg = spNewImg;
+			}
+
+			// Handle transformation of cubemaps - both cylinders and spheres!
 			if( pSettings->m_bIsEnvMap )
 			{
 				int lImgTransform[6] =
 				{
 					IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPH,
-					IMAGE_TRANSFORM_FLIPH,
-					IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPV,
-					IMAGE_TRANSFORM_FLIPV,
-					IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPH,
-					IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPH
+						IMAGE_TRANSFORM_FLIPH,
+						IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPV,
+						IMAGE_TRANSFORM_FLIPV,
+						IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPH,
+						IMAGE_TRANSFORM_ROTATECW | IMAGE_TRANSFORM_FLIPH
 				};
 				_spImg = _spImg->Transform(lImgTransform[pSettings->m_iSide]);
 			}
@@ -2106,7 +2217,7 @@ void CTextureContainer_Plain::Add(CTextureContainer_Plain* _pSrcXTC)
 	}
 }
 
-void CTextureContainer_Plain::AddFiltered(CTextureContainer_Plain *_pSrcXTC, TList_Vector<CStr> *_pAllowed)
+void CTextureContainer_Plain::AddFiltered(CTextureContainer_Plain *_pSrcXTC, TArray<CStr> *_pAllowed)
 {	
 	CStringHashConst Hash;
 	Hash.Create(_pAllowed->Len());
@@ -2116,7 +2227,7 @@ void CTextureContainer_Plain::AddFiltered(CTextureContainer_Plain *_pSrcXTC, TLi
 		Hash.Insert(i, (*_pAllowed)[i]);
 	}
 
-	TList_Vector<spCTexture> lspTextures;
+	TArray<spCTexture> lspTextures;
 	lspTextures.SetLen(_pSrcXTC->m_lspTextures.Len());
 	int iCurrent = 0;
 
@@ -2162,12 +2273,14 @@ void CTextureContainer_Plain::AddFromXTC(const char* _pName)
 	DFile.GetParent();
 	if(DFile.GetNext("COMPILECHECKSUMS"))
 	{
-		m_lTextureCompileChecksums.SetLen(DFile.GetUserData());
-		if(m_lTextureCompileChecksums.ListSize() != DFile.GetUserData2())
+		uint OrgLen = m_lTextureCompileChecksums.Len();
+		uint OrgSize = m_lTextureCompileChecksums.ListSize();
+		m_lTextureCompileChecksums.SetLen(OrgLen + DFile.GetUserData());
+		if((m_lTextureCompileChecksums.ListSize() - OrgSize) != DFile.GetUserData2())
 			Error("AddFromXTC", "Invalid XTC. (Size of TextureCompileChecksums is invalid)");
 
 		DFile.GetSubDir();
-		DFile.GetFile()->Read(m_lTextureCompileChecksums.GetBasePtr(), DFile.GetUserData2());
+		DFile.GetFile()->Read(m_lTextureCompileChecksums.GetBasePtr() + OrgLen, DFile.GetUserData2());
 		DFile.GetParent();
 	}
 	DFile.Close();
@@ -2302,7 +2415,7 @@ int CTextureContainer_Plain::AddFromKeys(CKeyContainer* _pKeys, CStr _BasePath)
 	int nLOD = 0;
 
 	int ConvertType = CTC_CONVERT_NONE;
-	fp4 BumpScale = 1.0f;
+	fp32 BumpScale = 1.0f;
 	bool bAutoCrop = false;
 
 	CStr TxtName;
@@ -2365,7 +2478,7 @@ int CTextureContainer_Plain::AddFromKeys(CKeyContainer* _pKeys, CStr _BasePath)
 		}
 		else if (Key == "BUMPSCALE")
 		{
-			BumpScale = Value.Val_fp8();
+			BumpScale = Value.Val_fp64();
 		}
 		else if (Key == "AUTOCROP") //AR-ADD
 		{
@@ -2571,13 +2684,13 @@ void CTextureContainer_Plain::WriteImageList2(CDataFile* _pDFile, int32 *_PicMip
 	}
 	_pDFile->EndEntry(m_lspTextures.Len());
 }
-static uint32 g_FilePos = 0;
+static fint g_FilePos = 0;
 
 void CTextureContainer_Plain::WriteImageDirectory(CDataFile* _pDFile)
 {
 	MAUTOSTRIP(CTextureContainer_Plain_WriteImageDirectory, MAUTOSTRIP_VOID);
 
-	if (!g_FilePos) 
+	if (g_FilePos == 0) 
 	{
 		g_FilePos = _pDFile->GetFile()->Pos();
 		_pDFile->BeginEntry("IMAGEDIRECTORY4");
@@ -2606,7 +2719,7 @@ void CTextureContainer_Plain::WriteImageDirectory2(CDataFile* _pDFile, int32 *_P
 	_pDFile->EndEntry(m_lspTextures.Len());
 }
 
-void CTextureContainer_Plain::WriteXTC(CDataFile* _pDFile)
+void CTextureContainer_Plain::WriteXTC(CDataFile* _pDFile, bool _bWriteList)
 {
 	MAUTOSTRIP(CTextureContainer_Plain_WriteXTC_pDFile, MAUTOSTRIP_VOID);
 
@@ -2619,10 +2732,16 @@ void CTextureContainer_Plain::WriteXTC(CDataFile* _pDFile)
 	_pDFile->BeginEntry("IMAGELIST");
 	_pDFile->EndEntry(0);
 	_pDFile->BeginSubDir();
+
 	g_FilePos = 0;
 	WriteImageDirectory(_pDFile);
-	WriteImageList(_pDFile);
-	WriteImageDirectory(_pDFile);
+
+	if (_bWriteList)
+	{
+		WriteImageList(_pDFile);
+		WriteImageDirectory(_pDFile);
+	}
+
 	_pDFile->EndSubDir();
 	if(m_lTextureCompileChecksums.Len() > 0)
 	{
@@ -2942,9 +3061,9 @@ static void BilinearRescale(CImage &_Dest, CImage &_Image, int _Width, int _Heig
 
 	uint32 *pDest = (uint32*)_Dest.Lock();		// Since we know the format and size of spMap we lock the texture and write to it directly
 
-	fp4 invU = 1.0f / fp4(w);
-	fp4 invV = 1.0f / fp4(h);
-	CVec2Dfp4 UV;
+	fp32 invU = 1.0f / fp32(w);
+	fp32 invV = 1.0f / fp32(h);
+	CVec2Dfp32 UV;
 	UV.k[1]	= 0.5f * invV;
 	for(int y = 0; y < h; y++)
 	{
@@ -3132,29 +3251,36 @@ void CTextureContainer_Plain::ScaleToPow2()
 	}
 }
 
-void CTextureContainer_Plain::FilterTextures(TList_Vector<CStr> *_pValidTextures)
+void CTextureContainer_Plain::FilterTextures(TArray<CStr> *_pValidTextures)
 {
 	if (!_pValidTextures)
 		return;
 
-	CStringHashConst Hash;
+	CStringHash Hash;
 	Hash.Create(_pValidTextures->Len());
 
 	for (int i = 0; i < _pValidTextures->Len(); ++i)
-	{
-		Hash.Insert(i, (*_pValidTextures)[i]);
-	}
+		Hash.Insert(i, (*_pValidTextures)[i].Ansi().LowerCase());
 
-	TList_Vector<spCTexture> lspTextures;
+	TArray<spCTexture> lspTextures;
 	lspTextures.SetLen(m_lspTextures.Len());
 	int iCurrent = 0;
 
 	for (int i = 0; i < lspTextures.Len(); ++i)
 	{
-		int iHash = Hash.GetIndex(m_lspTextures[i]->m_Name);
+		CStr id = CStr(m_lspTextures[i]->m_Name).Ansi().LowerCase();
+		int iHash = Hash.GetIndex(id);
 
 		if (m_lspTextures[i]->m_TextureID > 0)
+		{
 			m_pTC->FreeID(m_lspTextures[i]->m_TextureID);
+
+			for (int k = i+1; k < lspTextures.Len(); ++k)
+			{
+				if(m_lspTextures[i]->m_TextureID == m_lspTextures[k]->m_TextureID)
+					m_lspTextures[k]->m_TextureID = 0;
+			}
+		}
 
 		if (iHash >= 0)
 		{
@@ -3225,46 +3351,53 @@ int CTextureContainer_Plain::AddFromImageList(CDataFile* _pDFile)
 	CStr NodeName;
 	while((NodeName = _pDFile->GetNext()) != (const char *)"")
 	{
-		if (NodeName == (const char *)"PALETTES")
+		uint32 NodeHash = StringToHash(NodeName.GetStr());
+		switch(NodeHash)
 		{
-			if (_pDFile->GetSubDir())
+		case MHASH2('PALE', 'TTES'):
 			{
-				while(_pDFile->GetNext("PALETTE"))
+				if (_pDFile->GetSubDir())
 				{
-					spCImagePalette spPal;
-					if (spPal == NULL) spPal = MNew(CImagePalette);
-					if (spPal == NULL) MemError("Read");
-					CPixel32 Pal[256];
-					if (_pDFile->GetUserData() != 256) Error("Read", "Supports only 256 color palettes.");
-					pFile->Read(&Pal, sizeof(Pal));
+					while(_pDFile->GetNext("PALETTE"))
+					{
+						spCImagePalette spPal;
+						if (spPal == NULL) spPal = MNew(CImagePalette);
+						if (spPal == NULL) MemError("Read");
+						CPixel32 Pal[256];
+						if (_pDFile->GetUserData() != 256) Error("Read", "Supports only 256 color palettes.");
+						pFile->Read(&Pal, sizeof(Pal));
 
-					spPal->SetPalette((CPixel32*) &Pal, 0, 256);
-					m_lspPalettes.Add(spPal);
+						spPal->SetPalette((CPixel32*) &Pal, 0, 256);
+						m_lspPalettes.Add(spPal);
+					}
+					_pDFile->GetParent();
 				}
-				_pDFile->GetParent();
 			}
-		}
-		else if (NodeName == (const char *)"IMAGE")
-		{
-			if (_pDFile->GetSubDir())
+			break;
+
+		case MHASH2('IMAG', 'E'):
 			{
-				if (!bScan)
+				if (_pDFile->GetSubDir())
 				{
-					m_lspTextures[iCurrentTxt]->Read(_pDFile, &m_lspPalettes, iPalBase);
-				}
-				else
-				{
-					spCTexture spTxt = MNew(CTexture);
-					if (spTxt == NULL) MemError("Read");
-					spTxt->Read(_pDFile, &m_lspPalettes, iPalBase);
-					AddTexture(spTxt);
-				}
-				iCurrentTxt++;
+					if (!bScan)
+					{
+						m_lspTextures[iCurrentTxt]->Read(_pDFile, &m_lspPalettes, iPalBase);
+					}
+					else
+					{
+						spCTexture spTxt = MNew(CTexture);
+						if (spTxt == NULL) MemError("Read");
+						spTxt->Read(_pDFile, &m_lspPalettes, iPalBase);
+						AddTexture(spTxt);
+					}
+					iCurrentTxt++;
 
 //CImage* pImg = spTxt->m_lspMaps[0];
 //pImg->Write(pImg->GetClipRect().clip, CStrF("E:\\TEST\\TXT_IN%.2X.TGA", iTxt));
-				_pDFile->GetParent();
+					_pDFile->GetParent();
+				}
 			}
+			break;
 		}
 	}
 /*
@@ -3330,9 +3463,9 @@ spCImage CTextureContainer_Plain::MergeNormalSpecMaps(CImage* _pNMap, CImage* _p
 
 	uint32 *pDest = (uint32*)spMap->Lock();		// Since we know the format and size of spMap we lock the texture and write to it directly
 
-	fp4 invU = 1.0f / fp4(w);
-	fp4 invV = 1.0f / fp4(h);
-	CVec2Dfp4 UV;
+	fp32 invU = 1.0f / fp32(w);
+	fp32 invV = 1.0f / fp32(h);
+	CVec2Dfp32 UV;
 	UV.k[1]	= 0.5f * invV;
 	for(int y = 0; y < h; y++)
 	{
@@ -3358,25 +3491,25 @@ spCImage CTextureContainer_Plain::MergeNormalSpecMaps(CImage* _pNMap, CImage* _p
 class CRNMS_Params
 {
 public:
-	CVec3Dfp4 m_LightVec;
-	CVec3Dfp4 m_DiffuseScale;
-	CVec3Dfp4 m_SpecularScale;
-	fp4 m_SpecularPower;
+	CVec3Dfp32 m_LightVec;
+	CVec3Dfp32 m_DiffuseScale;
+	CVec3Dfp32 m_SpecularScale;
+	fp32 m_SpecularPower;
 
 	CRNMS_Params()
 	{
-		m_LightVec = CVec3Dfp4(1.0f, -0.5f, -0.0f);
+		m_LightVec = CVec3Dfp32(1.0f, -0.5f, -0.0f);
 		m_DiffuseScale = 1.0f;
 		m_SpecularScale = 1.0f;
 		m_SpecularPower = 16.0f;
 	}
 };
 
-static fp4 pow16(fp4 x)
+static fp32 pow16(fp32 x)
 {
-	fp4 x2 = x*x;
-	fp4 x4 = x2*x2;
-	fp4 x8 = x4*x4;
+	fp32 x2 = x*x;
+	fp32 x4 = x2*x2;
+	fp32 x8 = x4*x4;
 	return x8*x8;
 }
 
@@ -3402,8 +3535,8 @@ static spCImage RenderNormalMapSurface(CImage* _pDiffuse, CImage* _pSpecular, CI
 
 	spMap->Create(w, h, Format, IMAGE_MEM_IMAGE);
 
-	CVec3Dfp4 EyeVec(-1.0f, 0, 0);
-	CVec3Dfp4 LightVec = _Params.m_LightVec;
+	CVec3Dfp32 EyeVec(-1.0f, 0, 0);
+	CVec3Dfp32 LightVec = _Params.m_LightVec;
 	LightVec.Normalize();
 
 	bool bDefaultPower = M_Fabs(_Params.m_SpecularPower - 16.0f) < 0.00001f;
@@ -3411,37 +3544,37 @@ static spCImage RenderNormalMapSurface(CImage* _pDiffuse, CImage* _pSpecular, CI
 	for(int y = 0; y < h; y++)
 		for(int x = 0; x < w; x++)
 		{
-			CVec2Dfp4 UV(fp4(x + 0.5f) / fp4(w), fp4(y + 0.5f) / fp4(h));
+			CVec2Dfp32 UV(fp32(x + 0.5f) / fp32(w), fp32(y + 0.5f) / fp32(h));
 			CPixel32 DCol = _pDiffuse->GetPixelUV_Bilinear(UV);
 			CPixel32 NCol = _pNormal->GetPixelUV_Bilinear(UV);
 			CPixel32 SCol = _pSpecular->GetPixelUV_Bilinear(UV);
 
-			CVec3Dfp4 Normal(NCol.GetR() - 127, NCol.GetG() - 127, NCol.GetB() - 127);
+			CVec3Dfp32 Normal(NCol.GetR() - 127, NCol.GetG() - 127, NCol.GetB() - 127);
 			Normal.Normalize();
 
-			CVec3Dfp4 Ref = EyeVec - Normal * (2.0f * (Normal * EyeVec));
+			CVec3Dfp32 Ref = EyeVec - Normal * (2.0f * (Normal * EyeVec));
 
-			CVec3Dfp4 Diffuse = _Params.m_DiffuseScale * ((1.0f + LightVec * Normal)*0.5f);
-			fp4 SpecScale = Clamp01(LightVec * Ref);
-			fp4 SpecPower = (bDefaultPower) ? 
+			CVec3Dfp32 Diffuse = _Params.m_DiffuseScale * ((1.0f + LightVec * Normal)*0.5f);
+			fp32 SpecScale = Clamp01(LightVec * Ref);
+			fp32 SpecPower = (bDefaultPower) ? 
 				pow16(SpecScale) :
 				M_Pow(Clamp01(LightVec * Ref), _Params.m_SpecularPower);
 
-			CVec3Dfp4 Specular = _Params.m_SpecularScale * (M_Pow(Clamp01(LightVec * Ref), _Params.m_SpecularPower));
+			CVec3Dfp32 Specular = _Params.m_SpecularScale * (M_Pow(Clamp01(LightVec * Ref), _Params.m_SpecularPower));
 
-			CVec3Dfp4 DColf(DCol.GetR(), DCol.GetG(), DCol.GetB());
-			fp4 DColMag = DColf.Length();
+			CVec3Dfp32 DColf(DCol.GetR(), DCol.GetG(), DCol.GetB());
+			fp32 DColMag = DColf.Length();
 			if (DColMag > 0)
 			{
-				CVec3Dfp4 DColf2;
+				CVec3Dfp32 DColf2;
 				DColf.CompMul(DColf, DColf2);
 				DColf2.Scale(DColMag / DColf2.Length(), DColf2);
 				
 				DColf2.Lerp(DColf, 0.5f, DColf);
 			}
 
-			CVec3Dfp4 SColfNew = DColf;
-			CVec3Dfp4 SColf(SCol.GetR(), SCol.GetG(), SCol.GetB());
+			CVec3Dfp32 SColfNew = DColf;
+			CVec3Dfp32 SColf(SCol.GetR(), SCol.GetG(), SCol.GetB());
 			SColfNew[1] *= 0.5f;
 			SColf[1] *= 0.5f;
 			if (DColMag > 0)
@@ -3461,11 +3594,11 @@ static spCImage RenderNormalMapSurface(CImage* _pDiffuse, CImage* _pSpecular, CI
 			Specular[1] *= SCol.GetG();
 			Specular[2] *= SCol.GetB();*/
 
-			CVec3Dfp4 Shading = Diffuse + Specular;
+			CVec3Dfp32 Shading = Diffuse + Specular;
 
-/*			fp4 DiffScalar = (1.0f + LightVec * Normal)*0.5f;
+/*			fp32 DiffScalar = (1.0f + LightVec * Normal)*0.5f;
 			DiffScalar = DiffScalar * DiffScalar * _Params.m_DiffuseScale;
-			fp4 SpecScalar = Clamp01(LightVec * Ref);
+			fp32 SpecScalar = Clamp01(LightVec * Ref);
 			SpecScalar = pow(SpecScalar, _Params.m_SpecularPower) * _Params.m_SpecularScale;*/
 
 /*			CPixel32 Spec = SCol;
@@ -3567,6 +3700,7 @@ spCTextureContainer_Plain GenerateThumbnails(CTextureContainer_Plain* _pTextures
 			CTC_TextureProperties ThumbProperties;
 			ThumbProperties	= spTxt->m_Properties;
 			ThumbProperties.m_Flags	|= CTC_TEXTUREFLAGS_NOPICMIP | CTC_TEXTUREFLAGS_NOMIPMAP;
+			ThumbProperties.m_TextureVersion = CTC_TEXTUREVERSION_RAW;
 			int iLocal = spThumb->AddTexture(pImg->Duplicate(), ThumbProperties, 1, 
 #ifdef USE_HASHED_TEXTURENAME
 					CStrF("#%08X", spTxt->m_NameID));
@@ -3820,7 +3954,8 @@ void CTextureContainer_Plain::XTXUpdate(int _Flags, const CRegistry& _Reg, CStr 
 					continue;
 	#endif // MERGE_NORMAL_SPECULAR
 
-				bool bIsCylCubeTex = pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER]) == 0;
+				bool bIsCylCubeTex = (pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER]) == 0 ||
+									pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMSPHERE]) == 0 );
 
 				if( (Properties.m_Flags & CTC_TEXTUREFLAGS_CUBEMAPCHAIN) && (!bIsCylCubeTex) )
 				{
@@ -3914,6 +4049,8 @@ void CTextureContainer_Plain::XTXUpdate(int _Flags, const CRegistry& _Reg, CStr 
 		CTextureContainer_Plain NewContainer;
 		NewContainer.XTXCompile(_Flags, NewRegistry, _SourcePath, NewResult);
 
+		uint CubeChain = 0;
+
 		for(int i = 0; i < _Reg.GetNumChildren(); i++)
 		{
 			const CRegistry* pChild = _Reg.GetChild(i);
@@ -3924,12 +4061,34 @@ void CTextureContainer_Plain::XTXUpdate(int _Flags, const CRegistry& _Reg, CStr 
 			if (Name == "")
 				Name = pChild->GetValue("PATH").GetFilenameNoExt();
 
+			{
+				// Patch to find cubemapchain children
+				if(CubeChain > 0)
+				{
+					if(Name.Len() > 3)
+						memcpy(Name.GetStr(), "$$$", 3);
+					else
+						Name = "$$$";
+					CubeChain--;
+				}
+
+				uint32 Flags = CStr::TranslateFlags(pChild->GetValue("FLAGS"), CTC_TextureProperties::ms_TxtPropFlagsTranslate);
+
+				if(Flags & CTC_TEXTUREFLAGS_CUBEMAPCHAIN)
+				{
+					M_ASSERT(CubeChain == 0, "New cubemap chain before finishing with old one");
+					// This is a chain, the 5 following will have broken names
+					CubeChain = 5;
+				}
+			}
+
 			if(pRequiresAdd[i] && IsTextureAvailable(&NewContainer, Name))
 				AddTexturesFromContainer(this, &NewContainer, Name);
 			else if(!pRequiresAdd[i] && IsTextureAvailable(&OldContainer, Name))
 				AddTexturesFromContainer(this, &OldContainer, Name);
 
-			else if(pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER])==0 && 
+			else if( (pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER])==0 ||
+					pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMSPHERE])==0) && 
 					!pRequiresAdd[i] && IsTextureAvailable(&OldContainer, Name+CStrF("_00")))
 			{
 				AddTexturesFromContainer(this, &OldContainer, Name + CStrF("_00"));	
@@ -3939,7 +4098,8 @@ void CTextureContainer_Plain::XTXUpdate(int _Flags, const CRegistry& _Reg, CStr 
 				AddTexturesFromContainer(this, &OldContainer, Name + CStrF("_04"));
 				AddTexturesFromContainer(this, &OldContainer, Name + CStrF("_05"));
 			}
-			else if(pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER])==0 && 
+			else if( (pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMCYLINDER])==0 ||
+					pChild->GetValue("CONVERT").CompareNoCase(CTC_TextureProperties::ms_TxtConvertTranslate[CTC_CONVERT_CUBEFROMSPHERE])==0) && 
 					pRequiresAdd[i] && IsTextureAvailable(&NewContainer, Name+CStrF("_00")))
 			{
 				AddTexturesFromContainer(this, &NewContainer, Name + CStrF("_00"));	
@@ -3967,13 +4127,13 @@ class MRTC_TaskArgCompressTexture : public MRTC_TaskBaseArg
 {
 	MRTC_DECLARE;
 public:
-	MRTC_TaskArgCompressTexture(CTexture* _pTexture, fp4 _Quality)
+	MRTC_TaskArgCompressTexture(CTexture* _pTexture, fp32 _Quality)
 	{
 		m_pTexture	= _pTexture;
 		m_Quality	= _Quality;
 	}
 	CTexture*	m_pTexture;
-	fp4	m_Quality;
+	fp32	m_Quality;
 };
 
 class MRTC_TaskArgConvertTexture : public MRTC_TaskBaseArg
@@ -4009,13 +4169,13 @@ class MRTC_TaskArgCompressTextureContainer : public MRTC_TaskBaseArg
 {
 	MRTC_DECLARE;
 public:
-	MRTC_TaskArgCompressTextureContainer(CTextureContainer_Plain* _pTC, fp4 _Quality)
+	MRTC_TaskArgCompressTextureContainer(CTextureContainer_Plain* _pTC, fp32 _Quality)
 	{
 		m_pContainer	= _pTC;
 		m_Quality	= _Quality;
 	}
 	CTextureContainer_Plain*	m_pContainer;
-	fp4	m_Quality;
+	fp32	m_Quality;
 };
 
 class MRTC_TaskCompressTextureContainer : public MRTC_TaskBase
@@ -4080,7 +4240,27 @@ public:
 	int m_iTexture;
 };
 
+class MRTC_TaskArgTrashCubemapNames : public MRTC_TaskBaseArg
+{
+	MRTC_DECLARE;
+public:
+	MRTC_TaskArgTrashCubemapNames(CTextureContainer_Plain* _pTC, int _iTexture)
+	{
+		m_pContainer	= _pTC;
+		m_iTexture	= _iTexture;
+	}
+	CTextureContainer_Plain* m_pContainer;
+	int m_iTexture;
+};
+
 class MRTC_TaskSmoothCubemapEdges : public MRTC_TaskBase
+{
+	MRTC_DECLARE;
+public:
+	virtual int Process(class MRTC_TaskInstance* _pTask, MRTC_TaskBaseArg* _pArg);
+};
+
+class MRTC_TaskTrashCubemapNames : public MRTC_TaskBase
 {
 	MRTC_DECLARE;
 public:
@@ -4178,9 +4358,9 @@ class MRTC_TaskArgHostCompressTexture : public MRTC_TaskBaseArg
 {
 	MRTC_DECLARE;
 public:
-	MRTC_TaskArgHostCompressTexture(CTexture* _pTex, fp4 _Quality) : m_pTexture(_pTex), m_Quality(_Quality) {}
+	MRTC_TaskArgHostCompressTexture(CTexture* _pTex, fp32 _Quality) : m_pTexture(_pTex), m_Quality(_Quality) {}
 	CTexture*	m_pTexture;
-	fp4	m_Quality;
+	fp32	m_Quality;
 };
 
 // This task is spawned on host once for each texture
@@ -4244,7 +4424,7 @@ int MRTC_TaskCompressTexture::Process(MRTC_TaskInstance* _pTask, MRTC_TaskBaseAr
 	if(pArg == 0)
 		return TASK_RETURN_ERROR;
 
-	fp4 Quality = 1.0f;
+	fp32 Quality = 1.0f;
 	CTexture Texture;
 	{
 		CDataFile ParamDataFile;
@@ -4357,6 +4537,38 @@ int MRTC_TaskSmoothCubemapEdges::Process(class MRTC_TaskInstance* _pTask, MRTC_T
 	return TASK_RETURN_FINISHED;
 }
 
+int MRTC_TaskTrashCubemapNames::Process(class MRTC_TaskInstance* _pTask, MRTC_TaskBaseArg* _pArg)
+{
+	MRTC_TaskArgTrashCubemapNames* pArg = TDynamicCast<MRTC_TaskArgTrashCubemapNames>(_pArg);
+	if(!pArg) return TASK_RETURN_ERROR;
+
+	try
+	{
+		int nVersions = pArg->m_pContainer->EnumTextureVersions(pArg->m_iTexture, 0, CTC_TEXTUREVERSION_ANY);
+		for(int iVersion = 0; iVersion < nVersions; iVersion++)
+		{
+			CTexture* pTex0 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 0 * nVersions, CTC_TEXTUREVERSION_ANY);
+			CTexture* pTex1 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 1 * nVersions, CTC_TEXTUREVERSION_ANY);
+			CTexture* pTex2 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 2 * nVersions, CTC_TEXTUREVERSION_ANY);
+			CTexture* pTex3 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 3 * nVersions, CTC_TEXTUREVERSION_ANY);
+			CTexture* pTex4 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 4 * nVersions, CTC_TEXTUREVERSION_ANY);
+			CTexture* pTex5 = pArg->m_pContainer->GetTextureMap(pArg->m_iTexture + 5 * nVersions, CTC_TEXTUREVERSION_ANY);
+
+			memcpy(pTex1->m_Name, "$$$", 3);
+			memcpy(pTex2->m_Name, "$$$", 3);
+			memcpy(pTex3->m_Name, "$$$", 3);
+			memcpy(pTex4->m_Name, "$$$", 3);
+			memcpy(pTex5->m_Name, "$$$", 3);
+		}
+	}
+	catch(...)
+	{
+		return TASK_RETURN_ERROR;
+	}
+
+	return TASK_RETURN_FINISHED;
+}
+
 int MRTC_TaskTexturePostFilter::Process(MRTC_TaskInstance* _pTask, MRTC_TaskBaseArg* _pArg)
 {
 	MRTC_TaskArgTexturePostFilter* pArg = TDynamicCast<MRTC_TaskArgTexturePostFilter>(_pArg);
@@ -4379,6 +4591,7 @@ MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskCompressTextureContainer, MRTC_TaskBase);
 MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskConvertTextureContainer, MRTC_TaskBase);
 MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskGaussFilterCubemap, MRTC_TaskBase);
 MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskSmoothCubemapEdges, MRTC_TaskBase);
+MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskTrashCubemapNames, MRTC_TaskBase);
 MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskTexturePostFilter, MRTC_TaskBase);
 MRTC_IMPLEMENT_DYNAMIC(MRTC_TaskHostCompressTexture, MRTC_RemoteTaskBase);
 
@@ -4389,6 +4602,7 @@ MRTC_IMPLEMENT(MRTC_TaskArgConvertTextureContainer, MRTC_TaskBaseArg);
 MRTC_IMPLEMENT(MRTC_TaskArgGaussFilterCubemap, MRTC_TaskBaseArg);
 MRTC_IMPLEMENT(MRTC_TaskArgTexturePostFilter, MRTC_TaskBaseArg);
 MRTC_IMPLEMENT(MRTC_TaskArgSmoothCubemapEdges, MRTC_TaskBaseArg);
+MRTC_IMPLEMENT(MRTC_TaskArgTrashCubemapNames, MRTC_TaskBaseArg);
 MRTC_IMPLEMENT(MRTC_TaskArgHostCompressTexture, MRTC_TaskBaseArg);
 
 void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr _SourcePath, CXTXCompileResult& _Result)
@@ -4429,6 +4643,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 	spMRTC_TaskInstance spCubemapGaussGroupTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskGroup", 0);
 	spMRTC_TaskInstance spPostprocessGroupTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskGroup", 0);
 	spMRTC_TaskInstance spCubemapEdgeGroupTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskGroup", 0);
+	spMRTC_TaskInstance spCubemapTrashNamesGroupTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskGroup", 0);
 	bool bOnlyNormal = true;
 	for (int j = 0; j < 2; ++j)
 	{
@@ -4750,6 +4965,11 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 						spMRTC_TaskInstance spCubemapEdgeTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskSmoothCubemapEdges", MNew2(MRTC_TaskArgSmoothCubemapEdges, this, m_lspTextures.Len()));
 						spCubemapEdgeGroupTask->AddTask(spCubemapEdgeTask);
 					}
+					if(Properties.m_Flags & CTC_TEXTUREFLAGS_CUBEMAPCHAIN)
+					{
+						spMRTC_TaskInstance spCubemapNameTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskTrashCubemapNames", MNew2(MRTC_TaskArgTrashCubemapNames, this, m_lspTextures.Len()));
+						spCubemapTrashNamesGroupTask->AddTask(spCubemapNameTask);
+					}
 					LogFile(CStrF("XTX: Adding texture %s (%s)", Name.Str(), Path.Str()));
 					if (iCurrentTxt == 0)
 					{
@@ -4780,7 +5000,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 								{
 									CTC_CubeFilterParams FilterParams;
 									FilterParams.m_Type	= 0;
-									FilterParams.m_aParams[0]	= CubeFilter.Val_fp8();
+									FilterParams.m_aParams[0]	= CubeFilter.Val_fp64();
 
 									spMRTC_TaskInstance spGaussFilterTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskGaussFilterCubemap", MNew3(MRTC_TaskArgGaussFilterCubemap, this, m_lspTextures.Len(), FilterParams));
 									spCubemapGaussGroupTask->AddTask(spGaussFilterTask);
@@ -4853,7 +5073,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 								Properties2.m_TextureVersion	= CTC_TEXTUREVERSION_S3TC;
 
 								//"CubeFromCylinder" - type adds 4/6 new textures
-								if(ConvertType == CTC_CONVERT_CUBEFROMCYLINDER)
+								if( (ConvertType == CTC_CONVERT_CUBEFROMCYLINDER) || (ConvertType == CTC_CONVERT_CUBEFROMSPHERE) )
 								{
 									CTEX_CubeFromCylinderSettings Settings;
 									uint8 liImageOrder[6] =	{ 0,2,3,1,4,5 };
@@ -4863,7 +5083,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 									Settings.m_Width = pChild->GetValuei("WIDTH",0);
 									Settings.m_ViewHeight = 1.0f - pChild->GetValuef("VIEW",0.5f);
 
-									int nSides = (pChild->GetValuei("CUSTOMTOPBTM",0) != 0) ? 4 : 6;
+									int nSides = ((pChild->GetValuei("CUSTOMTOPBTM",0) != 0) && (ConvertType != CTC_CONVERT_CUBEFROMSPHERE)) ? 4 : 6;
 
 									for(int k = 0;k < nSides;k++)
 									{
@@ -4879,6 +5099,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 											m_lTextureCompileChecksums.Add(CompileChecksum);
 										}
 
+										//Clear flag- we only need this once
 										if( Properties1.m_Flags & CTC_TEXTUREFLAGS_CUBEMAPCHAIN )
 										{
 											Properties1.m_Flags &= ~CTC_TEXTUREFLAGS_CUBEMAPCHAIN;
@@ -4888,7 +5109,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 								}
 								else
 								{
-									fp4 BumpScale = pChild->GetValuef("BUMPSCALE", 1.0f);
+									fp32 BumpScale = pChild->GetValuef("BUMPSCALE", 1.0f);
 
 									if(!(Properties.m_Flags & CTC_TEXTUREFLAGS_NOCOMPRESS) && spImage->CanCompress(IMAGE_MEM_COMPRESSTYPE_S3TC))
 									{
@@ -4923,7 +5144,7 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 		if(Compression > 0)
 		{
 			// Create compression task
-			spMRTC_TaskInstance spCompressTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskCompressTextureContainer", MNew2(MRTC_TaskArgCompressTextureContainer, this, (fp4)Compression * 0.01f));
+			spMRTC_TaskInstance spCompressTask = MRTC_TaskInstance::CreateTaskInstance("MRTC_TaskCompressTextureContainer", MNew2(MRTC_TaskArgCompressTextureContainer, this, (fp32)Compression * 0.01f));
 
 			spCompressTask->DependOn(spPostprocessGroupTask);
 			spConvertTask->DependOn(spCompressTask);
@@ -4937,9 +5158,11 @@ void CTextureContainer_Plain::XTXCompile(int _Flags, const CRegistry &_Reg, CStr
 	// Post-process must be run after cubemap gauss filtering
 	spPostprocessGroupTask->DependOn(spCubemapGaussGroupTask);
 	spCubemapEdgeGroupTask->DependOn(spPostprocessGroupTask);
+	spCubemapTrashNamesGroupTask->DependOn(spCubemapEdgeGroupTask);
 	pTaskManager->AddTask(spCubemapGaussGroupTask);
 	pTaskManager->AddTask(spPostprocessGroupTask);
 	pTaskManager->AddTask(spCubemapEdgeGroupTask);
+	pTaskManager->AddTask(spCubemapTrashNamesGroupTask);
 
 	pTaskManager->Host_BlockUntilDone();
 }
@@ -4996,7 +5219,7 @@ void CTextureContainer_Plain::AddFromWAD(CStr _FileName)
 	// Read entry directory.
 	int nEntries = Header.m_nEntries;
 
-	TList_Vector<CWAD2_Entry> m_lEntries;
+	TArray<CWAD2_Entry> m_lEntries;
 	m_lEntries.SetLen(nEntries);
 	spFile->Seek(Header.m_DirOffset);
 	if (nEntries) spFile->Read(&m_lEntries[0], m_lEntries.ListSize());
@@ -5124,7 +5347,7 @@ void CTextureContainer_Plain::WriteWAD(CStr _FileName)
 	if (m_lspPalettes.Len() != 1)
 		Error("WriteWAD", "WADs must have exactly one palette.");
 
-	TList_Vector<CWAD2_Entry> lEntries;
+	TArray<CWAD2_Entry> lEntries;
 
 	TPtr<CCFile> spFile = MNew(CCFile);
 	if (spFile == NULL) MemError("Read");
@@ -5274,8 +5497,8 @@ spCTextureContainer_Plain CTextureContainer_Plain::CreateSubContainer(uint8* _pT
 {
 	MAUTOSTRIP(CTextureContainer_Plain_CreateSubContainer, NULL);
 
-	TList_Vector<uint32> lPalUsed;
-	TList_Vector<uint32> liPalNew;
+	TArray<uint32> lPalUsed;
+	TArray<uint32> liPalNew;
 	lPalUsed.SetLen(m_lspPalettes.Len());
 	liPalNew.SetLen(m_lspPalettes.Len());
 	if (lPalUsed.Len()) FillChar(&lPalUsed[0], lPalUsed.ListSize(), 0);
@@ -5314,7 +5537,7 @@ spCTextureContainer_Plain CTextureContainer_Plain::CreateSubContainer(uint32* _p
 	return NULL;
 }
 
-void CTextureContainer_Plain::Compress(int _Compression, fp4 _Quality)
+void CTextureContainer_Plain::Compress(int _Compression, fp32 _Quality)
 {
 	MAUTOSTRIP(CTextureContainer_Plain_Compress, MAUTOSTRIP_VOID);
 
@@ -5360,7 +5583,7 @@ void CTextureContainer_Plain::Decompress()
 	}
 }
 
-void CTextureContainer_Plain::Recompress( int _FromFormat, int _ToFormat, fp4 _Quality )
+void CTextureContainer_Plain::Recompress( int _FromFormat, int _ToFormat, fp32 _Quality )
 {
 	MAUTOSTRIP(CTextureContainer_Plain_Recompress, MAUTOSTRIP_VOID );
 
@@ -5791,7 +6014,7 @@ class	CParaboloidFromCubeMap	{
 	}
 
 	//
-	CPnt	getPixelPnt( fp4 _x, fp4 _y )
+	CPnt	getPixelPnt( fp32 _x, fp32 _y )
 	{
 		int x = (int)(m_Width * _x);
 		int y = (int)(m_Height * _y);
@@ -5840,7 +6063,7 @@ class	CParaboloidFromCubeMap	{
 				//	Need normalization?
 				if( r2 > 1.0f )
 				{
-					fp4 l = M_InvSqrt(r2);
+					fp32 l = M_InvSqrt(r2);
 					nx *= l;
 					ny *= l;
 					r2 = 1;
@@ -6131,9 +6354,13 @@ int CTextureContainer_Plain::EnumTextureVersions(int _iLocal, uint8* _pDestVersi
 	int nLocal = GetNumLocal();
 	while((iLocal < nLocal) && (nVersions < _nMaxVersions) && (GetTextureID(iLocal) == TexID))
 	{
-		CTC_TextureProperties Properties;
-		GetTextureProperties(iLocal, Properties);
-		_pDestVersion[nVersions++]	= Properties.m_TextureVersion;
+		if(_pDestVersion)
+		{
+			CTC_TextureProperties Properties;
+			GetTextureProperties(iLocal, Properties);
+			_pDestVersion[nVersions]	= Properties.m_TextureVersion;
+		}
+		nVersions++;
 		iLocal++;
 	}
 
@@ -6299,6 +6526,7 @@ void CTextureContainer_VirtualXTC::Unload(int _iLocal)
 	// Find correct _iLocal
 	m_lspTextures[_iLocal]->Virtual_Unload();
 
+	/*
 	int i, nc = m_liCached.Len();
 	for(i = 0; i < nc; i++)
 		if (m_liCached[i] == CTextureCache_Entry(_iLocal, 0))
@@ -6306,6 +6534,7 @@ void CTextureContainer_VirtualXTC::Unload(int _iLocal)
 			m_liCached[i] = CTextureCache_Entry();
 			return;
 		}
+		*/
 }
 
 void CTextureContainer_VirtualXTC::Unload(int _iLocal, int _iMipMap)
@@ -6316,6 +6545,7 @@ void CTextureContainer_VirtualXTC::Unload(int _iLocal, int _iMipMap)
 	if (_iMipMap < 0) return;
 	m_lspTextures[_iLocal]->Virtual_Unload(_iMipMap);
 
+	/*
 	int i, nc = m_liCached.Len();
 	for(i = 0; i < nc; i++)
 		if (m_liCached[i] == CTextureCache_Entry(_iLocal, _iMipMap))
@@ -6323,6 +6553,7 @@ void CTextureContainer_VirtualXTC::Unload(int _iLocal, int _iMipMap)
 			m_liCached[i] = CTextureCache_Entry();
 			return;
 		}
+		*/
 
 }
 
@@ -6380,11 +6611,33 @@ void CTextureContainer_VirtualXTC::Load(int _iLocal)
 	Load(_iLocal, 0);
 }
 
-void CTextureContainer_VirtualXTC::Load(int _iLocal, int _iMipmap)
+void CTextureContainer_VirtualXTC::Load(int _iLocal, int _iMipmap, int _nMips)
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_Load_int_int, MAUTOSTRIP_VOID);
 
 	if ((m_lspTextures[_iLocal]->m_IsLoaded>>_iMipmap) & 1) return;
+
+	CCFile *pFile;
+	CCFile File;
+	if (m_spPrecacheFile)
+		pFile = m_spPrecacheFile;
+	else
+	{
+		File.Open(GetFileName(), CFILE_BINARY | CFILE_READ);
+		pFile = &File;
+	}
+
+	for (int i = 0; i < _nMips; ++i)
+	{
+//		File.Open(GetFileName(), CFILE_BINARY | CFILE_READ);
+		if (! ((m_lspTextures[_iLocal]->m_IsLoaded>>(_iMipmap + i)) & 1))
+		{
+			m_lspTextures[_iLocal]->Virtual_Load(pFile, _iMipmap + i);
+			m_lspTextures[_iLocal]->m_IsLoaded |= (1 << (_iMipmap + i));
+		}
+	}
+
+#if 0
 /*	if (!m_lspTextures[_iLocal]->m_bIsLoaded)
 	{
 		CCFile File;
@@ -6408,7 +6661,8 @@ void CTextureContainer_VirtualXTC::Load(int _iLocal, int _iMipmap)
 		m_liCached[0] = CTextureCache_Entry(_iLocal, _iMipmap);
 
 		CCFile File;
-		File.Open(GetFileName(), CFILE_BINARY | CFILE_READ);
+//		File.Open(GetFileName(), CFILE_BINARY | CFILE_READ);
+		File.OpenExt(GetFileName(), CFILE_BINARY | CFILE_READ, NO_COMPRESSION, NORMAL_COMPRESSION, 0, 1, 65536);
 		m_lspTextures[_iLocal]->Virtual_Load(&File, _iMipmap);
 		File.Close();
 
@@ -6433,15 +6687,16 @@ void CTextureContainer_VirtualXTC::Load(int _iLocal, int _iMipmap)
 	}
 
 	m_lspTextures[_iLocal]->m_IsLoaded |= (1 << _iMipmap);
+#endif
 }
 
 CStr CTextureContainer_VirtualXTC::GetFileName()
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_GetFileName, NULL);
 
-	if (m_CacheFileName == "")
+//	if (m_CacheFileName == "")
 		return m_FileName;
-	else
+/*	else
 	{
 		if (!m_bIsCached)
 		{
@@ -6455,23 +6710,22 @@ CStr CTextureContainer_VirtualXTC::GetFileName()
 			m_bIsCached = true;
 		}
 		return m_CacheFileName;
-	}
+	}*/
 }
 
 
 // -------------------------------------------------------------------
-void CTextureContainer_VirtualXTC::Create(CDataFile* _pDFile, int _NumCache)
+void CTextureContainer_VirtualXTC::Create(CDataFile* _pDFile, CStr _FileName, int _NumCache)
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_Create_CDataFile_int, MAUTOSTRIP_VOID);
 
-	m_liCached.SetLen(_NumCache);
-	for(int i = 0; i < _NumCache; i++) m_liCached[i] = CTextureCache_Entry(-1, -1);
+//	m_liCached.SetLen(_NumCache);
+//	for(int i = 0; i < _NumCache; i++) m_liCached[i] = CTextureCache_Entry(-1, -1);
 
-	m_FileName = _pDFile->GetFile()->GetFileName();
-	m_ContainerName = _pDFile->GetFile()->GetFileName().GetFilename();
+	m_FileName = _FileName.Len() ? _FileName : _pDFile->GetFile()->GetFileName();
+	m_ContainerName = m_FileName.GetFilename();
 
 	m_lspTextures.SetGrow(128);
-
 	{
 		_pDFile->PushPosition();
 		if(_pDFile->GetNext("SOURCE"))
@@ -6494,10 +6748,11 @@ void CTextureContainer_VirtualXTC::Create(CStr _FileName, int _NumCache)
 
 	CDataFile DFile;
 	DFile.Open(spFile, 0);
-	Create(&DFile, _NumCache);
+	Create(&DFile, _FileName, _NumCache);
 	DFile.Close();
 }
 
+#if 0
 void CTextureContainer_VirtualXTC::SetCacheFile(CStr _CacheFileName)
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_SetCacheFile, MAUTOSTRIP_VOID);
@@ -6507,6 +6762,7 @@ void CTextureContainer_VirtualXTC::SetCacheFile(CStr _CacheFileName)
 	if (CDiskUtil::FileExists(_CacheFileName))
 		m_bIsCached = true;
 }
+#endif
 
 void CTextureContainer_VirtualXTC::AddFromXTC(const char* _pName)
 {
@@ -6517,7 +6773,7 @@ CTextureContainer_VirtualXTC::CTextureContainer_VirtualXTC()
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_ctor, MAUTOSTRIP_VOID);
 
-	m_bIsCached = false;
+//	m_bIsCached = false;
 }
 
 CTextureContainer_VirtualXTC::~CTextureContainer_VirtualXTC()
@@ -6549,7 +6805,7 @@ void CTextureContainer_VirtualXTC::Clear()
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_Clear, MAUTOSTRIP_VOID);
 	CTextureContainer_Plain::Clear();
 
-	m_liCached.Clear();
+//	m_liCached.Clear();
 }
 
 int CTextureContainer_VirtualXTC::GetLocal(const char* _pName)
@@ -6585,6 +6841,14 @@ CImage* CTextureContainer_VirtualXTC::GetTexture(int _iLocal, int _iMipMap, int 
 	return CTextureContainer_Plain::GetTexture(_iLocal, _iMipMap, _TextureVersion);
 }
 
+CImage* CTextureContainer_VirtualXTC::GetTextureNumMip(int _iLocal, int _iMipMap, int _nMips, int _TextureVersion)
+{
+	MAUTOSTRIP(CTextureContainer_VirtualXTC_GetTexture_int_int, NULL);
+	int iLocal = GetCorrectLocal(_iLocal, _TextureVersion);
+	Load(iLocal, _iMipMap, _nMips);
+	return CTextureContainer_Plain::GetTexture(_iLocal, _iMipMap, _TextureVersion);
+}
+
 void CTextureContainer_VirtualXTC::ReleaseTexture(int _iLocal, int _iMipMap, int _TextureVersion)
 {
 	MAUTOSTRIP(CTextureContainer_VirtualXTC_ReleaseTexture, MAUTOSTRIP_VOID);
@@ -6617,6 +6881,17 @@ void CTextureContainer_VirtualXTC::BuildInto(int _iLocal, CImage** _ppImg, int _
 
 
 //#endif
+}
+
+void CTextureContainer_VirtualXTC::OpenPrecache()
+{
+	m_spPrecacheFile = MNew(CCFile);
+	m_spPrecacheFile->Open(GetFileName(), CFILE_BINARY | CFILE_READ);
+}
+
+void CTextureContainer_VirtualXTC::ClosePrecache()
+{
+	m_spPrecacheFile = NULL;
 }
 
 MRTC_IMPLEMENT(CTextureContainer_Video, CTextureContainer);

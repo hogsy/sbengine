@@ -1,0 +1,230 @@
+; ------------------------------------------
+;
+;  A nifty little hack to obtain the address
+;  of a procedure.  (c) Starbreeze Studios
+;
+; ------------------------------------------
+			.EXPORT		_CW_GetProcAddress
+			.EXPORT		_RunProc_int
+			.EXPORT		_RunProc_float
+			.EXPORT		_RunProc_ptr
+			.EXPORT		_RunProc
+
+			.SECTION	text
+
+
+
+; ------------------------------------------
+;
+; void* CW_GetProcAddress(...);
+;
+_CW_GetProcAddress:
+			mov.l		@(8, r15), r0
+			rts
+			nop
+
+
+
+; ------------------------------------------
+;
+; int RunProc_int(void* _pOwner, void* _pCommand, void* _pCallstack, int _Parameters);
+; float RunProc_float(void* _pOwner, void* _pCommand, void* _pCallstack, int _Parameters);
+; void* RunProc_ptr(void* _pOwner, void* _pCommand, void* _pCallstack, int _Parameters);
+; void RunProc(void* _pOwner, void* _pCommand, void* _pCallstack, int _Parameters);
+;
+; r4 - this, do not touch
+; r5 - command, move to r12 and don't touch
+; r6 - ptr to callstack, move to r1
+; r7 - number of params, move to r2
+;
+_RunProc_int:
+_RunProc_float:
+_RunProc_ptr:
+_RunProc:
+			mov.l	r1, @-r15
+			mov.l	r2, @-r15
+			mov.l	r3, @-r15
+			mov.l	r8, @-r15
+			mov.l	r9, @-r15
+			mov.l	r10, @-r15
+			mov.l	r11, @-r15
+			mov.l	r12, @-r15
+
+			mov		r5, r12			; r12 = _pCommand
+			mov		r6, r1			; r1 = _pCallstack
+			mov		r7, r2			; r2 = _Params
+			mov		#8, r11			; r11 = sizeof(CallStackEntry)
+
+			tst		r2, r2
+			bt		_int_run		; if (!r2) bra _int_run
+
+;
+; Loopstart
+;
+_int_loopstart:
+			mov.w	@(2, r1), r0	; r8 = type
+			mov		r0, r8
+			mov.w	@(0, r1), r0	; r9 = pos
+			mov		r0, r9
+			mov.l	@(4, r1), r10	; r10 = valueptr
+
+			mov		r8, r0
+
+			cmp/eq	#1, r0			; type == int register
+			bt		_int_intreg
+
+			cmp/eq	#2, r0			; type == float register
+			bt		_int_floatreg
+
+			cmp/eq	#3, r0			; type == stack
+			bt		_int_stack
+
+			cmp/eq	#4, r0			; type == int register ptr
+			bt		_int_intreg_ptr
+
+			bra		_int_end		; neither, this shouldn't happen, abort
+
+;
+; integer parameter
+;
+_int_intreg:
+			mov		r9, r0			; r0 = parameter position
+			cmp/eq	#5, r0
+			bf		_int_r6
+			mov.l	@r10, r5
+			bra		_int_done
+
+_int_r6:
+			cmp/eq	#6, r0
+			bf		_int_r7
+			mov.l	@r10, r6
+			bra		_int_done
+
+_int_r7:
+			cmp/eq	#7, r0
+			bf		_int_done
+			mov.l	@r10, r7
+			bra		_int_done
+
+
+;
+; integer ptr parameter
+;
+_int_intreg_ptr:
+			mov		r9, r0			; r0 = parameter position
+			cmp/eq	#5, r0
+			bf		_int_r6_ptr
+			mov		r10, r5
+			bra		_int_done
+
+_int_r6_ptr:
+			cmp/eq	#6, r0
+			bf		_int_r7_ptr
+			mov		r10, r6
+			bra		_int_done
+
+_int_r7_ptr:
+			cmp/eq	#7, r0
+			bf		_int_done
+			mov		r10, r7
+			bra		_int_done
+
+
+;
+; float parameter
+;
+_int_floatreg:
+			mov		r9, r0			; r0 = parameter position
+
+			cmp/eq	#4, r0
+			bf		_int_fr5
+			fmov.s	@r10, fr4
+			bra		_int_done
+
+_int_fr5:
+			cmp/eq	#5, r0
+			bf		_int_fr6
+			fmov.s	@r10, fr5
+			bra		_int_done
+
+_int_fr6:
+			cmp/eq	#6, r0
+			bf		_int_fr7
+			fmov.s	@r10, fr6
+			bra		_int_done
+
+_int_fr7:
+			cmp/eq	#7, r0
+			bf		_int_fr8
+			fmov.s	@r10, fr7
+			bra		_int_done
+
+_int_fr8:
+			cmp/eq	#8, r0
+			bf		_int_fr9
+			fmov.s	@r10, fr8
+			bra		_int_done
+
+_int_fr9:
+			cmp/eq	#9, r0
+			bf		_int_fr10
+			fmov.s	@r10, fr9
+			bra		_int_done
+
+_int_fr10:
+			cmp/eq	#10, r0
+			bf		_int_fr11
+			fmov.s	@r10, fr10
+			bra		_int_done
+
+_int_fr11:
+			cmp/eq	#11, r0
+			bf		_int_end
+			fmov.s	@r10, fr11
+			bra		_int_done
+
+
+
+;
+; stack parameter
+;
+_int_stack:
+			mov.l	@r10, r0
+			mov.l	r0, @-r15
+			bra		_int_done
+
+
+;
+; done
+;
+_int_done:
+			sub		r11, r1			; r1 -= 8
+			dt		r2				; r2 -= 1 (t sätts om r2=0)
+			bf		_int_loopstart	; if (r2) bra _int_loopstart
+
+
+;
+; Execute
+;
+_int_run:
+			mov		r12, r0
+			jmp		@r0
+
+;
+; game over
+;
+_int_end:
+			mov.l	@r15+, r11
+			mov.l	@r15+, r10
+			mov.l	@r15+, r9
+			mov.l	@r15+, r8
+			mov.l	@r15+, r3
+			mov.l	@r15+, r2
+			mov.l	@r15+, r1
+
+			rts
+			nop
+
+; ------------------------------------------
+
+			.END

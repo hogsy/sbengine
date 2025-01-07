@@ -61,10 +61,13 @@ public:
 		Thread_Destroy();
 	}
 
+	const char* Thread_GetName() const
+	{
+		return "Async copy";
+	}
+
 	int Thread_Main()
 	{
-		MRTC_SystemInfo::Thread_SetName("Async copy");
-
 		M_TRY
 		{
 			while (!Thread_IsTerminating())
@@ -209,7 +212,7 @@ public:
 					{
 						while (!m_FileFrom.Read(&m_ReadRequest))
 							MRTC_SystemInfo::OS_Sleep(1);
-//						fp4 FileSize = m_FileLength;
+//						fp32 FileSize = m_FileLength;
 						m_FileTo.Close();
 						m_FileFrom.Close();
 						m_bPending = false;
@@ -363,7 +366,7 @@ public:
 		}
 	};
 
-	TList_Vector<CQueueItem> m_Queue;
+	TArray<CQueueItem> m_Queue;
 
 	CFileAsyncWriteChunk *m_pChunks;
 	int m_nChunks;
@@ -402,10 +405,13 @@ public:
 		Thread_Destroy();
 	}
 
+	const char* Thread_GetName() const
+	{
+		return "Async write";
+	}
+
 	int Thread_Main()
 	{
-		MRTC_SystemInfo::Thread_SetName("Async write");
-
 		while (!Thread_IsTerminating())
 		{
 			M_TRY
@@ -716,7 +722,7 @@ public:
 				{
 					if (m_File.AsyncFlush(false))
 					{
-//						fp4 FileSize = m_FileLength;
+//						fp32 FileSize = m_FileLength;
 						m_File.Close();
 
 						if (m_bOwnChunks && m_pChunks)

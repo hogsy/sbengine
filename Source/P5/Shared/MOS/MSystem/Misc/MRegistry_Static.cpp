@@ -587,7 +587,7 @@ void CRegistry_Static::SetThisKeyi(int32 _Value)
 }
 
 
-void CRegistry_Static::SetThisKeyf(fp4 _Value)
+void CRegistry_Static::SetThisKeyf(fp32 _Value)
 {
 	m_pOwner->Elem_Set(this, _Value);
 }
@@ -635,7 +635,7 @@ void CRegistry_Static::SetThisKeyi(const char* _pName, int32 _Value)
 }
 
 
-void CRegistry_Static::SetThisKeyf(const char* _pName, fp4 _Value)
+void CRegistry_Static::SetThisKeyf(const char* _pName, fp32 _Value)
 {
 	m_pOwner->Elem_SetName(this, _pName);
 	m_pOwner->Elem_Set(this, _Value);
@@ -714,7 +714,7 @@ void CRegistry_Static::AddKeyi(const char* _pName, int32 _Value)
 }
 
 
-void CRegistry_Static::AddKeyf(const char* _pName, fp4 _Value)
+void CRegistry_Static::AddKeyf(const char* _pName, fp32 _Value)
 {
 	m_pOwner->Elem_Add(this, _pName, _Value);
 }
@@ -779,7 +779,7 @@ void CRegistry_Static::SetValuei(const char* _pName, int32 _Value)
 }
 
 
-void CRegistry_Static::SetValuef(const char* _pName, fp4 _Value)
+void CRegistry_Static::SetValuef(const char* _pName, fp32 _Value)
 {
 	CRegistry* pR = Find(_pName);
 	if (!pR)
@@ -845,7 +845,7 @@ void CRegistry_Static::SetValuei(int _iKey, int32 _Value)
 }
 
 
-void CRegistry_Static::SetValuef(int _iKey, fp4 _Value)
+void CRegistry_Static::SetValuef(int _iKey, fp32 _Value)
 {
 	m_pOwner->Elem_Set(GetChildFromIndex(_iKey), _Value);
 }
@@ -919,16 +919,16 @@ int32 CRegistry_Static::GetThisValuei() const
 }
 
 
-fp4 CRegistry_Static::GetThisValuef() const
+fp32 CRegistry_Static::GetThisValuef() const
 {
 	if (m_ValueType == e_Value_Float)
 		return m_fValue;
 	else if (m_ValueType == e_Value_Int)
-		return (fp4)m_nValue;
+		return (fp32)m_nValue;
 	else
 	{
-		fp8 Tmp;
-		CStrBase::Val_fp8(GetValueStrData(), Tmp);
+		fp64 Tmp;
+		CStrBase::Val_fp64(GetValueStrData(), Tmp);
 		return Tmp;
 	}
 }
@@ -1143,7 +1143,7 @@ void CStaticRegistryHandler::Elem_Set(CRegistry_Static* _pElem, int32 _nValue)
 }
 
 
-void CStaticRegistryHandler::Elem_Set(CRegistry_Static* _pElem, fp4 _fValue)
+void CStaticRegistryHandler::Elem_Set(CRegistry_Static* _pElem, fp32 _fValue)
 {
 	int nNewSize = CalcSize(_pElem->m_nNameSize, e_Value_Float, 0);
 	UpdateSize(_pElem, nNewSize, _pElem->GetSize());
@@ -1218,7 +1218,7 @@ CRegistry_Static* CStaticRegistryHandler::Elem_Add(CRegistry_Static* _pElem, con
 }
 
 
-CRegistry_Static* CStaticRegistryHandler::Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, fp4 _fValue)
+CRegistry_Static* CStaticRegistryHandler::Elem_Add(CRegistry_Static* _pElem, const char* _pChildName, fp32 _fValue)
 {
 	int NameLen = (_pChildName && _pChildName[0]) ? strlen(_pChildName)+1 : 0;
 	CRegistry_Static* pNew = Elem_Add(_pElem, 1, sizeof(CRegistry_Static) + NameLen);

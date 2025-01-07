@@ -1,0 +1,1390 @@
+
+Lib_GameClassesObjCharProjectName := Lib_GameClassesObjChar
+Lib_GameClassesObjCharOutputDir :=Projects/Main/GameClasses/Output/$(PlatformName)/Lib_GameClassesObjChar/$(Config)
+
+Lib_GameClassesObjCharIncludes := -isystem $(FIXED_SN_PS3_PATH)/ppu/include/sn
+Lib_GameClassesObjCharIncludes += -isystem $(FIXED_SCE_PS3_ROOT)/target/ppu/include
+Lib_GameClassesObjCharIncludes += -I Projects/Main/GameClasses/PCH
+Lib_GameClassesObjCharIncludes += -I Shared/MCC
+Lib_GameClassesObjCharIncludes += -I Projects/Main/GameClasses
+Lib_GameClassesObjCharPPU_CPP_OPTIONS := -Wall -fno-exceptions $(MAdditionalPS3Compile) -fno-strict-aliasing -maltivec -fno-rtti -Werror $(PPU_CPP_OPTIONS)
+Lib_GameClassesObjCharDefs := -DSN_TARGET_PS3 -D__GCC__ 
+
+Lib_GameClassesObjCharObjFilesCpp := $(Lib_GameClassesObjCharOutputDir)/CConstraintSystem.o $(Lib_GameClassesObjCharOutputDir)/CIKSystem.o $(Lib_GameClassesObjCharOutputDir)/CPostAnimSystem.o $(Lib_GameClassesObjCharOutputDir)/PCH.o $(Lib_GameClassesObjCharOutputDir)/WAG2_ClientData_Game.o $(Lib_GameClassesObjCharOutputDir)/WAnimPositioning.o $(Lib_GameClassesObjCharOutputDir)/WFixedCharMovement.o $(Lib_GameClassesObjCharOutputDir)/WObj_AnimUtils.o $(Lib_GameClassesObjCharOutputDir)/WObj_AutoVar_AttachModel.o $(Lib_GameClassesObjCharOutputDir)/WObj_Char.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharAngelus.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharAngelus_ClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharAnim.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharBlink.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharCamera.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharControlModeAnim.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharCreate.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharDarkling.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharDarkling_Camera.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharDarkling_ClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharDarkling_Phys.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharDialogue.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharIO.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharMechanics.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharMisc.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharMsg.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharNPC.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharNPC_ClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharNPC_ClientData_P6.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharNPC_P6.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPhys.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPlayer.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPlayer_ClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPlayer_ClientData_P6.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPlayer_P6.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharPredict.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharRagdoll.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharRender.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharShapeshifter.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharShapeshifter_ClientData.o $(Lib_GameClassesObjCharOutputDir)/WObj_CharSpectator.o $(Lib_GameClassesObjCharOutputDir)/WObj_Interface_AI.o $(Lib_GameClassesObjCharOutputDir)/WObj_Player.o 
+Lib_GameClassesObjCharObjFilesC := 
+
+Lib_GameClassesObjCharSpuElfFiles := 
+
+Lib_GameClassesObjCharSpursObjFiles := 
+
+Lib_GameClassesObjCharSrcFilesCpp := Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp Projects/Main/GameClasses/CConstraintSystem.cpp Projects/Main/GameClasses/CIKSystem.cpp Projects/Main/GameClasses/CPostAnimSystem.cpp Projects/Main/GameClasses/PCH/PCH.cpp Projects/Main/GameClasses/WAG2_ClientData_Game.cpp Projects/Main/GameClasses/WAnimPositioning.cpp Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp Projects/Main/GameClasses/WObj_Char.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp Projects/Main/GameClasses/WObj_CharAnim.cpp Projects/Main/GameClasses/WObj_CharCamera.cpp Projects/Main/GameClasses/WObj_CharClientData.cpp Projects/Main/GameClasses/WObj_CharCreate.cpp Projects/Main/GameClasses/WObj_CharDialogue.cpp Projects/Main/GameClasses/WObj_CharIO.cpp Projects/Main/GameClasses/WObj_CharMechanics.cpp Projects/Main/GameClasses/WObj_CharMisc.cpp Projects/Main/GameClasses/WObj_CharMsg.cpp Projects/Main/GameClasses/WObj_CharPhys.cpp Projects/Main/GameClasses/WObj_CharPredict.cpp Projects/Main/GameClasses/WObj_CharRender.cpp Projects/Main/GameClasses/WObj_CharSpectator.cpp Projects/Main/GameClasses/WObj_Interface_AI.cpp Projects/Main/GameClasses/WObj_Player.cpp Projects/Main/GameClasses/WFixedCharMovement.cpp Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp 
+Lib_GameClassesObjCharSrcFilesC := 
+
+
+ifeq ($(Config),Release)
+	Lib_GameClassesObjCharDefs += -DNDEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS := -O2 -O3 -finline-functions -g  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug_RTM)
+	Lib_GameClassesObjCharDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS := -O0 -g  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD)
+	Lib_GameClassesObjCharDefs += -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS :=  -O3 -finline-functions -g  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),Debug)
+	Lib_GameClassesObjCharDefs += -D_DEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS := -O0 -g  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTMD_Profile)
+	Lib_GameClassesObjCharDefs += -DMRTC_ENABLE_MSCOPE -DM_Profile -DM_RTM -DNDEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS := -O3 -finline-functions -g  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+ifeq ($(Config),RTM)
+	Lib_GameClassesObjCharDefs += -DM_RTM -DNDEBUG  
+	Lib_GameClassesObjCharPPU_CPP_OPTIONS :=  -O3 -finline-functions  $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) 
+endif
+
+Lib_GameClassesObjCharclean: 
+	@echo Cleaning Lib_GameClassesObjChar $(Config)
+	@-rm -f $(Lib_GameClassesObjCharOutputDir)/*.*
+-include $(Lib_GameClassesObjCharObjFilesCpp:.o=.d) $(Lib_GameClassesObjCharObjFilesC:.o=.d) $(Lib_GameClassesObjCharSpuElfFiles:.elf=.d)$(Lib_GameClassesObjCharSpursObjFiles:.o=.d)
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/PCH.o: Projects/Main/GameClasses/PCH/PCH.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/CConstraintSystem.o: Projects/Main/GameClasses/CConstraintSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/CIKSystem.o: Projects/Main/GameClasses/CIKSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/CPostAnimSystem.o: Projects/Main/GameClasses/CPostAnimSystem.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WAnimPositioning.o: Projects/Main/GameClasses/WAnimPositioning.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WFixedCharMovement.o: Projects/Main/GameClasses/WFixedCharMovement.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_AnimUtils.o: Shared/MOS/Classes/GameWorld/WObjects/WObj_AnimUtils.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_AutoVar_AttachModel.o: Projects/Main/GameClasses/WObj_AutoVar_AttachModel.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_Char.o: Projects/Main/GameClasses/WObj_Char.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharAnim.o: Projects/Main/GameClasses/WObj_CharAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharBlink.o: Projects/Main/GameClasses/WObj_Char/WObj_CharBlink.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharCamera.o: Projects/Main/GameClasses/WObj_CharCamera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharClientData.o: Projects/Main/GameClasses/WObj_CharClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharCreate.o: Projects/Main/GameClasses/WObj_CharCreate.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharDialogue.o: Projects/Main/GameClasses/WObj_CharDialogue.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharIO.o: Projects/Main/GameClasses/WObj_CharIO.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharMechanics.o: Projects/Main/GameClasses/WObj_CharMechanics.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharMisc.o: Projects/Main/GameClasses/WObj_CharMisc.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharMsg.o: Projects/Main/GameClasses/WObj_CharMsg.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPhys.o: Projects/Main/GameClasses/WObj_CharPhys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPredict.o: Projects/Main/GameClasses/WObj_CharPredict.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharRagdoll.o: Projects/Main/GameClasses/WObj_Char/WObj_CharRagdoll.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharRender.o: Projects/Main/GameClasses/WObj_CharRender.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharSpectator.o: Projects/Main/GameClasses/WObj_CharSpectator.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_Player.o: Projects/Main/GameClasses/WObj_Player.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WAG2_ClientData_Game.o: Projects/Main/GameClasses/WAG2_ClientData_Game.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharControlModeAnim.o: Projects/Main/GameClasses/WObj_CharControlModeAnim.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_Interface_AI.o: Projects/Main/GameClasses/WObj_Interface_AI.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPlayer.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPlayer_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPlayer_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharPlayer_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharPlayer_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharNPC.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharNPC_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharNPC_ClientData_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_ClientData_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharNPC_P6.o: Projects/Main/GameClasses/WObj_Char/WObj_CharNPC_P6.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharDarkling.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharDarkling_Camera.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Camera.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharDarkling_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharDarkling_Phys.o: Projects/Main/GameClasses/WObj_Char/WObj_CharDarkling_Phys.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharAngelus.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharAngelus_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharAngelus_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharShapeshifter.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Release/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug_RTM/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/Debug/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTMD_Profile/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Projects/Main/GameClasses/Output/Ps3/Lib_GameClassesObjChar/RTM/WObj_CharShapeshifter_ClientData.o: Projects/Main/GameClasses/WObj_Char/WObj_CharShapeshifter_ClientData.cpp
+	@echo PPU-CC $<
+	$(PPU_CC_VERBOSE)$(BuildPrefix) $(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(Lib_GameClassesObjCharPPU_CPP_OPTIONS) $(COMPILE) -o $@ $< $(CC_ERRORCONV)
+	@$(PPU_CC) $(Lib_GameClassesObjCharDefs) $(Lib_GameClassesObjCharIncludes) $(DEPEND) $@ $< > $(basename $@).d
+
+Lib_GameClassesObjChar_CreateOutputDir:
+	@mkdir -p $(Lib_GameClassesObjCharOutputDir)
+
+Lib_GameClassesObjCharTargetFileName := libLib_GameClassesObjChar.a
+Lib_GameClassesObjCharTargetPath := $(LinkDir)/$(Lib_GameClassesObjCharTargetFileName)
+
+$(Lib_GameClassesObjCharTargetPath): $(Lib_GameClassesObjCharObjFilesCpp) $(Lib_GameClassesObjCharObjFilesC) $(Lib_GameClassesObjCharSpursObjFiles) 
+	@echo Creating Lib_GameClassesObjChar
+	$(PPU_LN_VERBOSE)$(PPU_AR) rc $(Lib_GameClassesObjCharTargetPath) $(Lib_GameClassesObjCharObjFilesCpp) $(Lib_GameClassesObjCharObjFilesC) $(Lib_GameClassesObjCharSpursObjFiles) 
+	$(PPU_LN_VERBOSE)$(PPU_RANLIB) $(Lib_GameClassesObjCharTargetPath)
+
+Lib_GameClassesObjCharExtraTargets: 

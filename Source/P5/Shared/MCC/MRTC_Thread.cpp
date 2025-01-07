@@ -16,7 +16,7 @@ MRTC_Thread_Store_Member::~MRTC_Thread_Store_Member()
 | MRTC_Thread_Core
 |__________________________________________________________________________________________________
 \*************************************************************************************************/
-/*fp8 MRTC_Thread_Core::GetTime()
+/*fp64 MRTC_Thread_Core::GetTime()
 {
 	return GetCPUClock() / GetCPUFrequency();
 }*/
@@ -84,7 +84,7 @@ void MRTC_Thread_Core::Thread_FreeStore()
 
 uint32 MRTC_Thread_Core::Thread_Proc(void* _pContext)
 {
-	MRTC_SystemInfo::Thread_SetProcessor(5);
+	MRTC_SystemInfo::Thread_SetProcessor(2);
 
 #ifdef PLATFORM_WIN_PC
 //	if (MRTC_GetMemoryManager()->m_RunningDebugRuntime)
@@ -92,6 +92,7 @@ uint32 MRTC_Thread_Core::Thread_Proc(void* _pContext)
 #endif
 
 	MRTC_Thread_Core* pThread = (MRTC_Thread_Core*)_pContext;
+	MRTC_SystemInfo::Thread_SetName(pThread->Thread_GetName());
 	pThread->Thread_Exit(pThread->Thread_Main());
 	return 0; // Never executes
 }
@@ -110,7 +111,7 @@ void MRTC_Thread_Core::Thread_Create(void* _pContext, int _StackSize, int _Prior
 //	M_TRACEALWAYS("(MRTC_Thread_Win32::Thread_Create) Creating thread.\n");
 
 
-	m_hThread = MRTC_SystemInfo::OS_ThreadCreate(Thread_Proc, _StackSize + DRDMaxScopeMaxStackSize + DRDMaxCategoryMaxStackSize + DRDMaxSendStackSize, this, _Priority);
+	m_hThread = MRTC_SystemInfo::OS_ThreadCreate(Thread_Proc, _StackSize + DRDMaxScopeMaxStackSize + DRDMaxCategoryMaxStackSize + DRDMaxSendStackSize, this, _Priority, Thread_GetName());
 	if (!m_hThread)
 	{
 		Thread_OnDestroy();
@@ -151,7 +152,7 @@ void MRTC_Thread_Core::Thread_Destroy()
 			int nLog = 0;
 			CMTime Time;
 
-			while(((Time = CMTime::GetCPU()) - RefTime).Compare(20.0f) < 0)
+			while(1)
 			{
 				if (Thread_IsTerminated()) 
 					break;
@@ -170,14 +171,14 @@ void MRTC_Thread_Core::Thread_Destroy()
 				}
 			}
 
-			if (!Thread_IsTerminated())
+/*			if (!Thread_IsTerminated())
 			{
 				// Ok, here we have no choice except going for the big nuke.
 				LogFile("-------------------------------------------------------------------");
 				LogFile("(MRTC_Thread_Core::Thread_Destroy) CRITICAL ERROR: TERMINATING THREAD!");
 				LogFile("-------------------------------------------------------------------");
 				MRTC_SystemInfo::OS_ThreadTerminate(m_hThread, 0);
-			}
+			}*/
 //			M_TRACEALWAYS("(MRTC_Thread_Win32::Thread_Destroy) CloseHandle\n");
 			MRTC_SystemInfo::OS_ThreadDestroy(m_hThread);
 
@@ -197,7 +198,7 @@ void MRTC_Thread_Core::Thread_Destroy()
 	)
 }
 
-void MRTC_Thread_Core::Thread_Sleep(fp4 _Time)
+void MRTC_Thread_Core::Thread_Sleep(fp32 _Time)
 {
 	MRTC_SystemInfo::OS_Sleep((mint)(_Time * 1000.0f));
 }
@@ -687,15 +688,15 @@ namespace NThread
 	{
 		CReportListMember *pReportMember;
 		{
-			DIdsLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
+			DLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
 			pReportMember = GetThreadContext()->m_EventMember_Pool.New();
 		}			
 
 		// Lock 
 		{
-			DIdsLockTyped(CMutual, m_Lock);
+			DLockTyped(CMutual, m_Lock);
 			{
-				DIdsLockTyped(CMutual, _pReportTo->m_Lock);				
+				DLockTyped(CMutual, _pReportTo->m_Lock);				
 
 				pReportMember->m_pReportTo = _pReportTo;
 				pReportMember->m_pReportFrom = this;
@@ -710,7 +711,7 @@ namespace NThread
 
 		// Lock 
 		{
-			DIdsLockTyped(CMutual, m_Lock);
+			DLockTyped(CMutual, m_Lock);
 			{
 				DIdsListLinkD_List(CReportListMember, m_LinkReportTo)::CIterator Iter(m_ReportTo);
 
@@ -722,9 +723,9 @@ namespace NThread
 					///CEventAutoResetReportableAggregate *pFrom = pList->m_pReportFrom; == this
 					CEventAutoResetReportableAggregate *pTo = pList->m_pReportTo;
 					{
-						DIdsLockTyped(CMutual, pTo->m_Lock);					
+						DLockTyped(CMutual, pTo->m_Lock);					
 						{
-							DIdsLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
+							DLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
 							GetThreadContext()->m_EventMember_Pool.Delete(pList);
 						}			
 					
@@ -739,7 +740,7 @@ namespace NThread
 
 		// Lock 
 		{
-			DIdsLockTyped(CMutual, m_Lock);
+			DLockTyped(CMutual, m_Lock);
 			{
 				DIdsListLinkD_List(CReportListMember, m_LinkReportFrom)::CIterator Iter(m_ReportFrom);
 
@@ -751,9 +752,9 @@ namespace NThread
 					///CEventAutoResetReportableAggregate *pFrom = pList->m_pReportFrom; == this
 					CEventAutoResetReportableAggregate *pFrom = pList->m_pReportFrom;
 					{
-						DIdsLockTyped(CMutual, pFrom->m_Lock);					
+						DLockTyped(CMutual, pFrom->m_Lock);					
 						{
-							DIdsLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
+							DLockTyped(CMutual, GetThreadContext()->m_EventMember_Lock);
 							GetThreadContext()->m_EventMember_Pool.Delete(pList);
 						}			
 					

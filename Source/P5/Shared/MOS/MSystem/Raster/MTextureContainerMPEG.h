@@ -334,7 +334,7 @@ public:
 
 	void Demux();
 	void SendAudio();
-	void DecodeNextFrame( uint8 *_pPixels = NULL, uint32 _nBufSize = 0, fp4 _DeltaTime = 0 );
+	void DecodeNextFrame( uint8 *_pPixels = NULL, uint32 _nBufSize = 0, fp32 _DeltaTime = 0 );
 
 	static int CBVideo( sceMpeg *mp, sceMpegCbDataStr *cbstr, void *data );
 	static int CBAudio( sceMpeg *mp, sceMpegCbDataStr *cbstr, void *data );
@@ -408,7 +408,7 @@ public:
 	uint32				 m_Width;
 	uint32				 m_Height;
 	uint32				 m_nFrames;
-	fp4					 m_Mainvolume;
+	fp32					 m_Mainvolume;
 	CMTime					 m_TimeLastVisible;
 	bool				 m_bOnLastFrame;
 	bool				 m_bPaused;
@@ -452,7 +452,7 @@ class SYSTEMDLLEXPORT CTextureContainer_Video_Mpeg : public CTextureContainer_Vi
 
 protected:
 	TArray<spCTC_MpegTexture>		m_lspVideos;
-	fp4								m_CloseTimeOut;
+	fp32								m_CloseTimeOut;
 
 public:
 	CTextureContainer_Video_Mpeg();
@@ -464,7 +464,7 @@ public:
 	void			ValidateLocalID(int _iLocal);
 	
 	virtual void	CloseVideo(int _iLocal);
-	virtual void	SetVolume(int _iLocal, fp4 fpVol);
+	virtual void	SetVolume(int _iLocal, fp32 fpVol);
 	virtual void	Pause(int _iLocal, bool _Paused = true);
 	virtual void	AutoRestart(int _iLocal, bool _EnableAutoRestart = true);
 	virtual void	Rewind(int _iLocal);
@@ -485,7 +485,7 @@ public:
 	virtual int		GetWidth(int _iLocal);
 	virtual int		GetHeight(int _iLocal);
 	
-	virtual fp4 	GetTime(int _iLocal);
+	virtual fp32 	GetTime(int _iLocal);
 };
 
 

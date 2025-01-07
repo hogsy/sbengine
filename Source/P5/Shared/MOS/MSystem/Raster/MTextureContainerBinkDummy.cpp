@@ -825,7 +825,7 @@ void CTextureContainer_Video_Bink::CloseVideo(int _iLocal)
 	m_lspVideos[_iLocal]->Close();
 }
 
-void CTextureContainer_Video_Bink::SetVolume(int _iLocal, fp4 fpVol)
+void CTextureContainer_Video_Bink::SetVolume(int _iLocal, fp32 fpVol)
 {
 	ValidateLocalID(_iLocal);
 	m_lspVideos[_iLocal]->m_volume = fpVol;

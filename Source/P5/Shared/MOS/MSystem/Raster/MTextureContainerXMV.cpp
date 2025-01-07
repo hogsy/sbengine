@@ -223,9 +223,9 @@ void CTC_XMVTexture::Open()
 	{
 
 		MACRO_GetRegisterObject(CSystem, pSys, "SYSTEM");
-		fp4 ValueSfx = pSys->GetOptions()->GetValuef("SND_VOLUMESFX", 1.0f);
+		fp32 ValueSfx = pSys->GetOptions()->GetValuef("SND_VOLUMESFX", 1.0f);
 
-		fp8 mB;		// Millibell
+		fp64 mB;		// Millibell
 		if (ValueSfx >= 1.0f)
 		{
 			ValueSfx = 1.0f;
@@ -530,7 +530,7 @@ void CTextureContainer_Video_XMV::OnRefresh()
 		if(pVideo->IsOpen())
 		{
 			//
-			fp4 Time1 = (Time - pVideo->m_TimeLastVisible).GetTime();
+			fp32 Time1 = (Time - pVideo->m_TimeLastVisible).GetTime();
 			if(Time1 > m_CloseTimeOut)
 			{
 				if ((pVideo->m_CloseTimeoutDelay++) >= 2)
@@ -670,7 +670,7 @@ void CTextureContainer_Video_XMV::BuildInto(int _iLocal, CImage** _ppImg, int _n
 
 }
 
-fp4 CTextureContainer_Video_XMV::GetTime(int _iLocal)
+fp32 CTextureContainer_Video_XMV::GetTime(int _iLocal)
 {
 	ValidateLocalID(_iLocal);
 	
@@ -693,7 +693,7 @@ bool CTextureContainer_Video_XMV::MoveToLastFrame(int _iLocal)
 {
 	return 0;
 }
-void CTextureContainer_Video_XMV::SetVolume(int _iLocal, fp4 fpVol)
+void CTextureContainer_Video_XMV::SetVolume(int _iLocal, fp32 fpVol)
 {}
 
 void CTextureContainer_Video_XMV::Pause(int _iLocal, bool _Paused)

@@ -1,5 +1,5 @@
 /*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯*\
-	File:			SSE optimizations for CVec3Dfp4
+	File:			SSE optimizations for CVec3Dfp32
 
 	Author:			Magnus Högdahl
 
@@ -14,7 +14,7 @@
 
 #if defined(CPU_X86)
 
-void SSE_Multiply_VcMc_4x3(const TVector3Aggr<fp4>& _Src1, const CMat4Dfp4& _Mat, TVector3Aggr<fp4>& _Dst)
+void SSE_Multiply_VcMc_4x3(const TVector3Aggr<fp32>& _Src1, const CMat4Dfp32& _Mat, TVector3Aggr<fp32>& _Dst)
 {
 	__asm
 	{
@@ -52,7 +52,7 @@ void SSE_Multiply_VcMc_4x3(const TVector3Aggr<fp4>& _Src1, const CMat4Dfp4& _Mat
 	}
 }
 
-void SSE_Box3Dfp4_And(CBox3Dfp4& _Target, const CBox3Dfp4& _Src)
+void SSE_Box3Dfp32_And(CBox3Dfp32& _Target, const CBox3Dfp32& _Src)
 {
 	__asm
 	{
@@ -84,7 +84,7 @@ void SSE_Box3Dfp4_And(CBox3Dfp4& _Target, const CBox3Dfp4& _Src)
 	}
 }
 
-void SSE_Box3Dfp4_And(const CBox3Dfp4& _Src1, const CBox3Dfp4& _Src2, CBox3Dfp4& _Target)
+void SSE_Box3Dfp32_And(const CBox3Dfp32& _Src1, const CBox3Dfp32& _Src2, CBox3Dfp32& _Target)
 {
 	__asm
 	{
@@ -117,7 +117,7 @@ void SSE_Box3Dfp4_And(const CBox3Dfp4& _Src1, const CBox3Dfp4& _Src2, CBox3Dfp4&
 	}
 }
 
-void SSE_Box3Dfp4_Expand(CBox3Dfp4& _Target, const CBox3Dfp4& _Src)
+void SSE_Box3Dfp32_Expand(CBox3Dfp32& _Target, const CBox3Dfp32& _Src)
 {
 	__asm
 	{
@@ -149,7 +149,7 @@ void SSE_Box3Dfp4_Expand(CBox3Dfp4& _Target, const CBox3Dfp4& _Src)
 	}
 }
 
-void SSE_Box3Dfp4_Expand(CBox3Dfp4& _Target, const TVector3Aggr<fp4>& _Src)
+void SSE_Box3Dfp32_Expand(CBox3Dfp32& _Target, const TVector3Aggr<fp32>& _Src)
 {
 	__asm
 	{
@@ -180,7 +180,7 @@ void SSE_Box3Dfp4_Expand(CBox3Dfp4& _Target, const TVector3Aggr<fp4>& _Src)
 	}
 }
 
-bool SSE_Box3Dfp4_IsInside(const CBox3Dfp4& _Src0, const CBox3Dfp4& _Src1)
+bool SSE_Box3Dfp32_IsInside(const CBox3Dfp32& _Src0, const CBox3Dfp32& _Src1)
 {
 	bool bRet;
 	__asm

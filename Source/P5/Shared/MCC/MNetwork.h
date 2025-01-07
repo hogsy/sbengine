@@ -5,19 +5,19 @@
 enum
 {
 	// State
-	ENetworkPacketStatus_Closed = DBit(0),
-	ENetworkPacketStatus_Connected = DBit(1),
-	ENetworkPacketStatus_Timeout = DBit(2),
+	ENetworkPacketStatus_Closed = M_Bit(0),
+	ENetworkPacketStatus_Connected = M_Bit(1),
+	ENetworkPacketStatus_Timeout = M_Bit(2),
 
 	// Data available / can be sent
-	ENetworkPacketStatus_Receive = DBit(3),
-	ENetworkPacketStatus_Send = DBit(4),
-	ENetworkPacketStatus_Connection = DBit(5),
+	ENetworkPacketStatus_Receive = M_Bit(3),
+	ENetworkPacketStatus_Send = M_Bit(4),
+	ENetworkPacketStatus_Connection = M_Bit(5),
 
 	//
-	ENetworkChannelFlag_AutoBufferSize = DBit(0),
-	ENetworkChannelFlag_Reliable = DBit(1),
-	ENetworkChannelFlag_OutOfOrder = DBit(2),
+	ENetworkChannelFlag_AutoBufferSize = M_Bit(0),
+	ENetworkChannelFlag_Reliable = M_Bit(1),
+	ENetworkChannelFlag_OutOfOrder = M_Bit(2),
 
 	ENetworkMaxPacketSize = 2048,
 	ENetworkMaxServerInfoSize = ENetworkMaxPacketSize - 32,
@@ -152,7 +152,7 @@ public:
 	// Client-only:
 	virtual int Client_Create(CNetwork_Address *_pAddress, NThread::CEventAutoResetReportableAggregate *_pReportTo) pure;					// Returns client handle.
 	virtual bint Client_QueryConnection(int _hConnection, CNetwork_Address *_pAddress) pure;
-	virtual CNetwork_ServerInfo* Client_OpenConnection(int _hConnection, CNetwork_Address * _pAddress, fp4 _TimeOut) pure;
+	virtual CNetwork_ServerInfo* Client_OpenConnection(int _hConnection, CNetwork_Address * _pAddress, fp32 _TimeOut) pure;
 
 	virtual bint Client_ServerInfoAvail(int _hConnection) pure;
 	virtual CNetwork_ServerInfo* Client_GetServerInfo(int _hConnection) pure;
@@ -164,9 +164,9 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual void Connection_Close(int _hConnection) pure;
 	virtual uint32 Connection_Status(int _hConnection) pure;
-	virtual fp4 Connection_GetPing(int _hConnection) pure;
+	virtual fp32 Connection_GetPing(int _hConnection) pure;
 	//
-	virtual int Connection_ChannelAlloc(int _hConnection, uint32 _Flags, fp4 _RatePriority, fp4 _MaxRate) pure;
+	virtual int Connection_ChannelAlloc(int _hConnection, uint32 _Flags, fp32 _RatePriority, fp32 _MaxRate) pure;
 	virtual void Connection_ChannelSetBufferSize(int _hConnection, int _iChannel, mint _Size) pure;
 	virtual void Connection_ChannelSetNumPackets(int _hConnection, int _iChannel, mint _nPackets) pure;
 	//
@@ -175,7 +175,7 @@ public:
 	virtual void Connection_PacketRelease(int _hConnection, CNetwork_Packet *_Packet) pure;
 	virtual void Connection_Flush(int _hConnection) pure; // Flushes the send queue and sends any queued data
 	//
-	virtual void Connection_SetRate(int _hConnection, fp4 _BytesPerSecond) pure;
+	virtual void Connection_SetRate(int _hConnection, fp32 _BytesPerSecond) pure;
 
 	virtual void Connection_TraceQueues(int _hConnection) pure;
 	virtual mint Connection_GetQueuedOutSize(int _hConnection) pure;
@@ -183,7 +183,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual int Global_GetThreadID() pure;
-	virtual void Global_SetRate(fp4 _BytesPerSecond) pure;
+	virtual void Global_SetRate(fp32 _BytesPerSecond) pure;
 	virtual CNetwork_Address *Global_ResolveAddress(CStr _Address) pure;
 
 	virtual void Refresh() pure;

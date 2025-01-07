@@ -87,8 +87,8 @@ inline void COctreeQuantize::ReduceTree()
 	// Search list and get the element with the brightest
 	// average color.
 	uint8 r,g,b;
-	fp4 Val;
-	fp4 Min=1000000.0;
+	fp32 Val;
+	fp32 Min=1000000.0;
 	int Element;
 	int i;
 	for (i=0; i<Reduceables[ReductionLevel].Len(); i++) 
@@ -97,8 +97,8 @@ inline void COctreeQuantize::ReduceTree()
 
 		// Calculate the square of the square distance between
 		// the colors (r,g,b) and (255,255,255).
-		Val=(fp4)r*(fp4)r+(fp4)g*(fp4)g+(fp4)b*(fp4)b-
-			510*((fp4)r+(fp4)g+(fp4)b);
+		Val=(fp32)r*(fp32)r+(fp32)g*(fp32)g+(fp32)b*(fp32)b-
+			510*((fp32)r+(fp32)g+(fp32)b);
 
 		if (Val<Min) {
 			Min=Val;
@@ -474,8 +474,8 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 				else 
 				{
 
-					Scanline=DNew(uint8) uint8[Width*3*sizeof(fp4)];
-					Scanline2=DNew(uint8) uint8[Width*3*sizeof(fp4)];
+					Scanline=DNew(uint8) uint8[Width*3*sizeof(fp32)];
+					Scanline2=DNew(uint8) uint8[Width*3*sizeof(fp32)];
 					if (Scanline==NULL || Scanline2==NULL) MemError("Quantize");
 
 					// Map all colors to an entry in the new palette
@@ -486,9 +486,9 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 
 					for (j=Width-1; j>=0; j--) 
 					{
-						*((fp4*)Scanline+j*3+2)=(fp4)*(Scanline+j*3+2);
-						*((fp4*)Scanline+j*3+1)=(fp4)*(Scanline+j*3+1);
-						*((fp4*)Scanline+j*3)=(fp4)*(Scanline+j*3);
+						*((fp32*)Scanline+j*3+2)=(fp32)*(Scanline+j*3+2);
+						*((fp32*)Scanline+j*3+1)=(fp32)*(Scanline+j*3+1);
+						*((fp32*)Scanline+j*3)=(fp32)*(Scanline+j*3);
 					}
 
 					for (i=0; i<Height; i++) 
@@ -499,19 +499,19 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 							pSrc->GetRAWData(CPnt(0,i+1),Width*3,Scanline2);
 							for (j=Width-1; j>=0; j--) 
 							{
-								*((fp4*)Scanline2+j*3+2)=(fp4)*(Scanline2+j*3+2);
-								*((fp4*)Scanline2+j*3+1)=(fp4)*(Scanline2+j*3+1);
-								*((fp4*)Scanline2+j*3)=(fp4)*(Scanline2+j*3);
+								*((fp32*)Scanline2+j*3+2)=(fp32)*(Scanline2+j*3+2);
+								*((fp32*)Scanline2+j*3+1)=(fp32)*(Scanline2+j*3+1);
+								*((fp32*)Scanline2+j*3)=(fp32)*(Scanline2+j*3);
 							}
 						}
 
-						fp4 r,g,b;
-						fp4 ErrorR,ErrorG,ErrorB;
+						fp32 r,g,b;
+						fp32 ErrorR,ErrorG,ErrorB;
 						for (j=0; j<Width; j++) 
 						{
-							r=*((fp4*)Scanline+j*3+2);
-							g=*((fp4*)Scanline+j*3+1);
-							b=*((fp4*)Scanline+j*3);
+							r=*((fp32*)Scanline+j*3+2);
+							g=*((fp32*)Scanline+j*3+1);
+							b=*((fp32*)Scanline+j*3);
 
 							r=Min(Max(r,0.0f),255.0f);
 							g=Min(Max(g,0.0f),255.0f);
@@ -519,37 +519,37 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 
 							*(Scanline+j)=MapColor2(Tree,(uint8)(r+0.5f),(uint8)(g+0.5f),(uint8)(b+0.5f));
 
-							ErrorR=*((fp4*)Scanline+j*3+2)-(fp4)(Palette[*(Scanline+j)].GetR());
-							ErrorG=*((fp4*)Scanline+j*3+1)-(fp4)(Palette[*(Scanline+j)].GetG());
-							ErrorB=*((fp4*)Scanline+j*3)-(fp4)(Palette[*(Scanline+j)].GetB());
+							ErrorR=*((fp32*)Scanline+j*3+2)-(fp32)(Palette[*(Scanline+j)].GetR());
+							ErrorG=*((fp32*)Scanline+j*3+1)-(fp32)(Palette[*(Scanline+j)].GetG());
+							ErrorB=*((fp32*)Scanline+j*3)-(fp32)(Palette[*(Scanline+j)].GetB());
 
 
 							if (j+1<Width) 
 							{
-								*((fp4*)Scanline+(j+1)*3+2)+=(ErrorR*7)/16;
-								*((fp4*)Scanline+(j+1)*3+1)+=(ErrorG*7)/16;
-								*((fp4*)Scanline+(j+1)*3)+=(ErrorB*7)/16;
+								*((fp32*)Scanline+(j+1)*3+2)+=(ErrorR*7)/16;
+								*((fp32*)Scanline+(j+1)*3+1)+=(ErrorG*7)/16;
+								*((fp32*)Scanline+(j+1)*3)+=(ErrorB*7)/16;
 							}
 
 							if (i+1<Height) 
 							{
-								*((fp4*)Scanline2+j*3+2)+=(ErrorR*5)/16;
-								*((fp4*)Scanline2+j*3+1)+=(ErrorG*5)/16;
-								*((fp4*)Scanline2+j*3)+=(ErrorB*5)/16;
+								*((fp32*)Scanline2+j*3+2)+=(ErrorR*5)/16;
+								*((fp32*)Scanline2+j*3+1)+=(ErrorG*5)/16;
+								*((fp32*)Scanline2+j*3)+=(ErrorB*5)/16;
 							}
 
 							if (i+1<Height && j+1<Width) 
 							{
-								*((fp4*)Scanline2+(j+1)*3+2)+=(ErrorR)/16;
-								*((fp4*)Scanline2+(j+1)*3+1)+=(ErrorG)/16;
-								*((fp4*)Scanline2+(j+1)*3)+=(ErrorB)/16;
+								*((fp32*)Scanline2+(j+1)*3+2)+=(ErrorR)/16;
+								*((fp32*)Scanline2+(j+1)*3+1)+=(ErrorG)/16;
+								*((fp32*)Scanline2+(j+1)*3)+=(ErrorB)/16;
 							}
 
 						}
 
 						spDestImage->SetRAWData(CPnt(0,i),Width,Scanline);
 
-						memcpy(Scanline,Scanline2,Width*3*sizeof(fp4));
+						memcpy(Scanline,Scanline2,Width*3*sizeof(fp32));
 					}
 
 				}
@@ -601,8 +601,8 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 					CPixel32 Pal[256];
 					pSrc->GetPalette()->GetPalette(Pal,0,256);
 
-					Scanline=DNew(uint8) uint8[Width*3*sizeof(fp4)];
-					Scanline2=DNew(uint8) uint8[Width*3*sizeof(fp4)];
+					Scanline=DNew(uint8) uint8[Width*3*sizeof(fp32)];
+					Scanline2=DNew(uint8) uint8[Width*3*sizeof(fp32)];
 					if (Scanline==NULL || Scanline2==NULL) MemError("Quantize");
 
 					// Remap all colors to an entry in the new palette
@@ -614,9 +614,9 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 					for (j=Width-1; j>=0; j--) 
 					{
 						Index=*(Scanline+j);
-						*((fp4*)Scanline+j*3+2)=Pal[Index].GetR();
-						*((fp4*)Scanline+j*3+1)=Pal[Index].GetG();
-						*((fp4*)Scanline+j*3)=Pal[Index].GetB();
+						*((fp32*)Scanline+j*3+2)=Pal[Index].GetR();
+						*((fp32*)Scanline+j*3+1)=Pal[Index].GetG();
+						*((fp32*)Scanline+j*3)=Pal[Index].GetB();
 					}
 
 					for (i=0; i<Height; i++) 
@@ -628,21 +628,21 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 							for (j=Width-1; j>=0; j--) 
 							{
 								Index=*(Scanline2+j);
-								*((fp4*)Scanline2+j*3+2)=Pal[Index].GetR();
-								*((fp4*)Scanline2+j*3+1)=Pal[Index].GetG();
-								*((fp4*)Scanline2+j*3)=Pal[Index].GetB();
+								*((fp32*)Scanline2+j*3+2)=Pal[Index].GetR();
+								*((fp32*)Scanline2+j*3+1)=Pal[Index].GetG();
+								*((fp32*)Scanline2+j*3)=Pal[Index].GetB();
 							}
 						}
 
-						fp4 r,g,b;
-						fp4 ErrorR,ErrorG,ErrorB;
+						fp32 r,g,b;
+						fp32 ErrorR,ErrorG,ErrorB;
 
 						for (j=0; j<Width; j++) 
 						{
 
-							r=*((fp4*)Scanline+j*3+2);
-							g=*((fp4*)Scanline+j*3+1);
-							b=*((fp4*)Scanline+j*3);
+							r=*((fp32*)Scanline+j*3+2);
+							g=*((fp32*)Scanline+j*3+1);
+							b=*((fp32*)Scanline+j*3);
 
 							r = Min(Max(r, 0.0f), 255.0f);
 							g = Min(Max(g, 0.0f), 255.0f);
@@ -650,34 +650,34 @@ spCImage COctreeQuantize::Quantize(CImage* _pSrcImage, eDither Dither)
 
 							*(Scanline+j)=MapColor2(Tree,(uint8)(r+0.5f),(uint8)(g+0.5f),(uint8)(b+0.5f));
 
-							ErrorR=*((fp4*)Scanline+j*3+2)-(fp4)(Palette[*(Scanline+j)].GetR());
-							ErrorG=*((fp4*)Scanline+j*3+1)-(fp4)(Palette[*(Scanline+j)].GetG());
-							ErrorB=*((fp4*)Scanline+j*3)-(fp4)(Palette[*(Scanline+j)].GetB());
+							ErrorR=*((fp32*)Scanline+j*3+2)-(fp32)(Palette[*(Scanline+j)].GetR());
+							ErrorG=*((fp32*)Scanline+j*3+1)-(fp32)(Palette[*(Scanline+j)].GetG());
+							ErrorB=*((fp32*)Scanline+j*3)-(fp32)(Palette[*(Scanline+j)].GetB());
 
 
 							if (j+1<Width) {
-								*((fp4*)Scanline+(j+1)*3+2)+=(ErrorR*7)/16;
-								*((fp4*)Scanline+(j+1)*3+1)+=(ErrorG*7)/16;
-								*((fp4*)Scanline+(j+1)*3)+=(ErrorB*7)/16;
+								*((fp32*)Scanline+(j+1)*3+2)+=(ErrorR*7)/16;
+								*((fp32*)Scanline+(j+1)*3+1)+=(ErrorG*7)/16;
+								*((fp32*)Scanline+(j+1)*3)+=(ErrorB*7)/16;
 							}
 
 							if (i+1<Height) {
-								*((fp4*)Scanline2+j*3+2)+=(ErrorR*5)/16;
-								*((fp4*)Scanline2+j*3+1)+=(ErrorG*5)/16;
-								*((fp4*)Scanline2+j*3)+=(ErrorB*5)/16;
+								*((fp32*)Scanline2+j*3+2)+=(ErrorR*5)/16;
+								*((fp32*)Scanline2+j*3+1)+=(ErrorG*5)/16;
+								*((fp32*)Scanline2+j*3)+=(ErrorB*5)/16;
 							}
 
 							if (i+1<Height && j+1<Width) {
-								*((fp4*)Scanline2+(j+1)*3+2)+=(ErrorR)/16;
-								*((fp4*)Scanline2+(j+1)*3+1)+=(ErrorG)/16;
-								*((fp4*)Scanline2+(j+1)*3)+=(ErrorB)/16;
+								*((fp32*)Scanline2+(j+1)*3+2)+=(ErrorR)/16;
+								*((fp32*)Scanline2+(j+1)*3+1)+=(ErrorG)/16;
+								*((fp32*)Scanline2+(j+1)*3)+=(ErrorB)/16;
 							}
 
 						}
 
 						spDestImage->SetRAWData(CPnt(0,i),Width,Scanline);
 
-						memcpy(Scanline,Scanline2,Width*3*sizeof(fp4));
+						memcpy(Scanline,Scanline2,Width*3*sizeof(fp32));
 					}
 
 				}
@@ -728,7 +728,7 @@ public:
 
 	TArray<CPixel32> m_lPalette;
 	TArray<CPixel32> m_lPixels;
-	TArray<CVec4Dfp8> m_lStartPalette;
+	TArray<CVec4Dfp64> m_lStartPalette;
 	int m_nStartPalettes;
 
 	void BuildFromPalette(CPixel32* _pPal)
@@ -741,7 +741,7 @@ public:
 		for (int i = 0; i < (1 << CONST_OCTQUANT_DESTBPP); ++i)
 		{
 			m_lPixels[CurLen + i] = _pPal[i];
-			m_lStartPalette[i] += CVec4Dfp8(_pPal[i].R(), _pPal[i].G(), _pPal[i].B(), _pPal[i].A());
+			m_lStartPalette[i] += CVec4Dfp64(_pPal[i].R(), _pPal[i].G(), _pPal[i].B(), _pPal[i].A());
 		}
 
 	}
@@ -762,7 +762,7 @@ public:
 		for (int i = 0; i < nColors; ++i)
 		{
 			m_lPixels[CurLen + i] = pPal[i];
-			m_lStartPalette[i] += CVec4Dfp8(pPal[i].R(), pPal[i].G(), pPal[i].B(), pPal[i].A());
+			m_lStartPalette[i] += CVec4Dfp64(pPal[i].R(), pPal[i].G(), pPal[i].B(), pPal[i].A());
 		}
 		for (int i = nColors; i < 256; ++i)
 		{
@@ -842,7 +842,7 @@ public:
 			CPixel32 *pLock = (CPixel32 *)spTmp->Lock();
 			for (int i = 0; i < Pixels; ++i)
 			{
-				m_lStartPalette[i] += CVec4Dfp8(pLock[i].R(), pLock[i].G(), pLock[i].B(), pLock[i].A());
+				m_lStartPalette[i] += CVec4Dfp64(pLock[i].R(), pLock[i].G(), pLock[i].B(), pLock[i].A());
 			}
 			spTmp->Unlock();
 			for (int i = Pixels; i < 256; ++i)

@@ -33,7 +33,7 @@ public:
 
 	// These statics are used by CImage
 	static void ReadJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, int _MemModel, int _Fmt = 0);
-	static void WriteJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, fp4 _Quality);
+	static void WriteJPG(CCFile* _pFile, CImage* _pImg, bool _bAlpha, fp32 _Quality);
 
 	virtual void Read(const CStr& filename, CImage* _pImg, int _MemModel);
 	virtual void Write(const CStr& filename, CImage* _pImg);
