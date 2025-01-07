@@ -1,6 +1,8 @@
 # Starbreeze Engine Sources
 
-Here are several copies of the source-code for Starbreeze’s in-house engine that were obtained and sorted from an earlier leak from Sony's private developer forum. Starbreeze has long since ditched this engine, but mind that it is still their intellectual property and could get taken down at any time, and has not been made officially open-source in any capacity.
+Here are several copies of the source-code for Starbreeze’s in-house engine, from 2006, that were obtained and sorted from an earlier leak from Sony's private developer forum.
+
+Starbreeze has long since ditched this engine, but mind that it is still their intellectual property and could get taken down at any time, and has not been made officially open-source in any capacity.
 
 Much of the platform-specific code, besides that for the PlayStation 3, has been stripped out by the developer that originally uploaded these prior to them being leaked.
 
@@ -32,7 +34,7 @@ There’s limited code that still remains for targeting some older platforms suc
 
 There is some ancient code in here going back to their first project, Sorcery. This can be found in a number of places, and you can find some commented-out code if you just search explicitly for Sorcery.
 
-Per `Source/P5/Projects/Main/GameClasses/WRPG` it also looks like there's left-over code from not only Sorcery but also their short-lived Quake-like arena game?
+Per [WRPG](Source/P5/Projects/Main/GameClasses/WRPG) it also looks like there's left-over code from not only Sorcery but also their short-lived Quake-like arena game?
 
 ### Other
 
